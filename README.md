@@ -1,5 +1,14 @@
 # EASY grammar
 
+## COMPILATIONS
+
+```bnf
+<compilation> ::= <program segment>
+                | <compilation> <program segment>
+<program segment> ::= <main program>
+                    | <external procedure>
+```
+
 ## SELECTION
 
 ```bnf
@@ -8,13 +17,16 @@
 
 <simple selection> ::= <selection head> <selection body> <selection end>
 <selection head> ::= SELECT <expression> OF
-<selection body> ::= <cast list> | <case list> <escape case>
+<selection body> ::= <cast list> 
+                   | <case list> <escape case>
 <selection end> ::= END SELECT ;  END SELECT <identifier> ;
-<case list> ::= <case> | <case list> <case>
+<case list> ::= <case> 
+              | <case list> <case>
 <case> ::= <case head> <case body>
 <case head> ::= CASE <selector>
 <selector> ::= <selector head> )
-<selector head> ::= ( <expression> | <selector head> , <expression> )
+<selector head> ::= ( <expression> 
+                  | <selector head> , <expression>
 <escape case> ::= <escape head> <case body>
 <escape head> ::= OTHERWISE :
 <case body> ::= <segment body>
@@ -31,10 +43,12 @@
 
 ```bnf
 <input statement> ::= INPUT <input list> ;
-<input list> ::= <variable> | <input list> , <variable>
+<input list> ::= <variable> 
+               | <input list> , <variable>
 
 <output statement> ::= OUTPUT <output list> ;
-<output list> ::=  <expression> | <output list> , <expression>
+<output list> ::=  <expression> 
+                | <output list> , <expression>
 ```
 
 ## NULLS and LABELS
@@ -96,8 +110,12 @@
 ## CONSTANTS
 
 ```bnf
-<contant> ::= <integer contant> | <real constant> | <boolean constant> | <string constant>
-<boolean constant> ::= TRUE | FALSE
+<contant> ::= <integer contant> 
+            | <real constant> 
+            | <boolean constant> 
+            | <string constant>
+<boolean constant> ::= TRUE 
+                     | FALSE
 ```
 
 ## FUNCTION CALLS
