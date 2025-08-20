@@ -278,7 +278,7 @@ class Call(Statement):
 
 @dataclass
 class BlockStatement(Statement):
-    compound: Statements  # for begin..end blocks
+    compound: Statements
 
 
 @dataclass
@@ -523,36 +523,6 @@ class Parser:
         self.eat(";")
         return Assign(name, expr)
 
-    # def factor(self) -> Expression:
-    #     token = self.current()
-    #     if token.type == "INTEGER":
-    #         self.i += 1
-    #         return IntegerLiteral(token.value)
-    #     if token.type == "REAL":
-    #         self.i += 1
-    #         return RealLiteral(token.value)
-    #     if token.type == "BOOLEAN":
-    #         self.i += 1
-    #         return BoolLiteral(token.value)
-    #     if token.type == "STRING":
-    #         self.i += 1
-    #         return StringLiteral(token.value)
-    #     if token.type == "IDENT":
-    #         self.i += 1
-    #         return Variable(token.value)
-    #     if token.value == "(":
-    #         self.eat("(")
-    #         expr = self.expression()
-    #         self.eat(")")
-    #         return expr
-
-    #     if token.value == "NOT":
-    #         self.i += 1
-    #         return UnaryOperation("NOT", self.factor())
-    #     raise ParseError(
-    #         f"unexpected token '{token.value}' at " f"{token.line}:{token.col}"
-    #     )
-
     def expression(self) -> Expression:
         return self.expression_or_xor()
 
@@ -626,119 +596,6 @@ class Parser:
             return Builtin(name, args)
         return self.factor()
 
-    def expression_one(self) -> Expression | None:
-        if v := self.expression_two():
-            return v
-        left = self.expression_one()
-        if self.accept("&"):
-            return BinaryOperation("&", left, self.expression_two())
-        raise ParseError(
-            f"expected '&' binary operator at "
-            f"{self.current().line}:{self.current().col}"
-        )
-
-    def expression_two(self) -> Expression | None:
-        if v := self.expression_three():
-            return v
-        if self.accept("NOT"):
-            return UnaryOperation("NOT", self.expression_three())
-        raise ParseError(
-            f"expected 'NOT' unary operator at "
-            f"{self.current().line}:{self.current().col}"
-        )
-
-    def expression_three(self) -> Expression | None:
-        if v := self.expression_four():
-            return v
-        left = self.expression_three()
-        operation = self.eat(("<", ">", "=", "<=", ">=", "<>")).value
-        right = self.expression_four()
-        return BinaryOperation(operation, left, right)
-
-    def expression_four(self) -> Expression | None:
-        if v := self.expression_five():
-            return v
-        left = self.expression_four()
-        self.eat("||")
-        right = self.expression_five()
-        return BinaryOperation("||", left, right)
-
-    def expression_five(self) -> Expression | None:
-        if self.accept(("+", "-")):
-            operation = self.current().value
-            self.i += 1
-            return UnaryOperation(operation, self.expression_six())
-        next = self.peek()
-        if next.value in ("+", "-"):
-            left = self.expression_five()
-            operation = self.eat(("+", "-")).value
-            right = self.expression_six()
-            return BinaryOperation(operation, left, right)
-        return self.expression_six()
-
-    def expression_six(self) -> Expression | None:
-        if v := self.expression_seven():
-            return v
-        left = self.expression_six()
-        self.eat(("*", "/", "MOD"))
-        right = self.expression_seven()
-        return BinaryOperation("&&", left, right)
-
-    def expression_seven(self) -> Expression | None:
-        return self.expression_eight()
-
-    def expression_eight(self) -> Expression | None:
-        token = self.current()
-        if token.value == "(":
-            self.i += 1
-            v = self.expression()
-            self.eat(")")
-            return v
-        if token.type == "INTEGER" or token.type == "REAL":
-            self.i += 1
-            return (
-                IntegerLiteral(int(token.value))
-                if token.type == "INTEGER"
-                else RealLiteral(float(token.value))
-            )
-        name = self.eat("IDENT").value
-        return Variable(name)
-
-    # -------------------------------------
-    def X():
-
-        # simple_expression -> term (relop term)?
-        left = self.simple_expression()
-        token = self.current()
-        if token.type in ("=", "<>", "<", "<=", ">", ">="):
-            operation = token.type
-            self.i += 1
-            right = self.simple_expression()
-            return BinaryOperation(operation, left, right)
-        return left
-
-    # simple_expression -> term (addop term)*
-    # addop -> '+' | '-' | 'or'
-    def simple_expression(self) -> Expression:
-        node = self.term()
-        while self.current().type in ("+", "-", "OR"):
-            operation = self.current().type
-            self.i += 1
-            right = self.term()
-            node = BinaryOperation(operation, node, right)
-        return node
-
-    # term -> factor (mulop factor)*
-    # mulop -> '*' | '/' | 'div' | 'mod' | 'and'
-    def term(self) -> Expression:
-        node = self.factor()
-        while self.current().type in ("*", "/", "DIV", "MOD", "AND"):
-            operation = self.current().type
-            self.i += 1
-            right = self.factor()
-            node = BinaryOperation(operation, node, right)
-        return node
-
     def factor(self) -> Expression:
         token = self.current()
         if token.type == "IDENT":
@@ -753,9 +610,6 @@ class Parser:
         if token.type == "STRING":
             self.i += 1
             return StringLiteral(token.value)
-        # if token.type == "NOT":
-        #     self.i += 1
-        #     return UnaryOperation("NOT", self.factor())
         if token.type == "+":
             self.i += 1
             return UnaryOperation("+", self.factor())
