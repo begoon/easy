@@ -1,12 +1,18 @@
 import pathlib
+import sys
 from dataclasses import dataclass
-from typing import List, Optional, Tuple, Union
+from typing import List, Literal, Optional, Tuple, Union, cast
+
+import pytest
 
 KEYWORDS = {
     "PROGRAM",
     "END",
     "FUNCTION",
     "RETURN",
+    "EXIT",
+    "INPUT",
+    "OUTPUT",
     "INTEGER",
     "REAL",
     "IF",
@@ -107,9 +113,7 @@ class Lexer:
                             continue
                         self.advance()
                     if self.i >= self.n:
-                        raise LexerError(
-                            f"unterminated /* */ comment at line {self.line}"
-                        )
+                        raise LexerError(f"unterminated /* */ comment at line {self.line}")
                     self.advance(2)
                     return True
                 return False
@@ -125,7 +129,7 @@ class Lexer:
             s += self.current()
             self.advance()
 
-        if self.current() == "." and self.peek().isdigit():
+        if self.current() == ".":
             s += "."
             self.advance()
             while self.current().isdigit():
@@ -211,14 +215,24 @@ class Program:
 @dataclass
 class Segment:
     variables: List["VariableDeclaration"]
-    functions: List["FunctionDeclaration"]
+    subroutines: List[Union["FunctionDeclaration", "ProcedureDeclaration"]]
     statements: "Statements"
 
 
 @dataclass
 class VariableDeclaration:
     names: List[str]
-    type: str
+    type: Union[str, "Array"]
+
+
+@dataclass
+class Array:
+    type: "PrimitiveType"
+    start: Optional["Expression"]
+    end: "Expression"
+
+
+PrimitiveType = Literal["INTEGER", "REAL", "STRING", "BOOLEAN"] | Array
 
 
 @dataclass
@@ -231,8 +245,8 @@ class ProcedureDeclaration:
 @dataclass
 class FunctionDeclaration:
     name: str
-    type: str
-    parameters: List[Tuple[str, str]]
+    type: Union[str, "Array"]
+    parameters: List[Tuple[str, Union[str, "Array"]]]
     segment: Segment
 
 
@@ -246,28 +260,43 @@ class Statement:
 
 
 @dataclass
-class Builtin:
-    name: str
-    args: List["Expression"]
-
-
-@dataclass
 class Assign(Statement):
     name: str
     expression: "Expression"
+    index: Optional["Expression"] = None
 
 
 @dataclass
 class If(Statement):
     cond: "Expression"
-    then_branch: Statement
-    else_branch: Optional[Statement]
+    then_branch: Segment
+    else_branch: Optional[Segment]
 
 
 @dataclass
-class While(Statement):
-    cond: "Expression"
-    body: Statement
+class For(Statement):
+    variable: "Variable"
+    init: "Expression"
+    do: Segment
+    by: Optional["Expression"] = None
+    to: Optional["Expression"] = None
+    while_: Optional["Expression"] = None
+
+
+@dataclass
+class Select(Statement):
+    expr: "Expression"
+    cases: List[Tuple["Expression", Segment]]
+
+
+@dataclass
+class Input(Statement):
+    variables: List[str]
+
+
+@dataclass
+class Output(Statement):
+    expressions: List["Expression"]
 
 
 @dataclass
@@ -277,8 +306,13 @@ class Call(Statement):
 
 
 @dataclass
-class BlockStatement(Statement):
-    compound: Statements
+class Return(Statement):
+    value: Optional["Expression"] = None
+
+
+@dataclass
+class Exit(Statement):
+    pass
 
 
 @dataclass
@@ -286,8 +320,15 @@ class Empty(Statement):
     pass
 
 
+@dataclass
 class Expression:
     pass
+
+
+@dataclass
+class FunctionCall(Expression):
+    name: str
+    args: List["Expression"]
 
 
 @dataclass
@@ -306,6 +347,7 @@ class UnaryOperation(Expression):
 @dataclass
 class Variable(Expression):
     name: str
+    index: Optional[Expression] = None
 
 
 @dataclass
@@ -349,10 +391,7 @@ class Parser:
             self.i += 1
             return token
         expected = "/".join(kinds)
-        raise ParseError(
-            f"expected '{expected}', found '{token.value}' "
-            f"at {token.line}:{token.col}"
-        )
+        raise ParseError(f"expected '{expected}', found '{token.value}' " f"at {token.line}:{token.col}")
 
     # consume a token if it matches the expected kind, without advancing,
     # otherwise return None
@@ -365,13 +404,9 @@ class Parser:
         return None
 
     def peek(self) -> Token:
-        return (
-            self.tokens[self.i + 1]
-            if self.i + 1 < len(self.tokens)
-            else Token("EOF", "", self.line, self.col)
-        )
+        current = self.current()
+        return self.tokens[self.i + 1] if self.i + 1 < len(self.tokens) else Token("EOF", "", current.line, current.col)
 
-    # program -> 'program' IDENT ':' segments end program IDENT ';'
     def program(self) -> Program:
         self.eat("PROGRAM")
         name = self.eat("IDENT").value
@@ -386,35 +421,29 @@ class Parser:
 
     def segment(self) -> Segment:
         variables_declarations = self.variables_section()
-        subroutines_declarations = self.subroutines_declarations()
-        instructions = self.instructions()
-        return Segment(
-            variables_declarations,
-            subroutines_declarations,
-            instructions,
-        )
+        subroutines = self.subroutines()
+        statements = self.statements()
+        return Segment(variables_declarations, subroutines, statements)
 
     def variables_section(self) -> List[VariableDeclaration]:
         out: List[VariableDeclaration] = []
         while self.accept("DECLARE"):
             if self.current().type == "IDENT":
-                # DECLARE v: INTEGER;
                 name = self.eat("IDENT").value
-                type_name = self.type()
+                type = self.type()
                 self.eat(";")
-                out.append(VariableDeclaration([name], type_name))
+                out.append(VariableDeclaration([name], type))
                 continue
             if self.current().value == "(":
-                # DECLARE (v, x) REAL;
                 self.eat("(")
                 names = []
                 while self.current().value != ")":
                     self.accept(",")
                     names.append(self.eat("IDENT").value)
                 self.eat(")")
-                type_name = self.type()
+                type = self.type()
                 self.eat(";")
-                out.append(VariableDeclaration(names, type_name))
+                out.append(VariableDeclaration(names, type))
                 continue
             raise ParseError(
                 f"expected variable and or '(', found "
@@ -423,19 +452,30 @@ class Parser:
             )
         return out
 
-    def type(self) -> str:
+    def type(self) -> str | Array | PrimitiveType:
         token = self.current()
         if token.type in ("INTEGER", "BOOLEAN", "REAL", "STRING"):
             self.i += 1
             return token.value
-        # allow IDENT types (simple aliases)
+        if token.value == "ARRAY":
+            self.i += 1
+            self.eat("[")
+            end = self.expression()
+            start = None
+            if self.accept(":"):
+                start = end
+                end = self.expression()
+            self.eat("]")
+            self.eat("OF")
+            type = cast(Array, self.type())
+            return Array(type, start, end)
         return self.eat("IDENT").value
 
-    def subroutines_declarations(self) -> List[ProcedureDeclaration]:
-        out: List[ProcedureDeclaration] = []
+    def subroutines(self) -> List[ProcedureDeclaration | FunctionDeclaration]:
+        out: List[ProcedureDeclaration | FunctionDeclaration] = []
         while self.accept("FUNCTION"):
             name = self.eat("IDENT").value
-            parameters: List[Tuple[str, str]] = []
+            parameters: List[Tuple[str, Union[str, "Array"]]] = []
             if self.accept("("):
                 if self.current().type != ")":
                     parameters = self.parameters()
@@ -447,18 +487,11 @@ class Parser:
             self.eat("FUNCTION")
             self.eat(name)
             self.eat(";")
-            out.append(
-                FunctionDeclaration(
-                    name,
-                    type,
-                    parameters,
-                    segment,
-                )
-            )
+            out.append(FunctionDeclaration(name, type, parameters, segment))
         return out
 
-    def parameters(self) -> List[Tuple[str, str]]:
-        out: List[Tuple[str, str]] = []
+    def parameters(self) -> List[Tuple[str, Union[str, "Array"]]]:
+        out: List[Tuple[str, Union[str, "Array"]]] = []
         while True:
             name = self.eat("IDENT").value
             type = self.type()
@@ -467,32 +500,34 @@ class Parser:
                 break
         return out
 
-    def instructions(self) -> Statements:
-        statements = self.statements()
-        return Statements(statements)
-
-    def statements(self) -> List[Statement]:
+    def statements(self) -> Statements:
         statements: List[Statement] = []
-        while self.current().value in ("SET",):
+        while self.current().value in ("SET", "IF", "RETURN", "EXIT", "INPUT", "OUTPUT", "FOR", "SELECT", ";"):
             statements.append(self.statement())
-        return statements
+        return Statements(statements)
 
     def statement(self) -> Statement:
         token = self.current()
         if token.value == "SET":
             return self.assignment_statement()
+        if token.value == "IF":
+            return self.if_statement()
+        if token.value == "FOR":
+            return self.for_statement()
+        if token.value == "SELECT":
+            return self.select_statement()
+        if token.value == "RETURN":
+            return self.return_statement()
+        if token.value == "EXIT":
+            return self.exit_statement()
+        if token.value == "INPUT":
+            return self.input_statement()
+        if token.value == "OUTPUT":
+            return self.output_statement()
+        self.eat(";")
         return Empty()
 
-    def procedure_statement(self) -> Call:
-        name = self.eat("IDENT").value
-        args: List[Expression] = []
-        if self.accept("("):
-            if self.current().type != ")":
-                args = self.arg_list()
-            self.eat(")")
-        return Call(name, args)
-
-    def arg_list(self) -> List[Expression]:
+    def arguments(self) -> List[Expression]:
         args = [self.expression()]
         while self.accept(","):
             args.append(self.expression())
@@ -502,26 +537,92 @@ class Parser:
         self.eat("IF")
         cond = self.expression()
         self.eat("THEN")
-        then_branch = self.statement()
+        then_branch = self.segment()
         else_branch = None
         if self.accept("ELSE"):
-            else_branch = self.statement()
+            else_branch = self.segment()
+        self.eat("FI")
+        self.eat(";")
         return If(cond, then_branch, else_branch)
 
-    def while_statement(self) -> While:
-        self.eat("WHILE")
-        cond = self.expression()
+    def for_statement(self) -> For:
+        self.eat("FOR")
+        variable = Variable(self.eat("IDENT").value)
+        self.eat(":=")
+        init = self.expression()
+        by = None
+        if self.accept("BY"):
+            by = self.expression()
+        to = None
+        if self.accept("TO"):
+            to = self.expression()
+        while_ = None
+        if self.accept("WHILE"):
+            while_ = self.expression()
         self.eat("DO")
-        body = self.statement()
-        return While(cond, body)
+        do = self.segment()
+        self.eat("END")
+        self.eat("FOR")
+        self.eat(";")
+        return For(variable, init, do, by, to, while_)
+
+    def select_statement(self) -> Select:
+        self.eat("SELECT")
+        expr = self.expression()
+        self.eat("OF")
+        cases = []
+        while self.accept("CASE"):
+            self.eat("(")
+            cond = self.expression()
+            self.eat(")")
+            self.eat(":")
+            body = self.segment()
+            cases.append((cond, body))
+        self.eat("END")
+        self.eat("SELECT")
+        self.eat(";")
+        return Select(expr, cases)
+
+    def return_statement(self, function: bool = True) -> Return:
+        self.eat("RETURN")
+        if function:
+            value = self.expression()
+        self.eat(";")
+        return Return(value)
+
+    def exit_statement(self) -> Exit:
+        self.eat("EXIT")
+        self.eat(";")
+        return Exit()
+
+    def input_statement(self) -> Input:
+        self.eat("INPUT")
+        variables = []
+        variables.append(self.eat("IDENT").value)
+        while self.accept(","):
+            variables.append(self.eat("IDENT").value)
+        self.eat(";")
+        return Input(variables)
+
+    def output_statement(self) -> Output:
+        self.eat("OUTPUT")
+        expressions = [self.expression()]
+        while self.accept(","):
+            expressions.append(self.expression())
+        self.eat(";")
+        return Output(expressions)
 
     def assignment_statement(self) -> Assign:
         self.eat("SET")
         name = self.eat("IDENT").value
+        index = None
+        if self.accept("["):
+            index = self.expression()
+            self.eat("]")
         self.eat(":=")
         expr = self.expression()
         self.eat(";")
-        return Assign(name, expr)
+        return Assign(name, expr, index)
 
     def expression(self) -> Expression:
         return self.expression_or_xor()
@@ -573,33 +674,24 @@ class Parser:
             left = BinaryOperation(operation.value, left, right)
         return left
 
-    def expression_builtin(self) -> Expression:
-        name = self.current().value
-        if name in (
-            "FLOOR",
-            "LENGTH",
-            "SUBSTR",
-            "CHARACTER",
-            "NUMBER",
-            "FLOAT",
-            "FIX",
-        ):
+    def expression_builtin(self) -> Expression | FunctionCall:
+        name = self.current()
+        if name.type == "IDENT" and self.peek().value == "(":
             self.i += 1
             self.eat("(")
-            args = [self.expression()]
-            if name == "SUBSTR":
-                self.eat(",")
-                args.append(self.expression())
-                self.eat(",")
-                args.append(self.expression())
+            args = self.arguments()
             self.eat(")")
-            return Builtin(name, args)
+            return FunctionCall(name.value, args)
         return self.factor()
 
     def factor(self) -> Expression:
         token = self.current()
         if token.type == "IDENT":
             self.i += 1
+            if self.accept("["):
+                index = self.expression()
+                self.eat("]")
+                return Variable(token.value, index)
             return Variable(token.value)
         if token.type == "INTEGER":
             self.i += 1
@@ -627,10 +719,7 @@ class Parser:
         if token.type == "IDENT" and token.value.lower() in ("true", "false"):
             self.i += 1
             return BoolLiteral(token.value.lower() == "true")
-        raise ParseError(
-            f"unexpected token {token.type}('{token.value}') at "
-            f"{token.line}:{token.col} in factor"
-        )
+        raise ParseError(f"unexpected token {token.type}('{token.value}') at " f"{token.line}:{token.col} in factor")
 
 
 def indent(s: str, n: int) -> str:
@@ -650,39 +739,47 @@ def dump(node, level=0) -> str:
             parts.append("Variables:")
             for v in node.variables:
                 parts.append(f"  {', '.join(v.names)}: {v.type}")
-        if node.functions:
+        if node.subroutines:
             parts.append("Functions:")
-            for p in node.functions:
+            for p in node.subroutines:
                 params = ", ".join(f"{n}:{t}" for n, t in p.parameters)
-                parts.append(
-                    indent(
-                        f"function {p.name}({params})\n"
-                        f"{dump(p.segment, level)}",
-                        1,
-                    )
-                )
+                parts.append(indent(f"function {p.name}({params})\n" f"{dump(p.segment, level)}", 1))
         parts.append("Statements:")
         parts.append(indent(dump(node.statements, level + 1), 1))
         return indent("\n".join(parts), level)
     if isinstance(node, Statements):
-        return (
-            "\n".join(dump(s, level + 1) for s in node.statements)
-            if node.statements
-            else "(empty)"
-        )
-    if isinstance(node, BlockStatement):
-        return "BlockStatementt:\n" + indent(dump(node.compound, level + 1), 1)
+        return "\n".join(dump(s, level + 1) for s in node.statements) if node.statements else "(empty)"
     if isinstance(node, Assign):
-        return f"Assign {node.name} := {dump(node.expression, level+1)}"
+        return " ".join(
+            filter(
+                None,
+                [
+                    "Assign",
+                    node.name,
+                    (f"[{dump(node.index)}]" if node.index else ""),
+                    ":=",
+                    dump(node.expression, level + 1),
+                ],
+            ),
+        )
     if isinstance(node, If):
-        s = f"If {dump(node.cond)} then {dump(node.then_branch)}"
+        s = f"If {dump(node.cond)} Then\n"
+        s += indent(f"{dump(node.then_branch)}\n", 1)
         if node.else_branch:
-            s += f" else {dump(node.else_branch)}"
+            s += "\nElse\n"
+            s += indent(f"{dump(node.else_branch)}\n", 1)
+        s += "\nFi"
         return s
-    if isinstance(node, While):
-        return f"While {dump(node.cond)} do {dump(node.body)}"
     if isinstance(node, Call):
         return f"Call {node.name}({', '.join(dump(a) for a in node.args)})"
+    if isinstance(node, Return):
+        return f"Return {dump(node.value)}"
+    if isinstance(node, Exit):
+        return "Exit"
+    if isinstance(node, Input):
+        return f"Input({', '.join(dump(e) for e in node.variables)})"
+    if isinstance(node, Output):
+        return f"Output({', '.join(dump(e) for e in node.expressions)})"
     if isinstance(node, Empty):
         return "Empty"
     if isinstance(node, BinaryOperation):
@@ -699,22 +796,230 @@ def dump(node, level=0) -> str:
         return repr(node.value)
     if isinstance(node, BoolLiteral):
         return "true" if node.value else "false"
-    if isinstance(node, Builtin):
+    if isinstance(node, FunctionCall):
         return f"{node.name}({', '.join(dump(a) for a in node.args)})"
+    if isinstance(node, Array):
+        if node.start:
+            return f"Array({dump(node.type)}, {dump(node.start)}, {dump(node.end)})"
+        return f"Array({dump(node.type)}, {dump(node.end)})"
+    if isinstance(node, For):
+        return " ".join(
+            filter(
+                None,
+                [
+                    f"For {dump(node.variable)}",
+                    ":=",
+                    dump(node.init),
+                    f"By {dump(node.by)}" if node.by else "",
+                    f"To {dump(node.to)}" if node.to else "",
+                    f"While {dump(node.while_)}" if node.while_ else "",
+                    "Do",
+                    "\n" + dump(node.do, 1),
+                    "\nEnd For",
+                ],
+            )
+        )
+    if isinstance(node, Select):
+        s = f"Select {dump(node.expr)}\n"
+        for cond, body in node.cases:
+            s += f"  Case {dump(cond)}:\n{dump(body, 2)}\n"
+        s += "End Select"
+        return s
     return repr(node)
 
 
-def build_ast(code: str) -> Program:
+def parse(code: str) -> Program:
     lexer = Lexer(code)
     tokens = lexer.tokens()
     return Parser(tokens).program()
 
 
-def parse() -> Program:
-    code = pathlib.Path("era-wip.easy").read_text()
-    ast = build_ast(code)
-    return ast
+# ---
+
+
+@pytest.mark.parametrize(
+    "input, expected",
+    [
+        ("a", [("IDENT", "a"), ("EOF", "")]),
+        ("a b", [("IDENT", "a"), ("IDENT", "b"), ("EOF", "")]),
+        ("a /* b /* \n */ */ c", [("IDENT", "a"), ("IDENT", "c"), ("EOF", "")]),
+    ],
+)
+def test_tokens(input, expected) -> None:
+    lexer = Lexer(input)
+    tokens = lexer.tokens()
+    assert [(t.type, t.value) for t in tokens] == expected
+
+
+@pytest.mark.parametrize(
+    "input, expected",
+    [
+        ("a", "a"),
+        ("a + b", "(a + b)"),
+        ("+a", "(+a)"),
+        ("-a", "(-a)"),
+        ("a + b * с", "(a + (b * с))"),
+        ('a || (b || SUBSTR("abc", 0, 2))', "(a || (b || SUBSTR('abc', 0, 2)))"),
+        ('-b + (1 - 2) - LENGTH("3") * 7 XOR 1', "((((-b) + (1 - 2)) - (LENGTH('3') * 7)) XOR 1)"),
+        ("NOT a < b", "(NOT(a < b))"),
+    ],
+)
+def test_expression(input, expected) -> None:
+    result = Parser(Lexer(input).tokens()).expression()
+    if not isinstance(expected, str):
+        expected = dump(expected)
+    assert dump(result) == expected, f"\n{expected}\n!=\n{result}\n"
+
+
+PROGRAM = """
+PROGRAM Eratosthenes:
+
+  DECLARE topnum INTEGER;
+
+  FUNCTION abs(x REAL) REAL:
+    IF x < 0 THEN RETURN -x; ELSE RETURN x; FI;
+  END FUNCTION abs;
+
+  FUNCTION integersqrt(a INTEGER) INTEGER:
+    SELECT TRUE OF
+      CASE (a < 0): OUTPUT "a < 0 in FUNCTION integersqrt."; EXIT;
+      CASE (a = 0): RETURN 0;
+      CASE (a > 0):
+        DECLARE (x, ra) REAL;
+        DECLARE epsilon REAL;
+        DECLARE sqrt INTEGER;
+        SET ra := FLOAT(a);
+        SET epsilon := 0.0000001*ra;
+        FOR x := ra/2. BY (ra/x-x)/2. WHILE abs(ra-x*x) > epsilon DO ; END FOR;
+        FOR sqrt := FIX(x)-1 BY 1 WHILE (sqrt+1) * (sqrt+1) <= a DO ; END FOR;
+        RETURN sqrt;
+    END SELECT;
+  END FUNCTION integersqrt;
+
+  INPUT topnum;
+
+  IF topnum > 0 THEN
+    DECLARE sieve ARRAY[1:topnum] OF BOOLEAN;
+    DECLARE (i, limit, count) INTEGER;
+    FOR i := 1 TO topnum DO SET sieve[i] := TRUE; END FOR;
+    SET limit := integersqrt(topnum)+1; /* Avoid repeating square root */
+    FOR i := 2 TO limit DO
+      IF sieve[i] THEN
+        DECLARE j INTEGER;
+        FOR j := 2*i BY i TO topnum DO SET sieve[j] := FALSE; END FOR;
+      FI;
+    END FOR;
+    SET count := 0;
+    FOR i := 1 TO topnum DO
+      IF sieve[i] THEN
+        SET count := count + 1;
+        OUTPUT "Prime[" || count || "] = " || i;
+      FI;
+    END FOR;
+  ELSE
+    OUTPUT "Input value " || topnum || " non-positive.";
+  FI;
+
+  EXIT;
+END PROGRAM Eratosthenes;
+"""
+
+PARSED_PROGRAM = """
+Program Eratosthenes
+  Variables:
+    topnum: INTEGER
+  Functions:
+    function abs(x:REAL)
+      Statements:
+        If (x < 0) Then
+          Statements:
+            Return (-x)
+        Else
+          Statements:
+            Return x
+        Fi
+    function integersqrt(a:INTEGER)
+      Statements:
+        Select TRUE
+          Case (a < 0):
+            Statements:
+              Output('a < 0 in FUNCTION integersqrt.')
+              Exit
+          Case (a = 0):
+            Statements:
+              Return 0
+          Case (a > 0):
+            Variables:
+              x, ra: REAL
+              epsilon: REAL
+              sqrt: INTEGER
+            Statements:
+              Assign ra := FLOAT(a)
+              Assign epsilon := (1e-07 * ra)
+              For x := (ra / 2.0) By (((ra / x) - x) / 2.0) While (abs((ra - (x * x))) > epsilon) Do 
+                Statements:
+                  Empty 
+              End For
+              For sqrt := (FIX(x) - 1) By 1 While (((sqrt + 1) * (sqrt + 1)) <= a) Do 
+                Statements:
+                  Empty 
+              End For
+              Return sqrt
+        End Select
+  Statements:
+    Input('topnum')
+    If (topnum > 0) Then
+      Variables:
+        sieve: Array(type='BOOLEAN', start=IntegerLiteral(value=1), end=Variable(name='topnum', index=None))
+        i, limit, count: INTEGER
+      Statements:
+        For i := 1 To topnum Do 
+          Statements:
+            Assign sieve [i] := TRUE 
+        End For
+        Assign limit := (integersqrt(topnum) + 1)
+        For i := 2 To limit Do 
+          Statements:
+            If sieve Then
+              Variables:
+                j: INTEGER
+              Statements:
+                For j := (2 * i) By i To topnum Do 
+                  Statements:
+                    Assign sieve [j] := FALSE 
+                End For
+            Fi 
+        End For
+        Assign count := 0
+        For i := 1 To topnum Do 
+          Statements:
+            If sieve Then
+              Statements:
+                Assign count := (count + 1)
+                Output(((('Prime[' || count) || '] = ') || i))
+            Fi 
+        End For
+    Else
+      Statements:
+        Output((('Input value ' || topnum) || ' non-positive.'))
+    Fi
+    Exit
+"""
+
+
+def test_program() -> None:
+    result = Parser(Lexer(PROGRAM).tokens()).program()
+    assert dump(result) == PARSED_PROGRAM.strip()
+
+
+def compile(source: str) -> Program:
+    return parse(source)
 
 
 if __name__ == "__main__":
-    print(dump(parse()))
+    print(sys.argv)
+    if len(sys.argv) >= 3 and sys.argv[1] == "compile":
+        source = pathlib.Path(sys.argv[2]).read_text()
+        print(dump(compile(source)))
+    else:
+        pytest.main(["-vvv", __file__])

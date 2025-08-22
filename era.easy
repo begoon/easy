@@ -41,7 +41,7 @@ PROGRAM Eratosthenes:
     SET count := 0;
     FOR i := 1 TO topnum DO 
       IF sieve[i] THEN
-        SET count := count + 1:
+        SET count := count + 1;
         OUTPUT "Prime[" || count || "] = " || i;
       FI;
     END FOR;
