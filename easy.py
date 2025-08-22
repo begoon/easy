@@ -339,6 +339,13 @@ class BinaryOperation(Expression):
 
 
 @dataclass
+class ConcatenationOperation(Expression):
+    operation: str
+    left: Expression
+    right: Expression
+
+
+@dataclass
 class UnaryOperation(Expression):
     operation: str
     expr: Expression
@@ -420,10 +427,10 @@ class Parser:
         return Program(name, segments)
 
     def segment(self) -> Segment:
-        variables_declarations = self.variables_section()
+        variables = self.variables_section()
         subroutines = self.subroutines()
         statements = self.statements()
-        return Segment(variables_declarations, subroutines, statements)
+        return Segment(variables, subroutines, statements)
 
     def variables_section(self) -> List[VariableDeclaration]:
         out: List[VariableDeclaration] = []
@@ -483,6 +490,7 @@ class Parser:
             type = self.type()
             self.eat(":")
             segment = self.segment()
+            segment.statements.statements.append(Return(0))
             self.eat("END")
             self.eat("FUNCTION")
             self.eat(name)
@@ -650,6 +658,8 @@ class Parser:
         left = self.expression_concatenation()
         while operation := self.accept(("<", ">", "=", "<=", ">=", "<>")):
             right = self.expression_concatenation()
+            if operation.value == "=":
+                operation = Token("=", "==", operation.line, operation.col)
             left = BinaryOperation(operation.value, left, right)
         return left
 
@@ -657,7 +667,7 @@ class Parser:
         left = self.expression_adding()
         while operation := self.accept(("||",)):
             right = self.expression_adding()
-            left = BinaryOperation(operation.value, left, right)
+            left = ConcatenationOperation(operation.value, left, right)
         return left
 
     def expression_adding(self) -> Expression:
@@ -787,7 +797,7 @@ def dump(node, level=0) -> str:
     if isinstance(node, UnaryOperation):
         return f"({node.operation}{dump(node.expr)})"
     if isinstance(node, Variable):
-        return node.name
+        return node.name + (f"[{dump(node.index)}]" if node.index else "")
     if isinstance(node, IntegerLiteral):
         return str(node.value)
     if isinstance(node, RealLiteral):
@@ -822,9 +832,177 @@ def dump(node, level=0) -> str:
     if isinstance(node, Select):
         s = f"Select {dump(node.expr)}\n"
         for cond, body in node.cases:
+            cond = generate(cond)
+            if cond.startswith("(") and cond.endswith(")"):
+                cond = cond[1:-1]
             s += f"  Case {dump(cond)}:\n{dump(body, 2)}\n"
         s += "End Select"
         return s
+    if isinstance(node, ConcatenationOperation):
+        left = dump(node.left)
+        if not left.startswith("'") and not left.startswith("concat"):
+            left = f"str({left})"
+        right = dump(node.right)
+        if not right.startswith("'") and not right.startswith("concat"):
+            right = f"str({right})"
+        return f"concat({left}, {right})"
+    return repr(node)
+
+
+def BOOL(v: str) -> str:
+    return {"TRUE": "1", "FALSE": "0"}[v]
+
+
+def TYPE(v: str) -> str:
+    if isinstance(v, Array):
+        return v
+    return {"INTEGER": "int", "REAL": "float", "BOOLEAN": "int"}[v]
+
+
+functions = ""
+
+
+def generate(node, level=0) -> str:
+    global functions
+
+    if isinstance(node, Program):
+        return indent("int main() {\n" + generate(node.block, level + 1) + "\n}", level)
+
+    if isinstance(node, Segment):
+        parts = []
+        if node.variables:
+            for v in node.variables:
+                if isinstance(v.type, Array):
+                    size = generate(v.type.end)
+                    offset = generate(v.type.start) or "0"
+                    parts.append(f"{TYPE(v.type.type)} {', '.join(v.names)}[{size} + {offset}];")
+                else:
+                    parts.append(f"{TYPE(v.type)} {', '.join(v.names)};")
+        if node.subroutines:
+            side_parts = []
+            for subroutine in node.subroutines:
+                params = ", ".join(f"{TYPE(t)} {n}" for n, t in subroutine.parameters)
+                side_parts.append(
+                    indent(
+                        f"{TYPE(subroutine.type)} {subroutine.name}({params}) {{\n"
+                        f"{generate(subroutine.segment, level)}\n}}",
+                        0,
+                    )
+                )
+            functions += "\n".join(side_parts)
+        parts.append(indent(generate(node.statements, level + 1), 0))
+        return indent("\n".join(parts), level)
+    if isinstance(node, Statements):
+        return "\n".join(generate(s, level + 1) for s in node.statements) if node.statements else "(empty)"
+    if isinstance(node, Assign):
+        return " ".join(
+            filter(
+                None,
+                [
+                    node.name,
+                    (f"[{generate(node.index)}]" if node.index else ""),
+                    "=",
+                    generate(node.expression, level + 1) + ";",
+                ],
+            ),
+        )
+    if isinstance(node, If):
+        cond = generate(node.cond)
+        if cond.startswith("(") and cond.endswith(")"):
+            cond = cond[1:-1]
+        s = f"if ({cond}) {{\n"
+        s += indent(f"{generate(node.then_branch)}\n", 1)
+        if node.else_branch:
+            s += "\n} else {\n"
+            s += indent(f"{generate(node.else_branch)}\n", 1)
+        s += "\n}"
+        return s
+    if isinstance(node, Call):
+        raise NotImplementedError()
+        return f"{node.name}({', '.join(generate(a) for a in node.args)});"
+    if isinstance(node, Return):
+        return f"return {generate(node.value)};"
+    if isinstance(node, Exit):
+        return "exit(0);"
+    if isinstance(node, Input):
+        inputs = []
+        for variable in node.variables:
+            inputs.append(f'scanf("%d", &{variable});')
+        return "\n".join(inputs)
+    if isinstance(node, Output):
+        return "\n".join(
+            [
+                'printf("%s", ' + ", ".join(generate(e).replace("'", '"') for e in node.expressions) + ");",
+                r'printf("\n");',
+            ],
+        )
+    if isinstance(node, Empty):
+        return ";"
+    if isinstance(node, BinaryOperation):
+        return f"({generate(node.left)} {node.operation} {generate(node.right)})"
+    if isinstance(node, UnaryOperation):
+        return f"({node.operation}{generate(node.expr)})"
+    if isinstance(node, Variable):
+        return node.name + (node.index and f"[{generate(node.index)}]" or "")
+    if isinstance(node, IntegerLiteral):
+        return str(node.value)
+    if isinstance(node, RealLiteral):
+        return str(node.value)
+    if isinstance(node, StringLiteral):
+        return repr(node.value)
+    if isinstance(node, BoolLiteral):
+        return "1" if node.value else "0"
+    if isinstance(node, FunctionCall):
+        return f"{node.name}({', '.join(generate(a) for a in node.args)})"
+    if isinstance(node, Array):
+        if node.start:
+            return f"Array({generate(node.type)}, {generate(node.start)}, {generate(node.end)})"
+        return f"Array({generate(node.type)}, {generate(node.end)})"
+    if isinstance(node, For):
+        return " ".join(
+            filter(
+                None,
+                [
+                    f"for ({generate(node.variable)}",
+                    "=",
+                    generate(node.init) + ";",
+                    "&&".join(
+                        filter(
+                            None,
+                            [
+                                (f"{generate(node.variable)} <= {generate(node.to)}" if node.to else ""),
+                                (f"{generate(node.while_)}" if node.while_ else ""),
+                            ],
+                        )
+                    )
+                    + "; "
+                    + f"{generate(node.variable)} += "
+                    + ("1" if not node.by else generate(node.by))
+                    + ")",
+                    "{",
+                    "\n" + generate(node.do, 1),
+                    "\n}",
+                ],
+            )
+        )
+    if isinstance(node, Select):
+        s = ""
+        for cond, body in node.cases:
+            cond = generate(cond)
+            if cond.startswith("(") and cond.endswith(")"):
+                cond = cond[1:-1]
+            s += f"\nif ({cond}) {{\n{generate(body, 2)}\n}}"
+        return s.strip()
+    if isinstance(node, Array):
+        return TYPE(node.type) + "[" + generate(node.end) + "];"
+    if isinstance(node, ConcatenationOperation):
+        left = generate(node.left)
+        if not left.startswith("'") and not left.startswith("concat"):
+            left = f"str({left})"
+        right = generate(node.right)
+        if not right.startswith("'") and not right.startswith("concat"):
+            right = f"str({right})"
+        return f"concat({left}, {right})"
     return repr(node)
 
 
@@ -859,7 +1037,7 @@ def test_tokens(input, expected) -> None:
         ("+a", "(+a)"),
         ("-a", "(-a)"),
         ("a + b * с", "(a + (b * с))"),
-        ('a || (b || SUBSTR("abc", 0, 2))', "(a || (b || SUBSTR('abc', 0, 2)))"),
+        ('a || (b || SUBSTR("abc", 0, 2))', "concat(str(a), concat(str(b), str(SUBSTR('abc', 0, 2))))"),
         ('-b + (1 - 2) - LENGTH("3") * 7 XOR 1', "((((-b) + (1 - 2)) - (LENGTH('3') * 7)) XOR 1)"),
         ("NOT a < b", "(NOT(a < b))"),
     ],
@@ -938,17 +1116,18 @@ Program Eratosthenes
           Statements:
             Return x
         Fi
+        Return 0
     function integersqrt(a:INTEGER)
       Statements:
         Select TRUE
-          Case (a < 0):
+          Case 'a < 0':
             Statements:
               Output('a < 0 in FUNCTION integersqrt.')
               Exit
-          Case (a = 0):
+          Case 'a == 0':
             Statements:
               Return 0
-          Case (a > 0):
+          Case 'a > 0':
             Variables:
               x, ra: REAL
               epsilon: REAL
@@ -966,6 +1145,7 @@ Program Eratosthenes
               End For
               Return sqrt
         End Select
+        Return 0
   Statements:
     Input('topnum')
     If (topnum > 0) Then
@@ -980,7 +1160,7 @@ Program Eratosthenes
         Assign limit := (integersqrt(topnum) + 1)
         For i := 2 To limit Do 
           Statements:
-            If sieve Then
+            If sieve[i] Then
               Variables:
                 j: INTEGER
               Statements:
@@ -993,15 +1173,15 @@ Program Eratosthenes
         Assign count := 0
         For i := 1 To topnum Do 
           Statements:
-            If sieve Then
+            If sieve[i] Then
               Statements:
                 Assign count := (count + 1)
-                Output(((('Prime[' || count) || '] = ') || i))
+                Output(concat(concat(concat('Prime[', str(count)), '] = '), str(i)))
             Fi 
         End For
     Else
       Statements:
-        Output((('Input value ' || topnum) || ' non-positive.'))
+        Output(concat(concat('Input value ', str(topnum)), ' non-positive.'))
     Fi
     Exit
 """
@@ -1016,10 +1196,29 @@ def compile(source: str) -> Program:
     return parse(source)
 
 
+PREABLE = """
+#include <stdio.h>
+#include <string.h>
+extern void exit(int);
+extern void* malloc(size_t);
+#define TRUE 1
+#define FALSE 0
+int FIX(float v) { return (int)v; }
+float FLOAT(int v) { return (float)v; }
+char* str(int v) { char* s = malloc(12); sprintf(s, "%d", v); return s; }
+char* concat(char* a, char* b) { char* s = malloc(strlen(a) + strlen(b) + 1); strcpy(s, a); strcat(s, b); return s; }
+#pragma clang diagnostic ignored "-Wincompatible-library-redeclaration"
+"""
+
 if __name__ == "__main__":
-    print(sys.argv)
     if len(sys.argv) >= 3 and sys.argv[1] == "compile":
         source = pathlib.Path(sys.argv[2]).read_text()
-        print(dump(compile(source)))
+        compiled = generate(compile(source))
+        compiled = compiled.replace("abs(", "abs_(")
+        print(PREABLE)
+        print("//" * 20)
+        print(functions)
+        print("//" * 20)
+        print(compiled)
     else:
         pytest.main(["-vvv", __file__])
