@@ -1214,7 +1214,6 @@ if __name__ == "__main__":
     if len(sys.argv) >= 3 and sys.argv[1] == "compile":
         source = pathlib.Path(sys.argv[2]).read_text()
         compiled = generate(compile(source))
-        compiled = compiled.replace("abs(", "abs_(")
         print(PREABLE)
         print("//" * 20)
         print(functions)
