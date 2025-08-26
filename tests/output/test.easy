@@ -1,0 +1,4 @@
+PROGRAM Output:
+  OUTPUT "aloha!";
+  EXIT;
+END PROGRAM Output;

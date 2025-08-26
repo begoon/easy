@@ -1,18 +1,48 @@
-
 #include <stdio.h>
 #include <string.h>
+#include <stdarg.h>
 extern void exit(int);
-extern void* malloc(size_t);
+extern void *malloc(size_t);
 #define TRUE 1
 #define FALSE 0
-int FIX(float v) { return (int)v; }
-float FLOAT(int v) { return (float)v; }
-char* str(int v) { char* s = malloc(12); sprintf(s, "%d", v); return s; }
-char* concat(char* a, char* b) { char* s = malloc(strlen(a) + strlen(b) + 1); strcpy(s, a); strcat(s, b); return s; }
-#pragma clang diagnostic ignored "-Wincompatible-library-redeclaration"
+int FIX(double v) { return (int)v; }
+double FLOAT(int v) { return (double)v; }
+char *str(int v)
+{
+    char *s = malloc(12);
+    sprintf(s, "%d", v);
+    return s;
+}
+char *concat(int count, ...)
+{
+    va_list args;
+    va_start(args, count);
 
-////////////////////////////////////////
-float abs(float x) {
+    size_t total_len = 0;
+    for (int i = 0; i < count; i++)
+    {
+        char *s = va_arg(args, char *);
+        total_len += strlen(s);
+    }
+    va_end(args);
+
+    char *result = malloc(total_len + 1);
+    if (!result)
+        return NULL;
+
+    result[0] = '\0';
+
+    va_start(args, count);
+    for (int i = 0; i < count; i++)
+    {
+        strcat(result, va_arg(args, char *));
+    }
+    va_end(args);
+
+    return result;
+}
+#pragma clang diagnostic ignored "-Wincompatible-library-redeclaration"
+double abs(double x) {
   if (x < 0) {
     return (-x);
   } else {
@@ -22,16 +52,15 @@ float abs(float x) {
 }
 int integersqrt(int a) {
   if (a < 0) {
-      printf("%s", "a < 0 in FUNCTION integersqrt.");
-      printf("\n");
+      printf("%s\n", "a < 0 in FUNCTION integersqrt.");
       exit(0);
   }
   if (a == 0) {
       return 0;
   }
   if (a > 0) {
-      float x, ra;
-      float epsilon;
+      double x, ra;
+      double epsilon;
       int sqrt;
       ra = FLOAT(a);
       epsilon = (1e-07 * ra);
@@ -45,7 +74,6 @@ int integersqrt(int a) {
   }
   return 0;
 }
-////////////////////////////////////////
 int main() {
   int topnum;
   scanf("%d", &topnum);
@@ -68,13 +96,11 @@ int main() {
     for (i = 1; i <= topnum; i += 1) { 
       if (sieve[i]) {
         count = (count + 1);
-        printf("%s", concat(concat(concat("Prime[", str(count)), "] = "), str(i)));
-        printf("\n");
+        printf("%s\n", concat(4, "Prime[", str(count), "] = ", str(i)));
       } 
     }
   } else {
-    printf("%s", concat(concat("Input value ", str(topnum)), " non-positive."));
-    printf("\n");
+    printf("%s\n", concat(3, "Input value ", str(topnum), " non-positive."));
   }
   exit(0);
 }

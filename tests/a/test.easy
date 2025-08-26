@@ -1,0 +1,4 @@
+PROGRAM A:
+  DECLARE x INTEGER;
+  SET x := a || (b || SUBSTR("abc", 0, 2));
+END PROGRAM A;

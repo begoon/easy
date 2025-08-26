@@ -1,0 +1,4 @@
+PROGRAM Output:
+  OUTPUT SUBSTR("aloha!", 1, 2);
+  EXIT;
+END PROGRAM Output;

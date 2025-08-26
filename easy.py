@@ -191,41 +191,44 @@ class Program:
     block: "Segment"
 
 
+Subroutine = Union["Function", "Procedure"]
+
+
 @dataclass
 class Segment:
-    variables: List["VariableDeclaration"]
-    subroutines: List[Union["FunctionDeclaration", "ProcedureDeclaration"]]
+    variables: List["Declaration"]
+    subroutines: List[Subroutine]
     statements: "Statements"
 
 
 @dataclass
-class VariableDeclaration:
+class Declaration:
     names: List[str]
     type: Union[str, "Array"]
 
 
 @dataclass
 class Array:
-    type: "PrimitiveType"
+    type: "Type"
     start: Optional["Expression"]
     end: "Expression"
 
 
-PrimitiveType = Literal["INTEGER", "REAL", "STRING", "BOOLEAN"] | Array
+Type = Literal["INTEGER", "REAL", "STRING", "BOOLEAN"] | Array
 
 
 @dataclass
-class ProcedureDeclaration:
+class Procedure:
     name: str
-    parameters: List[Tuple[str, str]]
+    parameters: List[Tuple[str, Union[str, Array]]]
     segment: Segment
 
 
 @dataclass
-class FunctionDeclaration:
+class Function:
     name: str
-    type: Union[str, "Array"]
-    parameters: List[Tuple[str, Union[str, "Array"]]]
+    type: Union[str, Array]
+    parameters: List[Tuple[str, Union[str, Array]]]
     segment: Segment
 
 
@@ -319,9 +322,7 @@ class BinaryOperation(Expression):
 
 @dataclass
 class ConcatenationOperation(Expression):
-    operation: str
-    left: Expression
-    right: Expression
+    parts: list[Expression]
 
 
 @dataclass
@@ -357,19 +358,29 @@ class BoolLiteral(Expression):
 
 
 class ParseError(Exception):
-    pass
+    def __init__(self, message: str, token: Token, source: str):
+        super().__init__(message)
+        self.message = message
+        self.token = token
+        self.source = source
+
+    def __str__(self) -> str:
+        error_line = self.source.splitlines()[self.token.line - 1]
+        return f"{self.message} at {self.token.line}:{self.token.col}\n{error_line}\n{' ' * (self.token.col - 1)}^"
 
 
 class Parser:
-    def __init__(self, tokens: List[Token]):
+    def __init__(self, tokens: List[Token], source: str):
         self.tokens = tokens
         self.i = 0
+        self.source = source
+
+    def error(self, message: str, token: Token) -> None:
+        raise ParseError(message, token, self.source)
 
     def current(self) -> Token:
         return self.tokens[self.i]
 
-    # consume a token and advance if it matches the expected kind,
-    # otherwise raise ParseError.
     def eat(self, kind: Union[str, Tuple[str, ...]]) -> Token:
         kinds = (kind,) if isinstance(kind, str) else kind
         token = self.current()
@@ -377,10 +388,8 @@ class Parser:
             self.i += 1
             return token
         expected = "/".join(kinds)
-        raise ParseError(f"expected '{expected}', found '{token.value}' " f"at {token.line}:{token.col}")
+        self.error(f"expected '{expected}', found '{token.value}'", token)
 
-    # consume a token if it matches the expected kind, without advancing,
-    # otherwise return None
     def accept(self, kind: Union[str, Tuple[str, ...]]) -> Optional[Token]:
         token = self.current()
         kinds = (kind,) if isinstance(kind, str) else kind
@@ -411,16 +420,17 @@ class Parser:
         statements = self.statements()
         return Segment(variables, subroutines, statements)
 
-    def variables_section(self) -> List[VariableDeclaration]:
-        out: List[VariableDeclaration] = []
+    def variables_section(self) -> List[Declaration]:
+        out: List[Declaration] = []
         while self.accept("DECLARE"):
-            if self.current().type == "IDENT":
+            token = self.current()
+            if token.type == "IDENT":
                 name = self.eat("IDENT").value
                 type = self.type()
                 self.eat(";")
-                out.append(VariableDeclaration([name], type))
+                out.append(Declaration([name], type))
                 continue
-            if self.current().value == "(":
+            if token.value == "(":
                 self.eat("(")
                 names = []
                 while self.current().value != ")":
@@ -429,16 +439,12 @@ class Parser:
                 self.eat(")")
                 type = self.type()
                 self.eat(";")
-                out.append(VariableDeclaration(names, type))
+                out.append(Declaration(names, type))
                 continue
-            raise ParseError(
-                f"expected variable and or '(', found "
-                f"'{self.current().value}' "
-                f"at {self.current().line}:{self.current().col}"
-            )
+            self.error(f"expected variable and or '(', found '{token.value}' ", token)
         return out
 
-    def type(self) -> str | Array | PrimitiveType:
+    def type(self) -> str | Array | Type:
         token = self.current()
         if token.type in ("INTEGER", "BOOLEAN", "REAL", "STRING"):
             self.i += 1
@@ -457,8 +463,8 @@ class Parser:
             return Array(type, start, end)
         return self.eat("IDENT").value
 
-    def subroutines(self) -> List[ProcedureDeclaration | FunctionDeclaration]:
-        out: List[ProcedureDeclaration | FunctionDeclaration] = []
+    def subroutines(self) -> List[Procedure | Function]:
+        out: List[Procedure | Function] = []
         while self.accept("FUNCTION"):
             name = self.eat("IDENT").value
             parameters: List[Tuple[str, Union[str, "Array"]]] = []
@@ -474,7 +480,7 @@ class Parser:
             self.eat("FUNCTION")
             self.eat(name)
             self.eat(";")
-            out.append(FunctionDeclaration(name, type, parameters, segment))
+            out.append(Function(name, type, parameters, segment))
         return out
 
     def parameters(self) -> List[Tuple[str, Union[str, "Array"]]]:
@@ -489,7 +495,17 @@ class Parser:
 
     def statements(self) -> Statements:
         statements: List[Statement] = []
-        while self.current().value in ("SET", "IF", "RETURN", "EXIT", "INPUT", "OUTPUT", "FOR", "SELECT", ";"):
+        while self.current().value in (
+            "SET",
+            "IF",
+            "RETURN",
+            "EXIT",
+            "INPUT",
+            "OUTPUT",
+            "FOR",
+            "SELECT",
+            ";",
+        ):
             statements.append(self.statement())
         return Statements(statements)
 
@@ -643,11 +659,12 @@ class Parser:
         return left
 
     def expression_concatenation(self) -> Expression:
-        left = self.expression_adding()
-        while operation := self.accept(("||",)):
-            right = self.expression_adding()
-            left = ConcatenationOperation(operation.value, left, right)
-        return left
+        parts = [self.expression_adding()]
+        while self.accept(("||",)):
+            parts.append(self.expression_adding())
+        if len(parts) == 1:
+            return parts[0]
+        return ConcatenationOperation(parts)
 
     def expression_adding(self) -> Expression:
         left = self.expression_multiplying()
@@ -657,13 +674,13 @@ class Parser:
         return left
 
     def expression_multiplying(self) -> Expression:
-        left = self.expression_builtin()
+        left = self.expression_function_call()
         while operation := self.accept(("*", "/", "MOD")):
-            right = self.expression_builtin()
+            right = self.expression_function_call()
             left = BinaryOperation(operation.value, left, right)
         return left
 
-    def expression_builtin(self) -> Expression | FunctionCall:
+    def expression_function_call(self) -> Expression | FunctionCall:
         name = self.current()
         if name.type == "IDENT" and self.peek().value == "(":
             self.i += 1
@@ -677,11 +694,11 @@ class Parser:
         token = self.current()
         if token.type == "IDENT":
             self.i += 1
+            index = None
             if self.accept("["):
                 index = self.expression()
                 self.eat("]")
-                return Variable(token.value, index)
-            return Variable(token.value)
+            return Variable(token.value, index)
         if token.type == "INTEGER":
             self.i += 1
             return IntegerLiteral(int(token.value))
@@ -708,20 +725,17 @@ class Parser:
         if token.type == "IDENT" and token.value.lower() in ("true", "false"):
             self.i += 1
             return BoolLiteral(token.value.lower() == "true")
-        raise ParseError(f"unexpected token {token.type}('{token.value}') at " f"{token.line}:{token.col} in factor")
+        self.error(f"unexpected token {token.type}('{token.value}')", token)
 
 
 def indent(s: str, n: int) -> str:
-    pad = "  " * n
+    pad = "    " * n
     return "\n".join(pad + line for line in s.splitlines())
 
 
 def dump(node, level=0) -> str:
     if isinstance(node, Program):
-        return indent(
-            f"Program {node.name}\n{dump(node.block, level+1)}",
-            level,
-        )
+        return indent(f"Program {node.name}\n{dump(node.block, level+1)}", level)
     if isinstance(node, Segment):
         parts = []
         if node.variables:
@@ -740,16 +754,11 @@ def dump(node, level=0) -> str:
         return "\n".join(dump(s, level + 1) for s in node.statements) if node.statements else "(empty)"
     if isinstance(node, Assign):
         return " ".join(
-            filter(
-                None,
-                [
-                    "Assign",
-                    node.name,
-                    (f"[{dump(node.index)}]" if node.index else ""),
-                    ":=",
-                    dump(node.expression, level + 1),
-                ],
-            ),
+            [
+                f"Assign {node.name}{"["+dump(node.index) + "]" if node.index else ""}",
+                ":=",
+                dump(node.expression, level + 1),
+            ],
         )
     if isinstance(node, If):
         s = f"If {dump(node.cond)} Then\n"
@@ -792,40 +801,38 @@ def dump(node, level=0) -> str:
             return f"Array({dump(node.type)}, {dump(node.start)}, {dump(node.end)})"
         return f"Array({dump(node.type)}, {dump(node.end)})"
     if isinstance(node, For):
-        return " ".join(
-            filter(
-                None,
-                [
-                    f"For {dump(node.variable)}",
-                    ":=",
-                    dump(node.init),
-                    f"By {dump(node.by)}" if node.by else "",
-                    f"To {dump(node.to)}" if node.to else "",
-                    f"While {dump(node.while_)}" if node.while_ else "",
-                    "Do",
-                    "\n" + dump(node.do, 1),
-                    "\nEnd For",
-                ],
-            )
+        header = "".join(
+            [
+                f"For {dump(node.variable)} := ",
+                dump(node.init),
+                " ",
+                f"By {dump(node.by)} " if node.by else "",
+                f"To {dump(node.to)} " if node.to else "",
+                f"While {dump(node.while_)} " if node.while_ else "",
+                "Do",
+            ]
         )
+        footer = "End For"
+        return f"{header}\n{dump(node.do, 1)}\n{footer}"
     if isinstance(node, Select):
         s = f"Select {dump(node.expr)}\n"
         for cond, body in node.cases:
             cond = generate(cond)
-            if cond.startswith("(") and cond.endswith(")"):
-                cond = cond[1:-1]
-            s += f"  Case {dump(cond)}:\n{dump(body, 2)}\n"
+            cond = cond[1:-1]
+            s += f"  Case ({dump(cond)}):\n{dump(body, 2)}\n"
         s += "End Select"
         return s
     if isinstance(node, ConcatenationOperation):
-        left = dump(node.left)
-        if not left.startswith("'") and not left.startswith("concat"):
-            left = f"str({left})"
-        right = dump(node.right)
-        if not right.startswith("'") and not right.startswith("concat"):
-            right = f"str({right})"
-        return f"concat({left}, {right})"
+        parts = [format_concat_part(v) for v in node.parts]
+        return f"concat({len(parts)}, {', '.join(parts)})"
     return repr(node)
+
+
+def format_concat_part(v: Expression) -> str:
+    str = generate(v)
+    if not str.startswith("'") and not str.startswith("concat"):
+        str = f"str({str})"
+    return str
 
 
 def BOOL(v: str) -> str:
@@ -835,7 +842,7 @@ def BOOL(v: str) -> str:
 def TYPE(v: str) -> str:
     if isinstance(v, Array):
         return v
-    return {"INTEGER": "int", "REAL": "float", "BOOLEAN": "int"}[v]
+    return {"INTEGER": "int", "REAL": "double", "BOOLEAN": "int"}[v]
 
 
 functions = ""
@@ -845,7 +852,7 @@ def generate(node, level=0) -> str:
     global functions
 
     if isinstance(node, Program):
-        return indent("int main() {\n" + generate(node.block, level + 1) + "\n}", level)
+        return indent("int main()\n{\n" + generate(node.block, level + 1) + "\n}", level)
 
     if isinstance(node, Segment):
         parts = []
@@ -863,7 +870,7 @@ def generate(node, level=0) -> str:
                 params = ", ".join(f"{TYPE(t)} {n}" for n, t in subroutine.parameters)
                 side_parts.append(
                     indent(
-                        f"{TYPE(subroutine.type)} {subroutine.name}({params}) {{\n"
+                        f"{TYPE(subroutine.type)} {subroutine.name}({params})\n{{\n"
                         f"{generate(subroutine.segment, level)}\n}}",
                         0,
                     )
@@ -874,25 +881,21 @@ def generate(node, level=0) -> str:
     if isinstance(node, Statements):
         return "\n".join(generate(s, level + 1) for s in node.statements) if node.statements else "(empty)"
     if isinstance(node, Assign):
-        return " ".join(
-            filter(
-                None,
-                [
-                    node.name,
-                    (f"[{generate(node.index)}]" if node.index else ""),
-                    "=",
-                    generate(node.expression, level + 1) + ";",
-                ],
-            ),
+        return (
+            node.name
+            + (f"[{generate(node.index)}]" if node.index else "")
+            + " = "
+            + generate(node.expression, level + 1)
+            + ";"
         )
     if isinstance(node, If):
         cond = generate(node.cond)
         if cond.startswith("(") and cond.endswith(")"):
             cond = cond[1:-1]
-        s = f"if ({cond}) {{\n"
+        s = f"if ({cond})\n{{\n"
         s += indent(f"{generate(node.then_branch)}\n", 1)
         if node.else_branch:
-            s += "\n} else {\n"
+            s += "\n}\nelse\n{\n"
             s += indent(f"{generate(node.else_branch)}\n", 1)
         s += "\n}"
         return s
@@ -909,12 +912,7 @@ def generate(node, level=0) -> str:
             inputs.append(f'scanf("%d", &{variable});')
         return "\n".join(inputs)
     if isinstance(node, Output):
-        return "\n".join(
-            [
-                'printf("%s", ' + ", ".join(generate(e).replace("'", '"') for e in node.expressions) + ");",
-                r'printf("\n");',
-            ],
-        )
+        return 'printf("%s\\n", ' + ", ".join(generate(e).replace("'", '"') for e in node.expressions) + ");"
     if isinstance(node, Empty):
         return ";"
     if isinstance(node, BinaryOperation):
@@ -938,57 +936,48 @@ def generate(node, level=0) -> str:
             return f"Array({generate(node.type)}, {generate(node.start)}, {generate(node.end)})"
         return f"Array({generate(node.type)}, {generate(node.end)})"
     if isinstance(node, For):
-        return " ".join(
-            filter(
-                None,
-                [
-                    f"for ({generate(node.variable)}",
-                    "=",
-                    generate(node.init) + ";",
-                    "&&".join(
-                        filter(
-                            None,
-                            [
-                                (f"{generate(node.variable)} <= {generate(node.to)}" if node.to else ""),
-                                (f"{generate(node.while_)}" if node.while_ else ""),
-                            ],
-                        )
-                    )
-                    + "; "
-                    + f"{generate(node.variable)} += "
-                    + ("1" if not node.by else generate(node.by))
-                    + ")",
-                    "{",
-                    "\n" + generate(node.do, 1),
-                    "\n}",
-                ],
-            )
+
+        def init() -> str:
+            return generate(node.variable) + " = " + generate(node.init)
+
+        def condition() -> str:
+            conditions = []
+            if node.while_:
+                conditions.append(generate(node.while_))
+            if node.to:
+                conditions.append(f"{generate(node.variable)} <= {generate(node.to)}")
+            return "".join(conditions)
+
+        def step() -> str:
+            return f"{generate(node.variable)} += " + ("1" if not node.by else generate(node.by))
+
+        return "".join(
+            [
+                "for (" + init() + "; " + condition() + "; " + step() + ")\n{",
+                "\n",
+                generate(node.do, 1),
+                "\n",
+                "}",
+            ],
         )
     if isinstance(node, Select):
         s = ""
         for cond, body in node.cases:
             cond = generate(cond)
-            if cond.startswith("(") and cond.endswith(")"):
-                cond = cond[1:-1]
-            s += f"\nif ({cond}) {{\n{generate(body, 2)}\n}}"
+            s += f"\nif {cond}\n{{\n{generate(body, 1)}\n}}"
         return s.strip()
     if isinstance(node, Array):
         return TYPE(node.type) + "[" + generate(node.end) + "];"
     if isinstance(node, ConcatenationOperation):
-        left = generate(node.left)
-        if not left.startswith("'") and not left.startswith("concat"):
-            left = f"str({left})"
-        right = generate(node.right)
-        if not right.startswith("'") and not right.startswith("concat"):
-            right = f"str({right})"
-        return f"concat({left}, {right})"
+        parts = [format_concat_part(v) for v in node.parts]
+        return f"concat({len(parts)}, {', '.join(parts)})"
     return repr(node)
 
 
 def parse(code: str) -> Program:
     lexer = Lexer(code)
     tokens = lexer.tokens()
-    return Parser(tokens).program()
+    return Parser(tokens, code).program()
 
 
 # ---
@@ -1016,13 +1005,27 @@ def test_tokens(input, expected) -> None:
         ("+a", "(+a)"),
         ("-a", "(-a)"),
         ("a + b * с", "(a + (b * с))"),
-        ('a || (b || SUBSTR("abc", 0, 2))', "concat(str(a), concat(str(b), str(SUBSTR('abc', 0, 2))))"),
-        ('-b + (1 - 2) - LENGTH("3") * 7 XOR 1', "((((-b) + (1 - 2)) - (LENGTH('3') * 7)) XOR 1)"),
+        (
+            '-b + (1 - 2) - LENGTH("3") * 7 XOR 1',
+            "((((-b) + (1 - 2)) - (LENGTH('3') * 7)) XOR 1)",
+        ),
+        ('-b + (1 - 2) - adhoc("3")', "(((-b) + (1 - 2)) - adhoc('3'))"),
         ("NOT a < b", "(NOT(a < b))"),
+        ("a || b", "concat(2, str(a), str(b))"),
+        ('"a" || b', "concat(2, 'a', str(b))"),
+        ('"a" || b || c', "concat(3, 'a', str(b), str(c))"),
+        (
+            'a || (b || SUBSTR("abc", 0, 2))',
+            "concat(2, str(a), concat(2, str(b), str(SUBSTR('abc', 0, 2))))",
+        ),
+        (
+            'a || b || SUBSTR("abc", 0, 2)',
+            "concat(3, str(a), str(b), str(SUBSTR('abc', 0, 2)))",
+        ),
     ],
 )
 def test_expression(input, expected) -> None:
-    result = Parser(Lexer(input).tokens()).expression()
+    result = Parser(Lexer(input).tokens(), input).expression()
     if not isinstance(expected, str):
         expected = dump(expected)
     assert dump(result) == expected, f"\n{expected}\n!=\n{result}\n"
@@ -1099,14 +1102,14 @@ Program Eratosthenes
     function integersqrt(a:INTEGER)
       Statements:
         Select TRUE
-          Case 'a < 0':
+          Case ('a < 0'):
             Statements:
               Output('a < 0 in FUNCTION integersqrt.')
               Exit
-          Case 'a == 0':
+          Case ('a == 0'):
             Statements:
               Return 0
-          Case 'a > 0':
+          Case ('a > 0'):
             Variables:
               x, ra: REAL
               epsilon: REAL
@@ -1114,13 +1117,13 @@ Program Eratosthenes
             Statements:
               Assign ra := FLOAT(a)
               Assign epsilon := (1e-07 * ra)
-              For x := (ra / 2.0) By (((ra / x) - x) / 2.0) While (abs((ra - (x * x))) > epsilon) Do 
+              For x := (ra / 2.0) By (((ra / x) - x) / 2.0) While (abs((ra - (x * x))) > epsilon) Do
                 Statements:
-                  Empty 
+                  Empty
               End For
-              For sqrt := (FIX(x) - 1) By 1 While (((sqrt + 1) * (sqrt + 1)) <= a) Do 
+              For sqrt := (FIX(x) - 1) By 1 While (((sqrt + 1) * (sqrt + 1)) <= a) Do
                 Statements:
-                  Empty 
+                  Empty
               End For
               Return sqrt
         End Select
@@ -1132,42 +1135,42 @@ Program Eratosthenes
         sieve: Array(type='BOOLEAN', start=IntegerLiteral(value=1), end=Variable(name='topnum', index=None))
         i, limit, count: INTEGER
       Statements:
-        For i := 1 To topnum Do 
+        For i := 1 To topnum Do
           Statements:
-            Assign sieve [i] := TRUE 
+            Assign sieve[i] := TRUE
         End For
         Assign limit := (integersqrt(topnum) + 1)
-        For i := 2 To limit Do 
+        For i := 2 To limit Do
           Statements:
             If sieve[i] Then
               Variables:
                 j: INTEGER
               Statements:
-                For j := (2 * i) By i To topnum Do 
+                For j := (2 * i) By i To topnum Do
                   Statements:
-                    Assign sieve [j] := FALSE 
+                    Assign sieve[j] := FALSE
                 End For
-            Fi 
+            Fi
         End For
         Assign count := 0
-        For i := 1 To topnum Do 
+        For i := 1 To topnum Do
           Statements:
             If sieve[i] Then
               Statements:
                 Assign count := (count + 1)
-                Output(concat(concat(concat('Prime[', str(count)), '] = '), str(i)))
-            Fi 
+                Output(concat(4, 'Prime[', str(count), '] = ', str(i)))
+            Fi
         End For
     Else
       Statements:
-        Output(concat(concat('Input value ', str(topnum)), ' non-positive.'))
+        Output(concat(3, 'Input value ', str(topnum), ' non-positive.'))
     Fi
     Exit
 """
 
 
 def test_program() -> None:
-    result = Parser(Lexer(PROGRAM).tokens()).program()
+    result = Parser(Lexer(PROGRAM).tokens(), PROGRAM).program()
     assert dump(result) == PARSED_PROGRAM.strip()
 
 
@@ -1175,28 +1178,29 @@ def compile(source: str) -> Program:
     return parse(source)
 
 
-PREABLE = """
-#include <stdio.h>
-#include <string.h>
-extern void exit(int);
-extern void* malloc(size_t);
-#define TRUE 1
-#define FALSE 0
-int FIX(float v) { return (int)v; }
-float FLOAT(int v) { return (float)v; }
-char* str(int v) { char* s = malloc(12); sprintf(s, "%d", v); return s; }
-char* concat(char* a, char* b) { char* s = malloc(strlen(a) + strlen(b) + 1); strcpy(s, a); strcat(s, b); return s; }
-#pragma clang diagnostic ignored "-Wincompatible-library-redeclaration"
-"""
+def flag(argv: list[str], name: str) -> Optional[int]:
+    return argv.index(name) if name in argv else None
+
+
+def arg(argv: list[str], name: str) -> Optional[str]:
+    i = flag(argv, name)
+    return argv[i + 1] if i is not None and i + 1 < len(argv) else None
+
 
 if __name__ == "__main__":
-    if len(sys.argv) >= 3 and sys.argv[1] == "compile":
-        source = pathlib.Path(sys.argv[2]).read_text()
+    if len(sys.argv) >= 2:
+        input_file = pathlib.Path(sys.argv[1])
+
+        source = input_file.read_text()
         compiled = generate(compile(source))
-        print(PREABLE)
-        print("//" * 20)
-        print(functions)
-        print("//" * 20)
-        print(compiled)
+
+        output = arg(sys.argv, "-o") or input_file.with_suffix(".c")
+        with open(output, "w") as f:
+            if not flag(sys.argv, "-r"):
+                preamble = pathlib.Path("preamble.c").read_text()
+                f.write(preamble.strip() + "\n")
+            if functions:
+                f.write(functions.strip() + "\n")
+            f.write(compiled.strip() + "\n")
     else:
         pytest.main(["-vvv", __file__])
