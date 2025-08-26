@@ -18,6 +18,14 @@ def process(test: Path) -> None:
 
     program = test.with_suffix(".easy")
 
+    expected_ast = test.with_suffix(".expected.ast")
+    if expected_ast.exists():
+        if run(["python", "easy.py", program, "-a"]).returncode != 0:
+            exit(1)
+
+        if run(["diff", "-u", expected_ast, test.with_suffix(".ast")]).returncode != 0:
+            exit(1)
+
     if run(["python", "easy.py", program, "-r"]).returncode != 0:
         exit(1)
 

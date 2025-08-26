@@ -741,7 +741,7 @@ def dump(node, level=0) -> str:
         if node.variables:
             parts.append("Variables:")
             for v in node.variables:
-                parts.append(f"  {', '.join(v.names)}: {v.type}")
+                parts.append(indent(f"{', '.join(v.names)}: {v.type}", 1))
         if node.subroutines:
             parts.append("Functions:")
             for p in node.subroutines:
@@ -1031,149 +1031,6 @@ def test_expression(input, expected) -> None:
     assert dump(result) == expected, f"\n{expected}\n!=\n{result}\n"
 
 
-PROGRAM = """
-PROGRAM Eratosthenes:
-
-  DECLARE topnum INTEGER;
-
-  FUNCTION abs(x REAL) REAL:
-    IF x < 0 THEN RETURN -x; ELSE RETURN x; FI;
-  END FUNCTION abs;
-
-  FUNCTION integersqrt(a INTEGER) INTEGER:
-    SELECT TRUE OF
-      CASE (a < 0): OUTPUT "a < 0 in FUNCTION integersqrt."; EXIT;
-      CASE (a = 0): RETURN 0;
-      CASE (a > 0):
-        DECLARE (x, ra) REAL;
-        DECLARE epsilon REAL;
-        DECLARE sqrt INTEGER;
-        SET ra := FLOAT(a);
-        SET epsilon := 0.0000001*ra;
-        FOR x := ra/2. BY (ra/x-x)/2. WHILE abs(ra-x*x) > epsilon DO ; END FOR;
-        FOR sqrt := FIX(x)-1 BY 1 WHILE (sqrt+1) * (sqrt+1) <= a DO ; END FOR;
-        RETURN sqrt;
-    END SELECT;
-  END FUNCTION integersqrt;
-
-  INPUT topnum;
-
-  IF topnum > 0 THEN
-    DECLARE sieve ARRAY[1:topnum] OF BOOLEAN;
-    DECLARE (i, limit, count) INTEGER;
-    FOR i := 1 TO topnum DO SET sieve[i] := TRUE; END FOR;
-    SET limit := integersqrt(topnum)+1; /* Avoid repeating square root */
-    FOR i := 2 TO limit DO
-      IF sieve[i] THEN
-        DECLARE j INTEGER;
-        FOR j := 2*i BY i TO topnum DO SET sieve[j] := FALSE; END FOR;
-      FI;
-    END FOR;
-    SET count := 0;
-    FOR i := 1 TO topnum DO
-      IF sieve[i] THEN
-        SET count := count + 1;
-        OUTPUT "Prime[" || count || "] = " || i;
-      FI;
-    END FOR;
-  ELSE
-    OUTPUT "Input value " || topnum || " non-positive.";
-  FI;
-
-  EXIT;
-END PROGRAM Eratosthenes;
-"""
-
-PARSED_PROGRAM = """
-Program Eratosthenes
-  Variables:
-    topnum: INTEGER
-  Functions:
-    function abs(x:REAL)
-      Statements:
-        If (x < 0) Then
-          Statements:
-            Return (-x)
-        Else
-          Statements:
-            Return x
-        Fi
-        Return 0
-    function integersqrt(a:INTEGER)
-      Statements:
-        Select TRUE
-          Case ('a < 0'):
-            Statements:
-              Output('a < 0 in FUNCTION integersqrt.')
-              Exit
-          Case ('a == 0'):
-            Statements:
-              Return 0
-          Case ('a > 0'):
-            Variables:
-              x, ra: REAL
-              epsilon: REAL
-              sqrt: INTEGER
-            Statements:
-              Assign ra := FLOAT(a)
-              Assign epsilon := (1e-07 * ra)
-              For x := (ra / 2.0) By (((ra / x) - x) / 2.0) While (abs((ra - (x * x))) > epsilon) Do
-                Statements:
-                  Empty
-              End For
-              For sqrt := (FIX(x) - 1) By 1 While (((sqrt + 1) * (sqrt + 1)) <= a) Do
-                Statements:
-                  Empty
-              End For
-              Return sqrt
-        End Select
-        Return 0
-  Statements:
-    Input('topnum')
-    If (topnum > 0) Then
-      Variables:
-        sieve: Array(type='BOOLEAN', start=IntegerLiteral(value=1), end=Variable(name='topnum', index=None))
-        i, limit, count: INTEGER
-      Statements:
-        For i := 1 To topnum Do
-          Statements:
-            Assign sieve[i] := TRUE
-        End For
-        Assign limit := (integersqrt(topnum) + 1)
-        For i := 2 To limit Do
-          Statements:
-            If sieve[i] Then
-              Variables:
-                j: INTEGER
-              Statements:
-                For j := (2 * i) By i To topnum Do
-                  Statements:
-                    Assign sieve[j] := FALSE
-                End For
-            Fi
-        End For
-        Assign count := 0
-        For i := 1 To topnum Do
-          Statements:
-            If sieve[i] Then
-              Statements:
-                Assign count := (count + 1)
-                Output(concat(4, 'Prime[', str(count), '] = ', str(i)))
-            Fi
-        End For
-    Else
-      Statements:
-        Output(concat(3, 'Input value ', str(topnum), ' non-positive.'))
-    Fi
-    Exit
-"""
-
-
-def test_program() -> None:
-    result = Parser(Lexer(PROGRAM).tokens(), PROGRAM).program()
-    assert dump(result) == PARSED_PROGRAM.strip()
-
-
 def compile(source: str) -> Program:
     return parse(source)
 
@@ -1192,6 +1049,12 @@ if __name__ == "__main__":
         input_file = pathlib.Path(sys.argv[1])
 
         source = input_file.read_text()
+
+        if "-a" in sys.argv:
+            ast = dump(parse(source)).strip() + "\n"
+            ast_file = input_file.with_suffix(".ast")
+            ast_file.write_text(ast)
+
         compiled = generate(compile(source))
 
         output = arg(sys.argv, "-o") or input_file.with_suffix(".c")
