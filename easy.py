@@ -143,7 +143,7 @@ class Lexer:
                 raise LexerError(f"unterminated string at line {line}")
             if c == quote:
                 self.advance()
-                # doubles quotes for escape: 'it''s'
+                # doubles quotes for escape: "it""s"
                 if self.current() == quote:
                     s += quote
                     self.advance()
@@ -830,7 +830,7 @@ def dump(node, level=0) -> str:
 
 def format_concat_part(v: Expression) -> str:
     str = generate(v)
-    if not str.startswith("'") and not str.startswith("concat"):
+    if not isinstance(v, (StringLiteral, ConcatenationOperation)):
         str = f"str({str})"
     return str
 
@@ -1050,20 +1050,38 @@ if __name__ == "__main__":
 
         source = input_file.read_text()
 
-        if "-a" in sys.argv:
-            ast = dump(parse(source)).strip() + "\n"
-            ast_file = input_file.with_suffix(".ast")
-            ast_file.write_text(ast)
+        lexer = Lexer(source)
 
-        compiled = generate(compile(source))
+        tokens = lexer.tokens()
+        if "-t" in sys.argv:
+            tokens_file = input_file.with_suffix(".tokens")
+
+            def format_token(token: Token) -> str:
+                return f"{input_file}:{token.line}:{token.col}\t {token.value}"
+
+            tokens_file.write_text("\n".join(format_token(t) for t in tokens) + "\n")
+
+        ast = Parser(tokens, source).program()
+        if "-a" in sys.argv:
+            ast_file = input_file.with_suffix(".ast")
+            ast_file.write_text(dump(ast) + "\n")
+
+        compiled = generate(ast).strip()
+
+        if "-s" in sys.argv:
+            c = input_file.with_suffix(".s")
+            with open(c, "w") as f:
+                if functions:
+                    f.write(functions.strip() + "\n")
+                f.write(compiled.strip() + "\n")
 
         output = arg(sys.argv, "-o") or input_file.with_suffix(".c")
         with open(output, "w") as f:
             if not flag(sys.argv, "-r"):
-                preamble = pathlib.Path("preamble.c").read_text()
-                f.write(preamble.strip() + "\n")
+                preamble = pathlib.Path("preamble.c").read_text().strip()
+                f.write(preamble + "\n")
             if functions:
                 f.write(functions.strip() + "\n")
-            f.write(compiled.strip() + "\n")
+            f.write(compiled + "\n")
     else:
         pytest.main(["-vvv", __file__])

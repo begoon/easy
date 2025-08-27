@@ -1,0 +1,16 @@
+name: pascal-parser
+on:
+    push:
+        branches: ["main"]
+        paths-ignore: ["README.md"]
+    workflow_dispatch:
+jobs:
+    build:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v5
+            - uses: actions/setup-python@v5
+              with:
+                  python-version: "3.13"
+            - uses: extractions/setup-just@v3
+            - run: just
