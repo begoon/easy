@@ -69,7 +69,8 @@ def process(test: Path) -> None:
     if expected_output.exists():
 
         exe = test.with_suffix(".exe")
-        if run(["cc", c, "-o", exe]).returncode != 0:
+        cc_flags = ["-Wall", "-Wextra", "-Werror"]
+        if run(["clang", *cc_flags, c, "-o", exe]).returncode != 0:
             exit(1)
 
         cmd = [exe, ">" + str(test.with_suffix(".output"))]
