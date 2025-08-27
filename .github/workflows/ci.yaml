@@ -1,4 +1,4 @@
-name: pascal-parser
+name: ci
 on:
     push:
         branches: ["main"]
