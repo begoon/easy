@@ -867,7 +867,15 @@ def generate(node, level=0) -> str:
         if node.subroutines:
             side_parts = []
             for subroutine in node.subroutines:
-                params = ", ".join(f"{TYPE(t)} {n}" for n, t in subroutine.parameters)
+
+                def format_parameter(n: str, v: str | Array) -> str:
+                    if isinstance(v, Array):
+                        size = generate(v.end)
+                        offset = generate(v.start) or "0"
+                        return f"{TYPE(v.type)} {n}[{size} + {offset}]"
+                    return f"{TYPE(v)} {n}"
+
+                params = ", ".join(format_parameter(n, t) for n, t in subroutine.parameters)
                 side_parts.append(
                     indent(
                         f"{TYPE(subroutine.type)} {subroutine.name}({params})\n{{\n"
@@ -971,6 +979,7 @@ def generate(node, level=0) -> str:
     if isinstance(node, ConcatenationOperation):
         parts = [format_concat_part(v) for v in node.parts]
         return f"concat({len(parts)}, {', '.join(parts)})"
+
     return repr(node)
 
 

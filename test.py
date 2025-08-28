@@ -29,15 +29,17 @@ def process(test: Path) -> None:
 
     flags = []
 
-    expected_tokens = test.with_suffix(".expected.tokens")
+    x = test.parent / "x" / "test"
+
+    expected_tokens = x.with_suffix(".tokens")
     if expected_tokens.exists():
         flags.append("-t")
 
-    expected_ast = test.with_suffix(".expected.ast")
+    expected_ast = x.with_suffix(".ast")
     if expected_ast.exists():
         flags.append("-a")
 
-    expected_s = test.with_suffix(".expected.s")
+    expected_s = x.with_suffix(".s")
     if expected_s.exists():
         flags.append("-s")
 
@@ -46,46 +48,38 @@ def process(test: Path) -> None:
 
     flags.extend(["-o", str(test.with_suffix(".c"))])
 
-    if run(["python", "easy.py", program, *flags]).returncode != 0:
-        exit(1)
+    run(["python", "easy.py", program, *flags])
 
     if "-t" in flags:
-        if run(["diff", "-u", expected_tokens, test.with_suffix(".tokens")]).returncode != 0:
-            exit(1)
+        run(["diff", "-u", expected_tokens, test.with_suffix(".tokens")])
     if "-a" in flags:
-        if run(["diff", "-u", expected_ast, test.with_suffix(".ast")]).returncode != 0:
-            exit(1)
+        run(["diff", "-u", expected_ast, test.with_suffix(".ast")])
 
     if "-s" in flags:
-        if run(["diff", "-u", expected_s, test.with_suffix(".s")]).returncode != 0:
-            exit(1)
+        run(["diff", "-u", expected_s, test.with_suffix(".s")])
 
-    expected_c = test.with_suffix(".expected.c")
-    c = test.with_suffix(".c")
-    if expected_c.exists() and run(["diff", "-u", expected_c, c]).returncode != 0:
-        exit(1)
+    expected_c = x.with_suffix(".c")
+    if expected_c.exists():
+        run(["diff", "-u", expected_c, test.with_suffix(".c")])
 
-    expected_output = test.with_suffix(".expected.output")
+    expected_output = x.with_suffix(".output")
     if expected_output.exists():
-
         exe = test.with_suffix(".exe")
         cc_flags = ["-Wall", "-Wextra", "-Werror"]
-        if run(["clang", *cc_flags, c, "-o", exe]).returncode != 0:
-            exit(1)
+        run(["clang", *cc_flags, test.with_suffix(".c"), "-o", exe])
 
         cmd = [exe, ">" + str(test.with_suffix(".output"))]
-        if test.with_suffix(".input").exists():
-            cmd.insert(1, "<" + str(test.with_suffix(".input")))
+        input_file = x.with_suffix(".input")
+        if input_file.exists():
+            cmd.insert(1, "<" + str(input_file))
 
         executor = " ".join(map(str, cmd))
         if verbose:
             print(executor)
 
-        if run(executor, shell=True).returncode != 0:
-            exit(1)
+        run(executor, shell=True)
 
-        if run(["diff", "-u", expected_output, test.with_suffix(".output")]).returncode != 0:
-            exit(1)
+        run(["diff", "-u", expected_output, test.with_suffix(".output")])
 
 
 verbose = "-v" in sys.argv or os.getenv("DEBUG")

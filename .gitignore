@@ -2,18 +2,10 @@ __pycache__/
 *.py[cod]
 
 tests/**/*.tokens
-!tests/**/*.expected.tokens
-
 tests/**/*.ast
-!tests/**/*.expected.ast
-
-tests/**/*.s
-!tests/**/*.expected.s
-
 tests/**/*.c
-!tests/**/*.expected.c
-
-tests/**/*.output
-!tests/**/*.expected.output
-
+tests/**/*.s
 tests/**/*.exe
+tests/**/*.output
+
+!tests/**/x/*.*

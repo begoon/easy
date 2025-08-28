@@ -6,8 +6,8 @@ test-unit:
 test-compiler:
     uv run python test.py
 
-run:
-    python easy.py tests/sieve/test.easy && cc -o sieve sieve.c && ./sieve
+life:
+    python easy.py life.easy && cc -o life life.c && ./life
 
 clean:
     git clean -Xf

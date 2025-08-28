@@ -1,0 +1,35 @@
+PROGRAM Life:
+  TYPE Field IS ARRAY[1: 40*20] OF BOOLEAN;
+
+  DECLARE (w, h) INTEGER;
+  DECLARE field ARRAY[1:40*20] OF BOOLEAN;
+  DECLARE v INTEGER;
+
+  FUNCTION offset(w INTEGER, h INTEGER, x INTEGER, y INTEGER) INTEGER:
+    RETURN y * w + x;
+  END FUNCTION offset;
+
+  FUNCTION neighbours(x INTEGER, y INTEGER) INTEGER:
+    RETURN 0;
+  END FUNCTION neighbours;
+
+  FUNCTION print(w INTEGER, h INTEGER, field Field] OF BOOLEAN) INTEGER:
+    DECLARE (x, y) INTEGER;
+    FOR y := 0 TO h-1 DO
+      DECLARE s STRING;
+      FOR x := 0 TO w-1 DO
+        OUTPUT "x";
+      END FOR;
+    END FOR;
+  END FUNCTION print;
+  
+  SET w := 40;
+  SET h := 20;
+
+  SET field[offset(w, h, 5, 5)] := TRUE;
+
+  SET v := print(w, h, field);
+
+  EXIT;
+
+END PROGRAM Life;

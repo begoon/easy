@@ -101,7 +101,7 @@
 <structured type> ::= STRUCTURE <field list> END STRUCTURE
 
 <field list> ::= <field>
-               | <field list> , <field>
+              | <field list> , <field>
 
 <field> ::= FIELD <identifier> IS <type>
 
