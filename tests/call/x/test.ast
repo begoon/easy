@@ -5,4 +5,4 @@ Program Output
                 Output(concat(2, 'a(): ', str(x)))
     Statements:
         CALL a(100)
-        Exit
+        EXIT

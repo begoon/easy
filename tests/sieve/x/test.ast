@@ -18,7 +18,7 @@ Program Eratosthenes
                   Case (a < 0):
                         Statements:
                             Output('a < 0 in FUNCTION integersqrt.')
-                            Exit
+                            EXIT
                   Case (a == 0):
                         Statements:
                             Return 0
@@ -79,4 +79,4 @@ Program Eratosthenes
             Statements:
                 Output(concat(3, 'Input value ', str(topnum), ' non-positive.'))
         Fi
-        Exit
+        EXIT

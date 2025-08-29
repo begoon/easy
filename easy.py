@@ -357,12 +357,20 @@ class Return(Statement):
 
 @dataclass
 class Exit(Statement):
-    pass
+    def __str__(self) -> str:
+        return "EXIT"
+
+    def c(self) -> str:
+        return "exit(0);"
 
 
 @dataclass
 class Empty(Statement):
-    pass
+    def __str__(self) -> str:
+        return "Empty"
+
+    def c(self) -> str:
+        return ";"
 
 
 @dataclass
@@ -887,14 +895,10 @@ def dump(node, level=0) -> str:
         return s
     if isinstance(node, Return):
         return f"Return {dump(node.value)}"
-    if isinstance(node, Exit):
-        return "Exit"
     if isinstance(node, Input):
         return f"Input({', '.join(dump(e) for e in node.variables)})"
     if isinstance(node, Output):
         return f"Output({', '.join(dump(e) for e in node.expressions)})"
-    if isinstance(node, Empty):
-        return "Empty"
     if isinstance(node, BinaryOperation):
         return f"({dump(node.left)} {node.operation} {dump(node.right)})"
     if isinstance(node, UnaryOperation):
@@ -1012,8 +1016,6 @@ def generate(node, level=0) -> str:
         return s
     if isinstance(node, Return):
         return f"return {generate(node.value)};"
-    if isinstance(node, Exit):
-        return "exit(0);"
     if isinstance(node, Input):
         inputs = []
         for variable in node.variables:
@@ -1021,8 +1023,6 @@ def generate(node, level=0) -> str:
         return "\n".join(inputs)
     if isinstance(node, Output):
         return 'printf("%s\\n", ' + ", ".join(generate(e).replace("'", '"') for e in node.expressions) + ");"
-    if isinstance(node, Empty):
-        return ";"
     if isinstance(node, BinaryOperation):
         return f"({generate(node.left)} {node.operation} {generate(node.right)})"
     if isinstance(node, UnaryOperation):
