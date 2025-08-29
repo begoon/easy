@@ -1,0 +1,9 @@
+Program Type
+    Types:
+        Field: ARRAY[1:100] OF INTEGER
+    Subroutines:
+        FUNCTION a(Field f) : BOOLEAN
+            Statements:
+                Return 0
+    Statements:
+        Exit

@@ -1,8 +1,8 @@
 Program Eratosthenes
     Variables:
         topnum: INTEGER
-    Functions:
-        function abs(x:REAL)
+    Subroutines:
+        FUNCTION abs(REAL x) : REAL
             Statements:
                 If (x < 0) Then
                     Statements:
@@ -12,17 +12,17 @@ Program Eratosthenes
                         Return x
                 Fi
                 Return 0
-        function integersqrt(a:INTEGER)
+        FUNCTION integersqrt(INTEGER a) : INTEGER
             Statements:
                 Select TRUE
-                  Case ('a < 0'):
+                  Case (a < 0):
                         Statements:
                             Output('a < 0 in FUNCTION integersqrt.')
                             Exit
-                  Case ('a == 0'):
+                  Case (a == 0):
                         Statements:
                             Return 0
-                  Case ('a > 0'):
+                  Case (a > 0):
                         Variables:
                             x, ra: REAL
                             epsilon: REAL
@@ -42,10 +42,10 @@ Program Eratosthenes
                 End Select
                 Return 0
     Statements:
-        Input('topnum')
+        Input(topnum)
         If (topnum > 0) Then
             Variables:
-                sieve: Array(type='BOOLEAN', start=IntegerLiteral(value=1), end=Variable(name='topnum', index=None))
+                sieve: ARRAY[1:topnum] OF BOOLEAN
                 i, limit, count: INTEGER
             Statements:
                 Assign topnum := (topnum + 1)

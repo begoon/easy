@@ -1,7 +1,7 @@
 import pathlib
 import sys
 from dataclasses import dataclass
-from typing import List, Literal, Optional, Tuple, Union, cast
+from typing import Any, List, Literal, Optional, Tuple, Union, cast
 
 import pytest
 
@@ -9,6 +9,7 @@ KEYWORDS = {
     "PROGRAM",
     "END",
     "FUNCTION",
+    "PROCEDURE",
     "RETURN",
     "EXIT",
     "INPUT",
@@ -27,6 +28,7 @@ KEYWORDS = {
     "CASE",
     "DECLARE",
     "SET",
+    "CALL",
     "OUTPUT",
     "INPUT",
     "EXIT",
@@ -34,6 +36,8 @@ KEYWORDS = {
     "FLOAT",
     "TRUE",
     "FALSE",
+    "TYPE",
+    "IS",
 }
 
 SYMBOLS = {*"+ - * / ( ) [ ] ; , . : := = <> < <= > >= ||".split(" ")}
@@ -186,6 +190,17 @@ class Lexer:
 
 
 @dataclass
+class Node:
+    def c(self, *args: Any, **kwargs: Any) -> str:
+        print(self)
+        raise NotImplementedError()
+
+    def __str__(self) -> str:
+        print(self)
+        raise NotImplementedError()
+
+
+@dataclass
 class Program:
     name: str
     block: "Segment"
@@ -196,6 +211,7 @@ Subroutine = Union["Function", "Procedure"]
 
 @dataclass
 class Segment:
+    types: List["TypeDeclaration"]
     variables: List["Declaration"]
     subroutines: List[Subroutine]
     statements: "Statements"
@@ -208,10 +224,26 @@ class Declaration:
 
 
 @dataclass
-class Array:
+class TypeDeclaration:
+    name: str
+    definition: Union[str, "Array"]
+
+
+@dataclass
+class Array(Node):
     type: "Type"
     start: Optional["Expression"]
     end: "Expression"
+
+    def c(self, name: str) -> str:
+        start = generate((self.start)) if self.start else "0"
+        end = generate(self.end)
+        return f"{TYPE(self.type)} {name}[{start} + {end}]"
+
+    def __str__(self) -> str:
+        start = dump(self.start) + ":" if self.start else ""
+        end = dump(self.end)
+        return f"ARRAY[{start}{end}] OF {self.type}"
 
 
 Type = Literal["INTEGER", "REAL", "STRING", "BOOLEAN"] | Array
@@ -223,6 +255,14 @@ class Procedure:
     parameters: List[Tuple[str, Union[str, Array]]]
     segment: Segment
 
+    def __str__(self) -> str:
+        parameters = ", ".join(name for name, _ in self.parameters)
+        return f"PROCEDURE {self.name}({parameters})" + "\n" + dump(self.segment, 1)
+
+    def c(self) -> str:
+        parameters = ", ".join(f"{TYPE(type)} {name}" for name, type in self.parameters)
+        return f"void {self.name}({parameters}){{\n{generate(self.segment, 1)}\n}}"
+
 
 @dataclass
 class Function:
@@ -230,6 +270,21 @@ class Function:
     type: Union[str, Array]
     parameters: List[Tuple[str, Union[str, Array]]]
     segment: Segment
+
+    def __str__(self) -> str:
+        return (
+            f"FUNCTION {self.name}({', '.join(f'{type} {name}' for name, type in self.parameters)}) : {self.type}"
+            + "\n"
+            + dump(self.segment, 1)
+        )
+
+    def c(self) -> str:
+        return (
+            f"{TYPE(self.type)} {self.name}({', '.join(f'{TYPE(type)} {name}' for name, type in self.parameters)})\n"
+            + "{\n"
+            f"{generate(self.segment, 1)}"
+            "\n}"
+        )
 
 
 @dataclass
@@ -286,6 +341,14 @@ class Call(Statement):
     name: str
     args: List["Expression"]
 
+    def __str__(self) -> str:
+        args = ", ".join(generate(arg) for arg in self.args)
+        return f"CALL {self.name}({dump(args)})"
+
+    def c(self) -> str:
+        args = ", ".join(generate(arg) for arg in self.args)
+        return f"{self.name}({args});"
+
 
 @dataclass
 class Return(Statement):
@@ -311,6 +374,20 @@ class Expression:
 class FunctionCall(Expression):
     name: str
     args: List["Expression"]
+
+
+@dataclass
+class ProcedureCall(Expression):
+    name: str
+    args: List["Expression"]
+
+    def __str__(self) -> str:
+        args = ", ".join(str(arg) for arg in self.args)
+        return f"CALL {self.name}({args})"
+
+    def c(self) -> str:
+        args = ", ".join(generate(arg) for arg in self.args)
+        return f"{self.name}({args});"
 
 
 @dataclass
@@ -415,10 +492,22 @@ class Parser:
         return Program(name, segments)
 
     def segment(self) -> Segment:
+        types = self.types_section()
         variables = self.variables_section()
         subroutines = self.subroutines()
         statements = self.statements()
-        return Segment(variables, subroutines, statements)
+        return Segment(types, variables, subroutines, statements)
+
+    def types_section(self) -> List[TypeDeclaration]:
+        out: List[TypeDeclaration] = []
+        while self.accept("TYPE"):
+            name = self.eat("IDENT").value
+            self.eat("IS")
+            definition = self.type()
+            self.eat(";")
+            out.append(TypeDeclaration(name, definition))
+            types[name] = definition
+        return out
 
     def variables_section(self) -> List[Declaration]:
         out: List[Declaration] = []
@@ -465,22 +554,34 @@ class Parser:
 
     def subroutines(self) -> List[Procedure | Function]:
         out: List[Procedure | Function] = []
-        while self.accept("FUNCTION"):
+        while token := self.accept(("FUNCTION", "PROCEDURE")):
             name = self.eat("IDENT").value
             parameters: List[Tuple[str, Union[str, "Array"]]] = []
             if self.accept("("):
                 if self.current().type != ")":
                     parameters = self.parameters()
                 self.eat(")")
-            type = self.type()
+
+            type = None
+            if token.value == "FUNCTION":
+                type = self.type()
+
             self.eat(":")
             segment = self.segment()
-            segment.statements.statements.append(Return(0))
+
+            if token.value == "FUNCTION":
+                segment.statements.statements.append(Return(0))
+
             self.eat("END")
-            self.eat("FUNCTION")
+            self.eat(token.value)
             self.eat(name)
             self.eat(";")
-            out.append(Function(name, type, parameters, segment))
+
+            if token.value == "PROCEDURE":
+                assert type is None, f"{type=}"
+                out.append(Procedure(name, parameters, segment))
+            else:
+                out.append(Function(name, type, parameters, segment))
         return out
 
     def parameters(self) -> List[Tuple[str, Union[str, "Array"]]]:
@@ -497,6 +598,7 @@ class Parser:
         statements: List[Statement] = []
         while self.current().value in (
             "SET",
+            "CALL",
             "IF",
             "RETURN",
             "EXIT",
@@ -513,6 +615,8 @@ class Parser:
         token = self.current()
         if token.value == "SET":
             return self.assignment_statement()
+        if token.value == "CALL":
+            return self.call_statement()
         if token.value == "IF":
             return self.if_statement()
         if token.value == "FOR":
@@ -627,6 +731,16 @@ class Parser:
         self.eat(";")
         return Assign(name, expr, index)
 
+    def call_statement(self) -> Call:
+        self.eat("CALL")
+        name = self.eat("IDENT").value
+        args = []
+        if self.accept("("):
+            args = self.arguments()
+            self.eat(")")
+        self.eat(";")
+        return Call(name, args)
+
     def expression(self) -> Expression:
         return self.expression_or_xor()
 
@@ -738,15 +852,18 @@ def dump(node, level=0) -> str:
         return indent(f"Program {node.name}\n{dump(node.block, level+1)}", level)
     if isinstance(node, Segment):
         parts = []
+        if node.types:
+            parts.append("Types:")
+            for t in node.types:
+                parts.append(indent(f"{t.name}: {dump(t.definition)}", 1))
         if node.variables:
             parts.append("Variables:")
             for v in node.variables:
-                parts.append(indent(f"{', '.join(v.names)}: {v.type}", 1))
+                parts.append(indent(f"{', '.join(v.names)}: {dump(v.type)}", 1))
         if node.subroutines:
-            parts.append("Functions:")
+            parts.append("Subroutines:")
             for p in node.subroutines:
-                params = ", ".join(f"{n}:{t}" for n, t in p.parameters)
-                parts.append(indent(f"function {p.name}({params})\n" f"{dump(p.segment, level)}", 1))
+                parts.append(indent(dump(p, 1), 1))
         parts.append("Statements:")
         parts.append(indent(dump(node.statements, level + 1), 1))
         return indent("\n".join(parts), level)
@@ -768,8 +885,6 @@ def dump(node, level=0) -> str:
             s += indent(f"{dump(node.else_branch)}\n", 1)
         s += "\nFi"
         return s
-    if isinstance(node, Call):
-        return f"Call {node.name}({', '.join(dump(a) for a in node.args)})"
     if isinstance(node, Return):
         return f"Return {dump(node.value)}"
     if isinstance(node, Exit):
@@ -796,10 +911,6 @@ def dump(node, level=0) -> str:
         return "true" if node.value else "false"
     if isinstance(node, FunctionCall):
         return f"{node.name}({', '.join(dump(a) for a in node.args)})"
-    if isinstance(node, Array):
-        if node.start:
-            return f"Array({dump(node.type)}, {dump(node.start)}, {dump(node.end)})"
-        return f"Array({dump(node.type)}, {dump(node.end)})"
     if isinstance(node, For):
         header = "".join(
             [
@@ -825,7 +936,7 @@ def dump(node, level=0) -> str:
     if isinstance(node, ConcatenationOperation):
         parts = [format_concat_part(v) for v in node.parts]
         return f"concat({len(parts)}, {', '.join(parts)})"
-    return repr(node)
+    return str(node)
 
 
 def format_concat_part(v: Expression) -> str:
@@ -839,8 +950,13 @@ def BOOL(v: str) -> str:
     return {"TRUE": "1", "FALSE": "0"}[v]
 
 
+types: dict[str, str | Array] = {}
+
+
 def TYPE(v: str) -> str:
     if isinstance(v, Array):
+        return v
+    if v in types:
         return v
     return {"INTEGER": "int", "REAL": "double", "BOOLEAN": "int"}[v]
 
@@ -856,33 +972,20 @@ def generate(node, level=0) -> str:
 
     if isinstance(node, Segment):
         parts = []
+        if node.types:
+            for t in node.types:
+                parts.append(indent(generate(t), 0))
         if node.variables:
             for v in node.variables:
                 if isinstance(v.type, Array):
-                    size = generate(v.type.end)
-                    offset = generate(v.type.start) or "0"
-                    parts.append(f"{TYPE(v.type.type)} {', '.join(v.names)}[{size} + {offset}];")
+                    for name in v.names:
+                        parts.append(f"{(v.type.c(name))};")
                 else:
-                    parts.append(f"{TYPE(v.type)} {', '.join(v.names)};")
+                    parts.append(f"{(TYPE(v.type))} {', '.join(v.names)};")
         if node.subroutines:
             side_parts = []
             for subroutine in node.subroutines:
-
-                def format_parameter(n: str, v: str | Array) -> str:
-                    if isinstance(v, Array):
-                        size = generate(v.end)
-                        offset = generate(v.start) or "0"
-                        return f"{TYPE(v.type)} {n}[{size} + {offset}]"
-                    return f"{TYPE(v)} {n}"
-
-                params = ", ".join(format_parameter(n, t) for n, t in subroutine.parameters)
-                side_parts.append(
-                    indent(
-                        f"{TYPE(subroutine.type)} {subroutine.name}({params})\n{{\n"
-                        f"{generate(subroutine.segment, level)}\n}}",
-                        0,
-                    )
-                )
+                side_parts.append(indent(generate(subroutine, level), 0))
             functions += "\n".join(side_parts)
         parts.append(indent(generate(node.statements, level + 1), 0))
         return indent("\n".join(parts), level)
@@ -907,9 +1010,6 @@ def generate(node, level=0) -> str:
             s += indent(f"{generate(node.else_branch)}\n", 1)
         s += "\n}"
         return s
-    if isinstance(node, Call):
-        raise NotImplementedError()
-        return f"{node.name}({', '.join(generate(a) for a in node.args)});"
     if isinstance(node, Return):
         return f"return {generate(node.value)};"
     if isinstance(node, Exit):
@@ -939,10 +1039,10 @@ def generate(node, level=0) -> str:
         return "1" if node.value else "0"
     if isinstance(node, FunctionCall):
         return f"{node.name}({', '.join(generate(a) for a in node.args)})"
-    if isinstance(node, Array):
-        if node.start:
-            return f"Array({generate(node.type)}, {generate(node.start)}, {generate(node.end)})"
-        return f"Array({generate(node.type)}, {generate(node.end)})"
+    # if isinstance(node, Array):
+    #     if node.start:
+    #         return f"{TYPE(node.type)}[{generate(node.start)} + {generate(node.end)}];"
+    #     return f"{TYPE(node.type)}[{generate(node.end)}];"
     if isinstance(node, For):
 
         def init() -> str:
@@ -975,11 +1075,20 @@ def generate(node, level=0) -> str:
             s += f"\nif {cond}\n{{\n{generate(body, 1)}\n}}"
         return s.strip()
     if isinstance(node, Array):
-        return TYPE(node.type) + "[" + generate(node.end) + "];"
+        return TYPE(node.type) + "[" + generate(node.end) + "]"
     if isinstance(node, ConcatenationOperation):
         parts = [format_concat_part(v) for v in node.parts]
         return f"concat({len(parts)}, {', '.join(parts)})"
+    if isinstance(node, TypeDeclaration):
+        definition = node.definition
+        return (
+            "typedef "
+            + (definition.c(node.name) if isinstance(definition, Array) else TYPE(definition) + " " + node.name)
+            + ";"
+        )
 
+    if hasattr(node, "c"):
+        return node.c()
     return repr(node)
 
 
@@ -1080,6 +1189,9 @@ if __name__ == "__main__":
         if "-s" in sys.argv:
             c = input_file.with_suffix(".s")
             with open(c, "w") as f:
+                if types:
+                    for name, definition in types.items():
+                        f.write(f"typedef {definition.c(name)};\n")
                 if functions:
                     f.write(functions.strip() + "\n")
                 f.write(compiled.strip() + "\n")
@@ -1089,6 +1201,9 @@ if __name__ == "__main__":
             if not flag(sys.argv, "-r"):
                 preamble = pathlib.Path("preamble.c").read_text().strip()
                 f.write(preamble + "\n")
+            if types:
+                for name, definition in types.items():
+                    f.write(f"typedef {definition} {name};\n")
             if functions:
                 f.write(functions.strip() + "\n")
             f.write(compiled + "\n")

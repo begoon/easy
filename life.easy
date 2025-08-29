@@ -13,7 +13,7 @@ PROGRAM Life:
     RETURN 0;
   END FUNCTION neighbours;
 
-  FUNCTION print(w INTEGER, h INTEGER, field Field] OF BOOLEAN) INTEGER:
+  FUNCTION print(w INTEGER, h INTEGER, field Field) INTEGER:
     DECLARE (x, y) INTEGER;
     FOR y := 0 TO h-1 DO
       DECLARE s STRING;

@@ -1,0 +1,9 @@
+PROGRAM Output:
+  PROCEDURE a(x INTEGER):
+    OUTPUT "a(): " || x;
+  END PROCEDURE a;
+
+  CALL a(100);
+
+  EXIT;
+END PROGRAM Output;
