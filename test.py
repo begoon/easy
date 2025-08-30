@@ -1,3 +1,4 @@
+import itertools
 import os
 import subprocess
 import sys
@@ -9,11 +10,7 @@ TESTS_FOLDER = Path("tests")
 def run(cmd, *args, **kwargs) -> subprocess.CompletedProcess:
     code: subprocess.CompletedProcess = subprocess.run(cmd, *args, **kwargs)
     if code.returncode != 0:
-        v = (
-            " ".join([str(v) for v in cmd])
-            if isinstance(cmd, (list, tuple))
-            else str(cmd)
-        )
+        v = " ".join([str(v) for v in cmd]) if isinstance(cmd, (list, tuple)) else str(cmd)
         print("ERROR:", v)
         exit(1)
     return code
@@ -55,16 +52,16 @@ def process(test: Path) -> None:
     run(["python", "easy.py", program, *flags])
 
     if "-t" in flags:
-        run(["diff", "-u", expected_tokens, test.with_suffix(".tokens")])
+        diff(expected_tokens, test.with_suffix(".tokens"))
     if "-a" in flags:
-        run(["diff", "-u", expected_ast, test.with_suffix(".ast")])
+        diff(expected_ast, test.with_suffix(".ast"))
 
     if "-s" in flags:
-        run(["diff", "-u", expected_s, test.with_suffix(".s")])
+        diff(expected_s, test.with_suffix(".s"))
 
     expected_c = x.with_suffix(".c")
     if expected_c.exists():
-        run(["diff", "-u", expected_c, test.with_suffix(".c")])
+        diff(expected_c, test.with_suffix(".c"))
 
     expected_output = x.with_suffix(".output")
     if expected_output.exists():
@@ -83,7 +80,25 @@ def process(test: Path) -> None:
 
         run(executor, shell=True)
 
-        run(["diff", "-u", expected_output, test.with_suffix(".output")])
+        diff(expected_output, test.with_suffix(".output"))
+
+
+WHITE = "\033[97m"
+RED = "\033[91m"
+NC = "\033[0m"
+
+
+def diff(expected_file: Path, created_file: Path) -> None:
+    expected_lines = expected_file.read_text().splitlines()
+    created_lines = created_file.read_text().splitlines()
+
+    for i, (expected, created) in enumerate(itertools.zip_longest(expected_lines, created_lines), 1):
+        if expected != created:
+            print(f"{expected_file}:{i}:")
+            print(f"  expected: {WHITE}{expected}{NC}")
+            print(f"  created:  {RED}{created}{NC}")
+            print(f"{created_file}:{i}:")
+            exit(1)
 
 
 verbose = "-v" in sys.argv or os.getenv("DEBUG")

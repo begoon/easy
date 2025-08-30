@@ -7,6 +7,13 @@ extern void *malloc(size_t);
 #define FALSE 0
 int FIX(double v) { return (int)v; }
 double FLOAT(int v) { return (double)v; }
+char *CHARACTER(int c)
+{
+    char *v = malloc(2);
+    v[0] = (char)c;
+    v[1] = '\0';
+    return v;
+}
 char *SUBSTR(const char *str, int start, int length)
 {
     char *sub = malloc(length + 1);
@@ -50,6 +57,12 @@ char *concat(int count, ...)
 
     return result;
 }
+void output(char *str)
+{
+    const size_t sz = strlen(str);
+    const char *crlf = sz > 1 ? "\n" : "";
+    printf("%s%s", str, crlf);
+}
 #pragma clang diagnostic ignored "-Wincompatible-library-redeclaration"
 double abs(double x)
 {
@@ -67,7 +80,7 @@ int integersqrt(int a)
 {
     if (a < 0)
     {
-        printf("%s\n", "a < 0 in FUNCTION integersqrt.");
+        output("a < 0 in FUNCTION integersqrt.");
         exit(0);
     }
     if (a == 0)
@@ -124,13 +137,13 @@ int main()
             if (sieve[i])
             {
                 count = (count + 1);
-                printf("%s\n", concat(4, "Prime[", str(count), "] = ", str(i)));
+                output(concat(4, "Prime[", str(count), "] = ", str(i)));
             }
         }
     }
     else
     {
-        printf("%s\n", concat(3, "Input value ", str(topnum), " non-positive."));
+        output(concat(3, "Input value ", str(topnum), " non-positive."));
     }
     exit(0);
 }

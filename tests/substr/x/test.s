@@ -1,5 +1,5 @@
 int main()
 {
-    printf("%s\n", SUBSTR("aloha!", 1, 2));
+    output(SUBSTR("aloha!", 1, 2));
     exit(0);
 }

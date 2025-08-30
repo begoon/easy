@@ -4,79 +4,79 @@ Program Eratosthenes
     Subroutines:
         FUNCTION abs(REAL x) : REAL
             Statements:
-                If (x < 0) Then
+                IF (x < 0) THEN
                     Statements:
-                        Return (-x)
-                Else
+                        RETURN (-x)
+                ELSE
                     Statements:
-                        Return x
-                Fi
-                Return 0
+                        RETURN x
+                FI
+                RETURN 0
         FUNCTION integersqrt(INTEGER a) : INTEGER
             Statements:
-                Select TRUE
-                  Case (a < 0):
+                SELECT TRUE
+                  CASE (a < 0):
                         Statements:
-                            Output('a < 0 in FUNCTION integersqrt.')
+                            OUTPUT('a < 0 in FUNCTION integersqrt.')
                             EXIT
-                  Case (a == 0):
+                  CASE (a == 0):
                         Statements:
-                            Return 0
-                  Case (a > 0):
+                            RETURN 0
+                  CASE (a > 0):
                         Variables:
                             x, ra: REAL
                             epsilon: REAL
                             sqrt: INTEGER
                         Statements:
-                            Assign ra := FLOAT(a)
-                            Assign epsilon := (1e-07 * ra)
-                            For x := (ra / 2.0) By (((ra / x) - x) / 2.0) While (abs((ra - (x * x))) > epsilon) Do
+                            ASSIGN ra := FLOAT(a)
+                            ASSIGN epsilon := (1e-07 * ra)
+                            FOR x := (ra / 2.0) BY (((ra / x) - x) / 2.0) WHILE (abs((ra - (x * x))) > epsilon) DO
                                 Statements:
                                     Empty
-                            End For
-                            For sqrt := (FIX(x) - 1) By 1 While (((sqrt + 1) * (sqrt + 1)) <= a) Do
+                            END FOR
+                            FOR sqrt := (FIX(x) - 1) BY 1 WHILE (((sqrt + 1) * (sqrt + 1)) <= a) DO
                                 Statements:
                                     Empty
-                            End For
-                            Return sqrt
-                End Select
-                Return 0
+                            END FOR
+                            RETURN sqrt
+                END SELECT
+                RETURN 0
     Statements:
-        Input(topnum)
-        If (topnum > 0) Then
+        INPUT(topnum)
+        IF (topnum > 0) THEN
             Variables:
                 sieve: ARRAY[1:topnum] OF BOOLEAN
                 i, limit, count: INTEGER
             Statements:
-                Assign topnum := (topnum + 1)
-                For i := 1 To topnum Do
+                ASSIGN topnum := (topnum + 1)
+                FOR i := 1 TO topnum DO
                     Statements:
-                        Assign sieve[i] := TRUE
-                End For
-                Assign limit := (integersqrt(topnum) + 1)
-                For i := 2 To limit Do
+                        ASSIGN sieve[i] := TRUE
+                END FOR
+                ASSIGN limit := (integersqrt(topnum) + 1)
+                FOR i := 2 TO limit DO
                     Statements:
-                        If sieve[i] Then
+                        IF sieve[i] THEN
                             Variables:
                                 j: INTEGER
                             Statements:
-                                For j := (2 * i) By i To topnum Do
+                                FOR j := (2 * i) BY i TO topnum DO
                                     Statements:
-                                        Assign sieve[j] := FALSE
-                                End For
-                        Fi
-                End For
-                Assign count := 0
-                For i := 1 To topnum Do
+                                        ASSIGN sieve[j] := FALSE
+                                END FOR
+                        FI
+                END FOR
+                ASSIGN count := 0
+                FOR i := 1 TO topnum DO
                     Statements:
-                        If sieve[i] Then
+                        IF sieve[i] THEN
                             Statements:
-                                Assign count := (count + 1)
-                                Output(concat(4, 'Prime[', str(count), '] = ', str(i)))
-                        Fi
-                End For
-        Else
+                                ASSIGN count := (count + 1)
+                                OUTPUT(concat(4, 'Prime[', str(count), '] = ', str(i)))
+                        FI
+                END FOR
+        ELSE
             Statements:
-                Output(concat(3, 'Input value ', str(topnum), ' non-positive.'))
-        Fi
+                OUTPUT(concat(3, 'Input value ', str(topnum), ' non-positive.'))
+        FI
         EXIT

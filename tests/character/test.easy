@@ -1,0 +1,8 @@
+PROGRAM Character:
+  OUTPUT CHARACTER(48) || CHARACTER(50);
+  OUTPUT CHARACTER(49);
+  OUTPUT CHARACTER(13) || CHARACTER(10);
+  OUTPUT "123" || "!";
+  OUTPUT "a" || "b" || "c";
+  EXIT;
+END PROGRAM Character;

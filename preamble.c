@@ -7,6 +7,13 @@ extern void *malloc(size_t);
 #define FALSE 0
 int FIX(double v) { return (int)v; }
 double FLOAT(int v) { return (double)v; }
+char *CHARACTER(int c)
+{
+    char *v = malloc(2);
+    v[0] = (char)c;
+    v[1] = '\0';
+    return v;
+}
 char *SUBSTR(const char *str, int start, int length)
 {
     char *sub = malloc(length + 1);
@@ -49,5 +56,11 @@ char *concat(int count, ...)
     va_end(args);
 
     return result;
+}
+void output(char *str)
+{
+    const size_t sz = strlen(str);
+    const char *crlf = sz > 1 ? "\n" : "";
+    printf("%s%s", str, crlf);
 }
 #pragma clang diagnostic ignored "-Wincompatible-library-redeclaration"

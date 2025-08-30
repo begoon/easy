@@ -4,6 +4,6 @@ Program Type
     Subroutines:
         FUNCTION a(Field f) : BOOLEAN
             Statements:
-                Return 0
+                RETURN 0
     Statements:
         EXIT

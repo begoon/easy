@@ -1,5 +1,5 @@
 int main()
 {
-    printf("%s\n", "aloha!");
+    output("aloha!");
     exit(0);
 }

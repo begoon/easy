@@ -8,36 +8,44 @@ import pytest
 KEYWORDS = {
     "PROGRAM",
     "END",
+    #
+    "TYPE",
+    "IS",
+    "DECLARE",
     "FUNCTION",
     "PROCEDURE",
+    "SET",
+    #
+    "CALL",
     "RETURN",
     "EXIT",
+    #
     "INPUT",
     "OUTPUT",
+    #
     "INTEGER",
     "REAL",
+    "BOOLEAN",
+    "STRING",
+    #
     "IF",
     "THEN",
     "ELSE",
     "FI",
-    "WHILE",
+    #
     "FOR",
+    "WHILE",
     "BY",
     "DO",
+    #
     "SELECT",
     "CASE",
-    "DECLARE",
-    "SET",
-    "CALL",
-    "OUTPUT",
-    "INPUT",
-    "EXIT",
+    #
     "FIX",
     "FLOAT",
+    #
     "TRUE",
     "FALSE",
-    "TYPE",
-    "IS",
 }
 
 SYMBOLS = {*"+ - * / ( ) [ ] ; , . : := = <> < <= > >= ||".split(" ")}
@@ -193,11 +201,11 @@ class Lexer:
 
 @dataclass
 class Node:
-    def c(self, level: int = 0) -> str:
+    def c(self) -> str:
         print(self)
         raise NotImplementedError()
 
-    def str(self, level=0):
+    def str(self):
         print(self)
         raise NotImplementedError()
 
@@ -207,11 +215,11 @@ class Program(Node):
     name: str
     segment: "Segment"
 
-    def str(self, level) -> str:
-        return f"Program {self.name}" + "\n" + self.segment.str(level + 1)
+    def str(self) -> str:
+        return f"Program {self.name}" + "\n" + indent(self.segment.str(), 1)
 
-    def c(self, level) -> str:
-        return "int main()" + "\n" + "{\n" + self.segment.c(level + 1) + "\n}"
+    def c(self) -> str:
+        return "int main()" + "\n" + "{\n" + indent(self.segment.c(), 1) + "\n}"
 
 
 Subroutine = Union["Function", "Procedure"]
@@ -219,17 +227,17 @@ Subroutine = Union["Function", "Procedure"]
 
 @dataclass
 class Segment:
-    types: list["TypeDeclaration"]
+    types: list["TypeDefinition"]
     variables: list["Declaration"]
     subroutines: list[Subroutine]
     statements: "Statements"
 
-    def str(self, level=0) -> str:
+    def str(self) -> str:
         parts = []
         if self.types:
             parts.append("Types:")
             for t in self.types:
-                parts.append(indent(f"{t.name}: {t.definition.str(level)}", level))
+                parts.append(indent(f"{t.name}: {t.definition.str()}", 1))
         if self.variables:
             parts.append("Variables:")
             for v in self.variables:
@@ -238,30 +246,31 @@ class Segment:
         if self.subroutines:
             parts.append("Subroutines:")
             for p in self.subroutines:
-                parts.append(indent(p.str(level), 1))
+                parts.append(indent(p.str(), 1))
         parts.append("Statements:")
-        parts.append(indent(self.statements.str(level), 1))
-        return indent("\n".join(parts), level)
+        parts.append(self.statements.str())
+        return "\n".join(parts)
 
-    def c(self, level=0) -> str:
+    def c(self) -> str:
         parts = []
         if self.variables:
             for v in self.variables:
                 if isinstance(v.type, Array):
                     for name in v.names:
-                        parts.append(f"{(v.type.c(level, name))};")
+                        parts.append(f"{(v.type.c(name))};")
                 else:
                     parts.append(f"{(TYPE(v.type))} {', '.join(v.names)};")
         if self.subroutines:
             side_parts = []
             for subroutine in self.subroutines:
-                side_parts.append(subroutine.c(level))
+                side_parts.append(subroutine.c())
             global functions
             functions += "\n".join(side_parts)
-        parts.append(self.statements.c(level + 1))
-        return indent("\n".join(parts), level)
+        parts.append(self.statements.c())
+        return "\n".join(parts)
 
 
+@dataclass
 class Statement(Node):
     pass
 
@@ -278,39 +287,35 @@ class Declaration:
 
 
 @dataclass
-class TypeDeclaration:
+class TypeDefinition:
     name: str
     definition: Union[str, "Array"]
 
-    def c(self, level) -> str:
+    def c(self) -> str:
         definition = self.definition
-        # !!!!!!!!!!!
-        return (
-            "typedef "
-            + (definition.c(self.name, level) if isinstance(definition, Array) else TYPE(definition) + " " + self.name)
-            + ";"
-        )
+        type = definition.c(self.name) if isinstance(definition, Array) else TYPE(definition)
+        return "typedef " + type + " " + self.name + ";"
 
 
 @dataclass
 class Array(Node):
     type: "Type"
     start: Optional[Expression]
-    end: "Expression"
+    end: Expression
 
-    def c(self, level: int, name: str) -> str:
+    def c(self, name: str) -> str:
         assert name, "Array.c() requires a name parameters"
-        start = self.start.c(level) if self.start else "0"
-        end = self.end.c(level)
+        start = self.start.c() if self.start else "0"
+        end = self.end.c()
         return f"{TYPE(self.type)} {name}[{start} + {end}]"
 
-    def str(self, level=0) -> str:
-        start = self.start.str(level) + ":" if self.start else ""
-        end = self.end.str(level)
+    def str(self) -> str:
+        start = self.start.str() + ":" if self.start else ""
+        end = self.end.str()
         return f"ARRAY[{start}{end}] OF {self.type}"
 
 
-Type = Literal["INTEGER", "REAL", "STRING", "BOOLEAN"] | Array
+Type = Literal["INTEGER", "REAL", "BOOLEAN", "STRING", "CHARACTER"] | Array
 
 
 @dataclass
@@ -319,13 +324,13 @@ class Procedure(Node):
     parameters: list[Tuple[str, Union[str, Array]]]
     segment: Segment
 
-    def str(self, level) -> str:
+    def str(self) -> str:
         parameters = ", ".join(name for name, _ in self.parameters)
-        return f"PROCEDURE {self.name}({parameters})" + "\n" + self.segment.str(1)
+        return f"PROCEDURE {self.name}({parameters})" + "\n" + indent(self.segment.str(), 1)
 
-    def c(self, level) -> str:
+    def c(self) -> str:
         parameters = ", ".join(f"{TYPE(type)} {name}" for name, type in self.parameters)
-        return f"void {self.name}({parameters})" + "{\n" + self.segment.c(1) + "\n}"
+        return f"void {self.name}({parameters})" + "{\n" + indent(self.segment.c(), 1) + "\n}"
 
 
 @dataclass
@@ -335,19 +340,19 @@ class Function(Node):
     parameters: list[Tuple[str, Union[str, Array]]]
     segment: Segment
 
-    def str(self, level=0) -> str:
+    def str(self) -> str:
         return (
             f"FUNCTION {self.name}({', '.join(f'{type} {name}' for name, type in self.parameters)}) : {self.type}"
             + "\n"
-            + self.segment.str(1)
+            + indent(self.segment.str(), 1)
         )
 
-    def c(self, level=0) -> str:
+    def c(self) -> str:
         return (
             f"{TYPE(self.type)} {self.name}({', '.join(f'{TYPE(type)} {name}' for name, type in self.parameters)})\n"
             + "{\n"
-            f"{self.segment.c(1)}"
-            "\n}"
+            + indent(self.segment.c(), 1)
+            + "\n}"
         )
 
 
@@ -355,11 +360,11 @@ class Function(Node):
 class Statements(Node):
     statements: list[Statement]
 
-    def str(self, level=0) -> str:
-        return "\n".join(s.str(level + 1) for s in self.statements) if self.statements else "(empty)"
+    def str(self) -> str:
+        return "\n".join(indent(s.str(), 1) for s in self.statements) if self.statements else "(empty)"
 
-    def c(self, level=0) -> str:
-        return "\n".join(s.c(level + 1) for s in self.statements) if self.statements else "(empty)"
+    def c(self) -> str:
+        return "\n".join(indent(s.c(), 0) for s in self.statements) if self.statements else "(empty)"
 
 
 @dataclass
@@ -368,10 +373,10 @@ class Assign(Statement):
     expression: Expression
     index: Optional[Expression] = None
 
-    def str(self, level=0) -> str:
-        return f"Assign {self.name}{'[' + self.index.str() + ']' if self.index else ''} := {self.expression.str()}"
+    def str(self) -> str:
+        return f"ASSIGN {self.name}{'[' + self.index.str() + ']' if self.index else ''} := {self.expression.str()}"
 
-    def c(self, level=0) -> str:
+    def c(self) -> str:
         return f"{self.name}{'[' + self.index.c() + ']' if self.index else ''} = {self.expression.c()};"
 
 
@@ -381,17 +386,17 @@ class If(Statement):
     then_branch: Segment
     else_branch: Optional[Segment]
 
-    def str(self, level=0) -> str:
-        s = f"If {self.cond.str()} Then\n"
+    def str(self) -> str:
+        s = f"IF {self.cond.str()} THEN\n"
         s += indent(f"{self.then_branch.str()}\n", 1)
         if self.else_branch:
-            s += "\nElse\n"
+            s += "\nELSE\n"
             s += indent(f"{self.else_branch.str()}\n", 1)
-        s += "\nFi"
+        s += "\nFI"
         return s
 
-    def c(self, level=0) -> str:
-        cond = self.cond.c(level)
+    def c(self) -> str:
+        cond = self.cond.c()
         if cond.startswith("(") and cond.endswith(")"):
             cond = cond[1:-1]
         s = f"if ({cond})\n{{\n"
@@ -412,24 +417,23 @@ class For(Statement):
     to: Optional[Expression] = None
     while_: Optional[Expression] = None
 
-    def str(self, level=0) -> str:
+    def str(self) -> str:
         return (
-            f"For {self.variable.str()} "
+            f"FOR {self.variable.str()} "
             f":= {self.init.str()} "
-            f"{f'By {self.by.str()} ' if self.by else ''}"
-            f"{f'To {self.to.str()} ' if self.to else ''}"
-            f"{f'While {self.while_.str()} ' if self.while_ else ''}"
-            f"Do\n{self.do.str(1)}"
+            f"{f'BY {self.by.str()} ' if self.by else ''}"
+            f"{f'TO {self.to.str()} ' if self.to else ''}"
+            f"{f'WHILE {self.while_.str()} ' if self.while_ else ''}"
+            f"DO\n"
+            f"{indent(self.do.str(), 1)}"
             "\n"
-            "End For"
+            "END FOR"
         )
 
-    def c(self, level=0) -> str:
+    def c(self) -> str:
         return (
             f"for ({self.variable.c()} = {self.init.c()}; {self.condition()}; {self.step()})\n"
-            f"{{\n"
-            f"{self.do.c(1)}"
-            f"\n}}"
+            "{\n" + indent(self.do.c(), 1) + "\n}"
         )
 
     def condition(self) -> str:
@@ -449,19 +453,19 @@ class Select(Statement):
     expr: "Expression"
     cases: list[Tuple["Expression", Segment]]
 
-    def str(self, level=0) -> str:
-        s = f"Select {self.expr.str()}\n"
+    def str(self) -> str:
+        s = f"SELECT {self.expr.str()}\n"
         for cond, body in self.cases:
             cond = cond.str()
-            s += f"  Case {cond}:\n{body.str(2)}\n"
-        s += "End Select"
+            s += f"  CASE {cond}:\n{indent(body.str(), 2)}\n"
+        s += "END SELECT"
         return s
 
-    def c(self, level=0) -> str:
+    def c(self) -> str:
         s = ""
         for cond, body in self.cases:
-            cond = cond.c(level)
-            s += f"\nif {cond}\n{{\n{body.c(1)}\n}}"
+            cond = cond.c()
+            s += f"\nif {cond}\n{{\n{indent(body.c(), 1)}\n}}"
         return s.strip()
 
 
@@ -469,10 +473,10 @@ class Select(Statement):
 class Input(Statement):
     variables: list[str]
 
-    def str(self, level=0) -> str:
-        return f"Input({', '.join(str(e) for e in self.variables)})"
+    def str(self) -> str:
+        return f"INPUT({', '.join(str(e) for e in self.variables)})"
 
-    def c(self, level=0) -> str:
+    def c(self) -> str:
         inputs = []
         for variable in self.variables:
             inputs.append(f'scanf("%d", &{variable});')
@@ -481,13 +485,15 @@ class Input(Statement):
 
 @dataclass
 class Output(Statement):
-    expressions: list["Expression"]
+    expressions: list[Expression]
 
-    def str(self, level=0) -> str:
-        return f"Output({', '.join(e.str() for e in self.expressions)})"
+    def str(self) -> str:
+        return f"OUTPUT({', '.join(e.str() for e in self.expressions)})"
 
-    def c(self, level=0) -> str:
-        return 'printf("%s\\n", ' + ", ".join(e.c().replace("'", '"') for e in self.expressions) + ");"
+    def c(self) -> str:
+        assert len(self.expressions) == 1, f"OUTPUT requires one expression, but given {len(self.expressions)}"
+        expression = self.expressions[0]
+        return "output(" + expression.c().replace("'", '"') + ");"
 
 
 @dataclass
@@ -495,43 +501,43 @@ class Call(Statement):
     name: str
     args: list["Expression"]
 
-    def str(self, level=0) -> str:
+    def str(self) -> str:
         args = ", ".join(arg.str() for arg in self.args)
         return f"CALL {self.name}({args})"
 
-    def c(self, level=0) -> str:
+    def c(self) -> str:
         args = ", ".join(arg.c() for arg in self.args)
         return f"{self.name}({args});"
 
 
 @dataclass
 class Return(Statement):
-    value: Optional["Expression"] = None
+    value: Optional[Expression] = None
 
-    def str(self, level=0) -> str:
+    def str(self) -> str:
         value = self.value.str() if isinstance(self.value, Expression) else self.value
-        return f"Return {value}" if self.value is not None else "Return"
+        return "RETURN" + f" {value}" if self.value is not None else ""
 
-    def c(self, level=0) -> str:
+    def c(self) -> str:
         value = self.value.c() if isinstance(self.value, Expression) else self.value
-        return f"return {value};" if self.value is not None else "return;"
+        return "return" + (f" {value}" if self.value is not None else "") + ";"
 
 
 @dataclass
 class Exit(Statement):
-    def str(self, level=0) -> str:
+    def str(self) -> str:
         return "EXIT"
 
-    def c(self, level=0) -> str:
+    def c(self) -> str:
         return "exit(0);"
 
 
 @dataclass
 class Empty(Statement):
-    def str(self, level=0) -> str:
+    def str(self) -> str:
         return "Empty"
 
-    def c(self, level=0) -> str:
+    def c(self) -> str:
         return ";"
 
 
@@ -540,10 +546,10 @@ class FunctionCall(Expression):
     name: str
     args: list[Expression]
 
-    def str(self, level=0) -> str:
+    def str(self) -> str:
         return f"{self.name}({', '.join(a.str() for a in self.args)})"
 
-    def c(self, level=0) -> str:
+    def c(self) -> str:
         return f"{self.name}({', '.join(a.c() for a in self.args)})"
 
 
@@ -552,11 +558,11 @@ class ProcedureCall(Expression):
     name: str
     args: list[Expression]
 
-    def str(self, level=0) -> str:
+    def str(self) -> str:
         args = ", ".join(arg.str() for arg in self.args)
         return f"CALL {self.name}({args})"
 
-    def c(self, level=0) -> str:
+    def c(self) -> str:
         args = ", ".join(arg.c() for arg in self.args)
         return f"{self.name}({args});"
 
@@ -567,10 +573,10 @@ class BinaryOperation(Expression):
     left: Expression
     right: Expression
 
-    def str(self, level=0) -> str:
+    def str(self) -> str:
         return f"({self.left.str()} {self.operation} {self.right.str()})"
 
-    def c(self, level=0) -> str:
+    def c(self) -> str:
         return f"({self.left.c()} {self.operation} {self.right.c()})"
 
 
@@ -578,20 +584,22 @@ class BinaryOperation(Expression):
 class ConcatenationOperation(Expression):
     parts: list[Expression]
 
-    def str(self, level=0) -> str:
+    def str(self) -> str:
         parts = [ConcatenationOperation.format_part(v) for v in self.parts]
         return f"concat({len(parts)}, {', '.join(parts)})"
 
-    def c(self, level=0) -> str:
+    def c(self) -> str:
         parts = [ConcatenationOperation.format_part(v) for v in self.parts]
         return f"concat({len(parts)}, {', '.join(parts)})"
 
     @staticmethod
     def format_part(v: Expression) -> str:
         str = v.c()
-        if not isinstance(v, (StringLiteral, ConcatenationOperation)):
-            str = f"str({str})"
-        return str
+        is_string_literal = isinstance(v, StringLiteral)
+        is_concatenation = isinstance(v, ConcatenationOperation)
+        is_character_function = isinstance(v, FunctionCall) and v.name == "CHARACTER"
+        skip_str = any([is_string_literal, is_concatenation, is_character_function])
+        return str if skip_str else f"str({str})"
 
 
 @dataclass
@@ -599,10 +607,10 @@ class UnaryOperation(Expression):
     operation: str
     expr: Expression
 
-    def str(self, level=0) -> str:
+    def str(self) -> str:
         return f"({self.operation}{self.expr.str()})"
 
-    def c(self, level=0) -> str:
+    def c(self) -> str:
         return f"({self.operation}{self.expr.c()})"
 
 
@@ -611,10 +619,10 @@ class Variable(Expression):
     name: str
     index: Optional[Expression] = None
 
-    def str(self, level=0) -> str:
+    def str(self) -> str:
         return self.name + (f"[{self.index.str()}]" if self.index else "")
 
-    def c(self, level=0) -> str:
+    def c(self) -> str:
         return self.name + (self.index and f"[{self.index.c()}]" or "")
 
 
@@ -622,10 +630,10 @@ class Variable(Expression):
 class IntegerLiteral(Expression):
     value: int
 
-    def str(self, level=0) -> str:
+    def str(self) -> str:
         return str(self.value)
 
-    def c(self, level=0) -> str:
+    def c(self) -> str:
         return str(self.value)
 
 
@@ -633,10 +641,10 @@ class IntegerLiteral(Expression):
 class RealLiteral(Expression):
     value: float
 
-    def str(self, level=0) -> str:
+    def str(self) -> str:
         return str(self.value)
 
-    def c(self, level=0) -> str:
+    def c(self) -> str:
         return str(self.value)
 
 
@@ -644,10 +652,10 @@ class RealLiteral(Expression):
 class StringLiteral(Expression):
     value: str
 
-    def str(self, level=0) -> str:
+    def str(self) -> str:
         return repr(self.value)
 
-    def c(self, level=0) -> str:
+    def c(self) -> str:
         return repr(self.value)
 
 
@@ -655,10 +663,10 @@ class StringLiteral(Expression):
 class BoolLiteral(Expression):
     value: bool
 
-    def str(self, level=0) -> str:
+    def str(self) -> str:
         return "true" if self.value else "false"
 
-    def c(self, level=0) -> str:
+    def c(self) -> str:
         return "1" if self.value else "0"
 
 
@@ -726,14 +734,14 @@ class Parser:
         statements = self.statements()
         return Segment(types, variables, subroutines, statements)
 
-    def types_section(self) -> list[TypeDeclaration]:
-        out: list[TypeDeclaration] = []
+    def types_section(self) -> list[TypeDefinition]:
+        out: list[TypeDefinition] = []
         while self.accept("TYPE"):
             name = self.eat("IDENT").value
             self.eat("IS")
             definition = self.type()
             self.eat(";")
-            out.append(TypeDeclaration(name, definition))
+            out.append(TypeDefinition(name, definition))
             types[name] = definition
         return out
 
@@ -1142,7 +1150,7 @@ def test_tokens(input, expected) -> None:
 def test_expression(input, expected) -> None:
     result = Parser(Lexer(input).tokens(), input).expression()
     if not isinstance(expected, str):
-        expected = expected.str(level=0)
+        expected = expected.str()
     assert result.str() == expected, f"\n{expected}\n!=\n{result}\n"
 
 
@@ -1179,16 +1187,16 @@ if __name__ == "__main__":
         ast = Parser(tokens, source).program()
         if "-a" in sys.argv:
             ast_file = input_file.with_suffix(".ast")
-            ast_file.write_text(ast.str(level=0) + "\n")
+            ast_file.write_text(ast.str() + "\n")
 
-        compiled = ast.c(level=0).strip()
+        compiled = ast.c().strip()
 
         if "-s" in sys.argv:
             c = input_file.with_suffix(".s")
             with open(c, "w") as f:
                 if types:
                     for name, definition in types.items():
-                        f.write(f"typedef {definition.c(0, name)};\n")
+                        f.write(f"typedef {definition.c(name)};\n")
                 if functions:
                     f.write(functions.strip() + "\n")
                 f.write(compiled.strip() + "\n")

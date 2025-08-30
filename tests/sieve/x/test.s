@@ -14,7 +14,7 @@ int integersqrt(int a)
 {
     if (a < 0)
     {
-        printf("%s\n", "a < 0 in FUNCTION integersqrt.");
+        output("a < 0 in FUNCTION integersqrt.");
         exit(0);
     }
     if (a == 0)
@@ -71,13 +71,13 @@ int main()
             if (sieve[i])
             {
                 count = (count + 1);
-                printf("%s\n", concat(4, "Prime[", str(count), "] = ", str(i)));
+                output(concat(4, "Prime[", str(count), "] = ", str(i)));
             }
         }
     }
     else
     {
-        printf("%s\n", concat(3, "Input value ", str(topnum), " non-positive."));
+        output(concat(3, "Input value ", str(topnum), " non-positive."));
     }
     exit(0);
 }
