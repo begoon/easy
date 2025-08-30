@@ -9,7 +9,11 @@ TESTS_FOLDER = Path("tests")
 def run(cmd, *args, **kwargs) -> subprocess.CompletedProcess:
     code: subprocess.CompletedProcess = subprocess.run(cmd, *args, **kwargs)
     if code.returncode != 0:
-        v = " ".join([str(v) for v in cmd]) if isinstance(cmd, (list, tuple)) else str(cmd)
+        v = (
+            " ".join([str(v) for v in cmd])
+            if isinstance(cmd, (list, tuple))
+            else str(cmd)
+        )
         print("ERROR:", v)
         exit(1)
     return code

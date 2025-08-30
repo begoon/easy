@@ -26,7 +26,10 @@ def test_tokens(input, expected) -> None:
         ("-a", "(-a)"),
         ("a + b * с", "(a + (b * с))"),
         ('a || (b || SUBSTR("abc", 0, 2))', "(a || (b || SUBSTR('abc', 0, 2)))"),
-        ('-b + (1 - 2) - LENGTH("3") * 7 XOR 1', "((((-b) + (1 - 2)) - (LENGTH('3') * 7)) XOR 1)"),
+        (
+            '-b + (1 - 2) - LENGTH("3") * 7 XOR 1',
+            "((((-b) + (1 - 2)) - (LENGTH('3') * 7)) XOR 1)",
+        ),
         ("NOT a < b", "(NOT(a < b))"),
     ],
 )

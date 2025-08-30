@@ -5,6 +5,5 @@ int a(Field f)
 }
 int main()
 {
-    typedef int Field[1 + 100];
     exit(0);
 }
