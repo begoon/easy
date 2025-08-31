@@ -13,4 +13,17 @@ PROGRAM Test:
   OUTPUT "repent_label_NO";
   repent_label: OUTPUT "repent_label";
 
+  BEGIN
+    OUTPUT "block";
+  END;
+
+  REPENT block_label;
+
+  BEGIN
+    OUTPUT "label block_NO";
+  END block_label;
+
+  OUTPUT ".";
+  EXIT;
+
 END PROGRAM Test;

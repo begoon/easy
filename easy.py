@@ -7,6 +7,7 @@ import pytest
 
 KEYWORDS = {
     "PROGRAM",
+    "BEGIN",
     "END",
     #
     "TYPE",
@@ -553,6 +554,25 @@ class Repent(Statement):
 
 
 @dataclass
+class Begin(Statement):
+    body: Segment
+    label: Optional[str] = None
+
+    def str(self) -> str:
+        s = f"BEGIN\n{indent(self.body.str(), 1)}\nEND"
+        if self.label:
+            s += " " + self.label
+        s += ";"
+        return s
+
+    def c(self) -> str:
+        s = f"{{\n{indent(self.body.c(), 1)}\n}}"
+        if self.label:
+            s += "\n" + self.label + ":\n"
+        return s
+
+
+@dataclass
 class Call(Statement):
     name: str
     args: list["Expression"]
@@ -594,7 +614,7 @@ class Empty(Statement):
         return "Empty"
 
     def c(self) -> str:
-        return ";"
+        return ";??"
 
 
 @dataclass
@@ -911,6 +931,7 @@ class Parser:
             "SELECT",
             "REPEAT",
             "REPENT",
+            "BEGIN",
             ";",
         )
 
@@ -951,6 +972,8 @@ class Parser:
             return self.repeat_statement()
         if token.value == "REPENT":
             return self.repent_statement()
+        if token.value == "BEGIN":
+            return self.begin_statement()
         self.eat(";")
         return Empty()
 
@@ -1054,6 +1077,14 @@ class Parser:
         label = self.eat("IDENT").value
         self.eat(";")
         return Repent(label)
+
+    def begin_statement(self) -> Statements:
+        self.eat("BEGIN")
+        body = self.segment()
+        self.eat("END")
+        label = self.accept("IDENT")
+        self.eat(";")
+        return Begin(body, label and label.value)
 
     def assignment_statement(self) -> Assign:
         self.eat("SET")

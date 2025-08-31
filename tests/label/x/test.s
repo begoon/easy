@@ -25,4 +25,14 @@ int main()
     output(1, "repent_label_NO");
     repent_label: 
     output(1, "repent_label");
+    {
+        output(1, "block");
+    }
+    goto block_label;
+    {
+        output(1, "label block_NO");
+    }
+    block_label:
+    output(1, ".");
+    exit(0);
 }
