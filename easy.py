@@ -40,6 +40,7 @@ KEYWORDS = {
     #
     "SELECT",
     "CASE",
+    "OTHERWISE",
     #
     "FIX",
     "FLOAT",
@@ -473,16 +474,26 @@ class Select(Statement):
     def str(self) -> str:
         s = f"SELECT {self.expr.str()}\n"
         for cond, body in self.cases:
-            cond = cond.str()
-            s += f"  CASE {cond}:\n{indent(body.str(), 2)}\n"
+            if cond is not None:
+                cond = cond.str()
+                s += f"  CASE {cond}:\n"
+            else:
+                s += "  OTHERWISE:\n"
+            s += f"{indent(body.str(), 2)}\n"
         s += "END SELECT"
         return s
 
     def c(self) -> str:
         s = ""
-        for cond, body in self.cases:
-            cond = cond.c()
-            s += f"\nif {cond}\n{{\n{indent(body.c(), 1)}\n}}"
+        for i, [cond, body] in enumerate(self.cases, 0):
+            if cond is not None:
+                cond = cond.c()
+                if i > 0:
+                    s += " else"
+                s += f"\nif {cond}\n"
+            else:
+                s += "\nelse\n"
+            s += f"{{\n{indent(body.c(), 1)}\n}}"
         return s.strip()
 
 
@@ -904,7 +915,8 @@ class Parser:
         )
 
         def is_label():
-            return self.current().type == "IDENT" and self.peek().value == ":"
+            current = self.current()
+            return (current.type == "IDENT" and current.value != "OTHERWISE") and self.peek().value == ":"
 
         while self.current().value in STATEMENTS or is_label():
             if is_label():
@@ -993,6 +1005,10 @@ class Parser:
             self.eat(":")
             body = self.segment()
             cases.append((cond, body))
+        if self.accept("OTHERWISE"):
+            self.eat(":")
+            body = self.segment()
+            cases.append((None, body))
         self.eat("END")
         self.eat("SELECT")
         self.eat(";")

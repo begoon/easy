@@ -1,0 +1,11 @@
+PROGRAM Test:
+  DECLARE a INTEGER;
+  SET a := 100;
+  SELECT TRUE OF
+    CASE (a < 0): OUTPUT "a < 0";
+    CASE (a = 0): OUTPUT "a = 0";
+    OTHERWISE: OUTPUT "otherwise";
+  END SELECT;
+  EXIT;
+
+END PROGRAM Test;

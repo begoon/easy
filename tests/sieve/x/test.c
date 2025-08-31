@@ -17,11 +17,11 @@ int integersqrt(int a)
     {
         output(1, "a < 0 in FUNCTION integersqrt.");
         exit(0);
-    }
+    } else
     if (a == 0)
     {
         return 0;
-    }
+    } else
     if (a > 0)
     {
         double x, ra = {0};
