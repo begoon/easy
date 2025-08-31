@@ -7,7 +7,7 @@ test-compiler:
     uv run python test.py
 
 life:
-    python easy.py life.easy && cc -o life life.c && ./life
+    python easy.py life.easy && clang life.c -o life && ./life
 
 clean:
     git clean -Xf

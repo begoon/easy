@@ -3,10 +3,16 @@
 #include <stdarg.h>
 extern void exit(int);
 extern void *malloc(size_t);
+extern void usleep(int);
 #define TRUE 1
 #define FALSE 0
+typedef struct
+{
+    char data[256];
+} STR;
 int FIX(double v) { return (int)v; }
 double FLOAT(int v) { return (double)v; }
+int LENGTH(STR s) { return strlen(s.data); }
 char *CHARACTER(int c)
 {
     char *v = malloc(2);
@@ -57,22 +63,28 @@ char *concat(int count, ...)
 
     return result;
 }
-void output_string(char *str)
-{
-    const size_t sz = strlen(str);
-    const char *crlf = sz > 1 ? "\n" : "";
-    printf("%s%s", str, crlf);
-}
 void output(int count, ...)
 {
     va_list args;
     va_start(args, count);
 
-    for (int i = 0; i < count; i++)
+    if (count < 1)
+        return;
+
+    for (int i = 0; i < count - 1; i++)
     {
-        char *s = va_arg(args, char *);
-        output_string(s);
+        printf("%s", va_arg(args, char *));
     }
+
+    char *s = va_arg(args, char *);
+    printf("%s", s);
+    if (strlen(s) > 1)
+        printf("%s", "\n");
+
     va_end(args);
+}
+void pause(double seconds)
+{
+    usleep(seconds * 1e6);
 }
 #pragma clang diagnostic ignored "-Wincompatible-library-redeclaration"

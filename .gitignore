@@ -9,3 +9,6 @@ tests/**/*.exe
 tests/**/*.output
 
 !tests/**/x/*.*
+
+/life
+life.c

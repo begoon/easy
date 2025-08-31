@@ -48,7 +48,7 @@ KEYWORDS = {
     "FALSE",
 }
 
-SYMBOLS = {*"+ - * / ( ) [ ] ; , . : := = <> < <= > >= ||".split(" ")}
+SYMBOLS = {*"+ - * / | & ( ) [ ] ; , . : := = <> < <= > >= ||".split(" ")}
 
 functions = ""
 
@@ -227,8 +227,8 @@ Subroutine = Union["Function", "Procedure"]
 
 @dataclass
 class Segment:
-    types: list["TypeDefinition"]
-    variables: list["Declaration"]
+    types: list["TypeIs"]
+    variables: list["Declare"]
     subroutines: list[Subroutine]
     statements: "Statements"
 
@@ -242,7 +242,8 @@ class Segment:
             parts.append("Variables:")
             for v in self.variables:
                 type = v.type.str() if isinstance(v.type, Node) else v.type
-                parts.append(indent(f"{', '.join(v.names)}: {type}", 1))
+                names = ", ".join(v.names)
+                parts.append(indent(f"{names}: {type}", 1))
         if self.subroutines:
             parts.append("Subroutines:")
             for p in self.subroutines:
@@ -259,7 +260,8 @@ class Segment:
                     for name in v.names:
                         parts.append(f"{(v.type.c(name))};")
                 else:
-                    parts.append(f"{(TYPE(v.type))} {', '.join(v.names)};")
+                    names = ", ".join(v.names)
+                    parts.append(f"{(TYPE(v.type))} {names} = {{0}};")
         if self.subroutines:
             side_parts = []
             for subroutine in self.subroutines:
@@ -281,13 +283,13 @@ class Expression(Node):
 
 
 @dataclass
-class Declaration:
+class Declare:
     names: list[str]
     type: Union[str, "Array"]
 
 
 @dataclass
-class TypeDefinition:
+class TypeIs:
     name: str
     definition: Union[str, "Array"]
 
@@ -315,7 +317,7 @@ class Array(Node):
         return f"ARRAY[{start}{end}] OF {self.type}"
 
 
-Type = Literal["INTEGER", "REAL", "BOOLEAN", "STRING", "CHARACTER"] | Array
+Type = Literal["INTEGER", "REAL", "BOOLEAN", "STRING"] | Array
 
 
 @dataclass
@@ -377,6 +379,10 @@ class Assign(Statement):
         return f"ASSIGN {self.name}{'[' + self.index.str() + ']' if self.index else ''} := {self.expression.str()}"
 
     def c(self) -> str:
+        global variables
+        type = variables.get(self.name)
+        if type == "STRING":
+            return f"strcpy({self.name}.data, {self.expression.c()});"
         return f"{self.name}{'[' + self.index.c() + ']' if self.index else ''} = {self.expression.c()};"
 
 
@@ -479,7 +485,14 @@ class Input(Statement):
     def c(self) -> str:
         inputs = []
         for variable in self.variables:
-            inputs.append(f'scanf("%d", &{variable});')
+            if variable not in variables:
+                raise Exception(f"undeclared variable '{variable}'")
+            type = variables[variable]
+            if type == "STRING":
+                inputs.append(f'scanf("%s", {variable}.data);')
+            else:
+                assert type == "INTEGER", f"unexpected variable type in INPUT '{variable}': {type}"
+                inputs.append(f'scanf("%d", &{variable});')
         return "\n".join(inputs)
 
 
@@ -598,6 +611,12 @@ class ConcatenationOperation(Expression):
         is_concatenation = isinstance(v, ConcatenationOperation)
         is_character_function = isinstance(v, FunctionCall) and v.name == "CHARACTER"
         skip_str = any([is_string_literal, is_concatenation, is_character_function])
+        if isinstance(v, Variable):
+            global variables
+            type = variables.get(v.name)
+            if type == "STRING":
+                return f"{v.name}.data"
+            return f"str({str})"
         return str if skip_str else f"str({str})"
 
 
@@ -733,26 +752,29 @@ class Parser:
         statements = self.statements()
         return Segment(types, variables, subroutines, statements)
 
-    def types_section(self) -> list[TypeDefinition]:
-        out: list[TypeDefinition] = []
+    def types_section(self) -> list[TypeIs]:
+        out: list[TypeIs] = []
         while self.accept("TYPE"):
             name = self.eat("IDENT").value
             self.eat("IS")
             definition = self.type()
             self.eat(";")
-            out.append(TypeDefinition(name, definition))
+            out.append(TypeIs(name, definition))
             types[name] = definition
         return out
 
-    def variables_section(self) -> list[Declaration]:
-        out: list[Declaration] = []
+    def variables_section(self) -> list[Declare]:
+        global variables
+
+        out: list[Declare] = []
         while self.accept("DECLARE"):
             token = self.current()
             if token.type == "IDENT":
                 name = self.eat("IDENT").value
                 type = self.type()
                 self.eat(";")
-                out.append(Declaration([name], type))
+                out.append(Declare([name], type))
+                variables[name] = type
                 continue
             if token.value == "(":
                 self.eat("(")
@@ -763,7 +785,9 @@ class Parser:
                 self.eat(")")
                 type = self.type()
                 self.eat(";")
-                out.append(Declaration(names, type))
+                out.append(Declare(names, type))
+                for name in names:
+                    variables[name] = type
                 continue
             self.error(f"expected variable and or '(', found '{token.value}' ", token)
         return out
@@ -983,6 +1007,7 @@ class Parser:
         left = self.expression_and()
         while operation := self.accept(("|", "XOR")):
             right = self.expression_and()
+            operation.value = {"|": "||", "XOR": "^"}.get(operation.value, operation.value)
             left = BinaryOperation(operation.value, left, right)
         return left
 
@@ -990,6 +1015,7 @@ class Parser:
         left = self.expression_not()
         while operation := self.accept(("&",)):
             right = self.expression_not()
+            operation.value = "&&"
             left = BinaryOperation(operation.value, left, right)
         return left
 
@@ -1002,8 +1028,7 @@ class Parser:
         left = self.expression_concatenation()
         while operation := self.accept(("<", ">", "=", "<=", ">=", "<>")):
             right = self.expression_concatenation()
-            if operation.value == "=":
-                operation = Token("=", "==", operation.line, operation.col)
+            operation.value = {"=": "==", "<>": "!="}.get(operation.value, operation.value)
             left = BinaryOperation(operation.value, left, right)
         return left
 
@@ -1026,6 +1051,7 @@ class Parser:
         left = self.expression_function_call()
         while operation := self.accept(("*", "/", "MOD")):
             right = self.expression_function_call()
+            operation.value = {"MOD": "%"}.get(operation.value, operation.value)
             left = BinaryOperation(operation.value, left, right)
         return left
 
@@ -1083,6 +1109,7 @@ def indent(s: str, n: int) -> str:
 
 
 types: dict[str, str | Array] = {}
+variables: dict[str, str | Array] = {}
 
 
 def TYPE(v: str) -> str:
@@ -1090,7 +1117,7 @@ def TYPE(v: str) -> str:
         return v
     if v in types:
         return v
-    type = {"INTEGER": "int", "REAL": "double", "BOOLEAN": "int"}.get(v)
+    type = {"INTEGER": "int", "REAL": "double", "BOOLEAN": "int", "STRING": "STR"}.get(v)
     if not type:
         raise ValueError(f"unknown type '{v}'")
     return type
@@ -1129,9 +1156,9 @@ def test_tokens(input, expected) -> None:
         ("a + b * с", "(a + (b * с))"),
         (
             '-b + (1 - 2) - LENGTH("3") * 7 XOR 1',
-            "((((-b) + (1 - 2)) - (LENGTH('3') * 7)) XOR 1)",
+            "((((-b) + (1 - 2)) - (LENGTH('3') * 7)) ^ 1)",
         ),
-        ("-b + (1 - 2) - adhoc(" "3" ")", "(((-b) + (1 - 2)) - adhoc(" "3" "))"),
+        ("-b + (1 - 2) - func(" "3" ")", "(((-b) + (1 - 2)) - func(" "3" "))"),
         ("NOT a < b", "(NOT(a < b))"),
         ("a || b", "concat(2, str(a), str(b))"),
         ('"a" || b', 'concat(2, "a", str(b))'),
@@ -1202,10 +1229,10 @@ if __name__ == "__main__":
 
         output = arg(sys.argv, "-o") or input_file.with_suffix(".c")
         with open(output, "w") as f:
-            f.write('#include "../../preamble.c"\n')
+            f.write('#include "preamble.c"\n')
             if types:
                 for name, definition in types.items():
-                    f.write(f"typedef {definition} {name};\n")
+                    f.write(f"typedef {definition.c(name)};\n")
             if functions:
                 f.write(functions.strip() + "\n")
             f.write(compiled + "\n")

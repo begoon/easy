@@ -45,7 +45,7 @@ def process(test: Path) -> None:
         flags.append("-s")
 
     if verbose:
-        print(">", ["python", "easy.py", program, *flags])
+        print("[COMPILE]", " ".join(["python", "easy.py", str(program), *flags]))
 
     flags.extend(["-o", str(test.with_suffix(".c"))])
 
@@ -67,7 +67,7 @@ def process(test: Path) -> None:
     if expected_output.exists():
         exe = test.with_suffix(".exe")
         cc_flags = ["-Wall", "-Wextra", "-Werror"]
-        run(["clang", *cc_flags, test.with_suffix(".c"), "-o", exe])
+        run(["clang", *cc_flags, test.with_suffix(".c"), "-I", ".", "-o", exe])
 
         cmd = [exe, ">" + str(test.with_suffix(".output"))]
         input_file = x.with_suffix(".input")
@@ -76,7 +76,7 @@ def process(test: Path) -> None:
 
         executor = " ".join(map(str, cmd))
         if verbose:
-            print(executor)
+            print("[EXECUTE]", executor)
 
         run(executor, shell=True)
 

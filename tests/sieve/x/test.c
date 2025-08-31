@@ -1,4 +1,4 @@
-#include "../../preamble.c"
+#include "preamble.c"
 double abs(double x)
 {
     if (x < 0)
@@ -24,9 +24,9 @@ int integersqrt(int a)
     }
     if (a > 0)
     {
-        double x, ra;
-        double epsilon;
-        int sqrt;
+        double x, ra = {0};
+        double epsilon = {0};
+        int sqrt = {0};
         ra = FLOAT(a);
         epsilon = (1e-07 * ra);
         for (x = (ra / 2.0); (abs((ra - (x * x))) > epsilon); x += (((ra / x) - x) / 2.0))
@@ -43,12 +43,12 @@ int integersqrt(int a)
 }
 int main()
 {
-    int topnum;
+    int topnum = {0};
     scanf("%d", &topnum);
     if (topnum > 0)
     {
         int sieve[1 + topnum];
-        int i, limit, count;
+        int i, limit, count = {0};
         topnum = (topnum + 1);
         for (i = 1; i <= topnum; i += 1)
         {
@@ -59,7 +59,7 @@ int main()
         {
             if (sieve[i])
             {
-                int j;
+                int j = {0};
                 for (j = (2 * i); j <= topnum; j += i)
                 {
                     sieve[j] = FALSE;

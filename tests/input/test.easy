@@ -1,0 +1,11 @@
+PROGRAM Input:
+  DECLARE i INTEGER;
+  DECLARE s STRING;
+
+  INPUT i;
+  INPUT s;
+
+  OUTPUT "i = [" || i || "]";
+  OUTPUT "str = [" || s || "]";
+  EXIT;
+END PROGRAM Input;
