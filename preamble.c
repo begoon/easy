@@ -88,3 +88,4 @@ void pause(double seconds)
     usleep(seconds * 1e6);
 }
 #pragma clang diagnostic ignored "-Wincompatible-library-redeclaration"
+#pragma clang diagnostic ignored "-Wunused-label"

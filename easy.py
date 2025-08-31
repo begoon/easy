@@ -283,6 +283,17 @@ class Expression(Node):
 
 
 @dataclass
+class Label(Node):
+    name: str
+
+    def c(self) -> str:
+        return f"{self.name}: "
+
+    def str(self) -> str:
+        return f"LABEL {self.name}"
+
+
+@dataclass
 class Declare:
     names: list[str]
     type: Union[str, "Array"]
@@ -855,19 +866,18 @@ class Parser:
 
     def statements(self) -> Statements:
         statements: list[Statement] = []
-        while self.current().value in (
-            "SET",
-            "CALL",
-            "IF",
-            "RETURN",
-            "EXIT",
-            "INPUT",
-            "OUTPUT",
-            "FOR",
-            "SELECT",
-            ";",
-        ):
-            statements.append(self.statement())
+        STATEMENTS = ("SET", "CALL", "IF", "RETURN", "EXIT", "INPUT", "OUTPUT", "FOR", "SELECT", ";")
+
+        def is_label():
+            return self.current().type == "IDENT" and self.peek().value == ":"
+
+        while self.current().value in STATEMENTS or is_label():
+            if is_label():
+                label = self.eat("IDENT").value
+                self.eat(":")
+                statements.append(Label(label))
+            else:
+                statements.append(self.statement())
         return Statements(statements)
 
     def statement(self) -> Statement:
