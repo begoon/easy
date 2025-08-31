@@ -614,7 +614,7 @@ class Empty(Statement):
         return "Empty"
 
     def c(self) -> str:
-        return ";??"
+        return ";"
 
 
 @dataclass
