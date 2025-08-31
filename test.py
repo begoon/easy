@@ -92,6 +92,14 @@ def diff(expected_file: Path, created_file: Path) -> None:
     expected_lines = expected_file.read_text().splitlines()
     created_lines = created_file.read_text().splitlines()
 
+    if expected_lines == created_lines:
+        return
+
+    if update:
+        print(f"update {created_file}")
+        expected_file.write_text("\n".join(created_lines) + "\n")
+        return
+
     for i, (expected, created) in enumerate(itertools.zip_longest(expected_lines, created_lines), 1):
         if expected != created:
             print(f"{expected_file}:{i}:")
@@ -102,6 +110,7 @@ def diff(expected_file: Path, created_file: Path) -> None:
 
 
 verbose = "-v" in sys.argv or os.getenv("DEBUG")
+update = "-u" in sys.argv
 
 
 def flag(argv: list[str], name: str) -> int | None:

@@ -57,10 +57,22 @@ char *concat(int count, ...)
 
     return result;
 }
-void output(char *str)
+void output_string(char *str)
 {
     const size_t sz = strlen(str);
     const char *crlf = sz > 1 ? "\n" : "";
     printf("%s%s", str, crlf);
+}
+void output(int count, ...)
+{
+    va_list args;
+    va_start(args, count);
+
+    for (int i = 0; i < count; i++)
+    {
+        char *s = va_arg(args, char *);
+        output_string(s);
+    }
+    va_end(args);
 }
 #pragma clang diagnostic ignored "-Wincompatible-library-redeclaration"

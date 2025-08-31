@@ -2,7 +2,7 @@ Program Output
     Subroutines:
         PROCEDURE a(x)
             Statements:
-                OUTPUT(concat(2, 'a(): ', str(x)))
+                OUTPUT(concat(2, "a(): ", str(x)))
     Statements:
         CALL a(100)
         EXIT

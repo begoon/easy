@@ -1,69 +1,4 @@
-#include <stdio.h>
-#include <string.h>
-#include <stdarg.h>
-extern void exit(int);
-extern void *malloc(size_t);
-#define TRUE 1
-#define FALSE 0
-int FIX(double v) { return (int)v; }
-double FLOAT(int v) { return (double)v; }
-char *CHARACTER(int c)
-{
-    char *v = malloc(2);
-    v[0] = (char)c;
-    v[1] = '\0';
-    return v;
-}
-char *SUBSTR(const char *str, int start, int length)
-{
-    char *sub = malloc(length + 1);
-    if (!sub)
-        return NULL;
-    strncpy(sub, str + start, length);
-    sub[length] = '\0';
-    return sub;
-}
-char *str(int v)
-{
-    char *s = malloc(12);
-    sprintf(s, "%d", v);
-    return s;
-}
-char *concat(int count, ...)
-{
-    va_list args;
-    va_start(args, count);
-
-    size_t total_len = 0;
-    for (int i = 0; i < count; i++)
-    {
-        char *s = va_arg(args, char *);
-        total_len += strlen(s);
-    }
-    va_end(args);
-
-    char *result = malloc(total_len + 1);
-    if (!result)
-        return NULL;
-
-    result[0] = '\0';
-
-    va_start(args, count);
-    for (int i = 0; i < count; i++)
-    {
-        strcat(result, va_arg(args, char *));
-    }
-    va_end(args);
-
-    return result;
-}
-void output(char *str)
-{
-    const size_t sz = strlen(str);
-    const char *crlf = sz > 1 ? "\n" : "";
-    printf("%s%s", str, crlf);
-}
-#pragma clang diagnostic ignored "-Wincompatible-library-redeclaration"
+#include "../../preamble.c"
 double abs(double x)
 {
     if (x < 0)
@@ -80,7 +15,7 @@ int integersqrt(int a)
 {
     if (a < 0)
     {
-        output("a < 0 in FUNCTION integersqrt.");
+        output(1, "a < 0 in FUNCTION integersqrt.");
         exit(0);
     }
     if (a == 0)
@@ -137,13 +72,13 @@ int main()
             if (sieve[i])
             {
                 count = (count + 1);
-                output(concat(4, "Prime[", str(count), "] = ", str(i)));
+                output(1, concat(4, "Prime[", str(count), "] = ", str(i)));
             }
         }
     }
     else
     {
-        output(concat(3, "Input value ", str(topnum), " non-positive."));
+        output(1, concat(3, "Input value ", str(topnum), " non-positive."));
     }
     exit(0);
 }

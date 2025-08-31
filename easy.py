@@ -491,9 +491,8 @@ class Output(Statement):
         return f"OUTPUT({', '.join(e.str() for e in self.expressions)})"
 
     def c(self) -> str:
-        assert len(self.expressions) == 1, f"OUTPUT requires one expression, but given {len(self.expressions)}"
-        expression = self.expressions[0]
-        return "output(" + expression.c().replace("'", '"') + ");"
+        args = ", ".join(e.c() for e in self.expressions)
+        return f"output({len(self.expressions)}, {args});"
 
 
 @dataclass
@@ -656,7 +655,7 @@ class StringLiteral(Expression):
         return repr(self.value)
 
     def c(self) -> str:
-        return repr(self.value)
+        return f'"{self.value}"'
 
 
 @dataclass
@@ -1132,18 +1131,18 @@ def test_tokens(input, expected) -> None:
             '-b + (1 - 2) - LENGTH("3") * 7 XOR 1',
             "((((-b) + (1 - 2)) - (LENGTH('3') * 7)) XOR 1)",
         ),
-        ('-b + (1 - 2) - adhoc("3")', "(((-b) + (1 - 2)) - adhoc('3'))"),
+        ("-b + (1 - 2) - adhoc(" "3" ")", "(((-b) + (1 - 2)) - adhoc(" "3" "))"),
         ("NOT a < b", "(NOT(a < b))"),
         ("a || b", "concat(2, str(a), str(b))"),
-        ('"a" || b', "concat(2, 'a', str(b))"),
-        ('"a" || b || c', "concat(3, 'a', str(b), str(c))"),
+        ('"a" || b', 'concat(2, "a", str(b))'),
+        ('"a" || b || c', 'concat(3, "a", str(b), str(c))'),
         (
             'a || (b || SUBSTR("abc", 0, 2))',
-            "concat(2, str(a), concat(2, str(b), str(SUBSTR('abc', 0, 2))))",
+            'concat(2, str(a), concat(2, str(b), str(SUBSTR("abc", 0, 2))))',
         ),
         (
             'a || b || SUBSTR("abc", 0, 2)',
-            "concat(3, str(a), str(b), str(SUBSTR('abc', 0, 2)))",
+            'concat(3, str(a), str(b), str(SUBSTR("abc", 0, 2)))',
         ),
     ],
 )
@@ -1203,9 +1202,7 @@ if __name__ == "__main__":
 
         output = arg(sys.argv, "-o") or input_file.with_suffix(".c")
         with open(output, "w") as f:
-            if not flag(sys.argv, "-r"):
-                preamble = pathlib.Path("preamble.c").read_text().strip()
-                f.write(preamble + "\n")
+            f.write('#include "../../preamble.c"\n')
             if types:
                 for name, definition in types.items():
                     f.write(f"typedef {definition} {name};\n")

@@ -14,7 +14,7 @@ int integersqrt(int a)
 {
     if (a < 0)
     {
-        output("a < 0 in FUNCTION integersqrt.");
+        output(1, "a < 0 in FUNCTION integersqrt.");
         exit(0);
     }
     if (a == 0)
@@ -71,13 +71,13 @@ int main()
             if (sieve[i])
             {
                 count = (count + 1);
-                output(concat(4, "Prime[", str(count), "] = ", str(i)));
+                output(1, concat(4, "Prime[", str(count), "] = ", str(i)));
             }
         }
     }
     else
     {
-        output(concat(3, "Input value ", str(topnum), " non-positive."));
+        output(1, concat(3, "Input value ", str(topnum), " non-positive."));
     }
     exit(0);
 }

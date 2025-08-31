@@ -72,11 +72,11 @@ Program Eratosthenes
                         IF sieve[i] THEN
                             Statements:
                                 ASSIGN count := (count + 1)
-                                OUTPUT(concat(4, 'Prime[', str(count), '] = ', str(i)))
+                                OUTPUT(concat(4, "Prime[", str(count), "] = ", str(i)))
                         FI
                 END FOR
         ELSE
             Statements:
-                OUTPUT(concat(3, 'Input value ', str(topnum), ' non-positive.'))
+                OUTPUT(concat(3, "Input value ", str(topnum), " non-positive."))
         FI
         EXIT

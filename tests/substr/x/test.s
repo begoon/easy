@@ -1,5 +1,5 @@
 int main()
 {
-    output(SUBSTR("aloha!", 1, 2));
+    output(1, SUBSTR("12345", 1, 2));
     exit(0);
 }

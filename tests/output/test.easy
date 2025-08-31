@@ -1,4 +1,5 @@
 PROGRAM Output:
-  OUTPUT "aloha!";
+  OUTPUT "00";
+  OUTPUT "11", "22";
   EXIT;
 END PROGRAM Output;

@@ -1,5 +1,5 @@
 void a(int x){
-    output(concat(2, "a(): ", str(x)));
+    output(1, concat(2, "a(): ", str(x)));
 }
 int main()
 {

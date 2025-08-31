@@ -1,4 +1,4 @@
 PROGRAM Output:
-  OUTPUT SUBSTR("aloha!", 1, 2);
+  OUTPUT SUBSTR("12345", 1, 2);
   EXIT;
 END PROGRAM Output;
