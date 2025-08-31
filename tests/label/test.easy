@@ -4,4 +4,13 @@ PROGRAM Test:
   for_label: FOR i := 0 TO 0 DO OUTPUT "for_label"; END FOR;
   SET i := 0;
   select_label: SELECT TRUE OF CASE (i = 0): OUTPUT "select_label"; END SELECT;
+
+  REPEAT repeat_label;
+  OUTPUT "repeat_label_NO";
+  repeat_label: OUTPUT "repeat_label";
+
+  REPENT repent_label;
+  OUTPUT "repent_label_NO";
+  repent_label: OUTPUT "repent_label";
+
 END PROGRAM Test;

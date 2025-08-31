@@ -17,4 +17,12 @@ int main()
     {
         output(1, "select_label");
     }
+    goto repeat_label;
+    output(1, "repeat_label_NO");
+    repeat_label: 
+    output(1, "repeat_label");
+    goto repent_label;
+    output(1, "repent_label_NO");
+    repent_label: 
+    output(1, "repent_label");
 }

@@ -520,6 +520,28 @@ class Output(Statement):
 
 
 @dataclass
+class Repeat(Statement):
+    label: str
+
+    def str(self) -> str:
+        return f"REPEAT {self.label}"
+
+    def c(self) -> str:
+        return f"goto {self.label};"
+
+
+@dataclass
+class Repent(Statement):
+    label: str
+
+    def str(self) -> str:
+        return f"REPENT {self.label}"
+
+    def c(self) -> str:
+        return f"goto {self.label};"
+
+
+@dataclass
 class Call(Statement):
     name: str
     args: list["Expression"]
@@ -866,7 +888,20 @@ class Parser:
 
     def statements(self) -> Statements:
         statements: list[Statement] = []
-        STATEMENTS = ("SET", "CALL", "IF", "RETURN", "EXIT", "INPUT", "OUTPUT", "FOR", "SELECT", ";")
+        STATEMENTS = (
+            "SET",
+            "CALL",
+            "IF",
+            "RETURN",
+            "EXIT",
+            "INPUT",
+            "OUTPUT",
+            "FOR",
+            "SELECT",
+            "REPEAT",
+            "REPENT",
+            ";",
+        )
 
         def is_label():
             return self.current().type == "IDENT" and self.peek().value == ":"
@@ -900,6 +935,10 @@ class Parser:
             return self.input_statement()
         if token.value == "OUTPUT":
             return self.output_statement()
+        if token.value == "REPEAT":
+            return self.repeat_statement()
+        if token.value == "REPENT":
+            return self.repent_statement()
         self.eat(";")
         return Empty()
 
@@ -987,6 +1026,18 @@ class Parser:
             expressions.append(self.expression())
         self.eat(";")
         return Output(expressions)
+
+    def repeat_statement(self) -> Statements:
+        self.eat("REPEAT")
+        label = self.eat("IDENT").value
+        self.eat(";")
+        return Repeat(label)
+
+    def repent_statement(self) -> Statements:
+        self.eat("REPENT")
+        label = self.eat("IDENT").value
+        self.eat(";")
+        return Repent(label)
 
     def assignment_statement(self) -> Assign:
         self.eat("SET")
