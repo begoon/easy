@@ -261,6 +261,9 @@ class Segment:
                 if isinstance(v.type, Array):
                     for name in v.names:
                         parts.append(f"{(v.type.c(name))};")
+                elif isinstance(v.type, Structure):
+                    for name in v.names:
+                        parts.append(f"{(v.type.c())} {name} = {{0}};")
                 else:
                     names = ", ".join(v.names)
                     parts.append(f"{(TYPE(v.type))} {names} = {{0}};")
@@ -304,11 +307,16 @@ class Declare:
 @dataclass
 class TypeIs:
     name: str
-    definition: Union[str, "Array"]
+    definition: Union[str, "Array", "Structure"]
 
     def c(self) -> str:
         definition = self.definition
-        type = definition.c(self.name) if isinstance(definition, Array) else TYPE(definition)
+        if isinstance(definition, Array):
+            type = definition.c(self.name)
+        elif isinstance(definition, Structure):
+            type = definition.c() + " " + self.name
+        else:
+            type = TYPE(definition)
         return "typedef " + type + " " + self.name + ";"
 
 
@@ -328,6 +336,25 @@ class Array(Node):
         start = self.start.str() + ":" if self.start else ""
         end = self.end.str()
         return f"ARRAY[{start}{end}] OF {self.type}"
+
+
+@dataclass
+class Field:
+    name: str
+    type: Union[str, Array]
+
+
+@dataclass
+class Structure:
+    fields: list[Field]
+
+    def str(self) -> str:
+        return " ".join(
+            ["STRUCTURE", " ".join(f"FIELD {field.name} IS {field.type}" for field in self.fields), "END STRUCTURE"]
+        )
+
+    def c(self) -> str:
+        return " ".join(["struct {", " ".join(f"{TYPE(field.type)} {field.name};" for field in self.fields), "}"])
 
 
 Type = Literal["INTEGER", "REAL", "BOOLEAN", "STRING"] | Array
@@ -873,6 +900,25 @@ class Parser:
             self.eat("OF")
             type = cast(Array, self.type())
             return Array(type, start, end)
+        if token.value == "STRUCTURE":
+            self.i += 1
+
+            fields = []
+            self.eat("FIELD")
+            name = self.eat("IDENT").value
+            self.eat("IS")
+            type = self.type()
+            fields.append(Field(name, type))
+
+            while self.accept(","):
+                name = self.eat("IDENT").value
+                self.eat("IS")
+                type = self.type()
+                fields.append(Field(name, type))
+
+            self.eat("END")
+            self.eat("STRUCTURE")
+            return Structure(fields)
         return self.eat("IDENT").value
 
     def subroutines(self) -> list[Procedure | Function]:
@@ -1216,13 +1262,15 @@ def indent(s: str, n: int) -> str:
     return "\n".join(pad + line for line in s.splitlines())
 
 
-types: dict[str, str | Array] = {}
-variables: dict[str, str | Array] = {}
+types: dict[str, str | Array | Structure] = {}
+variables: dict[str, str | Array | Structure] = {}
 
 
 def TYPE(v: str) -> str:
     if isinstance(v, Array):
         return v
+    if isinstance(v, Structure):
+        return v.str()
     if v in types:
         return v
     type = {"INTEGER": "int", "REAL": "double", "BOOLEAN": "int", "STRING": "STR"}.get(v)
@@ -1330,7 +1378,10 @@ if __name__ == "__main__":
             with open(c, "w") as f:
                 if types:
                     for name, definition in types.items():
-                        f.write(f"typedef {definition.c(name)};\n")
+                        if isinstance(definition, Array):
+                            f.write(f"typedef {definition.c(name)};\n")
+                        else:
+                            f.write(f"typedef {definition.c()} {name};\n")
                 if functions:
                     f.write(functions.strip() + "\n")
                 f.write(compiled.strip() + "\n")
@@ -1340,7 +1391,10 @@ if __name__ == "__main__":
             f.write('#include "preamble.c"\n')
             if types:
                 for name, definition in types.items():
-                    f.write(f"typedef {definition.c(name)};\n")
+                    if isinstance(definition, Array):
+                        f.write(f"typedef {definition.c(name)};\n")
+                    else:
+                        f.write(f"typedef {definition.c()} {name};\n")
             if functions:
                 f.write(functions.strip() + "\n")
             f.write(compiled + "\n")
