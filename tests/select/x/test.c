@@ -1,3 +1,4 @@
+#include "preamble.c"
 int main()
 {
     int a = {0};

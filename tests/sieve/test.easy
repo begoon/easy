@@ -1,4 +1,5 @@
 PROGRAM Eratosthenes:
+  /* 123 */
   DECLARE topnum INTEGER;
 
   FUNCTION abs(x REAL) REAL:

@@ -8,6 +8,8 @@ TESTS_FOLDER = Path("tests")
 
 
 def run(cmd, *args, **kwargs) -> subprocess.CompletedProcess:
+    if verbose:
+        print("[RUN]", " ".join([str(v) for v in cmd]) if isinstance(cmd, (list, tuple)) else str(cmd))
     code: subprocess.CompletedProcess = subprocess.run(cmd, *args, **kwargs)
     if code.returncode != 0:
         v = " ".join([str(v) for v in cmd]) if isinstance(cmd, (list, tuple)) else str(cmd)
@@ -32,55 +34,68 @@ def process(test: Path) -> None:
 
     x = test.parent / "x" / "test"
 
+    removals: list[Path] = []
+
     expected_tokens = x.with_suffix(".tokens")
     if expected_tokens.exists():
+        created_tokens = test.with_suffix(".tokens")
+        removals.append(created_tokens)
+
         flags.append("-t")
 
     expected_ast = x.with_suffix(".ast")
     if expected_ast.exists():
+        created_ast = test.with_suffix(".ast")
+        removals.append(created_ast)
+
         flags.append("-a")
-
-    expected_s = x.with_suffix(".s")
-    if expected_s.exists():
-        flags.append("-s")
-
-    if verbose:
-        print("[COMPILE]", " ".join(["python", "easy.py", str(program), *flags]))
-
-    flags.extend(["-o", str(test.with_suffix(".c"))])
-
-    run(["python", "easy.py", program, *flags])
-
-    if "-t" in flags:
-        diff(expected_tokens, test.with_suffix(".tokens"))
-    if "-a" in flags:
-        diff(expected_ast, test.with_suffix(".ast"))
-
-    if "-s" in flags:
-        diff(expected_s, test.with_suffix(".s"))
 
     expected_c = x.with_suffix(".c")
     if expected_c.exists():
-        diff(expected_c, test.with_suffix(".c"))
+        created_c = test.with_suffix(".c")
+        removals.append(created_c)
+
+        flags.extend(["-o", str(created_c)])
+
+    run(["python", "easy.py", program, *flags])
+
+    if expected_tokens.exists():
+        diff(expected_tokens, created_tokens)
+
+    if expected_ast.exists():
+        diff(expected_ast, created_ast)
+
+    if expected_c.exists():
+        diff(expected_c, created_c)
 
     expected_output = x.with_suffix(".output")
     if expected_output.exists():
+        created_output = test.with_suffix(".output")
+        removals.append(created_output)
+
         exe = test.with_suffix(".exe")
+        removals.append(exe)
+
         cc_flags = ["-Wall", "-Wextra", "-Werror"]
         run(["clang", *cc_flags, test.with_suffix(".c"), "-I", ".", "-o", exe])
 
         cmd = [exe, ">" + str(test.with_suffix(".output"))]
+
         input_file = x.with_suffix(".input")
         if input_file.exists():
             cmd.insert(1, "<" + str(input_file))
 
         executor = " ".join(map(str, cmd))
-        if verbose:
-            print("[EXECUTE]", executor)
 
         run(executor, shell=True)
 
-        diff(expected_output, test.with_suffix(".output"))
+        diff(expected_output, created_output)
+
+    for removal in removals:
+        if removal.exists():
+            if verbose:
+                print(f"[DEL] {removal}")
+            removal.unlink()
 
 
 WHITE = "\033[97m"
@@ -96,8 +111,9 @@ def diff(expected_file: Path, created_file: Path) -> None:
         return
 
     if update:
-        print(f"update {created_file}")
+        print(f"copy {created_file} -> {expected_file}")
         expected_file.write_text("\n".join(created_lines) + "\n")
+        Path(created_file).unlink()
         return
 
     for i, (expected, created) in enumerate(itertools.zip_longest(expected_lines, created_lines), 1):

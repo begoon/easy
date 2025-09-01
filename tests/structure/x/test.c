@@ -1,3 +1,4 @@
+#include "preamble.c"
 typedef struct { int a; STR b; } t;
 int main()
 {

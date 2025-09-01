@@ -207,7 +207,7 @@ class Node:
         print(self)
         raise NotImplementedError()
 
-    def str(self):
+    def meta(self):
         print(self)
         raise NotImplementedError()
 
@@ -217,8 +217,8 @@ class Program(Node):
     name: str
     segment: "Segment"
 
-    def str(self) -> str:
-        return f"Program {self.name}" + "\n" + indent(self.segment.str(), 1)
+    def meta(self) -> str:
+        return f"Program {self.name}" + "\n" + indent(self.segment.meta(), 1)
 
     def c(self) -> str:
         return "int main()" + "\n" + "{\n" + indent(self.segment.c(), 1) + "\n}"
@@ -234,24 +234,24 @@ class Segment:
     subroutines: list[Subroutine]
     statements: "Statements"
 
-    def str(self) -> str:
+    def meta(self) -> str:
         parts = []
         if self.types:
             parts.append("Types:")
             for t in self.types:
-                parts.append(indent(f"{t.name}: {t.definition.str()}", 1))
+                parts.append(indent(f"{t.name}: {t.definition.meta()}", 1))
         if self.variables:
             parts.append("Variables:")
             for v in self.variables:
-                type = v.type.str() if isinstance(v.type, Node) else v.type
+                type = v.type.meta() if isinstance(v.type, Node) else v.type
                 names = ", ".join(v.names)
                 parts.append(indent(f"{names}: {type}", 1))
         if self.subroutines:
             parts.append("Subroutines:")
             for p in self.subroutines:
-                parts.append(indent(p.str(), 1))
+                parts.append(indent(p.meta(), 1))
         parts.append("Statements:")
-        parts.append(self.statements.str())
+        parts.append(self.statements.meta())
         return "\n".join(parts)
 
     def c(self) -> str:
@@ -294,7 +294,7 @@ class Label(Node):
     def c(self) -> str:
         return f"{self.name}: "
 
-    def str(self) -> str:
+    def meta(self) -> str:
         return f"LABEL {self.name}"
 
 
@@ -309,14 +309,16 @@ class TypeIs:
     name: str
     definition: Union[str, "Array", "Structure"]
 
-    def c(self) -> str:
+    def c(self, /, variable: str = "") -> str:
+        1 / 0
         definition = self.definition
         if isinstance(definition, Array):
-            type = definition.c(self.name)
+            type = definition.c(variable)
         elif isinstance(definition, Structure):
             type = definition.c() + " " + self.name
         else:
             type = TYPE(definition)
+        1 / 0
         return "typedef " + type + " " + self.name + ";"
 
 
@@ -326,15 +328,20 @@ class Array(Node):
     start: Optional[Expression]
     end: Expression
 
-    def c(self, name: str) -> str:
-        assert name, "Array.c() requires a name parameters"
+    def c(self, variable: str) -> str:
+        assert variable, "Array.c() requires a name parameter"
         start = self.start.c() if self.start else "0"
         end = self.end.c()
-        return f"{TYPE(self.type)} {name}[{start} + {end}]"
+        t = f"[{start} + {end}]"
+        v = self.type
+        while isinstance(v, Array):
+            t += f"[{v.start.c() if v.start else '0'} + {v.end.c()}]"
+            v = v.type
+        return f"{TYPE(v)} {variable}{t}"
 
-    def str(self) -> str:
-        start = self.start.str() + ":" if self.start else ""
-        end = self.end.str()
+    def meta(self) -> str:
+        start = self.start.meta() + ":" if self.start else ""
+        end = self.end.meta()
         return f"ARRAY[{start}{end}] OF {self.type}"
 
 
@@ -348,7 +355,7 @@ class Field:
 class Structure:
     fields: list[Field]
 
-    def str(self) -> str:
+    def meta(self) -> str:
         return " ".join(
             ["STRUCTURE", " ".join(f"FIELD {field.name} IS {field.type}" for field in self.fields), "END STRUCTURE"]
         )
@@ -366,9 +373,9 @@ class Procedure(Node):
     parameters: list[Tuple[str, Union[str, Array]]]
     segment: Segment
 
-    def str(self) -> str:
+    def meta(self) -> str:
         parameters = ", ".join(name for name, _ in self.parameters)
-        return f"PROCEDURE {self.name}({parameters})" + "\n" + indent(self.segment.str(), 1)
+        return f"PROCEDURE {self.name}({parameters})" + "\n" + indent(self.segment.meta(), 1)
 
     def c(self) -> str:
         parameters = ", ".join(f"{TYPE(type)} {name}" for name, type in self.parameters)
@@ -382,11 +389,11 @@ class Function(Node):
     parameters: list[Tuple[str, Union[str, Array]]]
     segment: Segment
 
-    def str(self) -> str:
+    def meta(self) -> str:
         return (
             f"FUNCTION {self.name}({', '.join(f'{type} {name}' for name, type in self.parameters)}) : {self.type}"
             + "\n"
-            + indent(self.segment.str(), 1)
+            + indent(self.segment.meta(), 1)
         )
 
     def c(self) -> str:
@@ -402,8 +409,8 @@ class Function(Node):
 class Statements(Node):
     statements: list[Statement]
 
-    def str(self) -> str:
-        return "\n".join(indent(s.str(), 1) for s in self.statements) if self.statements else "(empty)"
+    def meta(self) -> str:
+        return "\n".join(indent(s.meta(), 1) for s in self.statements) if self.statements else "(empty)"
 
     def c(self) -> str:
         return "\n".join(indent(s.c(), 0) for s in self.statements) if self.statements else "(empty)"
@@ -415,8 +422,8 @@ class Assign(Statement):
     expression: Expression
     index: Optional[Expression] = None
 
-    def str(self) -> str:
-        return f"ASSIGN {self.name}{'[' + self.index.str() + ']' if self.index else ''} := {self.expression.str()}"
+    def meta(self) -> str:
+        return f"ASSIGN {self.name}{'[' + self.index.meta() + ']' if self.index else ''} := {self.expression.meta()}"
 
     def c(self) -> str:
         global variables
@@ -432,12 +439,12 @@ class If(Statement):
     then_branch: Segment
     else_branch: Optional[Segment]
 
-    def str(self) -> str:
-        s = f"IF {self.cond.str()} THEN\n"
-        s += indent(f"{self.then_branch.str()}\n", 1)
+    def meta(self) -> str:
+        s = f"IF {self.cond.meta()} THEN\n"
+        s += indent(f"{self.then_branch.meta()}\n", 1)
         if self.else_branch:
             s += "\nELSE\n"
-            s += indent(f"{self.else_branch.str()}\n", 1)
+            s += indent(f"{self.else_branch.meta()}\n", 1)
         s += "\nFI"
         return s
 
@@ -463,15 +470,15 @@ class For(Statement):
     to: Optional[Expression] = None
     while_: Optional[Expression] = None
 
-    def str(self) -> str:
+    def meta(self) -> str:
         return (
-            f"FOR {self.variable.str()} "
-            f":= {self.init.str()} "
-            f"{f'BY {self.by.str()} ' if self.by else ''}"
-            f"{f'TO {self.to.str()} ' if self.to else ''}"
-            f"{f'WHILE {self.while_.str()} ' if self.while_ else ''}"
+            f"FOR {self.variable.meta()} "
+            f":= {self.init.meta()} "
+            f"{f'BY {self.by.meta()} ' if self.by else ''}"
+            f"{f'TO {self.to.meta()} ' if self.to else ''}"
+            f"{f'WHILE {self.while_.meta()} ' if self.while_ else ''}"
             f"DO\n"
-            f"{indent(self.do.str(), 1)}"
+            f"{indent(self.do.meta(), 1)}"
             "\n"
             "END FOR"
         )
@@ -499,15 +506,15 @@ class Select(Statement):
     expr: "Expression"
     cases: list[Tuple["Expression", Segment]]
 
-    def str(self) -> str:
-        s = f"SELECT {self.expr.str()}\n"
+    def meta(self) -> str:
+        s = f"SELECT {self.expr.meta()}\n"
         for cond, body in self.cases:
             if cond is not None:
-                cond = cond.str()
+                cond = cond.meta()
                 s += f"  CASE {cond}:\n"
             else:
                 s += "  OTHERWISE:\n"
-            s += f"{indent(body.str(), 2)}\n"
+            s += f"{indent(body.meta(), 2)}\n"
         s += "END SELECT"
         return s
 
@@ -529,7 +536,7 @@ class Select(Statement):
 class Input(Statement):
     variables: list[str]
 
-    def str(self) -> str:
+    def meta(self) -> str:
         return f"INPUT({', '.join(str(e) for e in self.variables)})"
 
     def c(self) -> str:
@@ -550,8 +557,8 @@ class Input(Statement):
 class Output(Statement):
     expressions: list[Expression]
 
-    def str(self) -> str:
-        return f"OUTPUT({', '.join(e.str() for e in self.expressions)})"
+    def meta(self) -> str:
+        return f"OUTPUT({', '.join(e.meta() for e in self.expressions)})"
 
     def c(self) -> str:
         args = ", ".join(e.c() for e in self.expressions)
@@ -562,7 +569,7 @@ class Output(Statement):
 class Repeat(Statement):
     label: str
 
-    def str(self) -> str:
+    def meta(self) -> str:
         return f"REPEAT {self.label}"
 
     def c(self) -> str:
@@ -573,7 +580,7 @@ class Repeat(Statement):
 class Repent(Statement):
     label: str
 
-    def str(self) -> str:
+    def meta(self) -> str:
         return f"REPENT {self.label}"
 
     def c(self) -> str:
@@ -585,8 +592,8 @@ class Begin(Statement):
     body: Segment
     label: Optional[str] = None
 
-    def str(self) -> str:
-        s = f"BEGIN\n{indent(self.body.str(), 1)}\nEND"
+    def meta(self) -> str:
+        s = f"BEGIN\n{indent(self.body.meta(), 1)}\nEND"
         if self.label:
             s += " " + self.label
         s += ";"
@@ -604,8 +611,8 @@ class Call(Statement):
     name: str
     args: list["Expression"]
 
-    def str(self) -> str:
-        args = ", ".join(arg.str() for arg in self.args)
+    def meta(self) -> str:
+        args = ", ".join(arg.meta() for arg in self.args)
         return f"CALL {self.name}({args})"
 
     def c(self) -> str:
@@ -617,8 +624,8 @@ class Call(Statement):
 class Return(Statement):
     value: Optional[Expression] = None
 
-    def str(self) -> str:
-        value = self.value.str() if isinstance(self.value, Expression) else self.value
+    def meta(self) -> str:
+        value = self.value.meta() if isinstance(self.value, Expression) else self.value
         return "RETURN" + f" {value}" if self.value is not None else ""
 
     def c(self) -> str:
@@ -628,7 +635,7 @@ class Return(Statement):
 
 @dataclass
 class Exit(Statement):
-    def str(self) -> str:
+    def meta(self) -> str:
         return "EXIT"
 
     def c(self) -> str:
@@ -637,7 +644,7 @@ class Exit(Statement):
 
 @dataclass
 class Empty(Statement):
-    def str(self) -> str:
+    def meta(self) -> str:
         return "Empty"
 
     def c(self) -> str:
@@ -649,8 +656,8 @@ class FunctionCall(Expression):
     name: str
     args: list[Expression]
 
-    def str(self) -> str:
-        return f"{self.name}({', '.join(a.str() for a in self.args)})"
+    def meta(self) -> str:
+        return f"{self.name}({', '.join(a.meta() for a in self.args)})"
 
     def c(self) -> str:
         return f"{self.name}({', '.join(a.c() for a in self.args)})"
@@ -661,8 +668,8 @@ class ProcedureCall(Expression):
     name: str
     args: list[Expression]
 
-    def str(self) -> str:
-        args = ", ".join(arg.str() for arg in self.args)
+    def meta(self) -> str:
+        args = ", ".join(arg.meta() for arg in self.args)
         return f"CALL {self.name}({args})"
 
     def c(self) -> str:
@@ -676,8 +683,8 @@ class BinaryOperation(Expression):
     left: Expression
     right: Expression
 
-    def str(self) -> str:
-        return f"({self.left.str()} {self.operation} {self.right.str()})"
+    def meta(self) -> str:
+        return f"({self.left.meta()} {self.operation} {self.right.meta()})"
 
     def c(self) -> str:
         return f"({self.left.c()} {self.operation} {self.right.c()})"
@@ -687,7 +694,7 @@ class BinaryOperation(Expression):
 class ConcatenationOperation(Expression):
     parts: list[Expression]
 
-    def str(self) -> str:
+    def meta(self) -> str:
         parts = [ConcatenationOperation.format_part(v) for v in self.parts]
         return f"concat({len(parts)}, {', '.join(parts)})"
 
@@ -716,8 +723,8 @@ class UnaryOperation(Expression):
     operation: str
     expr: Expression
 
-    def str(self) -> str:
-        return f"({self.operation}{self.expr.str()})"
+    def meta(self) -> str:
+        return f"({self.operation}{self.expr.meta()})"
 
     def c(self) -> str:
         return f"({self.operation}{self.expr.c()})"
@@ -728,8 +735,8 @@ class Variable(Expression):
     name: str
     index: Optional[Expression] = None
 
-    def str(self) -> str:
-        return self.name + (f"[{self.index.str()}]" if self.index else "")
+    def meta(self) -> str:
+        return self.name + (f"[{self.index.meta()}]" if self.index else "")
 
     def c(self) -> str:
         return self.name + (self.index and f"[{self.index.c()}]" or "")
@@ -739,7 +746,7 @@ class Variable(Expression):
 class IntegerLiteral(Expression):
     value: int
 
-    def str(self) -> str:
+    def meta(self) -> str:
         return str(self.value)
 
     def c(self) -> str:
@@ -750,7 +757,7 @@ class IntegerLiteral(Expression):
 class RealLiteral(Expression):
     value: float
 
-    def str(self) -> str:
+    def meta(self) -> str:
         return str(self.value)
 
     def c(self) -> str:
@@ -761,7 +768,7 @@ class RealLiteral(Expression):
 class StringLiteral(Expression):
     value: str
 
-    def str(self) -> str:
+    def meta(self) -> str:
         return repr(self.value)
 
     def c(self) -> str:
@@ -772,7 +779,7 @@ class StringLiteral(Expression):
 class BoolLiteral(Expression):
     value: bool
 
-    def str(self) -> str:
+    def meta(self) -> str:
         return "true" if self.value else "false"
 
     def c(self) -> str:
@@ -1270,7 +1277,7 @@ def TYPE(v: str) -> str:
     if isinstance(v, Array):
         return v
     if isinstance(v, Structure):
-        return v.str()
+        return v.meta()
     if v in types:
         return v
     type = {"INTEGER": "int", "REAL": "double", "BOOLEAN": "int", "STRING": "STR"}.get(v)
@@ -1332,8 +1339,8 @@ def test_tokens(input, expected) -> None:
 def test_expression(input, expected) -> None:
     result = Parser(Lexer(input).tokens(), input).expression()
     if not isinstance(expected, str):
-        expected = expected.str()
-    assert result.str() == expected, f"\n{expected}\n!=\n{result}\n"
+        expected = expected.meta()
+    assert result.meta() == expected, f"\n{expected}\n!=\n{result}\n"
 
 
 def compile(source: str) -> Program:
@@ -1369,34 +1376,25 @@ if __name__ == "__main__":
         ast = Parser(tokens, source).program()
         if "-a" in sys.argv:
             ast_file = input_file.with_suffix(".ast")
-            ast_file.write_text(ast.str() + "\n")
+            ast_file.write_text(ast.meta() + "\n")
 
         compiled = ast.c().strip()
 
-        if "-s" in sys.argv:
-            c = input_file.with_suffix(".s")
-            with open(c, "w") as f:
-                if types:
-                    for name, definition in types.items():
-                        if isinstance(definition, Array):
-                            f.write(f"typedef {definition.c(name)};\n")
-                        else:
-                            f.write(f"typedef {definition.c()} {name};\n")
-                if functions:
-                    f.write(functions.strip() + "\n")
-                f.write(compiled.strip() + "\n")
-
         output = arg(sys.argv, "-o") or input_file.with_suffix(".c")
+
         with open(output, "w") as f:
             f.write('#include "preamble.c"\n')
             if types:
                 for name, definition in types.items():
+                    v = "typedef "
                     if isinstance(definition, Array):
-                        f.write(f"typedef {definition.c(name)};\n")
+                        v += definition.c(variable=name)
                     else:
-                        f.write(f"typedef {definition.c()} {name};\n")
+                        v += definition.c() + " " + name
+                    v += ";\n"
+                    f.write(v)
             if functions:
                 f.write(functions.strip() + "\n")
-            f.write(compiled + "\n")
+            f.write(compiled.strip() + "\n")
     else:
         pytest.main(["-vvv", __file__])

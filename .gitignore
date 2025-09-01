@@ -4,7 +4,6 @@ __pycache__/
 tests/**/*.tokens
 tests/**/*.ast
 tests/**/*.c
-tests/**/*.s
 tests/**/*.exe
 tests/**/*.output
 

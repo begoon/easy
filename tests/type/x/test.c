@@ -1,3 +1,4 @@
+#include "preamble.c"
 typedef int Field[1 + 100];
 int a(Field f)
 {
