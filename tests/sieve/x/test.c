@@ -47,7 +47,7 @@ int main()
     scanf("%d", &topnum);
     if (topnum > 0)
     {
-        int sieve[1 + topnum];
+        int sieve[1 + topnum + /* @ */ 1];
         int i, limit, count = {0};
         topnum = (topnum + 1);
         for (i = 1; i <= topnum; i += 1)

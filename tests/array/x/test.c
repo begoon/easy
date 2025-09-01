@@ -1,5 +1,5 @@
 #include "preamble.c"
-typedef int B[0 + 25][0 + 80];
+typedef int B[0 + 25 + /* @ */ 1][0 + 80];
 B b = {0};
 int main()
 {

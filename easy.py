@@ -335,7 +335,7 @@ class Array(Node):
         assert variable, "Array.c() requires a name parameter"
         start = self.start.c() if self.start else "0"
         end = self.end.c()
-        t = f"[{start} + {end}]"
+        t = f"[{start} + {end} + /* @ */ 1]"
         v = self.type
         while isinstance(v, Array):
             t += f"[{v.start.c() if v.start else '0'} + {v.end.c()}]"

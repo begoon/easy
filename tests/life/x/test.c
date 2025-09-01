@@ -1,5 +1,5 @@
 #include "preamble.c"
-typedef int Field[0 + 25][0 + 80];
+typedef int Field[0 + 25 + /* @ */ 1][0 + 80];
 int w, h = {0};
 Field field = {0};
 int x, y = {0};
