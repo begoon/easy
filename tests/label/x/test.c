@@ -1,7 +1,7 @@
 #include "preamble.c"
+int i = {0};
 int main()
 {
-    int i = {0};
     if_label: 
     if (TRUE)
     {

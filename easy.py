@@ -50,7 +50,7 @@ KEYWORDS = {
 
 SYMBOLS = {*"+ - * / | & ( ) [ ] ; , . : := = <> < <= > >= ||".split(" ")}
 
-functions = ""
+globals: str = ""
 
 
 @dataclass
@@ -219,7 +219,7 @@ class Program(Node):
         return f"Program {self.name}" + "\n" + indent(self.segment.meta(), 1)
 
     def c(self) -> str:
-        return "int main()" + "\n" + "{\n" + indent(self.segment.c(), 1) + "\n}"
+        return "int main()" + "\n" + "{\n" + indent(self.segment.c(main=True), 1) + "\n}"
 
 
 Subroutine = Union["Function", "Procedure"]
@@ -252,25 +252,30 @@ class Segment:
         parts.append(self.statements.meta())
         return "\n".join(parts)
 
-    def c(self) -> str:
+    def c(self, /, main: bool = False) -> str:
+        global globals
         parts = []
         if self.variables:
+            variables = []
             for v in self.variables:
                 if isinstance(v.type, Array):
                     for name in v.names:
-                        parts.append(f"{(v.type.c(name))};")
+                        variables.append(f"{(v.type.c(name))};")
                 elif isinstance(v.type, Structure):
                     for name in v.names:
-                        parts.append(f"{(v.type.c())} {name} = {{0}};")
+                        variables.append(f"{(v.type.c())} {name} = {{0}};")
                 else:
                     names = ", ".join(v.names)
-                    parts.append(f"{(TYPE(v.type))} {names} = {{0}};")
+                    variables.append(f"{(TYPE(v.type))} {names} = {{0}};")
+            if main:
+                globals += "\n".join(variables) + "\n"
+            else:
+                parts.extend(variables)
         if self.subroutines:
-            side_parts = []
+            subroutines = []
             for subroutine in self.subroutines:
-                side_parts.append(subroutine.c())
-            global functions
-            functions += "\n".join(side_parts)
+                subroutines.append(subroutine.c())
+            globals += "\n".join(subroutines) + "\n"
         parts.append(self.statements.c())
         return "\n".join(parts)
 
@@ -346,7 +351,7 @@ class Array(Node):
 @dataclass
 class Field:
     name: str
-    type: Union[str, Array]
+    type: "Type"
 
 
 @dataclass
@@ -362,13 +367,13 @@ class Structure:
         return " ".join(["struct {", " ".join(f"{TYPE(field.type)} {field.name};" for field in self.fields), "}"])
 
 
-Type = Literal["INTEGER", "REAL", "BOOLEAN", "STRING"] | Array
+Type = Literal["INTEGER", "REAL", "BOOLEAN", "STRING"] | Array | Structure
 
 
 @dataclass
 class Procedure(Node):
     name: str
-    parameters: list[Tuple[str, Union[str, Array]]]
+    parameters: list[Tuple[str, Type]]
     segment: Segment
 
     def meta(self) -> str:
@@ -383,8 +388,8 @@ class Procedure(Node):
 @dataclass
 class Function(Node):
     name: str
-    type: Union[str, Array]
-    parameters: list[Tuple[str, Union[str, Array]]]
+    type: Type
+    parameters: list[Tuple[str, Type]]
     segment: Segment
 
     def meta(self) -> str:
@@ -427,8 +432,8 @@ class Assign(Statement):
         return f"ASSIGN {self.name}{indexes} := {self.expression.meta()}"
 
     def c(self) -> str:
-        global variables
-        type = variables.get(self.name)
+        global variables_registry
+        type = variables_registry.get(self.name)
         if type == "STRING":
             return f"strcpy({self.name}.data, {self.expression.c()});"
         indexes = ""
@@ -546,9 +551,9 @@ class Input(Statement):
     def c(self) -> str:
         inputs = []
         for variable in self.variables:
-            if variable not in variables:
+            if variable not in variables_registry:
                 raise Exception(f"undeclared variable '{variable}'")
-            type = variables[variable]
+            type = variables_registry[variable]
             if type == "STRING":
                 inputs.append(f'scanf("%s", {variable}.data);')
             else:
@@ -714,8 +719,8 @@ class ConcatenationOperation(Expression):
         is_character_function = isinstance(v, FunctionCall) and v.name == "CHARACTER"
         skip_str = any([is_string_literal, is_concatenation, is_character_function])
         if isinstance(v, Variable):
-            global variables
-            type = variables.get(v.name)
+            global variables_registry
+            type = variables_registry.get(v.name)
             if type == "STRING":
                 return f"{v.name}.data"
             return f"str({str})"
@@ -869,11 +874,11 @@ class Parser:
             definition = self.type()
             self.eat(";")
             out.append(TypeIs(name, definition))
-            types[name] = definition
+            types_registry[name] = definition
         return out
 
     def variables_section(self) -> list[Declare]:
-        global variables
+        global variables_registry
 
         out: list[Declare] = []
         while self.accept("DECLARE"):
@@ -883,7 +888,7 @@ class Parser:
                 type = self.type()
                 self.eat(";")
                 out.append(Declare([name], type))
-                variables[name] = type
+                variables_registry[name] = type
                 continue
             if token.value == "(":
                 self.eat("(")
@@ -896,7 +901,7 @@ class Parser:
                 self.eat(";")
                 out.append(Declare(names, type))
                 for name in names:
-                    variables[name] = type
+                    variables_registry[name] = type
                 continue
             self.error(f"expected variable and or '(', found '{token.value}' ", token)
         return out
@@ -1286,8 +1291,8 @@ def indent(s: str, n: int) -> str:
     return "\n".join(pad + line for line in s.splitlines())
 
 
-types: dict[str, str | Array | Structure] = {}
-variables: dict[str, str | Array | Structure] = {}
+types_registry: dict[str, str | Array | Structure] = {}
+variables_registry: dict[str, str | Array | Structure] = {}
 
 
 def TYPE(v: str) -> str:
@@ -1295,7 +1300,7 @@ def TYPE(v: str) -> str:
         return v
     if isinstance(v, Structure):
         return v.meta()
-    if v in types:
+    if v in types_registry:
         return v
     type = {"INTEGER": "int", "REAL": "double", "BOOLEAN": "int", "STRING": "STR"}.get(v)
     if not type:
@@ -1359,8 +1364,8 @@ if __name__ == "__main__":
 
     with open(output, "w") as f:
         f.write('#include "preamble.c"\n')
-        if types:
-            for name, definition in types.items():
+        if types_registry:
+            for name, definition in types_registry.items():
                 v = "typedef "
                 if isinstance(definition, Array):
                     v += definition.c(variable=name)
@@ -1368,6 +1373,6 @@ if __name__ == "__main__":
                     v += definition.c() + " " + name
                 v += ";\n"
                 f.write(v)
-        if functions:
-            f.write(functions.strip() + "\n")
+        if globals:
+            f.write(globals.strip() + "\n")
         f.write(compiled.strip() + "\n")

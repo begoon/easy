@@ -1,7 +1,7 @@
 #include "preamble.c"
+int a = {0};
 int main()
 {
-    int a = {0};
     a = 100;
     if (a < 0)
     {

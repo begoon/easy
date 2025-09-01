@@ -7,11 +7,11 @@ PROGRAM Life:
   DECLARE (x, y) INTEGER;
   DECLARE i INTEGER;
 
-  FUNCTION valid(x INTEGER, y INTEGER, w INTEGER, h INTEGER) BOOLEAN:
+  FUNCTION valid(x INTEGER, y INTEGER) BOOLEAN:
     RETURN NOT (x < 0 | x >= w | y < 0 | y >= h);
   END FUNCTION valid;
 
-  FUNCTION neighbours(x INTEGER, y INTEGER, w INTEGER, h INTEGER, field Field) INTEGER:
+  FUNCTION neighbours(x INTEGER, y INTEGER) INTEGER:
     DECLARE n INTEGER;
     DECLARE (xx, yy) INTEGER;
 
@@ -19,7 +19,7 @@ PROGRAM Life:
     FOR xx := x-1 TO x+1 DO
       FOR yy := y-1 TO y+1 DO
         IF xx <> x | yy <> y THEN
-          IF valid(xx, yy, w, h) THEN
+          IF valid(xx, yy) THEN
             IF field[yy][xx] THEN SET n := n + 1; FI;
           FI;
         FI;
@@ -33,7 +33,7 @@ PROGRAM Life:
     OUTPUT CHARACTER(27), "[", "H", CHARACTER(27), "[", "J";
   END PROCEDURE clearscreen;
 
-  PROCEDURE print(w INTEGER, h INTEGER, field Field):
+  PROCEDURE print:
     DECLARE (x, y) INTEGER;
 
     CALL clearscreen;
@@ -54,7 +54,7 @@ PROGRAM Life:
     FOR x := 0 TO w+1 DO OUTPUT "*"; END FOR; OUTPUT " " || CHARACTER(13);
   END PROCEDURE print;
   
-  PROCEDURE glider(w INTEGER, h INTEGER, x INTEGER, y INTEGER, field Field):
+  PROCEDURE glider(x INTEGER, y INTEGER):
     SET field[y][x] := TRUE;
     SET field[y][x+1] := TRUE;
     SET field[y][x+2] := TRUE;
@@ -62,7 +62,7 @@ PROGRAM Life:
     SET field[y+2][x+1] := TRUE;
   END PROCEDURE glider;
 
-  PROCEDURE evolution(w INTEGER, h INTEGER, field Field):
+  PROCEDURE evolution:
     DECLARE (x, y) INTEGER;
     DECLARE n INTEGER;
     DECLARE next Field;
@@ -72,7 +72,7 @@ PROGRAM Life:
         DECLARE alive BOOLEAN;
 
         SET alive := field[y][x];
-        SET n := neighbours(x, y, w, h, field);
+        SET n := neighbours(x, y);
 
         IF alive = TRUE THEN
           IF n < 2 | n > 3 THEN SET alive := FALSE; FI;
@@ -100,21 +100,21 @@ PROGRAM Life:
     END FOR;
   END FOR;
 
-  CALL glider(w, h, 30, 15, field);
-  CALL glider(w, h, 40, 10, field);
-  CALL glider(w, h, 50, 20, field);
+  CALL glider(30, 15);
+  CALL glider(40, 10);
+  CALL glider(50, 20);
 
   FOR i := 1 WHILE TRUE DO
-    CALL print(w, h, field);
+    CALL print;
     OUTPUT "GENERATION: " || i;
 
-    CALL evolution(w, h, field);
+    CALL evolution;
 
     CALL pause(0.3);
 
     IF i MOD 10 = 0 THEN
-      CALL glider(w, h, 40, 10, field);
-      CALL glider(w, h, 30, 15, field);
+      CALL glider(40, 10);
+      CALL glider(30, 15);
     FI;
   END FOR;
 

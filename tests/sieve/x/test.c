@@ -1,4 +1,5 @@
 #include "preamble.c"
+int topnum = {0};
 double abs(double x)
 {
     if (x < 0)
@@ -43,7 +44,6 @@ int integersqrt(int a)
 }
 int main()
 {
-    int topnum = {0};
     scanf("%d", &topnum);
     if (topnum > 0)
     {
