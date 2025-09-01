@@ -89,3 +89,4 @@ void pause(double seconds)
 }
 #pragma clang diagnostic ignored "-Wincompatible-library-redeclaration"
 #pragma clang diagnostic ignored "-Wunused-label"
+#pragma clang diagnostic ignored "-Wunused-variable"

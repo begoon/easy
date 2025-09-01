@@ -1,47 +1,34 @@
 #include "preamble.c"
-typedef int Field[1 + (80 * 25)];
-int offset(int x, int y, int w)
+typedef int Field[0 + 25][0 + 80];
+int valid(int x, int y, int w, int h)
 {
-    return ((y * w) + x);
-    return 0;
-}
-int get(int x, int y, int w, int h, Field field)
-{
-    if ((((x < 0) || (x >= w)) || (y < 0)) || (y >= h))
-    {
-        return 0;
-    }
-    return field[offset(x, y, w)];
-    return 0;
-}
-void set(int x, int y, int w, int h, Field field, int v){
-    if ((((x >= 0) && (x < w)) && (y >= 0)) && (y < h))
-    {
-        field[offset(x, y, w)] = v;
-    }
+    return (!((((x < 0) || (x >= w)) || (y < 0)) || (y >= h)));
 }
 int neighbours(int x, int y, int w, int h, Field field)
 {
     int n = {0};
     int xx, yy = {0};
     n = 0;
-    for (xx = (-1); xx <= 1; xx += 1)
+    for (xx = (x - 1); xx <= (x + 1); xx += 1)
     {
-        for (yy = (-1); yy <= 1; yy += 1)
+        for (yy = (y - 1); yy <= (y + 1); yy += 1)
         {
-            if ((xx != 0) || (yy != 0))
+            if ((xx != x) || (yy != y))
             {
-                n = (n + get((x + xx), (y + yy), w, h, field));
+                if (valid(xx, yy, w, h))
+                {
+                    if (field[yy][xx])
+                    {
+                        n = (n + 1);
+                    }
+                }
             }
         }
     }
     return n;
-    return 0;
 }
-void clearscreen(){
-    output(6, CHARACTER(27), "[", "H", CHARACTER(27), "[", "J");
-}
-void print(int w, int h, Field field){
+void print(int w, int h, Field field)
+{
     int x, y = {0};
     output(2, "** [ EASY LIFE ]", " ");
     for (x = 0; x <= ((w + 1) - 17); x += 1)
@@ -54,9 +41,7 @@ void print(int w, int h, Field field){
         output(1, "*");
         for (x = 0; x <= (w - 1); x += 1)
         {
-            int i = {0};
-            i = offset(x, y, w);
-            if (field[i] == TRUE)
+            if (field[y][x] == TRUE)
             {
                 output(1, "x");
             }
@@ -73,14 +58,16 @@ void print(int w, int h, Field field){
     }
     output(1, concat(2, " ", CHARACTER(13)));
 }
-void glider(int w, int h, int x, int y, Field field){
-    set(x, y, w, h, field, TRUE);
-    set((x + 1), y, w, h, field, TRUE);
-    set((x + 2), y, w, h, field, TRUE);
-    set(x, (y + 1), w, h, field, TRUE);
-    set((x + 1), (y + 2), w, h, field, TRUE);
+void glider(int x, int y, Field field)
+{
+    field[y][x] = TRUE;
+    field[y][(x + 1)] = TRUE;
+    field[y][(x + 2)] = TRUE;
+    field[(y + 1)][x] = TRUE;
+    field[(y + 2)][(x + 1)] = TRUE;
 }
-void evolution(int w, int h, Field field){
+void evolution(int w, int h, Field field)
+{
     int x, y = {0};
     int n = {0};
     Field next = {0};
@@ -89,7 +76,7 @@ void evolution(int w, int h, Field field){
         for (x = 0; x <= (w - 1); x += 1)
         {
             int alive = {0};
-            alive = get(x, y, w, h, field);
+            alive = field[y][x];
             n = neighbours(x, y, w, h, field);
             if (alive == TRUE)
             {
@@ -105,33 +92,45 @@ void evolution(int w, int h, Field field){
                     alive = TRUE;
                 }
             }
-            set(x, y, w, h, next, alive);
+            next[y][x] = alive;
         }
     }
-    for (n = 0; n <= ((w * h) - 1); n += 1)
+    for (y = 0; y <= (h - 1); y += 1)
     {
-        field[n] = next[n];
+        for (x = 0; x <= (w - 1); x += 1)
+        {
+            field[y][x] = next[y][x];
+        }
     }
 }
 int main()
 {
     int w, h = {0};
     Field field = {0};
+    int x, y = {0};
     int i = {0};
     w = 80;
     h = 25;
-    for (i = 0; i <= (w * h); i += 1)
+    for (y = 0; y <= (h - 1); y += 1)
     {
-        field[i] = 0;
+        for (x = 0; x <= (w - 1); x += 1)
+        {
+            field[y][x] = FALSE;
+        }
     }
-    glider(w, h, 30, 15, field);
-    glider(w, h, 40, 10, field);
-    glider(w, h, 50, 20, field);
-    for (i = 1; i <= 2; i += 1)
+    glider(30, 15, field);
+    glider(40, 10, field);
+    glider(50, 20, field);
+    for (i = 1; i <= 12; i += 1)
     {
+        print(w, h, field);
+        output(1, concat(2, "GENERATION: ", str(i)));
         evolution(w, h, field);
+        if ((i % 10) == 0)
+        {
+            glider(40, 10, field);
+            glider(30, 15, field);
+        }
     }
-    print(w, h, field);
-    output(1, concat(2, "GENERATION: ", str(i)));
     exit(0);
 }

@@ -18,9 +18,20 @@ def run(cmd, *args, **kwargs) -> subprocess.CompletedProcess:
     return code
 
 
-def run_tests(name: str | None) -> None:
+def run_tests(filter: str | None) -> None:
+    names = [f.strip() for f in filter.split(",")] if filter else []
+    include = set([name for name in names if not name.startswith("-")])
+    exclude = set([name[1:] for name in names if name.startswith("-")])
+
+    def runnable(test: Path) -> bool:
+        if include and test.name not in include:
+            return False
+        if exclude and test.name in exclude:
+            return False
+        return True
+
     for test in TESTS_FOLDER.iterdir():
-        if test.is_dir() and (name is None or name in test.name):
+        if test.is_dir() and runnable(test):
             process(test)
 
 
@@ -113,7 +124,6 @@ def diff(expected_file: Path, created_file: Path) -> None:
     if update:
         print(f"copy {created_file} -> {expected_file}")
         expected_file.write_text("\n".join(created_lines) + "\n")
-        Path(created_file).unlink()
         return
 
     for i, (expected, created) in enumerate(itertools.zip_longest(expected_lines, created_lines), 1):

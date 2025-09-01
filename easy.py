@@ -3,8 +3,6 @@ import sys
 from dataclasses import dataclass
 from typing import Literal, Optional, Tuple, Union, cast
 
-import pytest
-
 KEYWORDS = {
     "PROGRAM",
     "BEGIN",
@@ -379,7 +377,7 @@ class Procedure(Node):
 
     def c(self) -> str:
         parameters = ", ".join(f"{TYPE(type)} {name}" for name, type in self.parameters)
-        return f"void {self.name}({parameters})" + "{\n" + indent(self.segment.c(), 1) + "\n}"
+        return f"void {self.name}({parameters})" + "\n{\n" + indent(self.segment.c(), 1) + "\n}"
 
 
 @dataclass
@@ -420,17 +418,23 @@ class Statements(Node):
 class Assign(Statement):
     name: str
     expression: Expression
-    index: Optional[Expression] = None
+    indexes: list[Optional[Expression]]
 
     def meta(self) -> str:
-        return f"ASSIGN {self.name}{'[' + self.index.meta() + ']' if self.index else ''} := {self.expression.meta()}"
+        indexes = ""
+        if self.indexes:
+            indexes = "".join(f"[{index.meta()}]" for index in self.indexes)
+        return f"ASSIGN {self.name}{indexes} := {self.expression.meta()}"
 
     def c(self) -> str:
         global variables
         type = variables.get(self.name)
         if type == "STRING":
             return f"strcpy({self.name}.data, {self.expression.c()});"
-        return f"{self.name}{'[' + self.index.c() + ']' if self.index else ''} = {self.expression.c()};"
+        indexes = ""
+        if self.indexes:
+            indexes = "".join(f"[{index.c()}]" for index in self.indexes)
+        return f"{self.name}{indexes} = {self.expression.c()};"
 
 
 @dataclass
@@ -727,19 +731,26 @@ class UnaryOperation(Expression):
         return f"({self.operation}{self.expr.meta()})"
 
     def c(self) -> str:
-        return f"({self.operation}{self.expr.c()})"
+        operation = "!" if self.operation == "NOT" else self.operation
+        return f"({operation}{self.expr.c()})"
 
 
 @dataclass
 class Variable(Expression):
     name: str
-    index: Optional[Expression] = None
+    indexes: Optional[Expression] = None
 
     def meta(self) -> str:
-        return self.name + (f"[{self.index.meta()}]" if self.index else "")
+        indexes = ""
+        if self.indexes:
+            indexes = "".join(f"[{index.meta()}]" for index in self.indexes)
+        return self.name + indexes
 
     def c(self) -> str:
-        return self.name + (self.index and f"[{self.index.c()}]" or "")
+        indexes = ""
+        if self.indexes:
+            indexes = "".join(f"[{index.c()}]" for index in self.indexes)
+        return self.name + indexes
 
 
 @dataclass
@@ -946,7 +957,9 @@ class Parser:
             segment = self.segment()
 
             if token.value == "FUNCTION":
-                segment.statements.statements.append(Return(0))
+                has_return = any(isinstance(v, Return) and v.value is not None for v in segment.statements.statements)
+                if not has_return:
+                    segment.statements.statements.append(Return(0))
 
             self.eat("END")
             self.eat(token.value)
@@ -1090,10 +1103,11 @@ class Parser:
         self.eat(";")
         return Select(expr, cases)
 
-    def return_statement(self, function: bool = True) -> Return:
+    def return_statement(self) -> Return:
         self.eat("RETURN")
-        if function:
-            value = self.expression()
+        if self.accept(";"):
+            return Return()
+        value = self.expression()
         self.eat(";")
         return Return(value)
 
@@ -1141,15 +1155,22 @@ class Parser:
 
     def assignment_statement(self) -> Assign:
         self.eat("SET")
-        name = self.eat("IDENT").value
-        index = None
-        if self.accept("["):
-            index = self.expression()
-            self.eat("]")
+        variable = self.variable_name()
         self.eat(":=")
         expr = self.expression()
         self.eat(";")
-        return Assign(name, expr, index)
+        return Assign(variable.name, expr, variable.indexes)
+
+    def variable_name(self) -> Variable:
+        name = self.eat("IDENT").value
+        while self.accept("."):
+            name += "." + self.eat("IDENT").value
+        indexes = []
+        while self.accept("["):
+            index = self.expression()
+            self.eat("]")
+            indexes.append(index)
+        return Variable(name, indexes)
 
     def call_statement(self) -> Call:
         self.eat("CALL")
@@ -1229,12 +1250,8 @@ class Parser:
     def factor(self) -> Expression:
         token = self.current()
         if token.type == "IDENT":
-            self.i += 1
-            index = None
-            if self.accept("["):
-                index = self.expression()
-                self.eat("]")
-            return Variable(token.value, index)
+            variable = self.variable_name()
+            return variable
         if token.type == "INTEGER":
             self.i += 1
             return IntegerLiteral(int(token.value))
@@ -1295,54 +1312,6 @@ def parse(code: str) -> Program:
 # ---
 
 
-@pytest.mark.parametrize(
-    "input, expected",
-    [
-        ("a", [("IDENT", "a"), ("EOF", "")]),
-        ("a b", [("IDENT", "a"), ("IDENT", "b"), ("EOF", "")]),
-        ("a /* b /* \n */ */ c", [("IDENT", "a"), ("IDENT", "c"), ("EOF", "")]),
-    ],
-)
-def test_tokens(input, expected) -> None:
-    lexer = Lexer(input)
-    tokens = lexer.tokens()
-    assert [(t.type, t.value) for t in tokens] == expected
-
-
-@pytest.mark.parametrize(
-    "input, expected",
-    [
-        ("a", "a"),
-        ("a + b", "(a + b)"),
-        ("+a", "(+a)"),
-        ("-a", "(-a)"),
-        ("a + b * с", "(a + (b * с))"),
-        (
-            '-b + (1 - 2) - LENGTH("3") * 7 XOR 1',
-            "((((-b) + (1 - 2)) - (LENGTH('3') * 7)) ^ 1)",
-        ),
-        ("-b + (1 - 2) - func(" "3" ")", "(((-b) + (1 - 2)) - func(" "3" "))"),
-        ("NOT a < b", "(NOT(a < b))"),
-        ("a || b", "concat(2, str(a), str(b))"),
-        ('"a" || b', 'concat(2, "a", str(b))'),
-        ('"a" || b || c', 'concat(3, "a", str(b), str(c))'),
-        (
-            'a || (b || SUBSTR("abc", 0, 2))',
-            'concat(2, str(a), concat(2, str(b), str(SUBSTR("abc", 0, 2))))',
-        ),
-        (
-            'a || b || SUBSTR("abc", 0, 2)',
-            'concat(3, str(a), str(b), str(SUBSTR("abc", 0, 2)))',
-        ),
-    ],
-)
-def test_expression(input, expected) -> None:
-    result = Parser(Lexer(input).tokens(), input).expression()
-    if not isinstance(expected, str):
-        expected = expected.meta()
-    assert result.meta() == expected, f"\n{expected}\n!=\n{result}\n"
-
-
 def compile(source: str) -> Program:
     return parse(source)
 
@@ -1357,44 +1326,48 @@ def arg(argv: list[str], name: str) -> Optional[str]:
 
 
 if __name__ == "__main__":
-    if len(sys.argv) >= 2:
-        input_file = pathlib.Path(sys.argv[1])
+    if len(sys.argv) < 2:
+        print("usage: easy.py <input.easy> [-o <output.c>] [-t] [-a]")
+        print("  -o <output.c> - specify output C file (default: input.c)")
+        print("  -t            - generate tokens file (default: off)")
+        print("  -a            - generate AST file (default: off)")
+        sys.exit(1)
 
-        source = input_file.read_text()
+    input_file = pathlib.Path(sys.argv[1])
 
-        lexer = Lexer(source)
+    source = input_file.read_text()
 
-        tokens = lexer.tokens()
-        if "-t" in sys.argv:
-            tokens_file = input_file.with_suffix(".tokens")
+    lexer = Lexer(source)
 
-            def format_token(token: Token) -> str:
-                return f"{input_file}:{token.line}:{token.col}\t {token.value}"
+    tokens = lexer.tokens()
+    if "-t" in sys.argv:
+        tokens_file = input_file.with_suffix(".tokens")
 
-            tokens_file.write_text("\n".join(format_token(t) for t in tokens) + "\n")
+        def format_token(token: Token) -> str:
+            return f"{input_file}:{token.line}:{token.col}\t {token.value}"
 
-        ast = Parser(tokens, source).program()
-        if "-a" in sys.argv:
-            ast_file = input_file.with_suffix(".ast")
-            ast_file.write_text(ast.meta() + "\n")
+        tokens_file.write_text("\n".join(format_token(t) for t in tokens) + "\n")
 
-        compiled = ast.c().strip()
+    ast = Parser(tokens, source).program()
+    if "-a" in sys.argv:
+        ast_file = input_file.with_suffix(".ast")
+        ast_file.write_text(ast.meta() + "\n")
 
-        output = arg(sys.argv, "-o") or input_file.with_suffix(".c")
+    compiled = ast.c().strip()
 
-        with open(output, "w") as f:
-            f.write('#include "preamble.c"\n')
-            if types:
-                for name, definition in types.items():
-                    v = "typedef "
-                    if isinstance(definition, Array):
-                        v += definition.c(variable=name)
-                    else:
-                        v += definition.c() + " " + name
-                    v += ";\n"
-                    f.write(v)
-            if functions:
-                f.write(functions.strip() + "\n")
-            f.write(compiled.strip() + "\n")
-    else:
-        pytest.main(["-vvv", __file__])
+    output = arg(sys.argv, "-o") or input_file.with_suffix(".c")
+
+    with open(output, "w") as f:
+        f.write('#include "preamble.c"\n')
+        if types:
+            for name, definition in types.items():
+                v = "typedef "
+                if isinstance(definition, Array):
+                    v += definition.c(variable=name)
+                else:
+                    v += definition.c() + " " + name
+                v += ";\n"
+                f.write(v)
+        if functions:
+            f.write(functions.strip() + "\n")
+        f.write(compiled.strip() + "\n")

@@ -1,6 +1,6 @@
 import pytest
 
-from easy import Lexer, Parser, dump
+from easy import Lexer, Parser
 
 
 @pytest.mark.parametrize(
@@ -25,18 +25,27 @@ def test_tokens(input, expected) -> None:
         ("+a", "(+a)"),
         ("-a", "(-a)"),
         ("a + b * с", "(a + (b * с))"),
-        ('a || (b || SUBSTR("abc", 0, 2))', "(a || (b || SUBSTR('abc', 0, 2)))"),
         (
             '-b + (1 - 2) - LENGTH("3") * 7 XOR 1',
-            "((((-b) + (1 - 2)) - (LENGTH('3') * 7)) XOR 1)",
+            "((((-b) + (1 - 2)) - (LENGTH('3') * 7)) ^ 1)",
         ),
+        ("-b + (1 - 2) - func(" "3" ")", "(((-b) + (1 - 2)) - func(" "3" "))"),
         ("NOT a < b", "(NOT(a < b))"),
+        ("a || b", "concat(2, str(a), str(b))"),
+        ('"a" || b', 'concat(2, "a", str(b))'),
+        ('"a" || b || c', 'concat(3, "a", str(b), str(c))'),
+        (
+            'a || (b || SUBSTR("abc", 0, 2))',
+            'concat(2, str(a), concat(2, str(b), str(SUBSTR("abc", 0, 2))))',
+        ),
+        (
+            'a || b || SUBSTR("abc", 0, 2)',
+            'concat(3, str(a), str(b), str(SUBSTR("abc", 0, 2)))',
+        ),
     ],
 )
 def test_expression(input, expected) -> None:
-    lexer = Lexer(input)
-    tokens = lexer.tokens()
-    actual = Parser(tokens).expression()
+    result = Parser(Lexer(input).tokens(), input).expression()
     if not isinstance(expected, str):
-        expected = dump(expected)
-    assert dump(actual) == expected, f"\n{expected}\n!=\n{actual}\n"
+        expected = expected.meta()
+    assert result.meta() == expected, f"\n{expected}\n!=\n{result}\n"

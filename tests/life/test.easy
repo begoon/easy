@@ -1,45 +1,33 @@
 PROGRAM Life:
-  TYPE Field IS ARRAY[1:80*25] OF BOOLEAN;
+  TYPE Field IS ARRAY[25] OF ARRAY[80] OF BOOLEAN;
 
   DECLARE (w, h) INTEGER;
   DECLARE field Field;
 
+  DECLARE (x, y) INTEGER;
   DECLARE i INTEGER;
 
-  FUNCTION offset(x INTEGER, y INTEGER, w INTEGER) INTEGER:
-    RETURN y * w + x;
-  END FUNCTION offset;
-
-  FUNCTION get(x INTEGER, y INTEGER, w INTEGER, h INTEGER, field Field) INTEGER:
-    IF x < 0 | x >= w | y < 0 | y >= h THEN RETURN 0; FI;
-    RETURN field[offset(x, y, w)];
-  END FUNCTION get;
-
-  PROCEDURE set(x INTEGER, y INTEGER, w INTEGER, h INTEGER, field Field, v BOOLEAN):
-    IF x >= 0 & x < w & y >= 0 & y < h THEN
-      SET field[offset(x, y, w)] := v;
-    FI;
-  END PROCEDURE set;
+  FUNCTION valid(x INTEGER, y INTEGER, w INTEGER, h INTEGER) BOOLEAN:
+    RETURN NOT (x < 0 | x >= w | y < 0 | y >= h);
+  END FUNCTION valid;
 
   FUNCTION neighbours(x INTEGER, y INTEGER, w INTEGER, h INTEGER, field Field) INTEGER:
     DECLARE n INTEGER;
     DECLARE (xx, yy) INTEGER;
 
     SET n := 0;
-    FOR xx := -1 TO 1 DO
-      FOR yy := -1 TO 1 DO
-        IF xx <> 0 | yy <> 0 THEN
-          SET n := n + get(x + xx, y + yy, w, h, field);
+    FOR xx := x-1 TO x+1 DO
+      FOR yy := y-1 TO y+1 DO
+        IF xx <> x | yy <> y THEN
+          IF valid(xx, yy, w, h) THEN
+            IF field[yy][xx] THEN SET n := n + 1; FI;
+          FI;
         FI;
       END FOR;
     END FOR;
 
     RETURN n;
   END FUNCTION neighbours;
-
-  PROCEDURE clearscreen:
-    OUTPUT CHARACTER(27), "[", "H", CHARACTER(27), "[", "J";
-  END PROCEDURE clearscreen;
 
   PROCEDURE print(w INTEGER, h INTEGER, field Field):
     DECLARE (x, y) INTEGER;
@@ -49,9 +37,7 @@ PROGRAM Life:
     FOR y := 0 TO h-1 DO
       OUTPUT "*";
       FOR x := 0 TO w-1 DO
-        DECLARE i INTEGER;
-        SET i := offset(x, y, w);
-        IF field[i] = TRUE THEN
+        IF field[y][x] = TRUE THEN
           OUTPUT "x";
         ELSE
           OUTPUT " ";
@@ -62,12 +48,12 @@ PROGRAM Life:
     FOR x := 0 TO w+1 DO OUTPUT "*"; END FOR; OUTPUT " " || CHARACTER(13);
   END PROCEDURE print;
   
-  PROCEDURE glider(w INTEGER, h INTEGER, x INTEGER, y INTEGER, field Field):
-    CALL set(x, y, w, h, field, TRUE);
-    CALL set(x+1, y, w, h, field, TRUE);
-    CALL set(x+2, y, w, h, field, TRUE);
-    CALL set(x, y+1, w, h, field, TRUE);
-    CALL set(x+1, y+2, w, h, field, TRUE);
+  PROCEDURE glider(x INTEGER, y INTEGER, field Field):
+    SET field[y][x] := TRUE;
+    SET field[y][x+1] := TRUE;
+    SET field[y][x+2] := TRUE;
+    SET field[y+1][x] := TRUE;
+    SET field[y+2][x+1] := TRUE;
   END PROCEDURE glider;
 
   PROCEDURE evolution(w INTEGER, h INTEGER, field Field):
@@ -79,7 +65,7 @@ PROGRAM Life:
       FOR x := 0 TO w-1 DO
         DECLARE alive BOOLEAN;
 
-        SET alive := get(x, y, w, h, field);
+        SET alive := field[y][x];
         SET n := neighbours(x, y, w, h, field);
 
         IF alive = TRUE THEN
@@ -88,28 +74,41 @@ PROGRAM Life:
           IF n = 3 THEN SET alive := TRUE; FI;
         FI;
 
-        CALL set(x, y, w, h, next, alive);
+        SET next[y][x] := alive;
       END FOR;
     END FOR;
 
-    FOR n := 0 TO w*h-1 DO SET field[n] := next[n]; END FOR;
+    FOR y := 0 TO h-1 DO
+      FOR x := 0 TO w-1 DO
+        SET field[y][x] := next[y][x];
+      END FOR;
+    END FOR;
   END PROCEDURE evolution;
 
   SET w := 80;
   SET h := 25;
 
-  FOR i := 0 TO w*h DO SET field[i] := 0; END FOR;
-
-  CALL glider(w, h, 30, 15, field);
-  CALL glider(w, h, 40, 10, field);
-  CALL glider(w, h, 50, 20, field);
-
-  FOR i := 1 TO 2 DO
-    CALL evolution(w, h, field);
+  FOR y := 0 TO h-1 DO
+    FOR x := 0 TO w-1 DO
+      SET field[y][x] := FALSE;
+    END FOR;
   END FOR;
 
-  CALL print(w, h, field);
-  OUTPUT "GENERATION: " || i;
+  CALL glider(30, 15, field);
+  CALL glider(40, 10, field);
+  CALL glider(50, 20, field);
+
+  FOR i := 1 TO 12 DO
+    CALL print(w, h, field);
+    OUTPUT "GENERATION: " || i;
+
+    CALL evolution(w, h, field);
+
+    IF i MOD 10 = 0 THEN
+      CALL glider(40, 10, field);
+      CALL glider(30, 15, field);
+    FI;
+  END FOR;
 
   EXIT;
 

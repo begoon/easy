@@ -1,5 +1,6 @@
 #include "preamble.c"
-void a(int x){
+void a(int x)
+{
     output(1, concat(2, "a(): ", str(x)));
 }
 int main()
