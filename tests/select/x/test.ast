@@ -2,15 +2,15 @@ PROGRAM Test
     Variables:
         a: INTEGER
     Statements:
-        ASSIGN a := 100
+        SET a := 100
         SELECT TRUE
-          CASE (a < 0):
+            CASE (a < 0):
                 Statements:
                     OUTPUT('a < 0')
-          CASE (a == 0):
+            CASE (a == 0):
                 Statements:
                     OUTPUT('a = 0')
-          OTHERWISE:
+            OTHERWISE:
                 Statements:
                     OUTPUT('otherwise')
         END SELECT

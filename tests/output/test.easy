@@ -1,5 +1,8 @@
 PROGRAM Output:
+  DECLARE a INTEGER;
   OUTPUT "00";
   OUTPUT "11", "22";
+  SET a := 123;
+  OUTPUT a;
   EXIT;
 END PROGRAM Output;

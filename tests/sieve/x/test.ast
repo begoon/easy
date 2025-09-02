@@ -15,28 +15,28 @@ PROGRAM Eratosthenes
         FUNCTION integersqrt(INTEGER a) : INTEGER
             Statements:
                 SELECT TRUE
-                  CASE (a < 0):
+                    CASE (a < 0):
                         Statements:
                             OUTPUT('a < 0 in FUNCTION integersqrt.')
                             EXIT
-                  CASE (a == 0):
+                    CASE (a == 0):
                         Statements:
                             RETURN 0
-                  CASE (a > 0):
+                    CASE (a > 0):
                         Variables:
                             x, ra: REAL
                             epsilon: REAL
                             sqrt: INTEGER
                         Statements:
-                            ASSIGN ra := FLOAT(a)
-                            ASSIGN epsilon := (1e-07 * ra)
+                            SET ra := FLOAT(a)
+                            SET epsilon := (1e-07 * ra)
                             FOR x := (ra / 2.0) BY (((ra / x) - x) / 2.0) WHILE (abs((ra - (x * x))) > epsilon) DO
                                 Statements:
-                                    Empty
+                                    EMPTY
                             END FOR
                             FOR sqrt := (FIX(x) - 1) BY 1 WHILE (((sqrt + 1) * (sqrt + 1)) <= a) DO
                                 Statements:
-                                    Empty
+                                    EMPTY
                             END FOR
                             RETURN sqrt
                 END SELECT
@@ -48,12 +48,12 @@ PROGRAM Eratosthenes
                 sieve: ARRAY[1:topnum] OF BOOLEAN
                 i, limit, count: INTEGER
             Statements:
-                ASSIGN topnum := (topnum + 1)
+                SET topnum := (topnum + 1)
                 FOR i := 1 TO topnum DO
                     Statements:
-                        ASSIGN sieve[i] := TRUE
+                        SET sieve[i] := TRUE
                 END FOR
-                ASSIGN limit := (integersqrt(topnum) + 1)
+                SET limit := (integersqrt(topnum) + 1)
                 FOR i := 2 TO limit DO
                     Statements:
                         IF sieve[i] THEN
@@ -62,16 +62,16 @@ PROGRAM Eratosthenes
                             Statements:
                                 FOR j := (2 * i) BY i TO topnum DO
                                     Statements:
-                                        ASSIGN sieve[j] := FALSE
+                                        SET sieve[j] := FALSE
                                 END FOR
                         FI
                 END FOR
-                ASSIGN count := 0
+                SET count := 0
                 FOR i := 1 TO topnum DO
                     Statements:
                         IF sieve[i] THEN
                             Statements:
-                                ASSIGN count := (count + 1)
+                                SET count := (count + 1)
                                 OUTPUT(4:('Prime[' || str(count) || '] = ' || str(i)))
                         FI
                 END FOR

@@ -6,8 +6,8 @@ int main()
     if (a < 0)
     {
         output(1, "a < 0");
-    } else
-    if (a == 0)
+    }
+    else if (a == 0)
     {
         output(1, "a = 0");
     }
