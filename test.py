@@ -2,6 +2,7 @@ import itertools
 import os
 import subprocess
 import sys
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 
 TESTS_FOLDER = Path("tests")
@@ -28,11 +29,19 @@ def run_tests(filter: str | None) -> None:
             return False
         if exclude and test.name in exclude:
             return False
-        return True
+        return test.is_dir()
 
-    for test in TESTS_FOLDER.iterdir():
-        if test.is_dir() and runnable(test):
-            process(test)
+    tests = [t for t in TESTS_FOLDER.iterdir() if runnable(t)]
+
+    max_workers = filter and 1 or (os.cpu_count() or 1)
+    with ThreadPoolExecutor(max_workers=max_workers) as pool:
+        futures = {pool.submit(process, t): t for t in tests}
+        for fut in as_completed(futures):
+            t = futures[fut]
+            try:
+                fut.result()
+            except Exception as e:
+                print(f"[{t.name}] failed: {e}")
 
 
 def process(test: Path) -> None:
