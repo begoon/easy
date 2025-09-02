@@ -1,8 +1,8 @@
-Program Output
+PROGRAM Output
     Subroutines:
         PROCEDURE a(x)
             Statements:
-                OUTPUT(concat(2, "a(): ", str(x)))
+                OUTPUT(2:('a(): ' || str(x)))
     Statements:
         CALL a(100)
         EXIT

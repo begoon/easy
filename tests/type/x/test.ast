@@ -1,4 +1,4 @@
-Program Type
+PROGRAM Type
     Types:
         Field: ARRAY[1:100] OF INTEGER
     Subroutines:

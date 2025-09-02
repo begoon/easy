@@ -210,24 +210,12 @@ class Node:
         raise NotImplementedError()
 
 
-@dataclass
-class Program(Node):
-    name: str
-    segment: "Segment"
-
-    def meta(self) -> str:
-        return f"Program {self.name}" + "\n" + indent(self.segment.meta(), 1)
-
-    def c(self) -> str:
-        return "int main()" + "\n" + "{\n" + indent(self.segment.c(main=True), 1) + "\n}"
-
-
 Subroutine = Union["Function", "Procedure"]
 
 
 @dataclass
 class Segment:
-    types: list["TypeIs"]
+    types: list["CustomType"]
     variables: list["Declare"]
     subroutines: list[Subroutine]
     statements: "Statements"
@@ -308,21 +296,9 @@ class Declare:
 
 
 @dataclass
-class TypeIs:
+class CustomType:
     name: str
     definition: Union[str, "Array", "Structure"]
-
-    def c(self, /, variable: str = "") -> str:
-        1 / 0
-        definition = self.definition
-        if isinstance(definition, Array):
-            type = definition.c(variable)
-        elif isinstance(definition, Structure):
-            type = definition.c() + " " + self.name
-        else:
-            type = TYPE(definition)
-        1 / 0
-        return "typedef " + type + " " + self.name + ";"
 
 
 @dataclass
@@ -704,27 +680,41 @@ class ConcatenationOperation(Expression):
     parts: list[Expression]
 
     def meta(self) -> str:
-        parts = [ConcatenationOperation.format_part(v) for v in self.parts]
-        return f"concat({len(parts)}, {', '.join(parts)})"
+        def format(v: Expression) -> str:
+            if isinstance(v, StringLiteral):
+                return repr(v.value)
+
+            if isinstance(v, ConcatenationOperation):
+                return v.meta()
+
+            if isinstance(v, FunctionCall) and v.name == "CHARACTER":
+                return v.meta()
+
+            s = v.meta()
+            return f"str({s})"
+
+        parts = [format(v) for v in self.parts]
+        return f"{len(parts)}:(" + " || ".join(parts) + ")"
 
     def c(self) -> str:
-        parts = [ConcatenationOperation.format_part(v) for v in self.parts]
-        return f"concat({len(parts)}, {', '.join(parts)})"
+        def format(v: Expression, is_meta: bool) -> str:
+            is_concatenation = isinstance(v, ConcatenationOperation)
+            is_string_literal = isinstance(v, StringLiteral)
+            is_character_function = isinstance(v, FunctionCall) and v.name == "CHARACTER"
 
-    @staticmethod
-    def format_part(v: Expression) -> str:
-        str = v.c()
-        is_string_literal = isinstance(v, StringLiteral)
-        is_concatenation = isinstance(v, ConcatenationOperation)
-        is_character_function = isinstance(v, FunctionCall) and v.name == "CHARACTER"
-        skip_str = any([is_string_literal, is_concatenation, is_character_function])
-        if isinstance(v, Variable):
-            global variables_registry
-            type = variables_registry.get(v.name)
-            if type == "STRING":
-                return f"{v.name}.data"
-            return f"str({str})"
-        return str if skip_str else f"str({str})"
+            skip_stringify = any([is_string_literal, is_concatenation, is_character_function])
+
+            str = v.meta() if is_meta else v.c()
+            if isinstance(v, Variable):
+                global variables_registry
+                type = variables_registry.get(v.name)
+                if type == "STRING":
+                    return f"{v.name}.data"
+                return f"str({str})"
+            return str if skip_stringify else f"str({str})"
+
+        parts = [format(v, is_meta=False) for v in self.parts]
+        return f"concat({len(parts)}, {', '.join(parts)})"
 
 
 @dataclass
@@ -743,18 +733,14 @@ class UnaryOperation(Expression):
 @dataclass
 class Variable(Expression):
     name: str
-    indexes: Optional[Expression] = None
+    indexes: list[Optional[Expression]] = None
 
     def meta(self) -> str:
-        indexes = ""
-        if self.indexes:
-            indexes = "".join(f"[{index.meta()}]" for index in self.indexes)
+        indexes = "".join(f"[{index.meta()}]" for index in self.indexes) if self.indexes else ""
         return self.name + indexes
 
     def c(self) -> str:
-        indexes = ""
-        if self.indexes:
-            indexes = "".join(f"[{index.c()}]" for index in self.indexes)
+        indexes = "".join(f"[{index.c()}]" for index in self.indexes) if self.indexes else ""
         return self.name + indexes
 
 
@@ -763,7 +749,7 @@ class IntegerLiteral(Expression):
     value: int
 
     def meta(self) -> str:
-        return str(self.value)
+        return repr(self.value)
 
     def c(self) -> str:
         return str(self.value)
@@ -774,7 +760,7 @@ class RealLiteral(Expression):
     value: float
 
     def meta(self) -> str:
-        return str(self.value)
+        return repr(self.value)
 
     def c(self) -> str:
         return str(self.value)
@@ -796,10 +782,26 @@ class BoolLiteral(Expression):
     value: bool
 
     def meta(self) -> str:
-        return "true" if self.value else "false"
+        return "TRUE" if self.value else "FALSE"
 
     def c(self) -> str:
         return "1" if self.value else "0"
+
+
+def block(lines: list[str]) -> str:
+    return "\n".join(lines)
+
+
+@dataclass
+class Program(Node):
+    name: str
+    segment: Segment
+
+    def meta(self) -> str:
+        return block([f"PROGRAM {self.name}", indent(self.segment.meta(), 1)])
+
+    def c(self) -> str:
+        return block(["int main()", "{", indent(self.segment.c(main=True), 1), "}"])
 
 
 class ParseError(Exception):
@@ -866,14 +868,14 @@ class Parser:
         statements = self.statements()
         return Segment(types, variables, subroutines, statements)
 
-    def types_section(self) -> list[TypeIs]:
-        out: list[TypeIs] = []
+    def types_section(self) -> list[CustomType]:
+        out: list[CustomType] = []
         while self.accept("TYPE"):
             name = self.eat("IDENT").value
             self.eat("IS")
             definition = self.type()
             self.eat(";")
-            out.append(TypeIs(name, definition))
+            out.append(CustomType(name, definition))
             types_registry[name] = definition
         return out
 
@@ -1188,61 +1190,61 @@ class Parser:
         return Call(name, args)
 
     def expression(self) -> Expression:
-        return self.expression_or_xor()
+        return self.expression_OR_XOR()
 
-    def expression_or_xor(self) -> Expression:
-        left = self.expression_and()
+    def expression_OR_XOR(self) -> Expression:
+        left = self.expression_AND()
         while operation := self.accept(("|", "XOR")):
-            right = self.expression_and()
+            right = self.expression_AND()
             operation.value = {"|": "||", "XOR": "^"}.get(operation.value, operation.value)
             left = BinaryOperation(operation.value, left, right)
         return left
 
-    def expression_and(self) -> Expression:
-        left = self.expression_not()
+    def expression_AND(self) -> Expression:
+        left = self.expression_NOT()
         while operation := self.accept(("&",)):
-            right = self.expression_not()
+            right = self.expression_NOT()
             operation.value = "&&"
             left = BinaryOperation(operation.value, left, right)
         return left
 
-    def expression_not(self) -> Expression:
+    def expression_NOT(self) -> Expression:
         if self.accept("NOT"):
-            return UnaryOperation("NOT", self.expression_not())
+            return UnaryOperation("NOT", self.expression_NOT())
         return self.expression_relation()
 
     def expression_relation(self) -> Expression:
-        left = self.expression_concatenation()
+        left = self.expression_CONCATENATION()
         while operation := self.accept(("<", ">", "=", "<=", ">=", "<>")):
-            right = self.expression_concatenation()
+            right = self.expression_CONCATENATION()
             operation.value = {"=": "==", "<>": "!="}.get(operation.value, operation.value)
             left = BinaryOperation(operation.value, left, right)
         return left
 
-    def expression_concatenation(self) -> Expression:
-        parts = [self.expression_adding()]
+    def expression_CONCATENATION(self) -> Expression:
+        parts = [self.expression_ADDING()]
         while self.accept(("||",)):
-            parts.append(self.expression_adding())
+            parts.append(self.expression_ADDING())
         if len(parts) == 1:
             return parts[0]
         return ConcatenationOperation(parts)
 
-    def expression_adding(self) -> Expression:
-        left = self.expression_multiplying()
+    def expression_ADDING(self) -> Expression:
+        left = self.expression_MULTIPLYING()
         while operation := self.accept(("+", "-")):
-            right = self.expression_multiplying()
+            right = self.expression_MULTIPLYING()
             left = BinaryOperation(operation.value, left, right)
         return left
 
-    def expression_multiplying(self) -> Expression:
-        left = self.expression_function_call()
+    def expression_MULTIPLYING(self) -> Expression:
+        left = self.expression_FUNCTION_CALL()
         while operation := self.accept(("*", "/", "MOD")):
-            right = self.expression_function_call()
+            right = self.expression_FUNCTION_CALL()
             operation.value = {"MOD": "%"}.get(operation.value, operation.value)
             left = BinaryOperation(operation.value, left, right)
         return left
 
-    def expression_function_call(self) -> Expression | FunctionCall:
+    def expression_FUNCTION_CALL(self) -> Expression | FunctionCall:
         name = self.current()
         if name.type == "IDENT" and self.peek().value == "(":
             self.i += 1
@@ -1280,9 +1282,6 @@ class Parser:
         if token.type in ("TRUE", "FALSE"):
             self.i += 1
             return BoolLiteral(token.type == "TRUE")
-        if token.type == "IDENT" and token.value.lower() in ("true", "false"):
-            self.i += 1
-            return BoolLiteral(token.value.lower() == "true")
         self.error(f"unexpected token {token.type}('{token.value}')", token)
 
 

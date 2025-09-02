@@ -36,12 +36,18 @@ def run_tests(filter: str | None) -> None:
     max_workers = filter and 1 or (os.cpu_count() or 1)
     with ThreadPoolExecutor(max_workers=max_workers) as pool:
         futures = {pool.submit(process, t): t for t in tests}
-        for fut in as_completed(futures):
-            t = futures[fut]
+        failed = []
+        for future in as_completed(futures):
+            task = futures[future]
             try:
-                fut.result()
+                future.result()
             except Exception as e:
-                print(f"[{t.name}] failed: {e}")
+                failed.append(task)
+                print(f"[{task.name}] failed: {e}")
+        if failed:
+            print("failed tests:")
+            for t in failed:
+                print(f" - {t.name}")
 
 
 def process(test: Path) -> None:
