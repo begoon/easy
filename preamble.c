@@ -12,7 +12,7 @@ typedef struct
 } STR;
 int FIX(double v) { return (int)v; }
 double FLOAT(int v) { return (double)v; }
-int LENGTH(STR s) { return strlen(s.data); }
+int LENGTH(char *s) { return strlen(s); }
 char *CHARACTER(int c)
 {
     char *v = malloc(2);

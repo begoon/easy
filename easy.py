@@ -422,7 +422,15 @@ class SetStatement(Statement):
         global variables_registry
         type = variables_registry.get(self.name)
         if type == "STRING":
-            return f"strcpy({self.name}.data, {self.expression.c()});"
+
+            def T(v: str) -> str:
+                if v.startswith('""'):
+                    v = v[0] + "\\" + v[1:]
+                if v.endswith('""'):
+                    v = v[:-2] + "\\" + v[-2:]
+                return v
+
+            return f"strcpy({self.name}.data, {T(self.expression.c())});"
         indexes = "".join(f"[{index.c()}]" for index in self.indexes) if self.indexes else ""
         return f"{self.name}{indexes} = {self.expression.c()};"
 
@@ -665,7 +673,14 @@ class FunctionInvoke(Expression):
         return f"{self.name}({', '.join(a.meta() for a in self.arguments)})"
 
     def c(self) -> str:
-        return f"{self.name}({', '.join(a.c() for a in self.arguments)})"
+        def format(argument: Expression) -> str:
+            if isinstance(argument, Variable):
+                type = variables_registry.get(argument.name)
+                if type == "STRING":
+                    return f"{argument.name}.data"
+            return argument.c()
+
+        return f"{self.name}({', '.join(format(a) for a in self.arguments)})"
 
 
 @dataclass
@@ -693,7 +708,7 @@ class ConcatenationOperation(Expression):
             if isinstance(v, ConcatenationOperation):
                 return v.meta()
 
-            if isinstance(v, FunctionInvoke) and v.name == "CHARACTER":
+            if isinstance(v, FunctionInvoke) and v.name in "CHARACTER":
                 return v.meta()
 
             s = v.meta()
@@ -703,14 +718,14 @@ class ConcatenationOperation(Expression):
         return f"{len(parts)}:(" + " || ".join(parts) + ")"
 
     def c(self) -> str:
-        def format(v: Expression, is_meta: bool) -> str:
+        def format(v: Expression) -> str:
             is_concatenation = isinstance(v, ConcatenationOperation)
             is_string_literal = isinstance(v, StringLiteral)
-            is_character_function = isinstance(v, FunctionInvoke) and v.name == "CHARACTER"
+            is_function = isinstance(v, FunctionInvoke) and v.name in ("CHARACTER", "SUBSTR")
 
-            skip_stringify = any([is_string_literal, is_concatenation, is_character_function])
+            skip_stringify = any([is_string_literal, is_concatenation, is_function])
 
-            str = v.meta() if is_meta else v.c()
+            str = v.c()
             if isinstance(v, Variable):
                 global variables_registry
                 type = variables_registry.get(v.name)
@@ -719,7 +734,7 @@ class ConcatenationOperation(Expression):
                 return f"str({str})"
             return str if skip_stringify else f"str({str})"
 
-        parts = [format(v, is_meta=False) for v in self.parts]
+        parts = [format(v) for v in self.parts]
         return f"concat({len(parts)}, {', '.join(parts)})"
 
 
