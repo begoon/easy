@@ -568,8 +568,9 @@ class OutputStatement(Statement):
         def format(argument: Expression) -> str:
             v = argument.c()
             if isinstance(argument, Variable):
-                assert argument.name in variables_registry, f"undeclared variable in OUTPUT '{argument}'"
-                type = variables_registry[argument.name]
+                name = argument.name.split(".", 1)[0]
+                assert name in variables_registry, f"undeclared variable in OUTPUT '{argument}'"
+                type = variables_registry[name]
                 if type != "STRING":
                     return f"str({v})"
             return v
@@ -957,6 +958,7 @@ class Parser:
             fields.append(FieldStatement(name, type))
 
             while self.accept(","):
+                self.eat("FIELD")
                 name = self.eat("IDENT").value
                 self.eat("IS")
                 type = self.type()

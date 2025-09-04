@@ -3,4 +3,5 @@ PROGRAM Array:
   DECLARE b B;
   SET b[1][2] := b[2][1];
   OUTPUT ".";
+  EXIT;
 END PROGRAM Array;

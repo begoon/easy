@@ -1,4 +1,4 @@
-PROGRAM Output:
+PROGRAM Call:
   PROCEDURE a(x INTEGER):
     OUTPUT "a(): " || x;
   END PROCEDURE a;
@@ -6,4 +6,4 @@ PROGRAM Output:
   CALL a(100);
 
   EXIT;
-END PROGRAM Output;
+END PROGRAM Call;

@@ -1,0 +1,9 @@
+PROGRAM Test:
+    TYPE Point IS STRUCTURE FIELD x IS INTEGER, FIELD y IS INTEGER END STRUCTURE;
+    DECLARE p Point;
+    BEGIN
+        SET p.x := 1;
+        SET p.y := 2;
+        OUTPUT p.x, p.y;
+    END;
+END PROGRAM Test;

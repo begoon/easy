@@ -1,4 +1,4 @@
-PROGRAM Output
+PROGRAM Call
     Subroutines:
         PROCEDURE a(x)
             Statements:

@@ -2,4 +2,5 @@ PROGRAM A:
   DECLARE x INTEGER;
   DECLARE (a, b) STRING;
   SET x := a || (b || SUBSTR("abc", 0, 2));
+  EXIT;
 END PROGRAM A;

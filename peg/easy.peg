@@ -1,0 +1,245 @@
+# ===== LEXICAL =====
+
+Identifier <- !Keyword [A-Za-z_] [A-Za-z0-9_]*
+Real       <- [0-9]+ '.' [0-9]+ ([eE] [+\-]? [0-9]+)?
+Integer    <- [0-9]+
+String     <- '"' ( '\\"' / !'"' . )* '"' / "'" ( "\\'" / !"'" . )* "'"
+Boolean    <- 'TRUE'i / 'FALSE'i
+
+Keyword <- 'PROGRAM'i / 'END'i / 'EXTERNAL'i / 'PROCEDURE'i / 'FUNCTION'i
+         / 'TYPE' / 'IS'i / 'ARRAY' / 'OF'i / 'STRUCTURE'i / 'FIELD'
+         / 'DECLARE'i / 'NAME'i / 'BEGIN'i / 'FOR'i / 'DO'i / 'BY'i / 'TO'i
+         / 'WHILE'i / 'IF'i / 'THEN'i / 'ELSE'i / 'FI'i
+         / 'CALL'i / 'RETURN'i / 'EXIT'i
+         / 'SELECT'i / 'CASE'i / 'OTHERWISE'i
+         / 'REPEAT'i / 'REPENT'i / 'INPUT'i / 'OUTPUT'
+         / 'INTEGER'i / 'REAL'i / 'BOOLEAN'i / 'STRING'i
+         / 'MOD'i / 'XOR'i / 'NOT'i / 'FLOOR'i / 'LENGTH'i / 'SUBSTR'
+         / 'CHARACTER' / 'NUMBER'i / 'FLOAT'i / 'FIX'i
+
+# ===== TOP LEVEL =====
+
+compilation <- program_segment+
+
+program_segment <- main:main_program / ext:external_procedure
+
+# ===== PROGRAMS =====
+
+main_program <-
+    'PROGRAM'i name:Identifier ':' body:segment_body
+    'END'i 'PROGRAM'i end_name:Identifier ';'
+
+# ===== EXTERNAL PROCEDURES =====
+
+external_procedure <- external_subprogram / external_function
+
+external_subprogram <-
+    external_subprogram_head ':' body:segment_body
+    'END'i 'EXTERNAL'i 'PROCEDURE'i end_name:Identifier ';'
+
+external_function <-
+    external_function_head ':' body:segment_body
+    'END'i 'EXTERNAL'i 'FUNCTION'i end_name:Identifier ';'
+
+external_subprogram_head <- 'EXTERNAL'i 'PROCEDURE'i name:external_procedure_name
+external_function_head   <- 'EXTERNAL'i 'FUNCTION'i  name:external_procedure_name ret:external_type
+
+external_procedure_name <- Identifier / Identifier params:external_parameter_list
+external_parameter_list <- '(' head:external_parameter (',' tail:external_parameter)* ')'
+external_parameter      <- id:Identifier t:external_type name_kw:('NAME'i)?
+
+external_type <- bt:basic_type
+
+# ===== SEGMENTS =====
+
+segment_body <-
+    type_defs:type_definition*
+    var_decls:variable_declaration*
+    proc_defs:procedure_definition*
+    stmts:executable_statement+
+
+# ===== TYPES =====
+
+type_definition <- 'TYPE' name:Identifier 'IS'i def:type ';'
+
+type <- bt:basic_type / arr:arrayed_type / str:structured_type / ref:type_identifier
+
+basic_type <- 'INTEGER'i / 'REAL'i / 'BOOLEAN'i / 'STRING'i
+
+arrayed_type <- 'ARRAY' bounds 'OF'i elem:type
+
+bounds <- '[' lo:expression ']' / '[' lo:expression ':' hi:expression ']'
+
+structured_type <- 'STRUCTURE' fields:field_list 'END'i 'STRUCTURE'i
+
+# right-recursive to avoid repetition corner cases
+field_list <- head:field (',' tail:field_list)?
+field      <- 'FIELD' name:Identifier 'IS'i t:type
+
+type_identifier <- name:Identifier
+
+# ===== DECLARATIONS =====
+
+variable_declaration <- 'DECLARE'i names:declared_names t:type ';'
+declared_names       <- head:Identifier (',' tail:Identifier)*
+
+# ===== INTERNAL PROCEDURES =====
+
+procedure_definition <- subprogram_definition / function_definition / external_subprogram_def / external_function_def
+
+subprogram_definition <- subprogram_head ':' body:segment_body 'END'i 'PROCEDURE'i end_name:Identifier ';'
+function_definition   <- function_head   ':' body:segment_body 'END'i 'FUNCTION'i  end_name:Identifier ';'
+
+external_subprogram_def <- head:external_subprogram_head ';'
+external_function_def   <- head:external_function_head ';'
+
+subprogram_head <- 'PROCEDURE'i name:procedure_name
+function_head   <- 'FUNCTION'i  name:procedure_name ret:type
+
+procedure_name <- Identifier / Identifier params:internal_parameter_list
+internal_parameter_list <- '(' head:internal_parameter (',' tail:internal_parameter)* ')'
+internal_parameter      <- id:Identifier t:type name_kw:('NAME'i)?
+
+# ===== EXECUTABLE STATEMENTS =====
+
+executable_statement <-
+      assignment_statement
+    / call_statement
+    / return_statement
+    / exit_statement
+    / conditional_statement
+    / compound_statement
+    / iteration_statement
+    / selection_statement
+    / repeat_statement
+    / repent_statement
+    / input_statement
+    / output_statement
+    / null_statement
+
+# ----- ASSIGNMENTS -----
+
+assignment_statement <- 'SET'i targets:target+ expr:expression ';'
+target <- var:variable ':='
+
+# ----- PROCEDURE CALLS -----
+
+call_statement <- 'CALL'i ref:procedure_reference ';'
+
+procedure_reference <- id:procedure_identifier / id:procedure_identifier args:actual_argument_list
+procedure_identifier <- name:Identifier
+actual_argument_list <- '(' head:expression (',' tail:expression)* ')'
+
+# ----- RETURNS -----
+
+return_statement <- 'RETURN'i ';' / 'RETURN'i value:expression ';'
+
+# ----- EXITS -----
+
+exit_statement <- 'EXIT'i ';'
+
+# ----- CONDITIONALS -----
+
+conditional_statement <- simple_conditional_statement / label simple_conditional_statement
+
+simple_conditional_statement <-
+      'IF'i cond:expression 'THEN'i then_body:segment_body 'FI'i ';'
+    / 'IF'i cond:expression 'THEN'i then_body:segment_body 'ELSE'i else_body:segment_body 'FI'i ';'
+
+label <- name:Identifier ':'
+
+# ----- COMPOUND -----
+
+compound_statement <- simple_compound / label simple_compound
+simple_compound <- 'BEGIN'i body:segment_body ('END'i end_name:Identifier ';' / 'END'i ';')
+
+# ----- ITERATIONS -----
+
+iteration_statement <- simple_iteration_statement / label simple_iteration_statement
+
+simple_iteration_statement <-
+    'FOR'i tgt:iteration_target ctrl:control 'DO'i body:segment_body
+    ('END'i 'FOR'i end_name:Identifier ';' / 'END'i 'FOR'i ';')
+
+iteration_target <- var:variable ':='
+control <- step_control / while_control
+
+step_control <-
+      init:initial_value step:step limit:limit
+    / init:initial_value limit:limit
+    / init:initial_value step:step
+
+initial_value <- expression
+step          <- 'BY'i value:expression
+limit         <- 'TO'i value:expression
+while_control <- 'WHILE'i cond:expression
+
+# ----- SELECTION -----
+
+selection_statement <- simple_selection / label simple_selection
+
+simple_selection <-
+    'SELECT'i sel:expression 'OF'i body:selection_body end:selection_end
+
+selection_body <- cases:case_list / cases:case_list esc:escape_case
+selection_end  <- 'END'i 'SELECT'i end_name:Identifier ';' / 'END'i 'SELECT'i ';'
+
+case_list <- head:case (tail:case)*
+case <- 'CASE'i sel:selector ':' body:case_body
+selector   <- '(' head:expression (',' tail:expression)* ')'
+escape_case <- 'OTHERWISE'i ':' body:case_body
+case_body   <- segment_body
+
+# ----- REPEAT / REPENT -----
+
+repeat_statement <- 'REPEAT'i name:Identifier ';'
+repent_statement <- 'REPENT'i name:Identifier ';'
+
+# ----- INPUT / OUTPUT -----
+
+input_statement  <- 'INPUT'i  list:input_list ';'
+input_list       <- head:variable (',' tail:variable)*
+
+output_statement <- 'OUTPUT'i list:output_list ';'
+output_list      <- head:expression (',' tail:expression)*
+
+# ----- NULL / LABEL -----
+
+null_statement <- ';'
+
+# ===== EXPRESSIONS =====
+
+expression      <- xor_expr
+xor_expr        <- head:or_expr ( 'XOR'i tail:or_expr )*
+or_expr         <- head:and_expr ( '|'   tail:and_expr )*
+and_expr        <- head:not_expr ( '&'   tail:not_expr )*
+
+not_expr    <- 'NOT'i inner:rel_expr / rel_expr
+rel_expr    <- head:concat_expr ( op:relation rhs:concat_expr )*
+concat_expr <- head:add_expr    ( '||' tail:add_expr )*
+add_expr    <- head:mul_expr    ( op:adding_operator rhs:mul_expr )*
+mul_expr    <- head:unary_expr  ( op:multiplying_operator rhs:unary_expr )*
+unary_expr  <- sign:adding_operator expr:postfix_expr / postfix_expr
+postfix_expr <- primary
+
+primary <- function_reference / variable / constant / '(' inner:expression ')'
+
+relation            <- '<=' / '>=' / '<>' / '<' / '>' / '='
+adding_operator     <- '+' / '-'
+multiplying_operator <- '*' / '/' / 'MOD'i
+
+# ----- VARIABLES -----
+
+variable <- base:Identifier parts:( ('.' field:Identifier) / ('[' index:expression ']') )*
+
+# ----- CONSTANTS -----
+
+constant <- Real / Integer / Boolean / String
+
+# ----- FUNCTION CALLS -----
+
+function_reference <-
+      fn:function_identifier '(' ')'
+    / fn:function_identifier '(' head:expression (',' tail:expression)* ')'
+
+function_identifier <- name:Identifier
