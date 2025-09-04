@@ -1,7 +1,7 @@
 default: test-unit test-compiler
 
 test-unit:
-    uv run pytest -vvv
+    uv run pytest
 
 test-compiler:
     uv run python test.py

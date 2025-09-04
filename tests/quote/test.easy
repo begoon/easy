@@ -1,0 +1,10 @@
+PROGRAM Quote: 
+  DECLARE s STRING;
+
+  SET s := """";
+  OUTPUT s;
+  OUTPUT "";
+  OUTPUT """";
+  OUTPUT s;
+  EXIT;
+END PROGRAM Quote;

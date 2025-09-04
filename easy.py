@@ -423,14 +423,12 @@ class SetStatement(Statement):
         type = variables_registry.get(self.name)
         if type == "STRING":
 
-            def T(v: str) -> str:
-                if v.startswith('""'):
-                    v = v[0] + "\\" + v[1:]
-                if v.endswith('""'):
-                    v = v[:-2] + "\\" + v[-2:]
-                return v
+            def T(v: Expression) -> str:
+                if not isinstance(v, StringLiteral):
+                    return v.c()
+                return '"' + v.c()[1:-1].replace('"', '\\"') + '"'
 
-            return f"strcpy({self.name}.data, {T(self.expression.c())});"
+            return f"strcpy({self.name}.data, {T(self.expression)});"
         indexes = "".join(f"[{index.c()}]" for index in self.indexes) if self.indexes else ""
         return f"{self.name}{indexes} = {self.expression.c()};"
 
@@ -565,15 +563,19 @@ class OutputStatement(Statement):
         return f"OUTPUT({', '.join(e.meta() for e in self.arguments)})"
 
     def c(self) -> str:
+        def T(v: Expression) -> str:
+            if not isinstance(v, StringLiteral):
+                return v.c()
+            return '"' + v.c()[1:-1].replace('"', '\\"') + '"'
+
         def format(argument: Expression) -> str:
-            v = argument.c()
             if isinstance(argument, Variable):
                 name = argument.name.split(".", 1)[0]
                 assert name in variables_registry, f"undeclared variable in OUTPUT '{argument}'"
                 type = variables_registry[name]
                 if type != "STRING":
-                    return f"strconv({v})"
-            return v
+                    return f"strconv({argument.c()})"
+            return T(argument)
 
         arguments = ", ".join(format(argument) for argument in self.arguments)
         return f"output({len(self.arguments)}, {arguments});"
