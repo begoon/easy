@@ -124,7 +124,7 @@ int main()
     for (i = 1; i <= 12; i += 1)
     {
         print();
-        output(1, concat(2, "GENERATION: ", str(i)));
+        output(1, concat(2, "GENERATION: ", strconv(i)));
         evolution();
         if ((i % 10) == 0)
         {

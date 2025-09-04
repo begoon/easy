@@ -2,7 +2,7 @@ PROGRAM Call
     Subroutines:
         PROCEDURE a(x)
             Statements:
-                OUTPUT(2:('a(): ' || str(x)))
+                OUTPUT(2:('a(): ' || strconv(x)))
     Statements:
         CALL a(100)
         EXIT

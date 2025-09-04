@@ -572,7 +572,7 @@ class OutputStatement(Statement):
                 assert name in variables_registry, f"undeclared variable in OUTPUT '{argument}'"
                 type = variables_registry[name]
                 if type != "STRING":
-                    return f"str({v})"
+                    return f"strconv({v})"
             return v
 
         arguments = ", ".join(format(argument) for argument in self.arguments)
@@ -713,7 +713,7 @@ class ConcatenationOperation(Expression):
                 return v.meta()
 
             s = v.meta()
-            return f"str({s})"
+            return f"strconv({s})"
 
         parts = [format(v) for v in self.parts]
         return f"{len(parts)}:(" + " || ".join(parts) + ")"
@@ -732,8 +732,8 @@ class ConcatenationOperation(Expression):
                 type = variables_registry.get(v.name)
                 if type == "STRING":
                     return f"{v.name}.data"
-                return f"str({str})"
-            return str if skip_stringify else f"str({str})"
+                return f"strconv({str})"
+            return str if skip_stringify else f"strconv({str})"
 
         parts = [format(v) for v in self.parts]
         return f"concat({len(parts)}, {', '.join(parts)})"

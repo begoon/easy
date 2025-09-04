@@ -29,7 +29,7 @@ char *SUBSTR(const char *str, int start, int length)
     sub[length] = '\0';
     return sub;
 }
-char *str(int v)
+char *strconv(int v)
 {
     char *s = malloc(12);
     sprintf(s, "%d", v);
