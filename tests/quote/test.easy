@@ -6,6 +6,6 @@ PROGRAM Quote:
   OUTPUT "";
   OUTPUT """";
   OUTPUT s;
-  OUTPUT ".";
+  OUTPUT "...";
   EXIT;
 END PROGRAM Quote;
