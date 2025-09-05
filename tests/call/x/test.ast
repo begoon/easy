@@ -1,8 +1,15 @@
 PROGRAM Call
+    Variables:
+        x: INTEGER
     Subroutines:
         PROCEDURE a(x)
             Statements:
                 OUTPUT(2:('a(): ' || strconv(x)))
+        FUNCTION b(INTEGER x) : INTEGER
+            Statements:
+                RETURN (x + 1)
     Statements:
         CALL a(100)
+        SET x := b(100)
+        OUTPUT(x)
         EXIT

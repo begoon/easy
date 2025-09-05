@@ -6,7 +6,7 @@
         {
             "type": "variable",
             "base": "c",
-            "parts": [{ "index": ["0"] }, { "field": "x" }, { "index": ["2"] }, { "index": ["1"] }, { "field": "t" }]
+            "parts": [{ "index": "0" }, { "field": "x" }, { "index": "2" }, { "index": "1" }, { "field": "t" }]
         }
     ]
 }

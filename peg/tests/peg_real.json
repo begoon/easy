@@ -1,0 +1,35 @@
+[
+    {
+        "type": "program_segment",
+        "main": {
+            "type": "main_program",
+            "name": "Real",
+            "body": {
+                "type": "segment_body",
+                "stmts": [
+                    {
+                        "type": "assignment_statement",
+                        "targets": [{ "type": "target", "var": { "type": "variable", "base": "a", "parts": [] } }],
+                        "expr": "2."
+                    },
+                    {
+                        "type": "assignment_statement",
+                        "targets": [{ "type": "target", "var": { "type": "variable", "base": "a", "parts": [] } }],
+                        "expr": "2.0"
+                    },
+                    {
+                        "type": "assignment_statement",
+                        "targets": [{ "type": "target", "var": { "type": "variable", "base": "a", "parts": [] } }],
+                        "expr": "2.e3"
+                    },
+                    {
+                        "type": "assignment_statement",
+                        "targets": [{ "type": "target", "var": { "type": "variable", "base": "a", "parts": [] } }],
+                        "expr": "12.34e-5"
+                    }
+                ]
+            },
+            "end_name": "Real"
+        }
+    }
+]

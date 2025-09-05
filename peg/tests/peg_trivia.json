@@ -33,10 +33,10 @@
                 "var_decls": [
                     {
                         "type": "variable_declaration",
-                        "names": ["p"],
+                        "names": "p",
                         "t": { "type": "type", "ref": { "type": "type_identifier", "name": "Point" } }
                     },
-                    { "type": "variable_declaration", "names": ["b"], "t": { "type": "type", "bt": "BOOLEAN" } }
+                    { "type": "variable_declaration", "names": "b", "t": { "type": "type", "bt": "BOOLEAN" } }
                 ],
                 "stmts": [
                     {
@@ -52,7 +52,7 @@
                                             "var": { "type": "variable", "base": "p", "parts": [{ "field": "x" }] }
                                         }
                                     ],
-                                    "expr": ["1"]
+                                    "expr": "1"
                                 },
                                 {
                                     "type": "assignment_statement",
@@ -62,7 +62,7 @@
                                             "var": { "type": "variable", "base": "p", "parts": [{ "field": "y" }] }
                                         }
                                     ],
-                                    "expr": ["2"]
+                                    "expr": "2"
                                 },
                                 {
                                     "type": "output_statement",

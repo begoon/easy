@@ -11,5 +11,11 @@ PROGRAM Quote:
   OUTPUT s;
   OUTPUT "<4>";
   OUTPUT "...";
+
+  SET s := """";
+  SET s := "we said ""ok"""; 
+  SET s := "str = [";
+  SET s := "abc = [";
+
   EXIT;
 END PROGRAM Quote;

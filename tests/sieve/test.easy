@@ -15,7 +15,7 @@ PROGRAM Eratosthenes:
         DECLARE sqrt INTEGER;
         SET ra := FLOAT(a);
         SET epsilon := 0.0000001*ra;
-        FOR x := ra/2. BY (ra/x-x)/2. 
+        FOR x := ra/2. BY (ra/x-x)/2.
           WHILE abs(ra-x*x) > epsilon DO ;
         END FOR;
         FOR sqrt := FIX(x)-1 BY 1 

@@ -21,11 +21,17 @@ int main()
     goto repeat_label;
     output(1, "repeat_label_NO");
     repeat_label:
-    output(1, "repeat_label");
+    if (TRUE)
+    {
+        output(1, "repeat_label");
+    }
     goto repent_label;
     output(1, "repent_label_NO");
     repent_label:
-    output(1, "repent_label");
+    if (TRUE)
+    {
+        output(1, "repent_label");
+    }
     {
         output(1, "block");
     }

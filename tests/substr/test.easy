@@ -1,8 +1,8 @@
-PROGRAM Output:
+PROGRAM Substr:
   DECLARE s STRING;
   SET s := "abcXYZ";
   OUTPUT SUBSTR("12345", 1, 2);
   OUTPUT SUBSTR(s, 1, 2);
   OUTPUT "abc" || SUBSTR(s, 3, 2);
   EXIT;
-END PROGRAM Output;
+END PROGRAM Substr;

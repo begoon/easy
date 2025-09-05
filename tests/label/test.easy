@@ -1,5 +1,6 @@
 PROGRAM Test:
   DECLARE i INTEGER;
+
   if_label: IF TRUE THEN OUTPUT "if_label"; FI;
   for_label: FOR i := 0 TO 0 DO OUTPUT "for_label"; END FOR;
   SET i := 0;
@@ -7,11 +8,11 @@ PROGRAM Test:
 
   REPEAT repeat_label;
   OUTPUT "repeat_label_NO";
-  repeat_label: OUTPUT "repeat_label";
+  repeat_label: IF TRUE THEN OUTPUT "repeat_label"; FI;
 
   REPENT repent_label;
   OUTPUT "repent_label_NO";
-  repent_label: OUTPUT "repent_label";
+  repent_label: IF TRUE THEN OUTPUT "repent_label"; FI;
 
   BEGIN
     OUTPUT "block";

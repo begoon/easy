@@ -505,9 +505,34 @@ class _Runtime:
         elif i == self.farthest:
             self.expected.append(expected)
 
-    def _skip_ws(self, i: int) -> int:
+    def _skip_ws_COMMENTLESS(self, i: int) -> int:
         m = self.ws_re.match(self.text, i)
         return m.end() if m else i
+
+    def _skip_ws(self, i: int) -> int:
+        while i < self.n:
+            # skip spaces/tabs/newlines
+            m = self.ws_re.match(self.text, i)
+            if m:
+                i = m.end()
+                continue
+            # C-style block comment
+            if self.text.startswith("/*", i):
+                j = self.text.find("*/", i + 2)
+                if j == -1:
+                    # unterminated comment: skip to EOF
+                    return self.n
+                i = j + 2
+                continue
+            # C++-style line comment
+            if self.text.startswith("//", i):
+                j = self.text.find("\n", i + 2)
+                if j == -1:
+                    return self.n
+                i = j + 1
+                continue
+            break
+        return i
 
     def _loc(self, i: int) -> Tuple[int, int, str]:
         line = self.text.count("\n", 0, i) + 1
@@ -544,10 +569,16 @@ class _Runtime:
         self.memo[key] = (ok, j, val)
         return ok, j, val
 
-    def _should_skip_between(self, prev: Expr, nxt: Optional[Expr]) -> bool:
+    def _should_skip_between(self, prev, nxt):
+        # (existing) do not skip after last part
         if nxt is None:
-            return False  # DO NOT skip after last part; avoids trailing-space capture
-        # Avoid skipping between token-internal pieces (e.g., [A-Za-z_] + [A-Za-z0-9_]*)
+            return False
+
+        # (already added earlier) do not skip after lookaheads (e.g., !'"' .)
+        if isinstance(prev, (And, Not)):
+            return False
+
+        # (existing) charclass-to-charclass guards ...
         if (
             isinstance(prev, CharClass)
             and isinstance(nxt, (ZeroOrMore, OneOrMore))
@@ -556,12 +587,27 @@ class _Runtime:
             return False
         if isinstance(prev, CharClass) and isinstance(nxt, CharClass):
             return False
+
+        # *** Important for strings ***
+        # Do not skip after a quote or backslash literal (", ', \)
+        if isinstance(prev, Literal) and prev.value in ('"', "'", "\\"):
+            return False
+        # Do not skip just before a closing quote literal
+        if isinstance(nxt, Literal) and nxt.value in ('"', "'"):
+            return False
+
+        # Extra-safe: prevent skipping between two 1-char literals (covers '""' and "''")
+        if isinstance(prev, Literal) and isinstance(nxt, Literal) and len(prev.value) == 1 and len(nxt.value) == 1:
+            return False
+
         return True
 
     def _merge_value(self, fields: Dict[str, Any], v: Any):
-        # Merge dicts and lists-of-dicts into parent 'fields'.
+        # Merge dicts and lists-of-dicts into parent 'fields', but never bubble up child 'type'.
         if isinstance(v, dict):
             for k, val in v.items():
+                if k == "type":
+                    continue  # avoid 'type' list pollution at parent
                 if k in fields:
                     if not isinstance(fields[k], list):
                         fields[k] = [fields[k]]
@@ -661,8 +707,11 @@ class _Runtime:
                 j = j2
                 if v is not None:
                     items.append(v)
-                # no WS skip between iterations
-            return True, j, items if items else None
+            # NEW: if repeating a CharClass, join into one string
+            if isinstance(e.inner, CharClass):
+                s = "".join(items)
+                return True, j, (s if s else None)
+            return True, j, (items if items else None)
 
         if isinstance(e, OneOrMore):
             j = i
@@ -679,6 +728,9 @@ class _Runtime:
                 j = j2
                 if v is not None:
                     items.append(v)
+            # NEW: if repeating a CharClass, join into one string
+            if isinstance(e.inner, CharClass):
+                return True, j, "".join(items)
             return True, j, items
 
         if isinstance(e, And):

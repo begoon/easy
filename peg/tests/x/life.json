@@ -1,0 +1,1253 @@
+[
+    {
+        "type": "program_segment",
+        "main": {
+            "type": "main_program",
+            "name": "Life",
+            "body": {
+                "type": "segment_body",
+                "type_defs": [
+                    {
+                        "type": "type_definition",
+                        "name": "Field",
+                        "def": {
+                            "type": "type",
+                            "arr": {
+                                "type": "arrayed_type",
+                                "lo": "25",
+                                "elem": {
+                                    "type": "type",
+                                    "arr": {
+                                        "type": "arrayed_type",
+                                        "lo": "80",
+                                        "elem": { "type": "type", "bt": "BOOLEAN" }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                ],
+                "var_decls": [
+                    {
+                        "type": "variable_declaration",
+                        "names": { "type": "declared_multiple_names", "head": "w", "tail": "h" },
+                        "t": { "type": "type", "bt": "INTEGER" }
+                    },
+                    {
+                        "type": "variable_declaration",
+                        "names": "field",
+                        "t": { "type": "type", "ref": { "type": "type_identifier", "name": "Field" } }
+                    },
+                    {
+                        "type": "variable_declaration",
+                        "names": { "type": "declared_multiple_names", "head": "x", "tail": "y" },
+                        "t": { "type": "type", "bt": "INTEGER" }
+                    },
+                    { "type": "variable_declaration", "names": "i", "t": { "type": "type", "bt": "INTEGER" } }
+                ],
+                "proc_defs": [
+                    {
+                        "type": "function_definition",
+                        "name": {
+                            "type": "procedure_name",
+                            "params": {
+                                "type": "internal_parameter_list",
+                                "head": {
+                                    "type": "internal_parameter",
+                                    "id": "x",
+                                    "t": { "type": "type", "bt": "INTEGER" }
+                                },
+                                "tail": {
+                                    "type": "internal_parameter",
+                                    "id": "y",
+                                    "t": { "type": "type", "bt": "INTEGER" }
+                                }
+                            }
+                        },
+                        "ret": { "type": "type", "bt": "BOOLEAN" },
+                        "body": {
+                            "type": "segment_body",
+                            "stmts": [
+                                {
+                                    "type": "return_statement",
+                                    "value": {
+                                        "type": "not_expr",
+                                        "inner": {
+                                            "type": "or_expr",
+                                            "head": {
+                                                "type": "rel_expr",
+                                                "head": { "type": "variable", "base": "x", "parts": [] },
+                                                "op": "<",
+                                                "rhs": "0"
+                                            },
+                                            "tail": [
+                                                {
+                                                    "type": "rel_expr",
+                                                    "head": { "type": "variable", "base": "x", "parts": [] },
+                                                    "op": ">=",
+                                                    "rhs": { "type": "variable", "base": "w", "parts": [] }
+                                                },
+                                                {
+                                                    "type": "rel_expr",
+                                                    "head": { "type": "variable", "base": "y", "parts": [] },
+                                                    "op": "<",
+                                                    "rhs": "0"
+                                                },
+                                                {
+                                                    "type": "rel_expr",
+                                                    "head": { "type": "variable", "base": "y", "parts": [] },
+                                                    "op": ">=",
+                                                    "rhs": { "type": "variable", "base": "h", "parts": [] }
+                                                }
+                                            ]
+                                        }
+                                    }
+                                }
+                            ]
+                        },
+                        "end_name": "valid"
+                    },
+                    {
+                        "type": "function_definition",
+                        "name": {
+                            "type": "procedure_name",
+                            "params": {
+                                "type": "internal_parameter_list",
+                                "head": {
+                                    "type": "internal_parameter",
+                                    "id": "x",
+                                    "t": { "type": "type", "bt": "INTEGER" }
+                                },
+                                "tail": {
+                                    "type": "internal_parameter",
+                                    "id": "y",
+                                    "t": { "type": "type", "bt": "INTEGER" }
+                                }
+                            }
+                        },
+                        "ret": { "type": "type", "bt": "INTEGER" },
+                        "body": {
+                            "type": "segment_body",
+                            "var_decls": [
+                                {
+                                    "type": "variable_declaration",
+                                    "names": "n",
+                                    "t": { "type": "type", "bt": "INTEGER" }
+                                },
+                                {
+                                    "type": "variable_declaration",
+                                    "names": { "type": "declared_multiple_names", "head": "xx", "tail": "yy" },
+                                    "t": { "type": "type", "bt": "INTEGER" }
+                                }
+                            ],
+                            "stmts": [
+                                {
+                                    "type": "assignment_statement",
+                                    "targets": [
+                                        { "type": "target", "var": { "type": "variable", "base": "n", "parts": [] } }
+                                    ],
+                                    "expr": "0"
+                                },
+                                {
+                                    "type": "simple_iteration_statement",
+                                    "tgt": {
+                                        "type": "iteration_target",
+                                        "var": { "type": "variable", "base": "xx", "parts": [] }
+                                    },
+                                    "ctrl": {
+                                        "type": "control",
+                                        "init": {
+                                            "type": "add_expr",
+                                            "head": { "type": "variable", "base": "x", "parts": [] },
+                                            "op": "-",
+                                            "rhs": "1"
+                                        },
+                                        "limit": {
+                                            "type": "limit",
+                                            "value": {
+                                                "type": "add_expr",
+                                                "head": { "type": "variable", "base": "x", "parts": [] },
+                                                "op": "+",
+                                                "rhs": "1"
+                                            }
+                                        }
+                                    },
+                                    "body": {
+                                        "type": "segment_body",
+                                        "stmts": [
+                                            {
+                                                "type": "simple_iteration_statement",
+                                                "tgt": {
+                                                    "type": "iteration_target",
+                                                    "var": { "type": "variable", "base": "yy", "parts": [] }
+                                                },
+                                                "ctrl": {
+                                                    "type": "control",
+                                                    "init": {
+                                                        "type": "add_expr",
+                                                        "head": { "type": "variable", "base": "y", "parts": [] },
+                                                        "op": "-",
+                                                        "rhs": "1"
+                                                    },
+                                                    "limit": {
+                                                        "type": "limit",
+                                                        "value": {
+                                                            "type": "add_expr",
+                                                            "head": { "type": "variable", "base": "y", "parts": [] },
+                                                            "op": "+",
+                                                            "rhs": "1"
+                                                        }
+                                                    }
+                                                },
+                                                "body": {
+                                                    "type": "segment_body",
+                                                    "stmts": [
+                                                        {
+                                                            "type": "simple_conditional_statement",
+                                                            "cond": {
+                                                                "type": "or_expr",
+                                                                "head": {
+                                                                    "type": "rel_expr",
+                                                                    "head": {
+                                                                        "type": "variable",
+                                                                        "base": "xx",
+                                                                        "parts": []
+                                                                    },
+                                                                    "op": "<>",
+                                                                    "rhs": {
+                                                                        "type": "variable",
+                                                                        "base": "x",
+                                                                        "parts": []
+                                                                    }
+                                                                },
+                                                                "tail": {
+                                                                    "type": "rel_expr",
+                                                                    "head": {
+                                                                        "type": "variable",
+                                                                        "base": "yy",
+                                                                        "parts": []
+                                                                    },
+                                                                    "op": "<>",
+                                                                    "rhs": {
+                                                                        "type": "variable",
+                                                                        "base": "y",
+                                                                        "parts": []
+                                                                    }
+                                                                }
+                                                            },
+                                                            "then_body": {
+                                                                "type": "segment_body",
+                                                                "stmts": [
+                                                                    {
+                                                                        "type": "simple_conditional_statement",
+                                                                        "cond": {
+                                                                            "type": "function_reference",
+                                                                            "fn": {
+                                                                                "type": "function_identifier",
+                                                                                "name": "valid"
+                                                                            },
+                                                                            "head": {
+                                                                                "type": "variable",
+                                                                                "base": "xx",
+                                                                                "parts": []
+                                                                            },
+                                                                            "tail": {
+                                                                                "type": "variable",
+                                                                                "base": "yy",
+                                                                                "parts": []
+                                                                            }
+                                                                        },
+                                                                        "then_body": {
+                                                                            "type": "segment_body",
+                                                                            "stmts": [
+                                                                                {
+                                                                                    "type": "simple_conditional_statement",
+                                                                                    "cond": {
+                                                                                        "type": "variable",
+                                                                                        "base": "field",
+                                                                                        "parts": [
+                                                                                            {
+                                                                                                "index": {
+                                                                                                    "type": "variable",
+                                                                                                    "base": "yy",
+                                                                                                    "parts": []
+                                                                                                }
+                                                                                            },
+                                                                                            {
+                                                                                                "index": {
+                                                                                                    "type": "variable",
+                                                                                                    "base": "xx",
+                                                                                                    "parts": []
+                                                                                                }
+                                                                                            }
+                                                                                        ]
+                                                                                    },
+                                                                                    "then_body": {
+                                                                                        "type": "segment_body",
+                                                                                        "stmts": [
+                                                                                            {
+                                                                                                "type": "assignment_statement",
+                                                                                                "targets": [
+                                                                                                    {
+                                                                                                        "type": "target",
+                                                                                                        "var": {
+                                                                                                            "type": "variable",
+                                                                                                            "base": "n",
+                                                                                                            "parts": []
+                                                                                                        }
+                                                                                                    }
+                                                                                                ],
+                                                                                                "expr": {
+                                                                                                    "type": "add_expr",
+                                                                                                    "head": {
+                                                                                                        "type": "variable",
+                                                                                                        "base": "n",
+                                                                                                        "parts": []
+                                                                                                    },
+                                                                                                    "op": "+",
+                                                                                                    "rhs": "1"
+                                                                                                }
+                                                                                            }
+                                                                                        ]
+                                                                                    }
+                                                                                }
+                                                                            ]
+                                                                        }
+                                                                    }
+                                                                ]
+                                                            }
+                                                        }
+                                                    ]
+                                                }
+                                            }
+                                        ]
+                                    }
+                                },
+                                {
+                                    "type": "return_statement",
+                                    "value": { "type": "variable", "base": "n", "parts": [] }
+                                }
+                            ]
+                        },
+                        "end_name": "neighbours"
+                    },
+                    {
+                        "type": "subprogram_definition",
+                        "name": "print",
+                        "body": {
+                            "type": "segment_body",
+                            "var_decls": [
+                                {
+                                    "type": "variable_declaration",
+                                    "names": { "type": "declared_multiple_names", "head": "x", "tail": "y" },
+                                    "t": { "type": "type", "bt": "INTEGER" }
+                                }
+                            ],
+                            "stmts": [
+                                { "type": "output_statement", "list": ["\"** [ EASY LIFE ]\"", "\" \""] },
+                                {
+                                    "type": "simple_iteration_statement",
+                                    "tgt": {
+                                        "type": "iteration_target",
+                                        "var": { "type": "variable", "base": "x", "parts": [] }
+                                    },
+                                    "ctrl": {
+                                        "type": "control",
+                                        "init": "0",
+                                        "limit": {
+                                            "type": "limit",
+                                            "value": {
+                                                "type": "add_expr",
+                                                "head": { "type": "variable", "base": "w", "parts": [] },
+                                                "op": ["+", "-"],
+                                                "rhs": ["1", "17"]
+                                            }
+                                        }
+                                    },
+                                    "body": {
+                                        "type": "segment_body",
+                                        "stmts": [{ "type": "output_statement", "list": ["\"*\""] }]
+                                    }
+                                },
+                                {
+                                    "type": "output_statement",
+                                    "list": [
+                                        {
+                                            "type": "concat_expr",
+                                            "head": "\" \"",
+                                            "tail": {
+                                                "type": "function_reference",
+                                                "fn": { "type": "function_identifier", "name": "CHARACTER" },
+                                                "head": "13"
+                                            }
+                                        }
+                                    ]
+                                },
+                                {
+                                    "type": "simple_iteration_statement",
+                                    "tgt": {
+                                        "type": "iteration_target",
+                                        "var": { "type": "variable", "base": "y", "parts": [] }
+                                    },
+                                    "ctrl": {
+                                        "type": "control",
+                                        "init": "0",
+                                        "limit": {
+                                            "type": "limit",
+                                            "value": {
+                                                "type": "add_expr",
+                                                "head": { "type": "variable", "base": "h", "parts": [] },
+                                                "op": "-",
+                                                "rhs": "1"
+                                            }
+                                        }
+                                    },
+                                    "body": {
+                                        "type": "segment_body",
+                                        "stmts": [
+                                            { "type": "output_statement", "list": ["\"*\""] },
+                                            {
+                                                "type": "simple_iteration_statement",
+                                                "tgt": {
+                                                    "type": "iteration_target",
+                                                    "var": { "type": "variable", "base": "x", "parts": [] }
+                                                },
+                                                "ctrl": {
+                                                    "type": "control",
+                                                    "init": "0",
+                                                    "limit": {
+                                                        "type": "limit",
+                                                        "value": {
+                                                            "type": "add_expr",
+                                                            "head": { "type": "variable", "base": "w", "parts": [] },
+                                                            "op": "-",
+                                                            "rhs": "1"
+                                                        }
+                                                    }
+                                                },
+                                                "body": {
+                                                    "type": "segment_body",
+                                                    "stmts": [
+                                                        {
+                                                            "type": "simple_conditional_statement",
+                                                            "cond": {
+                                                                "type": "rel_expr",
+                                                                "head": {
+                                                                    "type": "variable",
+                                                                    "base": "field",
+                                                                    "parts": [
+                                                                        {
+                                                                            "index": {
+                                                                                "type": "variable",
+                                                                                "base": "y",
+                                                                                "parts": []
+                                                                            }
+                                                                        },
+                                                                        {
+                                                                            "index": {
+                                                                                "type": "variable",
+                                                                                "base": "x",
+                                                                                "parts": []
+                                                                            }
+                                                                        }
+                                                                    ]
+                                                                },
+                                                                "op": "=",
+                                                                "rhs": {
+                                                                    "type": "variable",
+                                                                    "base": "TRUE",
+                                                                    "parts": []
+                                                                }
+                                                            },
+                                                            "then_body": {
+                                                                "type": "segment_body",
+                                                                "stmts": [
+                                                                    { "type": "output_statement", "list": ["\"x\""] }
+                                                                ]
+                                                            },
+                                                            "else_body": {
+                                                                "type": "segment_body",
+                                                                "stmts": [
+                                                                    { "type": "output_statement", "list": ["\" \""] }
+                                                                ]
+                                                            }
+                                                        }
+                                                    ]
+                                                }
+                                            },
+                                            {
+                                                "type": "output_statement",
+                                                "list": [
+                                                    {
+                                                        "type": "concat_expr",
+                                                        "head": "\"*\"",
+                                                        "tail": {
+                                                            "type": "function_reference",
+                                                            "fn": {
+                                                                "type": "function_identifier",
+                                                                "name": "CHARACTER"
+                                                            },
+                                                            "head": "13"
+                                                        }
+                                                    }
+                                                ]
+                                            }
+                                        ]
+                                    }
+                                },
+                                {
+                                    "type": "simple_iteration_statement",
+                                    "tgt": {
+                                        "type": "iteration_target",
+                                        "var": { "type": "variable", "base": "x", "parts": [] }
+                                    },
+                                    "ctrl": {
+                                        "type": "control",
+                                        "init": "0",
+                                        "limit": {
+                                            "type": "limit",
+                                            "value": {
+                                                "type": "add_expr",
+                                                "head": { "type": "variable", "base": "w", "parts": [] },
+                                                "op": "+",
+                                                "rhs": "1"
+                                            }
+                                        }
+                                    },
+                                    "body": {
+                                        "type": "segment_body",
+                                        "stmts": [{ "type": "output_statement", "list": ["\"*\""] }]
+                                    }
+                                },
+                                {
+                                    "type": "output_statement",
+                                    "list": [
+                                        {
+                                            "type": "concat_expr",
+                                            "head": "\" \"",
+                                            "tail": {
+                                                "type": "function_reference",
+                                                "fn": { "type": "function_identifier", "name": "CHARACTER" },
+                                                "head": "13"
+                                            }
+                                        }
+                                    ]
+                                }
+                            ]
+                        },
+                        "end_name": "print"
+                    },
+                    {
+                        "type": "subprogram_definition",
+                        "name": {
+                            "type": "procedure_name",
+                            "params": {
+                                "type": "internal_parameter_list",
+                                "head": {
+                                    "type": "internal_parameter",
+                                    "id": "x",
+                                    "t": { "type": "type", "bt": "INTEGER" }
+                                },
+                                "tail": {
+                                    "type": "internal_parameter",
+                                    "id": "y",
+                                    "t": { "type": "type", "bt": "INTEGER" }
+                                }
+                            }
+                        },
+                        "body": {
+                            "type": "segment_body",
+                            "stmts": [
+                                {
+                                    "type": "assignment_statement",
+                                    "targets": [
+                                        {
+                                            "type": "target",
+                                            "var": {
+                                                "type": "variable",
+                                                "base": "field",
+                                                "parts": [
+                                                    { "index": { "type": "variable", "base": "y", "parts": [] } },
+                                                    { "index": { "type": "variable", "base": "x", "parts": [] } }
+                                                ]
+                                            }
+                                        }
+                                    ],
+                                    "expr": { "type": "variable", "base": "TRUE", "parts": [] }
+                                },
+                                {
+                                    "type": "assignment_statement",
+                                    "targets": [
+                                        {
+                                            "type": "target",
+                                            "var": {
+                                                "type": "variable",
+                                                "base": "field",
+                                                "parts": [
+                                                    { "index": { "type": "variable", "base": "y", "parts": [] } },
+                                                    {
+                                                        "index": {
+                                                            "type": "add_expr",
+                                                            "head": { "type": "variable", "base": "x", "parts": [] },
+                                                            "op": "+",
+                                                            "rhs": "1"
+                                                        }
+                                                    }
+                                                ]
+                                            }
+                                        }
+                                    ],
+                                    "expr": { "type": "variable", "base": "TRUE", "parts": [] }
+                                },
+                                {
+                                    "type": "assignment_statement",
+                                    "targets": [
+                                        {
+                                            "type": "target",
+                                            "var": {
+                                                "type": "variable",
+                                                "base": "field",
+                                                "parts": [
+                                                    { "index": { "type": "variable", "base": "y", "parts": [] } },
+                                                    {
+                                                        "index": {
+                                                            "type": "add_expr",
+                                                            "head": { "type": "variable", "base": "x", "parts": [] },
+                                                            "op": "+",
+                                                            "rhs": "2"
+                                                        }
+                                                    }
+                                                ]
+                                            }
+                                        }
+                                    ],
+                                    "expr": { "type": "variable", "base": "TRUE", "parts": [] }
+                                },
+                                {
+                                    "type": "assignment_statement",
+                                    "targets": [
+                                        {
+                                            "type": "target",
+                                            "var": {
+                                                "type": "variable",
+                                                "base": "field",
+                                                "parts": [
+                                                    {
+                                                        "index": {
+                                                            "type": "add_expr",
+                                                            "head": { "type": "variable", "base": "y", "parts": [] },
+                                                            "op": "+",
+                                                            "rhs": "1"
+                                                        }
+                                                    },
+                                                    { "index": { "type": "variable", "base": "x", "parts": [] } }
+                                                ]
+                                            }
+                                        }
+                                    ],
+                                    "expr": { "type": "variable", "base": "TRUE", "parts": [] }
+                                },
+                                {
+                                    "type": "assignment_statement",
+                                    "targets": [
+                                        {
+                                            "type": "target",
+                                            "var": {
+                                                "type": "variable",
+                                                "base": "field",
+                                                "parts": [
+                                                    {
+                                                        "index": {
+                                                            "type": "add_expr",
+                                                            "head": { "type": "variable", "base": "y", "parts": [] },
+                                                            "op": "+",
+                                                            "rhs": "2"
+                                                        }
+                                                    },
+                                                    {
+                                                        "index": {
+                                                            "type": "add_expr",
+                                                            "head": { "type": "variable", "base": "x", "parts": [] },
+                                                            "op": "+",
+                                                            "rhs": "1"
+                                                        }
+                                                    }
+                                                ]
+                                            }
+                                        }
+                                    ],
+                                    "expr": { "type": "variable", "base": "TRUE", "parts": [] }
+                                }
+                            ]
+                        },
+                        "end_name": "glider"
+                    },
+                    {
+                        "type": "subprogram_definition",
+                        "name": "evolution",
+                        "body": {
+                            "type": "segment_body",
+                            "var_decls": [
+                                {
+                                    "type": "variable_declaration",
+                                    "names": { "type": "declared_multiple_names", "head": "x", "tail": "y" },
+                                    "t": { "type": "type", "bt": "INTEGER" }
+                                },
+                                {
+                                    "type": "variable_declaration",
+                                    "names": "n",
+                                    "t": { "type": "type", "bt": "INTEGER" }
+                                },
+                                {
+                                    "type": "variable_declaration",
+                                    "names": "next",
+                                    "t": { "type": "type", "ref": { "type": "type_identifier", "name": "Field" } }
+                                }
+                            ],
+                            "stmts": [
+                                {
+                                    "type": "simple_iteration_statement",
+                                    "tgt": {
+                                        "type": "iteration_target",
+                                        "var": { "type": "variable", "base": "y", "parts": [] }
+                                    },
+                                    "ctrl": {
+                                        "type": "control",
+                                        "init": "0",
+                                        "limit": {
+                                            "type": "limit",
+                                            "value": {
+                                                "type": "add_expr",
+                                                "head": { "type": "variable", "base": "h", "parts": [] },
+                                                "op": "-",
+                                                "rhs": "1"
+                                            }
+                                        }
+                                    },
+                                    "body": {
+                                        "type": "segment_body",
+                                        "stmts": [
+                                            {
+                                                "type": "simple_iteration_statement",
+                                                "tgt": {
+                                                    "type": "iteration_target",
+                                                    "var": { "type": "variable", "base": "x", "parts": [] }
+                                                },
+                                                "ctrl": {
+                                                    "type": "control",
+                                                    "init": "0",
+                                                    "limit": {
+                                                        "type": "limit",
+                                                        "value": {
+                                                            "type": "add_expr",
+                                                            "head": { "type": "variable", "base": "w", "parts": [] },
+                                                            "op": "-",
+                                                            "rhs": "1"
+                                                        }
+                                                    }
+                                                },
+                                                "body": {
+                                                    "type": "segment_body",
+                                                    "var_decls": [
+                                                        {
+                                                            "type": "variable_declaration",
+                                                            "names": "alive",
+                                                            "t": { "type": "type", "bt": "BOOLEAN" }
+                                                        }
+                                                    ],
+                                                    "stmts": [
+                                                        {
+                                                            "type": "assignment_statement",
+                                                            "targets": [
+                                                                {
+                                                                    "type": "target",
+                                                                    "var": {
+                                                                        "type": "variable",
+                                                                        "base": "alive",
+                                                                        "parts": []
+                                                                    }
+                                                                }
+                                                            ],
+                                                            "expr": {
+                                                                "type": "variable",
+                                                                "base": "field",
+                                                                "parts": [
+                                                                    {
+                                                                        "index": {
+                                                                            "type": "variable",
+                                                                            "base": "y",
+                                                                            "parts": []
+                                                                        }
+                                                                    },
+                                                                    {
+                                                                        "index": {
+                                                                            "type": "variable",
+                                                                            "base": "x",
+                                                                            "parts": []
+                                                                        }
+                                                                    }
+                                                                ]
+                                                            }
+                                                        },
+                                                        {
+                                                            "type": "assignment_statement",
+                                                            "targets": [
+                                                                {
+                                                                    "type": "target",
+                                                                    "var": {
+                                                                        "type": "variable",
+                                                                        "base": "n",
+                                                                        "parts": []
+                                                                    }
+                                                                }
+                                                            ],
+                                                            "expr": {
+                                                                "type": "function_reference",
+                                                                "fn": {
+                                                                    "type": "function_identifier",
+                                                                    "name": "neighbours"
+                                                                },
+                                                                "head": {
+                                                                    "type": "variable",
+                                                                    "base": "x",
+                                                                    "parts": []
+                                                                },
+                                                                "tail": { "type": "variable", "base": "y", "parts": [] }
+                                                            }
+                                                        },
+                                                        {
+                                                            "type": "simple_conditional_statement",
+                                                            "cond": {
+                                                                "type": "rel_expr",
+                                                                "head": {
+                                                                    "type": "variable",
+                                                                    "base": "alive",
+                                                                    "parts": []
+                                                                },
+                                                                "op": "=",
+                                                                "rhs": {
+                                                                    "type": "variable",
+                                                                    "base": "TRUE",
+                                                                    "parts": []
+                                                                }
+                                                            },
+                                                            "then_body": {
+                                                                "type": "segment_body",
+                                                                "stmts": [
+                                                                    {
+                                                                        "type": "simple_conditional_statement",
+                                                                        "cond": {
+                                                                            "type": "or_expr",
+                                                                            "head": {
+                                                                                "type": "rel_expr",
+                                                                                "head": {
+                                                                                    "type": "variable",
+                                                                                    "base": "n",
+                                                                                    "parts": []
+                                                                                },
+                                                                                "op": "<",
+                                                                                "rhs": "2"
+                                                                            },
+                                                                            "tail": {
+                                                                                "type": "rel_expr",
+                                                                                "head": {
+                                                                                    "type": "variable",
+                                                                                    "base": "n",
+                                                                                    "parts": []
+                                                                                },
+                                                                                "op": ">",
+                                                                                "rhs": "3"
+                                                                            }
+                                                                        },
+                                                                        "then_body": {
+                                                                            "type": "segment_body",
+                                                                            "stmts": [
+                                                                                {
+                                                                                    "type": "assignment_statement",
+                                                                                    "targets": [
+                                                                                        {
+                                                                                            "type": "target",
+                                                                                            "var": {
+                                                                                                "type": "variable",
+                                                                                                "base": "alive",
+                                                                                                "parts": []
+                                                                                            }
+                                                                                        }
+                                                                                    ],
+                                                                                    "expr": {
+                                                                                        "type": "variable",
+                                                                                        "base": "FALSE",
+                                                                                        "parts": []
+                                                                                    }
+                                                                                }
+                                                                            ]
+                                                                        }
+                                                                    }
+                                                                ]
+                                                            },
+                                                            "else_body": {
+                                                                "type": "segment_body",
+                                                                "stmts": [
+                                                                    {
+                                                                        "type": "simple_conditional_statement",
+                                                                        "cond": {
+                                                                            "type": "rel_expr",
+                                                                            "head": {
+                                                                                "type": "variable",
+                                                                                "base": "n",
+                                                                                "parts": []
+                                                                            },
+                                                                            "op": "=",
+                                                                            "rhs": "3"
+                                                                        },
+                                                                        "then_body": {
+                                                                            "type": "segment_body",
+                                                                            "stmts": [
+                                                                                {
+                                                                                    "type": "assignment_statement",
+                                                                                    "targets": [
+                                                                                        {
+                                                                                            "type": "target",
+                                                                                            "var": {
+                                                                                                "type": "variable",
+                                                                                                "base": "alive",
+                                                                                                "parts": []
+                                                                                            }
+                                                                                        }
+                                                                                    ],
+                                                                                    "expr": {
+                                                                                        "type": "variable",
+                                                                                        "base": "TRUE",
+                                                                                        "parts": []
+                                                                                    }
+                                                                                }
+                                                                            ]
+                                                                        }
+                                                                    }
+                                                                ]
+                                                            }
+                                                        },
+                                                        {
+                                                            "type": "assignment_statement",
+                                                            "targets": [
+                                                                {
+                                                                    "type": "target",
+                                                                    "var": {
+                                                                        "type": "variable",
+                                                                        "base": "next",
+                                                                        "parts": [
+                                                                            {
+                                                                                "index": {
+                                                                                    "type": "variable",
+                                                                                    "base": "y",
+                                                                                    "parts": []
+                                                                                }
+                                                                            },
+                                                                            {
+                                                                                "index": {
+                                                                                    "type": "variable",
+                                                                                    "base": "x",
+                                                                                    "parts": []
+                                                                                }
+                                                                            }
+                                                                        ]
+                                                                    }
+                                                                }
+                                                            ],
+                                                            "expr": { "type": "variable", "base": "alive", "parts": [] }
+                                                        }
+                                                    ]
+                                                }
+                                            }
+                                        ]
+                                    }
+                                },
+                                {
+                                    "type": "simple_iteration_statement",
+                                    "tgt": {
+                                        "type": "iteration_target",
+                                        "var": { "type": "variable", "base": "y", "parts": [] }
+                                    },
+                                    "ctrl": {
+                                        "type": "control",
+                                        "init": "0",
+                                        "limit": {
+                                            "type": "limit",
+                                            "value": {
+                                                "type": "add_expr",
+                                                "head": { "type": "variable", "base": "h", "parts": [] },
+                                                "op": "-",
+                                                "rhs": "1"
+                                            }
+                                        }
+                                    },
+                                    "body": {
+                                        "type": "segment_body",
+                                        "stmts": [
+                                            {
+                                                "type": "simple_iteration_statement",
+                                                "tgt": {
+                                                    "type": "iteration_target",
+                                                    "var": { "type": "variable", "base": "x", "parts": [] }
+                                                },
+                                                "ctrl": {
+                                                    "type": "control",
+                                                    "init": "0",
+                                                    "limit": {
+                                                        "type": "limit",
+                                                        "value": {
+                                                            "type": "add_expr",
+                                                            "head": { "type": "variable", "base": "w", "parts": [] },
+                                                            "op": "-",
+                                                            "rhs": "1"
+                                                        }
+                                                    }
+                                                },
+                                                "body": {
+                                                    "type": "segment_body",
+                                                    "stmts": [
+                                                        {
+                                                            "type": "assignment_statement",
+                                                            "targets": [
+                                                                {
+                                                                    "type": "target",
+                                                                    "var": {
+                                                                        "type": "variable",
+                                                                        "base": "field",
+                                                                        "parts": [
+                                                                            {
+                                                                                "index": {
+                                                                                    "type": "variable",
+                                                                                    "base": "y",
+                                                                                    "parts": []
+                                                                                }
+                                                                            },
+                                                                            {
+                                                                                "index": {
+                                                                                    "type": "variable",
+                                                                                    "base": "x",
+                                                                                    "parts": []
+                                                                                }
+                                                                            }
+                                                                        ]
+                                                                    }
+                                                                }
+                                                            ],
+                                                            "expr": {
+                                                                "type": "variable",
+                                                                "base": "next",
+                                                                "parts": [
+                                                                    {
+                                                                        "index": {
+                                                                            "type": "variable",
+                                                                            "base": "y",
+                                                                            "parts": []
+                                                                        }
+                                                                    },
+                                                                    {
+                                                                        "index": {
+                                                                            "type": "variable",
+                                                                            "base": "x",
+                                                                            "parts": []
+                                                                        }
+                                                                    }
+                                                                ]
+                                                            }
+                                                        }
+                                                    ]
+                                                }
+                                            }
+                                        ]
+                                    }
+                                }
+                            ]
+                        },
+                        "end_name": "evolution"
+                    }
+                ],
+                "stmts": [
+                    {
+                        "type": "assignment_statement",
+                        "targets": [{ "type": "target", "var": { "type": "variable", "base": "w", "parts": [] } }],
+                        "expr": "80"
+                    },
+                    {
+                        "type": "assignment_statement",
+                        "targets": [{ "type": "target", "var": { "type": "variable", "base": "h", "parts": [] } }],
+                        "expr": "25"
+                    },
+                    {
+                        "type": "simple_iteration_statement",
+                        "tgt": { "type": "iteration_target", "var": { "type": "variable", "base": "y", "parts": [] } },
+                        "ctrl": {
+                            "type": "control",
+                            "init": "0",
+                            "limit": {
+                                "type": "limit",
+                                "value": {
+                                    "type": "add_expr",
+                                    "head": { "type": "variable", "base": "h", "parts": [] },
+                                    "op": "-",
+                                    "rhs": "1"
+                                }
+                            }
+                        },
+                        "body": {
+                            "type": "segment_body",
+                            "stmts": [
+                                {
+                                    "type": "simple_iteration_statement",
+                                    "tgt": {
+                                        "type": "iteration_target",
+                                        "var": { "type": "variable", "base": "x", "parts": [] }
+                                    },
+                                    "ctrl": {
+                                        "type": "control",
+                                        "init": "0",
+                                        "limit": {
+                                            "type": "limit",
+                                            "value": {
+                                                "type": "add_expr",
+                                                "head": { "type": "variable", "base": "w", "parts": [] },
+                                                "op": "-",
+                                                "rhs": "1"
+                                            }
+                                        }
+                                    },
+                                    "body": {
+                                        "type": "segment_body",
+                                        "stmts": [
+                                            {
+                                                "type": "assignment_statement",
+                                                "targets": [
+                                                    {
+                                                        "type": "target",
+                                                        "var": {
+                                                            "type": "variable",
+                                                            "base": "field",
+                                                            "parts": [
+                                                                {
+                                                                    "index": {
+                                                                        "type": "variable",
+                                                                        "base": "y",
+                                                                        "parts": []
+                                                                    }
+                                                                },
+                                                                {
+                                                                    "index": {
+                                                                        "type": "variable",
+                                                                        "base": "x",
+                                                                        "parts": []
+                                                                    }
+                                                                }
+                                                            ]
+                                                        }
+                                                    }
+                                                ],
+                                                "expr": { "type": "variable", "base": "FALSE", "parts": [] }
+                                            }
+                                        ]
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "type": "call_statement",
+                        "ref": {
+                            "type": "procedure_reference",
+                            "id": { "type": "procedure_identifier", "name": "glider" },
+                            "args": ["30", "15"]
+                        }
+                    },
+                    {
+                        "type": "call_statement",
+                        "ref": {
+                            "type": "procedure_reference",
+                            "id": { "type": "procedure_identifier", "name": "glider" },
+                            "args": ["40", "10"]
+                        }
+                    },
+                    {
+                        "type": "call_statement",
+                        "ref": {
+                            "type": "procedure_reference",
+                            "id": { "type": "procedure_identifier", "name": "glider" },
+                            "args": ["50", "20"]
+                        }
+                    },
+                    {
+                        "type": "simple_iteration_statement",
+                        "tgt": { "type": "iteration_target", "var": { "type": "variable", "base": "i", "parts": [] } },
+                        "ctrl": { "type": "control", "init": "1", "limit": { "type": "limit", "value": "12" } },
+                        "body": {
+                            "type": "segment_body",
+                            "stmts": [
+                                {
+                                    "type": "call_statement",
+                                    "ref": {
+                                        "type": "procedure_reference",
+                                        "id": { "type": "procedure_identifier", "name": "print" }
+                                    }
+                                },
+                                {
+                                    "type": "output_statement",
+                                    "list": [
+                                        {
+                                            "type": "concat_expr",
+                                            "head": "\"GENERATION: \"",
+                                            "tail": { "type": "variable", "base": "i", "parts": [] }
+                                        }
+                                    ]
+                                },
+                                {
+                                    "type": "call_statement",
+                                    "ref": {
+                                        "type": "procedure_reference",
+                                        "id": { "type": "procedure_identifier", "name": "evolution" }
+                                    }
+                                },
+                                {
+                                    "type": "simple_conditional_statement",
+                                    "cond": {
+                                        "type": "rel_expr",
+                                        "head": {
+                                            "type": "mul_expr",
+                                            "head": { "type": "variable", "base": "i", "parts": [] },
+                                            "op": "MOD",
+                                            "rhs": "10"
+                                        },
+                                        "op": "=",
+                                        "rhs": "0"
+                                    },
+                                    "then_body": {
+                                        "type": "segment_body",
+                                        "stmts": [
+                                            {
+                                                "type": "call_statement",
+                                                "ref": {
+                                                    "type": "procedure_reference",
+                                                    "id": { "type": "procedure_identifier", "name": "glider" },
+                                                    "args": ["40", "10"]
+                                                }
+                                            },
+                                            {
+                                                "type": "call_statement",
+                                                "ref": {
+                                                    "type": "procedure_reference",
+                                                    "id": { "type": "procedure_identifier", "name": "glider" },
+                                                    "args": ["30", "15"]
+                                                }
+                                            }
+                                        ]
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                ]
+            },
+            "end_name": "Life"
+        }
+    }
+]

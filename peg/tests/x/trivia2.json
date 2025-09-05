@@ -33,7 +33,7 @@
                 "var_decls": [
                     {
                         "type": "variable_declaration",
-                        "names": ["p"],
+                        "names": "p",
                         "t": { "type": "type", "ref": { "type": "type_identifier", "name": "Point" } }
                     }
                 ],
@@ -51,7 +51,7 @@
                                             "var": { "type": "variable", "base": "p", "parts": [{ "field": "x" }] }
                                         }
                                     ],
-                                    "expr": ["1"]
+                                    "expr": "1"
                                 },
                                 {
                                     "type": "assignment_statement",
@@ -61,7 +61,7 @@
                                             "var": { "type": "variable", "base": "p", "parts": [{ "field": "y" }] }
                                         }
                                     ],
-                                    "expr": ["2"]
+                                    "expr": "2"
                                 },
                                 {
                                     "type": "output_statement",

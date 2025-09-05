@@ -6,13 +6,7 @@
             "var": {
                 "type": "variable",
                 "base": "p",
-                "parts": [
-                    { "field": "x" },
-                    { "index": ["0"] },
-                    { "index": ["1"] },
-                    { "field": "z" },
-                    { "index": ["1", "0", "0"] }
-                ]
+                "parts": [{ "field": "x" }, { "index": "0" }, { "index": "1" }, { "field": "z" }, { "index": "100" }]
             }
         }
     ],

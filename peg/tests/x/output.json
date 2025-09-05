@@ -7,7 +7,7 @@
             "body": {
                 "type": "segment_body",
                 "var_decls": [
-                    { "type": "variable_declaration", "names": ["a"], "t": { "type": "type", "bt": "INTEGER" } }
+                    { "type": "variable_declaration", "names": "a", "t": { "type": "type", "bt": "INTEGER" } }
                 ],
                 "stmts": [
                     { "type": "output_statement", "list": ["\"00\""] },
@@ -15,7 +15,7 @@
                     {
                         "type": "assignment_statement",
                         "targets": [{ "type": "target", "var": { "type": "variable", "base": "a", "parts": [] } }],
-                        "expr": ["1", "2", "3"]
+                        "expr": "123"
                     },
                     { "type": "output_statement", "list": [{ "type": "variable", "base": "a", "parts": [] }] }
                 ]

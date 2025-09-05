@@ -1,0 +1,98 @@
+[
+    {
+        "type": "program_segment",
+        "main": {
+            "type": "main_program",
+            "name": "Call",
+            "body": {
+                "type": "segment_body",
+                "var_decls": [
+                    { "type": "variable_declaration", "names": "x", "t": { "type": "type", "bt": "INTEGER" } }
+                ],
+                "proc_defs": [
+                    {
+                        "type": "subprogram_definition",
+                        "name": {
+                            "type": "procedure_name",
+                            "params": {
+                                "type": "internal_parameter_list",
+                                "head": {
+                                    "type": "internal_parameter",
+                                    "id": "x",
+                                    "t": { "type": "type", "bt": "INTEGER" }
+                                }
+                            }
+                        },
+                        "body": {
+                            "type": "segment_body",
+                            "stmts": [
+                                {
+                                    "type": "output_statement",
+                                    "list": [
+                                        {
+                                            "type": "concat_expr",
+                                            "head": "\"a(): \"",
+                                            "tail": { "type": "variable", "base": "x", "parts": [] }
+                                        }
+                                    ]
+                                }
+                            ]
+                        },
+                        "end_name": "a"
+                    },
+                    {
+                        "type": "function_definition",
+                        "name": {
+                            "type": "procedure_name",
+                            "params": {
+                                "type": "internal_parameter_list",
+                                "head": {
+                                    "type": "internal_parameter",
+                                    "id": "x",
+                                    "t": { "type": "type", "bt": "INTEGER" }
+                                }
+                            }
+                        },
+                        "ret": { "type": "type", "bt": "INTEGER" },
+                        "body": {
+                            "type": "segment_body",
+                            "stmts": [
+                                {
+                                    "type": "return_statement",
+                                    "value": {
+                                        "type": "add_expr",
+                                        "head": { "type": "variable", "base": "x", "parts": [] },
+                                        "op": "+",
+                                        "rhs": "1"
+                                    }
+                                }
+                            ]
+                        },
+                        "end_name": "b"
+                    }
+                ],
+                "stmts": [
+                    {
+                        "type": "call_statement",
+                        "ref": {
+                            "type": "procedure_reference",
+                            "id": { "type": "procedure_identifier", "name": "a" },
+                            "args": ["100"]
+                        }
+                    },
+                    {
+                        "type": "assignment_statement",
+                        "targets": [{ "type": "target", "var": { "type": "variable", "base": "x", "parts": [] } }],
+                        "expr": {
+                            "type": "function_reference",
+                            "fn": { "type": "function_identifier", "name": "b" },
+                            "head": "100"
+                        }
+                    },
+                    { "type": "output_statement", "list": [{ "type": "variable", "base": "x", "parts": [] }] }
+                ]
+            },
+            "end_name": "Call"
+        }
+    }
+]

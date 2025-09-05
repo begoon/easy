@@ -12,5 +12,9 @@ int main()
     output(1, s.data);
     output(1, "<4>");
     output(1, "...");
+    strcpy(s.data, "\"");
+    strcpy(s.data, "we said \"ok\"");
+    strcpy(s.data, "str = [");
+    strcpy(s.data, "abc = [");
     exit(0);
 }

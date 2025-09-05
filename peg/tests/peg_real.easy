@@ -1,0 +1,6 @@
+PROGRAM Real:
+  SET a := 2.;
+  SET a := 2.0;
+  SET a := 2.e3;
+  SET a := 12.34e-5;
+END PROGRAM Real;

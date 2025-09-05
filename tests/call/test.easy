@@ -1,9 +1,18 @@
 PROGRAM Call:
+  DECLARE x INTEGER;
+
   PROCEDURE a(x INTEGER):
     OUTPUT "a(): " || x;
   END PROCEDURE a;
+  
+  FUNCTION b(x INTEGER) INTEGER:
+    RETURN x + 1;
+  END FUNCTION b;
 
   CALL a(100);
+
+  SET x := b(100);
+  OUTPUT x;
 
   EXIT;
 END PROGRAM Call;
