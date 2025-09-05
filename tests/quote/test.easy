@@ -3,9 +3,13 @@ PROGRAM Quote:
 
   SET s := """";
   OUTPUT s;
+  OUTPUT "<1>";
   OUTPUT "";
+  OUTPUT "<2>";
   OUTPUT """";
+  OUTPUT "<3>";
   OUTPUT s;
+  OUTPUT "<4>";
   OUTPUT "...";
   EXIT;
 END PROGRAM Quote;
