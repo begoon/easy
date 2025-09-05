@@ -563,7 +563,7 @@ class OutputStatement(Statement):
         return f"OUTPUT({', '.join(e.meta() for e in self.arguments)})"
 
     def c(self) -> str:
-        def T(v: Expression) -> str:
+        def format_string(v: Expression) -> str:
             if not isinstance(v, StringLiteral):
                 return v.c()
             return '"' + v.c()[1:-1].replace('"', '\\"') + '"'
@@ -575,7 +575,8 @@ class OutputStatement(Statement):
                 type = variables_registry[name]
                 if type != "STRING":
                     return f"strconv({argument.c()})"
-            return T(argument)
+                return f"{argument.c()}.data"
+            return format_string(argument)
 
         arguments = ", ".join(format(argument) for argument in self.arguments)
         return f"output({len(self.arguments)}, {arguments});"

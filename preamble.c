@@ -69,17 +69,22 @@ void output(int count, ...)
     va_start(args, count);
 
     if (count < 1)
-        return;
-
-    for (int i = 0; i < count - 1; i++)
     {
-        printf("%s", va_arg(args, char *));
+        va_end(args);
+        return;
     }
 
-    char *s = va_arg(args, char *);
-    printf("%s", s);
-    if (strlen(s) > 1)
-        printf("%s", "\n");
+    const char *s = NULL;
+    for (int i = 0; i < count; i++)
+    {
+        s = va_arg(args, const char *);
+        if (!s)
+            s = "(null)";
+        fputs(s, stdout);
+    }
+
+    if (s && strlen(s) > 1)
+        putchar('\n');
 
     va_end(args);
 }
