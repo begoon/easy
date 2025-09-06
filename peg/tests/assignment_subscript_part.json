@@ -1,0 +1,38 @@
+{
+    "type": "assignment_statement",
+    "targets": [
+        {
+            "type": "target",
+            "var": {
+                "type": "variable",
+                "base": "p",
+                "parts": [
+                    {
+                        "field": "x"
+                    },
+                    {
+                        "index": "0"
+                    },
+                    {
+                        "index": "1"
+                    },
+                    {
+                        "field": "z"
+                    },
+                    {
+                        "index": "100"
+                    }
+                ]
+            }
+        }
+    ],
+    "expr": {
+        "type": "variable",
+        "base": "p",
+        "parts": [
+            {
+                "field": "y"
+            }
+        ]
+    }
+}

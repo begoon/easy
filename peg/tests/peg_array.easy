@@ -1,6 +1,0 @@
-PROGRAM Array:
-  TYPE B IS ARRAY[1:25] OF ARRAY [80] OF BOOLEAN;
-  DECLARE b B;
-  SET b[1][2] := b[2][1];
-  OUTPUT ".";
-END PROGRAM Array;

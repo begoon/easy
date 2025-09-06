@@ -1,0 +1,129 @@
+[
+    {
+        "type": "program_segment",
+        "main": {
+            "type": "main_program",
+            "name": "Test",
+            "body": {
+                "type": "segment_body",
+                "type_defs": [
+                    {
+                        "type": "type_definition",
+                        "name": "Point",
+                        "def": {
+                            "type": "type",
+                            "str": {
+                                "type": "structured_type",
+                                "fields": {
+                                    "type": "field_list",
+                                    "head": {
+                                        "type": "field",
+                                        "name": "x",
+                                        "t": {
+                                            "type": "type",
+                                            "bt": "INTEGER"
+                                        }
+                                    },
+                                    "tail": {
+                                        "type": "field_list",
+                                        "head": {
+                                            "type": "field",
+                                            "name": "y",
+                                            "t": {
+                                                "type": "type",
+                                                "bt": "INTEGER"
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                ],
+                "var_decls": [
+                    {
+                        "type": "variable_declaration",
+                        "names": "p",
+                        "t": {
+                            "type": "type",
+                            "ref": {
+                                "type": "type_identifier",
+                                "name": "Point"
+                            }
+                        }
+                    }
+                ],
+                "stmts": [
+                    {
+                        "type": "simple_compound",
+                        "body": {
+                            "type": "segment_body",
+                            "stmts": [
+                                {
+                                    "type": "assignment_statement",
+                                    "targets": [
+                                        {
+                                            "type": "target",
+                                            "var": {
+                                                "type": "variable",
+                                                "base": "p",
+                                                "parts": [
+                                                    {
+                                                        "field": "x"
+                                                    }
+                                                ]
+                                            }
+                                        }
+                                    ],
+                                    "expr": "1"
+                                },
+                                {
+                                    "type": "assignment_statement",
+                                    "targets": [
+                                        {
+                                            "type": "target",
+                                            "var": {
+                                                "type": "variable",
+                                                "base": "p",
+                                                "parts": [
+                                                    {
+                                                        "field": "y"
+                                                    }
+                                                ]
+                                            }
+                                        }
+                                    ],
+                                    "expr": "2"
+                                },
+                                {
+                                    "type": "output_statement",
+                                    "list": [
+                                        {
+                                            "type": "variable",
+                                            "base": "p",
+                                            "parts": [
+                                                {
+                                                    "field": "x"
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "type": "variable",
+                                            "base": "p",
+                                            "parts": [
+                                                {
+                                                    "field": "y"
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    }
+                ]
+            },
+            "end_name": "Test"
+        }
+    }
+]

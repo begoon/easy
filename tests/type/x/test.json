@@ -1,0 +1,67 @@
+[
+    {
+        "type": "program_segment",
+        "main": {
+            "type": "main_program",
+            "name": "Type",
+            "body": {
+                "type": "segment_body",
+                "type_defs": [
+                    {
+                        "type": "type_definition",
+                        "name": "Field",
+                        "def": {
+                            "type": "type",
+                            "arr": {
+                                "type": "arrayed_type",
+                                "lo": "1",
+                                "hi": "100",
+                                "elem": {
+                                    "type": "type",
+                                    "bt": "INTEGER"
+                                }
+                            }
+                        }
+                    }
+                ],
+                "proc_defs": [
+                    {
+                        "type": "function_definition",
+                        "name": {
+                            "type": "procedure_name",
+                            "params": {
+                                "type": "internal_parameter_list",
+                                "head": {
+                                    "type": "internal_parameter",
+                                    "id": "f",
+                                    "t": {
+                                        "type": "type",
+                                        "ref": {
+                                            "type": "type_identifier",
+                                            "name": "Field"
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        "ret": {
+                            "type": "type",
+                            "bt": "BOOLEAN"
+                        },
+                        "body": {
+                            "type": "segment_body",
+                            "stmts": [
+                                {
+                                    "type": "return_statement",
+                                    "value": "0"
+                                }
+                            ]
+                        },
+                        "end_name": "a"
+                    }
+                ]
+            },
+            "end_name": "Type"
+        }
+    }
+]

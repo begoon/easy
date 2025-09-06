@@ -76,6 +76,13 @@ def process(test: Path) -> None:
 
         flags.append("-a")
 
+    expected_peg_ast = x.with_suffix(".json")
+    if expected_peg_ast.exists():
+        created_peg_ast = test.with_suffix(".json")
+        removals.append(created_peg_ast)
+
+        flags.append("-j")
+
     expected_c = x.with_suffix(".c")
     if expected_c.exists():
         created_c = test.with_suffix(".c")
@@ -90,6 +97,9 @@ def process(test: Path) -> None:
 
     if expected_ast.exists():
         diff(expected_ast, created_ast)
+
+    if expected_peg_ast.exists():
+        diff(expected_peg_ast, created_peg_ast)
 
     if expected_c.exists():
         diff(expected_c, created_c)

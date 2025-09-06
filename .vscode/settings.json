@@ -13,6 +13,9 @@
         "--extend-ignore",
         "E203"
     ],
+    "[json]": {
+        "editor.defaultFormatter": "vscode.json-language-features"
+    },
     "editor.rulers": [
         120
     ],

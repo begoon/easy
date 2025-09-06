@@ -8,7 +8,12 @@ grammar = open("peg/easy.peg").read()
 
 parser = PEGParser(grammar, start="compilation")
 
-code = Path(sys.argv[1]).read_text()
-r = parser.parse(code)
+if __name__ == "__main__":
+    if len(sys.argv) < 2:
+        print("usage: peg_cli.py <input.easy>")
+        sys.exit(1)
 
-print(json.dumps(r, indent=2))
+    code = Path(sys.argv[1]).read_text()
+    v = parser.parse(code)
+
+    print(json.dumps(v, indent=2))

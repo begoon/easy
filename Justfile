@@ -12,8 +12,8 @@ peg-cli:
 life:
     python easy.py life.easy && clang life.c -o life && ./life
 
-oneoff:
-    python -m peg.peg_oneoff
+peg:
+    python -m peg.peg_run
     
 clean:
     git clean -Xf

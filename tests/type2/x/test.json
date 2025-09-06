@@ -1,0 +1,47 @@
+[
+    {
+        "type": "program_segment",
+        "main": {
+            "type": "main_program",
+            "name": "Type2",
+            "body": {
+                "type": "segment_body",
+                "type_defs": [
+                    {
+                        "type": "type_definition",
+                        "name": "Point",
+                        "def": {
+                            "type": "type",
+                            "str": {
+                                "type": "structured_type",
+                                "fields": {
+                                    "type": "field_list",
+                                    "head": {
+                                        "type": "field",
+                                        "name": "x",
+                                        "t": {
+                                            "type": "type",
+                                            "bt": "INTEGER"
+                                        }
+                                    },
+                                    "tail": {
+                                        "type": "field_list",
+                                        "head": {
+                                            "type": "field",
+                                            "name": "y",
+                                            "t": {
+                                                "type": "type",
+                                                "bt": "INTEGER"
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                ]
+            },
+            "end_name": "Type2"
+        }
+    }
+]

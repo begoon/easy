@@ -1,0 +1,102 @@
+[
+    {
+        "type": "program_segment",
+        "main": {
+            "type": "main_program",
+            "name": "Substr",
+            "body": {
+                "type": "segment_body",
+                "var_decls": [
+                    {
+                        "type": "variable_declaration",
+                        "names": "s",
+                        "t": {
+                            "type": "type",
+                            "bt": "STRING"
+                        }
+                    }
+                ],
+                "stmts": [
+                    {
+                        "type": "assignment_statement",
+                        "targets": [
+                            {
+                                "type": "target",
+                                "var": {
+                                    "type": "variable",
+                                    "base": "s",
+                                    "parts": []
+                                }
+                            }
+                        ],
+                        "expr": "\"abcXYZ\""
+                    },
+                    {
+                        "type": "output_statement",
+                        "list": [
+                            {
+                                "type": "function_reference",
+                                "fn": {
+                                    "type": "function_identifier",
+                                    "name": "SUBSTR"
+                                },
+                                "head": "\"12345\"",
+                                "tail": [
+                                    "1",
+                                    "2"
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "type": "output_statement",
+                        "list": [
+                            {
+                                "type": "function_reference",
+                                "fn": {
+                                    "type": "function_identifier",
+                                    "name": "SUBSTR"
+                                },
+                                "head": {
+                                    "type": "variable",
+                                    "base": "s",
+                                    "parts": []
+                                },
+                                "tail": [
+                                    "1",
+                                    "2"
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "type": "output_statement",
+                        "list": [
+                            {
+                                "type": "concat_expr",
+                                "head": "\"abc\"",
+                                "tail": {
+                                    "type": "function_reference",
+                                    "fn": {
+                                        "type": "function_identifier",
+                                        "name": "SUBSTR"
+                                    },
+                                    "head": {
+                                        "type": "variable",
+                                        "base": "s",
+                                        "parts": []
+                                    },
+                                    "tail": [
+                                        "3",
+                                        "2"
+                                    ]
+                                }
+                            }
+                        ]
+                    }
+                ]
+            },
+            "end_name": "Substr"
+        }
+    }
+]

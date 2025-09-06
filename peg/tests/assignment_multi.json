@@ -1,0 +1,22 @@
+{
+    "expr": "0",
+    "targets": [
+        {
+            "type": "target",
+            "var": {
+                "base": "a",
+                "parts": [],
+                "type": "variable"
+            }
+        },
+        {
+            "type": "target",
+            "var": {
+                "base": "b",
+                "parts": [],
+                "type": "variable"
+            }
+        }
+    ],
+    "type": "assignment_statement"
+}

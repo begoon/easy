@@ -1,9 +1,11 @@
+import json
 import pathlib
 import sys
 
 from easy_lexer import Lexer, Token
 from easy_nodes import Array, ProgramStatement, block, common, types_registry
 from easy_parser import Parser
+from peg.peg_parser import PEGParser
 
 
 def parse(code: str) -> ProgramStatement:
@@ -34,6 +36,7 @@ if __name__ == "__main__":
         print("  -o <output.c> - specify output C file (default: input.c)")
         print("  -t            - generate tokens file (default: off)")
         print("  -a            - generate AST file (default: off)")
+        print("  -j            - generate PEG JSON AST file (default: off)")
         sys.exit(1)
 
     input_file = pathlib.Path(sys.argv[1])
@@ -55,6 +58,14 @@ if __name__ == "__main__":
     if "-a" in sys.argv:
         ast_file = input_file.with_suffix(".ast")
         ast_file.write_text(ast.meta() + "\n")
+
+    if "-j" in sys.argv:
+        peg_ast_file = input_file.with_suffix(".json")
+
+        grammar = open("peg/easy.peg").read()
+        peg_ast = PEGParser(grammar, start="compilation").parse(source)
+
+        peg_ast_file.write_text(json.dumps(peg_ast, indent=4) + "\n")
 
     c_code = ast.c().strip()
 

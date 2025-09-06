@@ -117,10 +117,10 @@ class Lexer:
             s += self.current()
             self.advance()
 
-        if self.current() == ".":
-            s += "."
+        if self.current() == "." or self.current() == "e":
+            s += self.current()
             self.advance()
-            while self.current().isdigit():
+            while self.current().isdigit() or self.current() in "+-eE":
                 s += self.current()
                 self.advance()
             return Token("REAL", s, line, col)

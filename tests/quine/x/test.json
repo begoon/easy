@@ -1,0 +1,118 @@
+[
+    {
+        "type": "program_segment",
+        "main": {
+            "type": "main_program",
+            "name": "Q",
+            "body": {
+                "type": "segment_body",
+                "var_decls": [
+                    {
+                        "type": "variable_declaration",
+                        "names": "s",
+                        "t": {
+                            "type": "type",
+                            "bt": "STRING"
+                        }
+                    }
+                ],
+                "stmts": [
+                    {
+                        "type": "assignment_statement",
+                        "targets": [
+                            {
+                                "type": "target",
+                                "var": {
+                                    "type": "variable",
+                                    "base": "s",
+                                    "parts": []
+                                }
+                            }
+                        ],
+                        "expr": "\"PROGRAM Q: DECLARE s STRING; SET s := %; OUTPUT SUBSTR(s, 0, 38) || CHARACTER(34) || s || CHARACTER(34) || SUBSTR(s, 39, LENGTH(s)-38); EXIT; END PROGRAM Q;\""
+                    },
+                    {
+                        "type": "output_statement",
+                        "list": [
+                            {
+                                "type": "concat_expr",
+                                "head": {
+                                    "type": "function_reference",
+                                    "fn": {
+                                        "type": "function_identifier",
+                                        "name": "SUBSTR"
+                                    },
+                                    "head": {
+                                        "type": "variable",
+                                        "base": "s",
+                                        "parts": []
+                                    },
+                                    "tail": [
+                                        "0",
+                                        "38"
+                                    ]
+                                },
+                                "tail": [
+                                    {
+                                        "type": "function_reference",
+                                        "fn": {
+                                            "type": "function_identifier",
+                                            "name": "CHARACTER"
+                                        },
+                                        "head": "34"
+                                    },
+                                    {
+                                        "type": "variable",
+                                        "base": "s",
+                                        "parts": []
+                                    },
+                                    {
+                                        "type": "function_reference",
+                                        "fn": {
+                                            "type": "function_identifier",
+                                            "name": "CHARACTER"
+                                        },
+                                        "head": "34"
+                                    },
+                                    {
+                                        "type": "function_reference",
+                                        "fn": {
+                                            "type": "function_identifier",
+                                            "name": "SUBSTR"
+                                        },
+                                        "head": {
+                                            "type": "variable",
+                                            "base": "s",
+                                            "parts": []
+                                        },
+                                        "tail": [
+                                            "39",
+                                            {
+                                                "type": "add_expr",
+                                                "head": {
+                                                    "type": "function_reference",
+                                                    "fn": {
+                                                        "type": "function_identifier",
+                                                        "name": "LENGTH"
+                                                    },
+                                                    "head": {
+                                                        "type": "variable",
+                                                        "base": "s",
+                                                        "parts": []
+                                                    }
+                                                },
+                                                "op": "-",
+                                                "rhs": "38"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            },
+            "end_name": "Q"
+        }
+    }
+]
