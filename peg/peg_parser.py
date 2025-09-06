@@ -75,10 +75,6 @@ class ParseError(Exception):
         return "\n".join(parts)
 
 
-class LeftRecursionError(Exception):
-    pass
-
-
 # -------------------------------
 # Grammar AST nodes
 # -------------------------------
@@ -375,111 +371,6 @@ class PEG:
             return s.read_class()
         name = s.read_identifier()
         return RuleRef(name)
-
-
-# -------------------------------
-# Left recursion analysis
-# -------------------------------
-
-
-class _Analyzer:
-    def __init__(self, rules: Dict[str, Expr]):
-        self.rules = rules
-        self.nullable: Dict[str, bool] = {name: False for name in rules}
-        self.first_rules: Dict[str, Set[str]] = {name: set() for name in rules}
-        self._compute()
-
-    def _expr_nullable(self, e: Expr) -> bool:
-        if isinstance(e, Literal):
-            return len(e.value) == 0
-        if isinstance(e, CharClass):
-            return False
-        if isinstance(e, AnyChar):
-            return False
-        if isinstance(e, RuleRef):
-            return self.nullable[e.name]
-        if isinstance(e, Sequence):
-            return all(self._expr_nullable(p) for p in e.parts)
-        if isinstance(e, Choice):
-            return any(self._expr_nullable(a) for a in e.alts)
-        if isinstance(e, OptionalE):
-            return True
-        if isinstance(e, ZeroOrMore):
-            return True
-        if isinstance(e, OneOrMore):
-            return self._expr_nullable(e.inner)
-        if isinstance(e, And):
-            return True
-        if isinstance(e, Not):
-            return True
-        if isinstance(e, Labeled):
-            return self._expr_nullable(e.inner)
-        return False
-
-    def _first_rules_expr(self, e: Expr) -> Set[str]:
-        S: Set[str] = set()
-        if isinstance(e, RuleRef):
-            S.add(e.name)
-        elif isinstance(e, Sequence):
-            for p in e.parts:
-                S |= self._first_rules_expr(p)
-                if not self._expr_nullable(p):
-                    break
-        elif isinstance(e, Choice):
-            for a in e.alts:
-                S |= self._first_rules_expr(a)
-        elif isinstance(e, (OptionalE, ZeroOrMore, OneOrMore, And, Not, Labeled)):
-            S |= self._first_rules_expr(e.inner)
-        return S
-
-    def _compute(self):
-        changed = True
-        while changed:
-            changed = False
-            for name, expr in self.rules.items():
-                val = self._expr_nullable(expr)
-                if val != self.nullable[name]:
-                    self.nullable[name] = val
-                    changed = True
-        changed = True
-        while changed:
-            changed = False
-            for name, expr in self.rules.items():
-                fr = set(self._first_rules_expr(expr))
-                if not fr.issubset(self.first_rules[name]):
-                    self.first_rules[name] |= fr
-                    changed = True
-
-    def detect_left_recursion(self) -> List[List[str]]:
-        edges = {a: set(bs) for a, bs in self.first_rules.items()}
-        cycles: List[List[str]] = []
-        visiting, visited = set(), set()
-        stack: List[str] = []
-
-        def dfs(u: str):
-            visiting.add(u)
-            stack.append(u)
-            for v in edges.get(u, ()):
-                if v in visiting:
-                    if v in stack:
-                        idx = stack.index(v)
-                        cyc = stack[idx:] + [v]
-                        if cyc not in cycles:
-                            cycles.append(cyc)
-                elif v not in visited:
-                    dfs(v)
-            stack.pop()
-            visiting.remove(u)
-            visited.add(u)
-
-        for r in self.rules:
-            if r not in visited:
-                dfs(r)
-        pruned = []
-        for cyc in cycles:
-            if len(cyc) >= 2 and cyc[0] == cyc[-1]:
-                pruned.append(cyc)
-        return pruned
 
 
 # -------------------------------
@@ -848,11 +739,6 @@ def _simplify_ast(node):
 class PEGParser:
     def __init__(self, grammar_text: str, start: Optional[str] = None):
         peg = PEG.parse(grammar_text)
-        analyzer = _Analyzer(peg.rules)
-        cycles = analyzer.detect_left_recursion()
-        if cycles:
-            msgs = [" -> ".join(c) for c in cycles]
-            raise LeftRecursionError("Left recursion detected in grammar:\n  " + "\n  ".join(msgs))
         self.grammar = peg
         if start:
             self.grammar.start = start
