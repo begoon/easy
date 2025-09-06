@@ -1,3 +1,4 @@
+import uuid
 from dataclasses import dataclass
 from typing import Literal, Optional, Tuple, Union
 
@@ -26,6 +27,10 @@ class Node:
         print(self)
         raise NotImplementedError()
 
+    def py(self) -> str:
+        print(self)
+        raise NotImplementedError()
+
     def meta(self):
         print(self)
         raise NotImplementedError()
@@ -51,6 +56,9 @@ class Label(Node):
     def c(self) -> str:
         return f"{self.name}: "
 
+    def py(self) -> str:
+        assert False, "labels are not supported in Python"
+
 
 Subroutine = Union["FunctionStatement", "ProcedureStatement"]
 
@@ -64,6 +72,9 @@ class Statements(Node):
 
     def c(self) -> str:
         return block(statement.c().strip() for statement in self.statements) if self.statements else "(empty)"
+
+    def py(self) -> str:
+        return block(statement.py().strip() for statement in self.statements) if self.statements else "(empty)"
 
 
 @dataclass
@@ -120,6 +131,28 @@ class Segment:
         parts.append(self.statements.c())
         return block(parts)
 
+    def py(self) -> str:
+        parts = []
+        if self.variables:
+            for v in self.variables:
+                type = v.type.meta() if isinstance(v.type, Node) else v.type
+                for name in v.names:
+                    if type == "INTEGER":
+                        parts.append(f"{name} = 0")
+                    elif type == "REAL":
+                        parts.append(f"{name} = 0.0")
+                    elif type == "BOOLEAN":
+                        parts.append(f"{name} = False")
+                    elif type == "STRING":
+                        parts.append(f"{name} = ''")
+                    else:
+                        raise ValueError(f"unsupported variable type in Python: {type}")
+        if self.subroutines:
+            for subroutine in self.subroutines:
+                parts.append(subroutine.py())
+        parts.append(self.statements.py())
+        return block(parts)
+
 
 @dataclass
 class DeclareStatement:
@@ -150,6 +183,11 @@ class Array(Node):
             v = v.type
         return f"{TYPE(v)} {variable}{t}"
 
+    def py(self) -> str:
+        start = self.start.py() + ":" if self.start else ""
+        end = self.end.py()
+        return f"[] # {start}{end} OF {self.type}"
+
     def meta(self) -> str:
         start = self.start.meta() + ":" if self.start else ""
         end = self.end.meta()
@@ -173,6 +211,22 @@ class StructureStatement:
     def c(self) -> str:
         v = ["struct {", " ".join(f"{TYPE(field.type)} {field.name};" for field in self.fields), "}"]
         return " ".join(v)
+
+    def py(self) -> str:
+        v = ["class STRUCTURE:"]
+        for field in self.fields:
+            type = field.type.meta() if isinstance(field.type, Node) else field.type
+            if type == "INTEGER":
+                v.append(f"    {field.name}: int = 0")
+            elif type == "REAL":
+                v.append(f"    {field.name}: float = 0.0")
+            elif type == "BOOLEAN":
+                v.append(f"    {field.name}: bool = False")
+            elif type == "STRING":
+                v.append(f"    {field.name}: str = ''")
+            else:
+                raise ValueError(f"unsupported field type in Python: {type}")
+        return "\n".join(v)
 
 
 Type = Union[Literal["INTEGER", "REAL", "BOOLEAN", "STRING"], Array, StructureStatement, str]
@@ -202,6 +256,14 @@ class ProcedureStatement(Node):
         ]
         return block(v)
 
+    def py(self) -> str:
+        arguments = ", ".join(name for name, _ in self.arguments)
+        v = [
+            f"def {self.name}({arguments}):",
+            indent(self.segment.py(), 1),
+        ]
+        return block(v)
+
 
 @dataclass
 class FunctionStatement(Node):
@@ -225,6 +287,14 @@ class FunctionStatement(Node):
             "{",
             indent(self.segment.c(), 1),
             "}",
+        ]
+        return block(v)
+
+    def py(self) -> str:
+        arguments = ", ".join(name for name, _ in self.arguments)
+        v = [
+            f"def {self.name}({arguments}) -> {self.type}:",
+            indent(self.segment.py(), 1),
         ]
         return block(v)
 
@@ -253,6 +323,10 @@ class SetStatement(Statement):
         indexes = "".join(f"[{index.c()}]" for index in self.indexes) if self.indexes else ""
         return f"{self.name}{indexes} = {self.expression.c()};"
 
+    def py(self) -> str:
+        indexes = "".join(f"[{index.py()}]" for index in self.indexes) if self.indexes else ""
+        return f"{self.name}{indexes} = {self.expression.py()}"
+
 
 @dataclass
 class IfStatement(Statement):
@@ -278,6 +352,13 @@ class IfStatement(Statement):
             v.append("{")
             v.append(indent(self.else_branch.c(), 1))
             v.append("}")
+        return block(v)
+
+    def py(self) -> str:
+        v = [f"if {self.cond.py()}:", indent(self.then_branch.py(), 1)]
+        if self.else_branch:
+            v.append("else:")
+            v.append(indent(self.else_branch.py(), 1))
         return block(v)
 
 
@@ -324,6 +405,22 @@ class ForStatement(Statement):
     def step(self) -> str:
         return f"{self.variable.c()} += " + ("1" if not self.by else self.by.c())
 
+    def py(self) -> str:
+        variable = self.variable.name
+        v = [
+            f"{variable} = {self.init.py() if self.init else 0}",
+            "while True:",
+        ]
+        if self.to or self.condition:
+            v.append(indent(f"if {variable} > {self.to.py()}:", 1))
+            v.append(indent("break", 2))
+        if self.condition:
+            v.append(indent(f"if not {self.condition.py()}:", 1))
+            v.append(indent("break", 2))
+        v.append(indent(f"{self.do.py()}", 1))
+        v.append(indent(f"{variable} += {self.by.py() if self.by else 1}", 1))
+        return block(v)
+
 
 @dataclass
 class SelectStatement(Statement):
@@ -355,6 +452,17 @@ class SelectStatement(Statement):
             v.append("}")
         return block(v)
 
+    def py(self) -> str:
+        v = []
+        for i, [condition, body] in enumerate(self.cases, 0):
+            if condition is not None:
+                condition = condition.py()
+                v.append(("elif " if i > 0 else "if ") + condition + ":")
+            else:
+                v.append("else:")
+            v.append(indent(body.py(), 1))
+        return block(v)
+
 
 @dataclass
 class InputStatement(Statement):
@@ -373,6 +481,18 @@ class InputStatement(Statement):
             else:
                 assert type == "INTEGER", f"unexpected variable type in INPUT '{variable}': {type}"
                 inputs.append(f'scanf("%d", &{variable});')
+        return block(inputs)
+
+    def py(self) -> str:
+        inputs = []
+        for variable in self.variables:
+            assert variable in variables_registry, f"undeclared variable '{variable}'"
+            type = variables_registry[variable]
+            if type == "STRING":
+                inputs.append(f"{variable} = input()")
+            else:
+                assert type == "INTEGER", f"unexpected variable type in INPUT '{variable}': {type}"
+                inputs.append(f"{variable} = int(input())")
         return block(inputs)
 
 
@@ -402,6 +522,20 @@ class OutputStatement(Statement):
         arguments = ", ".join(format(argument) for argument in self.arguments)
         return f"output({len(self.arguments)}, {arguments});"
 
+    def py(self) -> str:
+        def format(argument: Expression) -> str:
+            if isinstance(argument, Variable):
+                name = argument.name.split(".", 1)[0]
+                assert name in variables_registry, f"undeclared variable in OUTPUT '{argument}'"
+                type = variables_registry[name]
+                if type != "STRING":
+                    return f"str({argument.py()})"
+                return argument.py()
+            return argument.py()
+
+        arguments = ", ".join(format(argument) for argument in self.arguments)
+        return f"print({arguments})"
+
 
 @dataclass
 class RepeatStatement(Statement):
@@ -413,6 +547,9 @@ class RepeatStatement(Statement):
     def c(self) -> str:
         return f"goto {self.label};"
 
+    def py(self) -> str:
+        assert False, "REPEAT is not supported in Python"
+
 
 @dataclass
 class RepentStatement(Statement):
@@ -423,6 +560,9 @@ class RepentStatement(Statement):
 
     def c(self) -> str:
         return f"goto {self.label};"
+
+    def py(self) -> str:
+        assert False, "REPENT is not supported in Python"
 
 
 @dataclass
@@ -443,6 +583,14 @@ class BeginStatement(Statement):
             v.append(self.label + ":")
         return block(v)
 
+    def py(self) -> str:
+        v = ["# BEGIN"]
+        v.append(indent(self.body.py(), 1))
+        v.append("# END")
+        if self.label:
+            v.append(f"# LABEL {self.label}")
+        return block(v)
+
 
 @dataclass
 class CallStatement(Statement):
@@ -457,6 +605,10 @@ class CallStatement(Statement):
         arguments = ", ".join(arg.c() for arg in self.arguments)
         return f"{self.name}({arguments});"
 
+    def py(self) -> str:
+        arguments = ", ".join(arg.py() for arg in self.arguments)
+        return f"{self.name}({arguments}) # CALL {self.name}"
+
 
 @dataclass
 class ReturnStatement(Statement):
@@ -470,6 +622,10 @@ class ReturnStatement(Statement):
         value = self.value.c() if isinstance(self.value, Expression) else self.value
         return "return" + (f" {value}" if self.value is not None else "") + ";"
 
+    def py(self) -> str:
+        value = self.value.py() if isinstance(self.value, Expression) else self.value
+        return "return" + (f" {value}" if self.value is not None else "") + ""
+
 
 @dataclass
 class ExitStatement(Statement):
@@ -479,6 +635,9 @@ class ExitStatement(Statement):
     def c(self) -> str:
         return "exit(0);"
 
+    def py(self) -> str:
+        return "exit(0)"
+
 
 @dataclass
 class EmptyStatement(Statement):
@@ -487,6 +646,9 @@ class EmptyStatement(Statement):
 
     def c(self) -> str:
         return ";"
+
+    def py(self) -> str:
+        return "pass"
 
 
 @dataclass
@@ -507,6 +669,9 @@ class FunctionInvoke(Expression):
 
         return f"{self.name}({', '.join(format(a) for a in self.arguments)})"
 
+    def py(self) -> str:
+        return f"{self.name}({', '.join(a.py() for a in self.arguments)}) # FUNCTION {self.name}"
+
 
 @dataclass
 class BinaryOperation(Expression):
@@ -519,6 +684,18 @@ class BinaryOperation(Expression):
 
     def c(self) -> str:
         return f"({self.left.c()} {self.operation} {self.right.c()})"
+
+    def py(self) -> str:
+        op = self.operation
+        if op == "AND":
+            op = "and"
+        elif op == "OR":
+            op = "or"
+        elif op == "=":
+            op = "=="
+        elif op == "<>":
+            op = "!="
+        return f"({self.left.py()} {op} {self.right.py()})"
 
 
 @dataclass
@@ -562,6 +739,26 @@ class ConcatenationOperation(Expression):
         parts = [format(v) for v in self.parts]
         return f"concat({len(parts)}, {', '.join(parts)})"
 
+    def py(self) -> str:
+        def format(v: Expression) -> str:
+            is_concatenation = isinstance(v, ConcatenationOperation)
+            is_string_literal = isinstance(v, StringLiteral)
+            is_function = isinstance(v, FunctionInvoke) and v.name in ("CHARACTER", "SUBSTR")
+
+            skip_stringify = any([is_string_literal, is_concatenation, is_function])
+
+            str = v.py()
+            if isinstance(v, Variable):
+                global variables_registry
+                type = variables_registry.get(v.name)
+                if type == "STRING":
+                    return f"{v.name}"
+                return f"str({str})"
+            return str if skip_stringify else f"str({str})"
+
+        parts = [format(v) for v in self.parts]
+        return " + ".join(parts)
+
 
 @dataclass
 class UnaryOperation(Expression):
@@ -574,6 +771,10 @@ class UnaryOperation(Expression):
     def c(self) -> str:
         operation = "!" if self.operation == "NOT" else self.operation
         return f"({operation}{self.expr.c()})"
+
+    def py(self) -> str:
+        operation = "not " if self.operation == "NOT" else self.operation
+        return f"({operation}{self.expr.py()})"
 
 
 @dataclass
@@ -589,6 +790,10 @@ class Variable(Expression):
         indexes = "".join(f"[{index.c()}]" for index in self.indexes) if self.indexes else ""
         return self.name + indexes
 
+    def py(self) -> str:
+        indexes = "".join(f"[{index.py()}]" for index in self.indexes) if self.indexes else ""
+        return self.name + indexes
+
 
 @dataclass
 class IntegerLiteral(Expression):
@@ -598,6 +803,9 @@ class IntegerLiteral(Expression):
         return repr(self.value)
 
     def c(self) -> str:
+        return str(self.value)
+
+    def py(self) -> str:
         return str(self.value)
 
 
@@ -611,6 +819,9 @@ class RealLiteral(Expression):
     def c(self) -> str:
         return str(self.value)
 
+    def py(self) -> str:
+        return str(self.value)
+
 
 @dataclass
 class StringLiteral(Expression):
@@ -621,6 +832,9 @@ class StringLiteral(Expression):
 
     def c(self) -> str:
         return f'"{self.value}"'
+
+    def py(self) -> str:
+        return repr(self.value)
 
 
 @dataclass
@@ -633,6 +847,9 @@ class BoolLiteral(Expression):
     def c(self) -> str:
         return "1" if self.value else "0"
 
+    def py(self) -> str:
+        return "True" if self.value else "False"
+
 
 @dataclass
 class ProgramStatement(Node):
@@ -644,6 +861,9 @@ class ProgramStatement(Node):
 
     def c(self) -> str:
         return block(["int main()", "{", indent(self.segment.c(main=True), 1), "}"])
+
+    def py(self) -> str:
+        return block([self.segment.py()])
 
 
 def indent(s: str, n: int) -> str:

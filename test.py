@@ -2,6 +2,7 @@ import itertools
 import os
 import subprocess
 import sys
+import traceback
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 
@@ -44,6 +45,7 @@ def run_tests(filter: str | None) -> None:
             except Exception as e:
                 failed.append(task)
                 print(f"[{task.name}] failed: {e}")
+                print(traceback.format_exc())
         if failed:
             print("failed tests:")
             for t in failed:
@@ -90,6 +92,13 @@ def process(test: Path) -> None:
 
         flags.extend(["-o", str(created_c)])
 
+    expected_py = x.with_suffix(".py")
+    if expected_py.exists():
+        created_py = test.with_suffix(".py")
+        removals.append(created_py)
+
+        flags.extend(["-o", str(created_py)])
+
     run(["python", "easy.py", program, *flags])
 
     if expected_tokens.exists():
@@ -104,26 +113,36 @@ def process(test: Path) -> None:
     if expected_c.exists():
         diff(expected_c, created_c)
 
+    if expected_py.exists():
+        diff(expected_py, created_py)
+
     expected_output = x.with_suffix(".output")
     if expected_output.exists():
         created_output = test.with_suffix(".output")
         removals.append(created_output)
 
-        exe = test.with_suffix(".exe")
-        removals.append(exe)
+        if expected_c.exists():
+            exe = test.with_suffix(".exe")
+            removals.append(exe)
 
-        cc_flags = ["-Wall", "-Wextra", "-Werror"]
-        run(["clang", *cc_flags, test.with_suffix(".c"), "-I", ".", "-o", exe])
+            cc_flags = ["-Wall", "-Wextra", "-Werror"]
+            run(["clang", *cc_flags, test.with_suffix(".c"), "-I", ".", "-o", exe])
 
-        cmd = [exe, ">" + str(test.with_suffix(".output"))]
+            cmd = [exe, ">" + str(test.with_suffix(".output"))]
 
-        input_file = x.with_suffix(".input")
-        if input_file.exists():
-            cmd.insert(1, "<" + str(input_file))
+            input_file = x.with_suffix(".input")
+            if input_file.exists():
+                cmd.append("<" + str(input_file))
 
-        executor = " ".join(map(str, cmd))
+            run(" ".join(map(str, cmd)), shell=True)
 
-        run(executor, shell=True)
+        if expected_py.exists():
+            cmd = ["python", created_py, ">" + str(test.with_suffix(".output"))]
+            input_file = x.with_suffix(".input")
+            if input_file.exists():
+                cmd.append("<" + str(input_file))
+
+            run(" ".join(map(str, cmd)), env={**os.environ, "PYTHONPATH": "."}, shell=True)
 
         diff(expected_output, created_output)
 

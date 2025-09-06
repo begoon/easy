@@ -1,6 +1,9 @@
+#!/usr/bin/env python3
+#
 import json
 import pathlib
 import sys
+from pathlib import Path
 
 from easy_lexer import Lexer, Token
 from easy_nodes import Array, ProgramStatement, block, common, types_registry
@@ -67,13 +70,20 @@ if __name__ == "__main__":
 
         peg_ast_file.write_text(json.dumps(peg_ast, indent=4) + "\n")
 
-    c_code = ast.c().strip()
+    output = Path(arg(sys.argv, "-o") or input_file.with_suffix(".c"))
 
-    output = arg(sys.argv, "-o") or input_file.with_suffix(".c")
+    is_py = output.suffix == ".py"
+
+    code = (ast.py() if is_py else ast.c()).strip()
 
     with open(output, "w") as f:
-        f.write('#include "preamble.c"\n')
+        if is_py:
+            f.write("import preamble # noqa:  F401\n\n")
+        else:
+            f.write('#include "preamble.c"\n')
         if types_registry:
+            if is_py:
+                assert False, "TODO: Python output does not support typedefs"
             for name, definition in types_registry.items():
                 v = "typedef "
                 if isinstance(definition, Array):
@@ -84,4 +94,4 @@ if __name__ == "__main__":
                 f.write(v)
         if common:
             f.write(block(common) + "\n")
-        f.write(c_code + "\n")
+        f.write(code + "\n")
