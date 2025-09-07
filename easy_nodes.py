@@ -68,13 +68,13 @@ class Statements(Node):
     statements: list[Statement]
 
     def meta(self) -> str:
-        return block(indent(statement.meta(), 1) for statement in self.statements) if self.statements else "(empty)"
+        return emit(indent(statement.meta(), 1) for statement in self.statements) if self.statements else "(empty)"
 
     def c(self) -> str:
-        return block(statement.c().strip() for statement in self.statements) if self.statements else "(empty)"
+        return emit(statement.c().strip() for statement in self.statements) if self.statements else "(empty)"
 
     def py(self) -> str:
-        return block(statement.py().strip() for statement in self.statements) if self.statements else "(empty)"
+        return emit(statement.py().strip() for statement in self.statements) if self.statements else "(empty)"
 
 
 @dataclass
@@ -102,7 +102,7 @@ class Segment:
                 parts.append(indent(subroutine.meta(), 1))
         parts.append("Statements:")
         parts.append(self.statements.meta())
-        return block(parts)
+        return emit(parts)
 
     def c(self, /, main: bool = False) -> str:
         global common
@@ -129,7 +129,7 @@ class Segment:
                 subroutines.append(subroutine.c())
             common.extend(subroutines)
         parts.append(self.statements.c())
-        return block(parts)
+        return emit(parts)
 
     def py(self) -> str:
         parts = []
@@ -151,7 +151,7 @@ class Segment:
             for subroutine in self.subroutines:
                 parts.append(subroutine.py())
         parts.append(self.statements.py())
-        return block(parts)
+        return emit(parts)
 
 
 @dataclass
@@ -244,7 +244,7 @@ class ProcedureStatement(Node):
             f"PROCEDURE {self.name}({arguments})",
             indent(self.segment.meta(), 1),
         ]
-        return block(v)
+        return emit(v)
 
     def c(self) -> str:
         arguments = ", ".join(f"{TYPE(type)} {name}" for name, type in self.arguments)
@@ -254,7 +254,7 @@ class ProcedureStatement(Node):
             indent(self.segment.c(), 1),
             "}",
         ]
-        return block(v)
+        return emit(v)
 
     def py(self) -> str:
         arguments = ", ".join(name for name, _ in self.arguments)
@@ -262,7 +262,7 @@ class ProcedureStatement(Node):
             f"def {self.name}({arguments}):",
             indent(self.segment.py(), 1),
         ]
-        return block(v)
+        return emit(v)
 
 
 @dataclass
@@ -278,7 +278,7 @@ class FunctionStatement(Node):
             f"FUNCTION {self.name}({arguments}) : {self.type}",
             indent(self.segment.meta(), 1),
         ]
-        return block(v)
+        return emit(v)
 
     def c(self) -> str:
         arguments = ", ".join(f"{TYPE(type)} {name}" for name, type in self.arguments)
@@ -288,7 +288,7 @@ class FunctionStatement(Node):
             indent(self.segment.c(), 1),
             "}",
         ]
-        return block(v)
+        return emit(v)
 
     def py(self) -> str:
         arguments = ", ".join(name for name, _ in self.arguments)
@@ -296,7 +296,7 @@ class FunctionStatement(Node):
             f"def {self.name}({arguments}) -> {self.type}:",
             indent(self.segment.py(), 1),
         ]
-        return block(v)
+        return emit(v)
 
 
 @dataclass
@@ -340,7 +340,7 @@ class IfStatement(Statement):
             v.append("ELSE")
             v.append(indent(self.else_branch.meta(), 1))
         v.append("FI")
-        return block(v)
+        return emit(v)
 
     def c(self) -> str:
         cond = self.cond.c()
@@ -352,14 +352,14 @@ class IfStatement(Statement):
             v.append("{")
             v.append(indent(self.else_branch.c(), 1))
             v.append("}")
-        return block(v)
+        return emit(v)
 
     def py(self) -> str:
         v = [f"if {self.cond.py()}:", indent(self.then_branch.py(), 1)]
         if self.else_branch:
             v.append("else:")
             v.append(indent(self.else_branch.py(), 1))
-        return block(v)
+        return emit(v)
 
 
 @dataclass
@@ -383,7 +383,7 @@ class ForStatement(Statement):
 
         v += " DO"
 
-        return block([v, indent(self.do.meta(), 1), "END FOR"])
+        return emit([v, indent(self.do.meta(), 1), "END FOR"])
 
     def c(self) -> str:
         v = [
@@ -392,7 +392,7 @@ class ForStatement(Statement):
             indent(self.do.c(), 1),
             "}",
         ]
-        return block(v)
+        return emit(v)
 
     def format_condition(self) -> str:
         conditions = []
@@ -419,7 +419,7 @@ class ForStatement(Statement):
             v.append(indent("break", 2))
         v.append(indent(f"{self.do.py()}", 1))
         v.append(indent(f"{variable} += {self.by.py() if self.by else 1}", 1))
-        return block(v)
+        return emit(v)
 
 
 @dataclass
@@ -437,7 +437,7 @@ class SelectStatement(Statement):
                 v.append(indent("OTHERWISE:", 1))
             v.append(f"{indent(body.meta(), 2)}")
         v.append("END SELECT")
-        return block(v)
+        return emit(v)
 
     def c(self) -> str:
         v = []
@@ -450,7 +450,7 @@ class SelectStatement(Statement):
             v.append("{")
             v.append(indent(body.c(), 1))
             v.append("}")
-        return block(v)
+        return emit(v)
 
     def py(self) -> str:
         v = []
@@ -461,7 +461,7 @@ class SelectStatement(Statement):
             else:
                 v.append("else:")
             v.append(indent(body.py(), 1))
-        return block(v)
+        return emit(v)
 
 
 @dataclass
@@ -481,7 +481,7 @@ class InputStatement(Statement):
             else:
                 assert type == "INTEGER", f"unexpected variable type in INPUT '{variable}': {type}"
                 inputs.append(f'scanf("%d", &{variable});')
-        return block(inputs)
+        return emit(inputs)
 
     def py(self) -> str:
         inputs = []
@@ -493,7 +493,7 @@ class InputStatement(Statement):
             else:
                 assert type == "INTEGER", f"unexpected variable type in INPUT '{variable}': {type}"
                 inputs.append(f"{variable} = int(input())")
-        return block(inputs)
+        return emit(inputs)
 
 
 @dataclass
@@ -576,13 +576,13 @@ class BeginStatement(Statement):
         if self.label:
             v.append("LABEL " + self.label)
         v.append(";")
-        return block(v)
+        return emit(v)
 
     def c(self) -> str:
         v = ["{", indent(self.body.c(), 1), "}"]
         if self.label:
             v.append(self.label + ":")
-        return block(v)
+        return emit(v)
 
     def py(self) -> str:
         v = ["# BEGIN"]
@@ -590,7 +590,7 @@ class BeginStatement(Statement):
         v.append("# END")
         if self.label:
             v.append(f"# LABEL {self.label}")
-        return block(v)
+        return emit(v)
 
 
 @dataclass
@@ -858,13 +858,13 @@ class ProgramStatement(Node):
     segment: Segment
 
     def meta(self) -> str:
-        return block([f"PROGRAM {self.name}", indent(self.segment.meta(), 1)])
+        return emit([f"PROGRAM {self.name}", indent(self.segment.meta(), 1)])
 
     def c(self) -> str:
-        return block(["int main()", "{", indent(self.segment.c(main=True), 1), "}"])
+        return emit(["int main()", "{", indent(self.segment.c(main=True), 1), "}"])
 
     def py(self) -> str:
-        return block([self.segment.py()])
+        return emit([self.segment.py()])
 
 
 def indent(s: str, n: int) -> str:
@@ -872,5 +872,5 @@ def indent(s: str, n: int) -> str:
     return "\n".join(pad + line for line in s.splitlines())
 
 
-def block(lines: list[str]) -> str:
+def emit(lines: list[str]) -> str:
     return "\n".join(lines)

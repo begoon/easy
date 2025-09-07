@@ -6,7 +6,7 @@ import sys
 from pathlib import Path
 
 from easy_lexer import Lexer, Token
-from easy_nodes import Array, ProgramStatement, block, common, python_imports, types_registry
+from easy_nodes import Array, ProgramStatement, common, emit, python_imports, types_registry
 from easy_parser import Parser
 from peg.peg_parser import PEGParser
 
@@ -87,7 +87,7 @@ if __name__ == "__main__":
                 v += ";\n"
                 f.write(v)
         if common:
-            f.write(block(common) + "\n")
+            f.write(emit(common) + "\n")
         f.write(code_c + "\n")
 
     output_py = Path(arg(sys.argv, "-p") or input_file.with_suffix(".py"))
@@ -99,6 +99,13 @@ if __name__ == "__main__":
             if python_imports:
                 imports = ", ".join(sorted(python_imports))
                 f.write(f"from preamble import {imports}\n\n")
+            f.write(code_py + "\n")
+
+        with open(output_py, "w") as f:
+            if python_imports:
+                imports = ", ".join(sorted(python_imports))
+                f.write(f"from preamble import {imports}\n\n")
+            f.write(code_py + "\n")
             f.write(code_py + "\n")
 
         with open(output_py, "w") as f:

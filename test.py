@@ -173,10 +173,18 @@ def diff(expected_file: Path, created_file: Path) -> None:
 
     for i, (expected, created) in enumerate(itertools.zip_longest(expected_lines, created_lines), 1):
         if expected != created:
-            print(f"{expected_file}:{i}:")
-            print(f"  expected: {WHITE}{expected}{NC}")
-            print(f"  created:  {RED}{created}{NC}")
-            print(f"{created_file}:{i}:")
+            mismatch_column = 1
+            for c1, c2 in itertools.zip_longest(expected or "", created or ""):
+                if c1 != c2:
+                    break
+                mismatch_column += 1
+
+            print(f"{expected_file}:{i}:{RED}{mismatch_column}{NC}")
+            print(f"          {" " * (mismatch_column-1)}↓")
+            print(f"expected: {WHITE}{expected}{NC}")
+            print(f"created:  {RED}{created}{NC}")
+            print(f"          {" " * (mismatch_column-1)}↑")
+            print(f"{created_file}:{i}:{RED}{mismatch_column}{NC}")
             exit(1)
 
 
