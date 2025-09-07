@@ -95,20 +95,6 @@ if __name__ == "__main__":
         code_py = ast.py().strip()
 
         with open(output_py, "w") as f:
-            f.write("from preamble import *  # noqa: F401\n\n")
-            if python_imports:
-                imports = ", ".join(sorted(python_imports))
-                f.write(f"from preamble import {imports}\n\n")
-            f.write(code_py + "\n")
-
-        with open(output_py, "w") as f:
-            if python_imports:
-                imports = ", ".join(sorted(python_imports))
-                f.write(f"from preamble import {imports}\n\n")
-            f.write(code_py + "\n")
-            f.write(code_py + "\n")
-
-        with open(output_py, "w") as f:
             if python_imports:
                 imports = ", ".join(sorted(python_imports))
                 f.write(f"from preamble import {imports}\n\n")

@@ -40,15 +40,14 @@ char *concat(int count, ...)
     va_list args;
     va_start(args, count);
 
-    size_t total_len = 0;
+    size_t sz = 0;
     for (int i = 0; i < count; i++)
     {
-        char *s = va_arg(args, char *);
-        total_len += strlen(s);
+        sz += strlen(va_arg(args, char *));
     }
     va_end(args);
 
-    char *result = malloc(total_len + 1);
+    char *result = malloc(sz + 1);
     if (!result)
         return NULL;
 
