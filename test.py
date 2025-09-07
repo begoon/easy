@@ -13,7 +13,7 @@ def run(cmd, *args, **kwargs) -> None:
     cmd = " ".join([str(v) for v in cmd]) if isinstance(cmd, (list, tuple)) else str(cmd)
     if verbose:
         print("[RUN]", cmd)
-    code: subprocess.CompletedProcess = subprocess.run(cmd, *args, shell=True, check=True, **kwargs)
+    code: subprocess.CompletedProcess = subprocess.run(cmd, *args, shell=True, **kwargs)
     if code.returncode != 0:
         print(f"ERROR: [{cmd}] -> {code.returncode}")
         exit(1)

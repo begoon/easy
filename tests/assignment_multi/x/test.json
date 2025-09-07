@@ -1,0 +1,73 @@
+[
+    {
+        "type": "program_segment",
+        "main": {
+            "type": "main_program",
+            "name": "AssignmentMulti",
+            "body": {
+                "type": "segment_body",
+                "var_decls": [
+                    {
+                        "type": "variable_declaration",
+                        "names": {
+                            "type": "declared_multiple_names",
+                            "head": "a",
+                            "tail": "b"
+                        },
+                        "t": {
+                            "type": "type",
+                            "bt": "INTEGER"
+                        }
+                    }
+                ],
+                "stmts": [
+                    {
+                        "type": "assignment_statement",
+                        "targets": [
+                            {
+                                "type": "target",
+                                "var": {
+                                    "type": "variable",
+                                    "base": "a",
+                                    "parts": []
+                                }
+                            },
+                            {
+                                "type": "target",
+                                "var": {
+                                    "type": "variable",
+                                    "base": "b",
+                                    "parts": []
+                                }
+                            }
+                        ],
+                        "expr": "123"
+                    },
+                    {
+                        "type": "output_statement",
+                        "list": [
+                            {
+                                "type": "concat_expr",
+                                "head": "\"> \"",
+                                "tail": [
+                                    {
+                                        "type": "variable",
+                                        "base": "a",
+                                        "parts": []
+                                    },
+                                    "\"-\"",
+                                    {
+                                        "type": "variable",
+                                        "base": "b",
+                                        "parts": []
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            },
+            "end_name": "AssignmentMulti"
+        }
+    }
+]

@@ -301,31 +301,46 @@ class FunctionStatement(Node):
 
 @dataclass
 class SetStatement(Statement):
-    name: str
+    names: list[str]
     expression: Expression
-    indexes: list[Optional[Expression]]
+    indexes: dict[str, list[Optional[Expression]]]
+
+    @staticmethod
+    def variable_indexes(indexes: list[Optional[Expression]]) -> str:
+        return "".join(f"[{index.meta()}]" for index in indexes if index is not None)
 
     def meta(self) -> str:
-        indexes = "".join(f"[{index.meta()}]" for index in self.indexes) if self.indexes else ""
-        return f"SET {self.name}{indexes} := {self.expression.meta()}"
+        v = "SET "
+        for name in self.names:
+            indexes = self.variable_indexes(self.indexes.get(name, []))
+            v += f"{name}{indexes} := "
+        v += self.expression.meta()
+        return v
 
     def c(self) -> str:
         global variables_registry
-        type = variables_registry.get(self.name)
-        if type == "STRING":
 
-            def T(v: Expression) -> str:
-                if not isinstance(v, StringLiteral):
-                    return v.c()
-                return '"' + v.c()[1:-1].replace('"', '\\"') + '"'
+        v = []
+        for name in self.names:
+            type = variables_registry.get(name)
+            if type == "STRING":
 
-            return f"strcpy({self.name}.data, {T(self.expression)});"
-        indexes = "".join(f"[{index.c()}]" for index in self.indexes) if self.indexes else ""
-        return f"{self.name}{indexes} = {self.expression.c()};"
+                def T(v: Expression) -> str:
+                    if not isinstance(v, StringLiteral):
+                        return v.c()
+                    return '"' + v.c()[1:-1].replace('"', '\\"') + '"'
+
+                return f"strcpy({name}.data, {T(self.expression)});"
+            indexes = self.variable_indexes(self.indexes.get(name, []))
+            v.append(f"{name}{indexes} = {self.expression.c()};")
+        return "\n".join(v)
 
     def py(self) -> str:
-        indexes = "".join(f"[{index.py()}]" for index in self.indexes) if self.indexes else ""
-        return f"{self.name}{indexes} = {self.expression.py()}"
+        v = []
+        for name in self.names:
+            indexes = self.variable_indexes(self.indexes.get(name, []))
+            v.append(f"{name}{indexes} = {self.expression.py()}")
+        return "\n".join(v)
 
 
 @dataclass

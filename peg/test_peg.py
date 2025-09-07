@@ -13,7 +13,6 @@ CWD = Path(__file__).parent
     ["name", "start"],
     [
         ("assignment_subscript_part", "assignment_statement"),
-        ("assignment_multi", "assignment_statement"),
         ("output_subscript_part", "output_statement"),
     ],
 )

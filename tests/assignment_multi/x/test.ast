@@ -1,0 +1,6 @@
+PROGRAM AssignmentMulti
+    Variables:
+        a, b: INTEGER
+    Statements:
+        SET a := b := 123
+        OUTPUT(4:('> ' || strconv(a) || '-' || strconv(b)))

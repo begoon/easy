@@ -395,10 +395,21 @@ class Parser:
     def assignment_statement(self) -> SetStatement:
         self.eat("SET")
         variable = self.variable_name()
+        indexes = {variable.name: variable.indexes}
         self.eat(":=")
+        targets = [variable.name]
+
+        while True:
+            current = self.current()
+            if current.type != "IDENT" or self.peek().value != ":=":
+                break
+            variable = self.variable_name()
+            indexes[variable.name] = variable.indexes
+            self.eat(":=")
+            targets.append(variable.name)
         expr = self.expression()
         self.eat(";")
-        return SetStatement(variable.name, expr, variable.indexes)
+        return SetStatement(targets, expr, indexes)
 
     def variable_name(self) -> Variable:
         name = self.eat("IDENT").value

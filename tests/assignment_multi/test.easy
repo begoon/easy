@@ -1,0 +1,5 @@
+PROGRAM AssignmentMulti:
+  DECLARE (a, b) INTEGER;
+  SET a := b := 123;
+  OUTPUT "> " || a || "-" || b;
+END PROGRAM AssignmentMulti;
