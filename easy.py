@@ -6,7 +6,7 @@ import sys
 from pathlib import Path
 
 from easy_lexer import Lexer, Token
-from easy_nodes import Array, ProgramStatement, block, common, types_registry
+from easy_nodes import Array, ProgramStatement, block, common, python_imports, types_registry
 from easy_parser import Parser
 from peg.peg_parser import PEGParser
 
@@ -35,11 +35,12 @@ def arg(argv: list[str], name: str) -> str | None:
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
-        print("usage: easy.py <input.easy> [-o <output.c>] [-t] [-a]")
-        print("  -o <output.c> - specify output C file (default: input.c)")
-        print("  -t            - generate tokens file (default: off)")
-        print("  -a            - generate AST file (default: off)")
-        print("  -j            - generate PEG JSON AST file (default: off)")
+        print("usage: easy.py <input.easy> [-c <output.c>] [-t] [-a] [-j] [-p <output.py>]")
+        print("  -c <output.c>  - specify output C file (default: input.c)")
+        print("  -t             - generate tokens file (default: off)")
+        print("  -a             - generate AST file (default: off)")
+        print("  -j             - generate PEG JSON AST file (default: off)")
+        print("  -p <output.py> - generate Python file (default: input.py)")
         sys.exit(1)
 
     input_file = pathlib.Path(sys.argv[1])
@@ -70,20 +71,13 @@ if __name__ == "__main__":
 
         peg_ast_file.write_text(json.dumps(peg_ast, indent=4) + "\n")
 
-    output = Path(arg(sys.argv, "-o") or input_file.with_suffix(".c"))
+    output_c = Path(arg(sys.argv, "-c") or input_file.with_suffix(".c"))
 
-    is_py = output.suffix == ".py"
+    code_c = ast.c().strip()
 
-    code = (ast.py() if is_py else ast.c()).strip()
-
-    with open(output, "w") as f:
-        if is_py:
-            f.write("import preamble # noqa:  F401\n\n")
-        else:
-            f.write('#include "preamble.c"\n')
+    with open(output_c, "w") as f:
+        f.write('#include "preamble.c"\n')
         if types_registry:
-            if is_py:
-                assert False, "TODO: Python output does not support typedefs"
             for name, definition in types_registry.items():
                 v = "typedef "
                 if isinstance(definition, Array):
@@ -94,4 +88,21 @@ if __name__ == "__main__":
                 f.write(v)
         if common:
             f.write(block(common) + "\n")
-        f.write(code + "\n")
+        f.write(code_c + "\n")
+
+    output_py = Path(arg(sys.argv, "-p") or input_file.with_suffix(".py"))
+    if flag(sys.argv, "-p") is not None:
+        code_py = ast.py().strip()
+
+        with open(output_py, "w") as f:
+            f.write("from preamble import *  # noqa: F401\n\n")
+            if python_imports:
+                imports = ", ".join(sorted(python_imports))
+                f.write(f"from preamble import {imports}\n\n")
+            f.write(code_py + "\n")
+
+        with open(output_py, "w") as f:
+            if python_imports:
+                imports = ", ".join(sorted(python_imports))
+                f.write(f"from preamble import {imports}\n\n")
+            f.write(code_py + "\n")

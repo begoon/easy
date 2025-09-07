@@ -9,15 +9,14 @@ from pathlib import Path
 TESTS_FOLDER = Path("tests")
 
 
-def run(cmd, *args, **kwargs) -> subprocess.CompletedProcess:
+def run(cmd, *args, **kwargs) -> None:
+    cmd = " ".join([str(v) for v in cmd]) if isinstance(cmd, (list, tuple)) else str(cmd)
     if verbose:
-        print("[RUN]", " ".join([str(v) for v in cmd]) if isinstance(cmd, (list, tuple)) else str(cmd))
-    code: subprocess.CompletedProcess = subprocess.run(cmd, *args, **kwargs)
+        print("[RUN]", cmd)
+    code: subprocess.CompletedProcess = subprocess.run(cmd, *args, shell=True, check=True, **kwargs)
     if code.returncode != 0:
-        v = " ".join([str(v) for v in cmd]) if isinstance(cmd, (list, tuple)) else str(cmd)
-        print("ERROR:", v)
+        print(f"ERROR: [{cmd}] -> {code.returncode}")
         exit(1)
-    return code
 
 
 def run_tests(filter: str | None) -> None:
@@ -90,14 +89,14 @@ def process(test: Path) -> None:
         created_c = test.with_suffix(".c")
         removals.append(created_c)
 
-        flags.extend(["-o", str(created_c)])
+        flags.extend(["-c", str(created_c)])
 
     expected_py = x.with_suffix(".py")
     if expected_py.exists():
         created_py = test.with_suffix(".py")
         removals.append(created_py)
 
-        flags.extend(["-o", str(created_py)])
+        flags.extend(["-p", str(created_py)])
 
     run(["python", "easy.py", program, *flags])
 
@@ -132,9 +131,12 @@ def process(test: Path) -> None:
 
             input_file = x.with_suffix(".input")
             if input_file.exists():
-                cmd.append("<" + str(input_file))
+                cmd.insert(0, "<" + str(input_file))
 
-            run(" ".join(map(str, cmd)), shell=True)
+            run(cmd)
+            diff(expected_output, created_output)
+
+            created_output.unlink()
 
         if expected_py.exists():
             cmd = ["python", created_py, ">" + str(test.with_suffix(".output"))]
@@ -142,9 +144,8 @@ def process(test: Path) -> None:
             if input_file.exists():
                 cmd.append("<" + str(input_file))
 
-            run(" ".join(map(str, cmd)), env={**os.environ, "PYTHONPATH": "."}, shell=True)
-
-        diff(expected_output, created_output)
+            run(cmd, env={**os.environ, "PYTHONPATH": "."})
+            diff(expected_output, created_output)
 
     for removal in removals:
         if removal.exists():

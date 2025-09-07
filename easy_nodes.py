@@ -1,9 +1,9 @@
-import uuid
 from dataclasses import dataclass
 from typing import Literal, Optional, Tuple, Union
 
 types_registry: dict[str, "Type"] = {}
 variables_registry: dict[str, "Type"] = {}
+python_imports: set[str] = set()
 
 common: list[str] = []
 
@@ -531,10 +531,11 @@ class OutputStatement(Statement):
                 if type != "STRING":
                     return f"str({argument.py()})"
                 return argument.py()
-            return argument.py()
+            return argument.py().replace("'", '"')
 
         arguments = ", ".join(format(argument) for argument in self.arguments)
-        return f"print({arguments})"
+        python_imports.add("runtime_print")
+        return f"runtime_print({arguments})"
 
 
 @dataclass
