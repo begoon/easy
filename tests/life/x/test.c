@@ -1,8 +1,10 @@
 #include "preamble.c"
 typedef int Field[0 + 25 + /* @ */ 1][0 + 80];
-int w, h = {0};
+int w = {0};
+int h = {0};
 Field field = {0};
-int x, y = {0};
+int x = {0};
+int y = {0};
 int i = {0};
 int valid(int x, int y)
 {
@@ -11,7 +13,8 @@ int valid(int x, int y)
 int neighbours(int x, int y)
 {
     int n = {0};
-    int xx, yy = {0};
+    int xx = {0};
+    int yy = {0};
     n = 0;
     for (xx = (x - 1); xx <= (x + 1); xx += 1)
     {
@@ -33,7 +36,8 @@ int neighbours(int x, int y)
 }
 void print()
 {
-    int x, y = {0};
+    int x = {0};
+    int y = {0};
     output(2, "** [ EASY LIFE ]", " ");
     for (x = 0; x <= ((w + 1) - 17); x += 1)
     {
@@ -72,7 +76,8 @@ void glider(int x, int y)
 }
 void evolution()
 {
-    int x, y = {0};
+    int x = {0};
+    int y = {0};
     int n = {0};
     Field next = {0};
     for (y = 0; y <= (h - 1); y += 1)

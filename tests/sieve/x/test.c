@@ -25,7 +25,8 @@ int integersqrt(int a)
     }
     else if (a > 0)
     {
-        double x, ra = {0};
+        double x = {0};
+        double ra = {0};
         double epsilon = {0};
         int sqrt = {0};
         ra = FLOAT(a);
@@ -48,7 +49,9 @@ int main()
     if (topnum > 0)
     {
         int sieve[1 + topnum + /* @ */ 1];
-        int i, limit, count = {0};
+        int i = {0};
+        int limit = {0};
+        int count = {0};
         topnum = (topnum + 1);
         for (i = 1; i <= topnum; i += 1)
         {

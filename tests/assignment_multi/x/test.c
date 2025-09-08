@@ -1,5 +1,6 @@
 #include "preamble.c"
-int a, b = {0};
+int a = {0};
+int b = {0};
 int main()
 {
     a = 123;

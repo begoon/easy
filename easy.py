@@ -99,3 +99,10 @@ if __name__ == "__main__":
                 imports = ", ".join(sorted(python_imports))
                 f.write(f"from preamble import {imports}\n\n")
             f.write(code_py + "\n")
+        code_py = ast.py().strip()
+
+        with open(output_py, "w") as f:
+            if python_imports:
+                imports = ", ".join(sorted(python_imports))
+                f.write(f"from preamble import {imports}\n\n")
+            f.write(code_py + "\n")

@@ -39,6 +39,19 @@
                             }
                         }
                     }
+                ],
+                "var_decls": [
+                    {
+                        "type": "variable_declaration",
+                        "names": "t",
+                        "t": {
+                            "type": "type",
+                            "ref": {
+                                "type": "type_identifier",
+                                "name": "Point"
+                            }
+                        }
+                    }
                 ]
             },
             "end_name": "Type2"

@@ -57,7 +57,7 @@ class Label(Node):
         return f"{self.name}: "
 
     def py(self) -> str:
-        assert False, "labels are not supported in Python"
+        assert False, "labels are not supported in python"
 
 
 Subroutine = Union["FunctionStatement", "ProcedureStatement"]
@@ -117,8 +117,8 @@ class Segment:
                     for name in v.names:
                         variables.append(f"{(v.type.c())} {name} = {{0}};")
                 else:
-                    names = ", ".join(v.names)
-                    variables.append(f"{(TYPE(v.type))} {names} = {{0}};")
+                    for name in v.names:
+                        variables.append(f"{(TYPE(v.type))} {name} = {{0}};")
             if main:
                 common.extend(variables)
             else:
