@@ -4,5 +4,7 @@ T t = {0};
 int main()
 {
     t.a = 1;
-    output(1, ".");
+    {
+        output(1, ".");
+    }
 }

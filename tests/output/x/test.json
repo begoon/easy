@@ -14,20 +14,157 @@
                             "type": "type",
                             "bt": "INTEGER"
                         }
+                    },
+                    {
+                        "type": "variable_declaration",
+                        "names": "r",
+                        "t": {
+                            "type": "type",
+                            "bt": "REAL"
+                        }
+                    },
+                    {
+                        "type": "variable_declaration",
+                        "names": "b",
+                        "t": {
+                            "type": "type",
+                            "bt": "BOOLEAN"
+                        }
+                    },
+                    {
+                        "type": "variable_declaration",
+                        "names": "s",
+                        "t": {
+                            "type": "type",
+                            "bt": "STRING"
+                        }
+                    }
+                ],
+                "proc_defs": [
+                    {
+                        "type": "function_definition",
+                        "name": "fa",
+                        "ret": {
+                            "type": "type",
+                            "bt": "INTEGER"
+                        },
+                        "body": {
+                            "type": "segment_body",
+                            "stmts": [
+                                {
+                                    "type": "return_statement",
+                                    "value": "1"
+                                }
+                            ]
+                        },
+                        "end_name": "fa"
+                    },
+                    {
+                        "type": "function_definition",
+                        "name": "fr",
+                        "ret": {
+                            "type": "type",
+                            "bt": "REAL"
+                        },
+                        "body": {
+                            "type": "segment_body",
+                            "stmts": [
+                                {
+                                    "type": "return_statement",
+                                    "value": "2.345"
+                                }
+                            ]
+                        },
+                        "end_name": "fr"
+                    },
+                    {
+                        "type": "function_definition",
+                        "name": "fb",
+                        "ret": {
+                            "type": "type",
+                            "bt": "BOOLEAN"
+                        },
+                        "body": {
+                            "type": "segment_body",
+                            "stmts": [
+                                {
+                                    "type": "return_statement",
+                                    "value": {
+                                        "type": "variable",
+                                        "base": "TRUE",
+                                        "parts": []
+                                    }
+                                }
+                            ]
+                        },
+                        "end_name": "fb"
+                    },
+                    {
+                        "type": "function_definition",
+                        "name": "fs",
+                        "ret": {
+                            "type": "type",
+                            "bt": "STRING"
+                        },
+                        "body": {
+                            "type": "segment_body",
+                            "var_decls": [
+                                {
+                                    "type": "variable_declaration",
+                                    "names": "s",
+                                    "t": {
+                                        "type": "type",
+                                        "bt": "STRING"
+                                    }
+                                }
+                            ],
+                            "stmts": [
+                                {
+                                    "type": "assignment_statement",
+                                    "targets": [
+                                        {
+                                            "type": "target",
+                                            "var": {
+                                                "type": "variable",
+                                                "base": "s",
+                                                "parts": []
+                                            }
+                                        }
+                                    ],
+                                    "expr": "\"xyz\""
+                                },
+                                {
+                                    "type": "return_statement",
+                                    "value": {
+                                        "type": "variable",
+                                        "base": "s",
+                                        "parts": []
+                                    }
+                                }
+                            ]
+                        },
+                        "end_name": "fs"
                     }
                 ],
                 "stmts": [
                     {
                         "type": "output_statement",
                         "list": [
-                            "\"00\""
-                        ]
-                    },
-                    {
-                        "type": "output_statement",
-                        "list": [
-                            "\"11\"",
-                            "\"22\""
+                            "0",
+                            "\" - \"",
+                            "0.001",
+                            "\" = \"",
+                            {
+                                "type": "variable",
+                                "base": "TRUE",
+                                "parts": []
+                            },
+                            "\" <> \"",
+                            {
+                                "type": "variable",
+                                "base": "FALSE",
+                                "parts": []
+                            }
                         ]
                     },
                     {
@@ -42,16 +179,170 @@
                                 }
                             }
                         ],
-                        "expr": "123"
+                        "expr": "321"
+                    },
+                    {
+                        "type": "assignment_statement",
+                        "targets": [
+                            {
+                                "type": "target",
+                                "var": {
+                                    "type": "variable",
+                                    "base": "r",
+                                    "parts": []
+                                }
+                            }
+                        ],
+                        "expr": "1.003"
+                    },
+                    {
+                        "type": "assignment_statement",
+                        "targets": [
+                            {
+                                "type": "target",
+                                "var": {
+                                    "type": "variable",
+                                    "base": "b",
+                                    "parts": []
+                                }
+                            }
+                        ],
+                        "expr": {
+                            "type": "variable",
+                            "base": "TRUE",
+                            "parts": []
+                        }
+                    },
+                    {
+                        "type": "assignment_statement",
+                        "targets": [
+                            {
+                                "type": "target",
+                                "var": {
+                                    "type": "variable",
+                                    "base": "s",
+                                    "parts": []
+                                }
+                            }
+                        ],
+                        "expr": "\"abc\""
+                    },
+                    {
+                        "type": "output_statement",
+                        "list": [
+                            "\"i:\"",
+                            {
+                                "type": "variable",
+                                "base": "a",
+                                "parts": []
+                            },
+                            "\" r:\"",
+                            {
+                                "type": "variable",
+                                "base": "r",
+                                "parts": []
+                            },
+                            "\" b:\"",
+                            {
+                                "type": "variable",
+                                "base": "b",
+                                "parts": []
+                            },
+                            "\" s:\"",
+                            {
+                                "type": "variable",
+                                "base": "s",
+                                "parts": []
+                            },
+                            "\"%%\""
+                        ]
                     },
                     {
                         "type": "output_statement",
                         "list": [
                             {
-                                "type": "variable",
-                                "base": "a",
-                                "parts": []
+                                "type": "function_reference",
+                                "fn": {
+                                    "type": "function_identifier",
+                                    "name": "CHARACTER"
+                                },
+                                "head": "50"
+                            },
+                            "\" \"",
+                            {
+                                "type": "function_reference",
+                                "fn": {
+                                    "type": "function_identifier",
+                                    "name": "LENGTH"
+                                },
+                                "head": "\"123\""
+                            },
+                            "\" \"",
+                            {
+                                "type": "function_reference",
+                                "fn": {
+                                    "type": "function_identifier",
+                                    "name": "FIX"
+                                },
+                                "head": "23.56"
+                            },
+                            "\" \"",
+                            {
+                                "type": "function_reference",
+                                "fn": {
+                                    "type": "function_identifier",
+                                    "name": "FLOAT"
+                                },
+                                "head": "543"
                             }
+                        ]
+                    },
+                    {
+                        "type": "output_statement",
+                        "list": [
+                            {
+                                "type": "concat_expr",
+                                "head": "\"123\"",
+                                "tail": "\"456\""
+                            }
+                        ]
+                    },
+                    {
+                        "type": "output_statement",
+                        "list": [
+                            "\"i:\"",
+                            {
+                                "type": "function_reference",
+                                "fn": {
+                                    "type": "function_identifier",
+                                    "name": "fa"
+                                }
+                            },
+                            "\" r:\"",
+                            {
+                                "type": "function_reference",
+                                "fn": {
+                                    "type": "function_identifier",
+                                    "name": "fr"
+                                }
+                            },
+                            "\" b:\"",
+                            {
+                                "type": "function_reference",
+                                "fn": {
+                                    "type": "function_identifier",
+                                    "name": "fb"
+                                }
+                            },
+                            "\" s:\"",
+                            {
+                                "type": "function_reference",
+                                "fn": {
+                                    "type": "function_identifier",
+                                    "name": "fs"
+                                }
+                            },
+                            "\"$$\""
                         ]
                     }
                 ]

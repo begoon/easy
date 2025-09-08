@@ -1,5 +1,7 @@
 #include "preamble.c"
 int main()
 {
-    output(1, "abc");
+    {
+        output(1, "abc");
+    }
 }

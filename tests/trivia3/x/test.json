@@ -104,26 +104,34 @@
                                     "expr": "2"
                                 },
                                 {
+                                    "type": "assignment_statement",
+                                    "targets": [
+                                        {
+                                            "type": "target",
+                                            "var": {
+                                                "type": "variable",
+                                                "base": "p",
+                                                "parts": [
+                                                    {
+                                                        "field": "x"
+                                                    }
+                                                ]
+                                            }
+                                        }
+                                    ],
+                                    "expr": {
+                                        "type": "variable",
+                                        "base": "p",
+                                        "parts": [
+                                            {
+                                                "field": "y"
+                                            }
+                                        ]
+                                    }
+                                },
+                                {
                                     "type": "output_statement",
                                     "list": [
-                                        {
-                                            "type": "variable",
-                                            "base": "p",
-                                            "parts": [
-                                                {
-                                                    "field": "x"
-                                                }
-                                            ]
-                                        },
-                                        {
-                                            "type": "variable",
-                                            "base": "p",
-                                            "parts": [
-                                                {
-                                                    "field": "y"
-                                                }
-                                            ]
-                                        },
                                         {
                                             "type": "variable",
                                             "base": "b",

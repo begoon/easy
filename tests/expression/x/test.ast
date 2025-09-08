@@ -1,4 +1,6 @@
 PROGRAM Expression
+    Variables:
+        a, b: INTEGER
     Statements:
         SET x := a
         SET x := (a + b)

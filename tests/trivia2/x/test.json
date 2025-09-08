@@ -40,19 +40,6 @@
                         }
                     }
                 ],
-                "var_decls": [
-                    {
-                        "type": "variable_declaration",
-                        "names": "p",
-                        "t": {
-                            "type": "type",
-                            "ref": {
-                                "type": "type_identifier",
-                                "name": "Point"
-                            }
-                        }
-                    }
-                ],
                 "stmts": [
                     {
                         "type": "simple_compound",
@@ -96,27 +83,26 @@
                                     "expr": "2"
                                 },
                                 {
-                                    "type": "output_statement",
-                                    "list": [
+                                    "type": "assignment_statement",
+                                    "targets": [
                                         {
-                                            "type": "variable",
-                                            "base": "p",
-                                            "parts": [
-                                                {
-                                                    "field": "x"
-                                                }
-                                            ]
-                                        },
-                                        {
-                                            "type": "variable",
-                                            "base": "p",
-                                            "parts": [
-                                                {
-                                                    "field": "y"
-                                                }
-                                            ]
+                                            "type": "target",
+                                            "var": {
+                                                "type": "variable",
+                                                "base": "a",
+                                                "parts": []
+                                            }
                                         }
-                                    ]
+                                    ],
+                                    "expr": {
+                                        "type": "variable",
+                                        "base": "p",
+                                        "parts": [
+                                            {
+                                                "field": "x"
+                                            }
+                                        ]
+                                    }
                                 }
                             ]
                         }

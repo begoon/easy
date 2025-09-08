@@ -16,7 +16,9 @@ int integersqrt(int a)
 {
     if (a < 0)
     {
-        output(1, "a < 0 in FUNCTION integersqrt.");
+        {
+            output(1, "a < 0 in FUNCTION integersqrt.");
+        }
         exit(0);
     }
     else if (a == 0)
@@ -55,7 +57,7 @@ int main()
         topnum = (topnum + 1);
         for (i = 1; i <= topnum; i += 1)
         {
-            sieve[i] = TRUE;
+            sieve[i] = 1;
         }
         limit = (integersqrt(topnum) + 1);
         for (i = 2; i <= limit; i += 1)
@@ -65,7 +67,7 @@ int main()
                 int j = {0};
                 for (j = (2 * i); j <= topnum; j += i)
                 {
-                    sieve[j] = FALSE;
+                    sieve[j] = 0;
                 }
             }
         }
@@ -75,13 +77,17 @@ int main()
             if (sieve[i])
             {
                 count = (count + 1);
-                output(1, concat(4, "Prime[", strconv(count), "] = ", strconv(i)));
+                {
+                    output(1, concat(4, "Prime[", strconv(count), "] = ", strconv(i)));
+                }
             }
         }
     }
     else
     {
-        output(1, concat(3, "Input value ", strconv(topnum), " non-positive."));
+        {
+            output(1, concat(3, "Input value ", strconv(topnum), " non-positive."));
+        }
     }
     exit(0);
 }

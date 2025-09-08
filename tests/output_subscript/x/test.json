@@ -6,6 +6,23 @@
             "name": "OutputSubscript",
             "body": {
                 "type": "segment_body",
+                "var_decls": [
+                    {
+                        "type": "variable_declaration",
+                        "names": {
+                            "type": "declared_multiple_names",
+                            "head": "b",
+                            "tail": [
+                                "p",
+                                "c"
+                            ]
+                        },
+                        "t": {
+                            "type": "type",
+                            "bt": "INTEGER"
+                        }
+                    }
+                ],
                 "stmts": [
                     {
                         "type": "output_statement",

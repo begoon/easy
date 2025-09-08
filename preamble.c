@@ -29,10 +29,31 @@ char *SUBSTR(const char *str, int start, int length)
     sub[length] = '\0';
     return sub;
 }
-char *strconv(int v)
+char *strconv_int(int v)
 {
     char *s = malloc(12);
     sprintf(s, "%d", v);
+    return s;
+}
+char *strconv(int v)
+{
+    return strconv_int(v);
+}
+
+char *strconv_double(double v)
+{
+    char *s = malloc(12);
+    sprintf(s, "%f", v);
+    return s;
+}
+char *strconv_boolean(int v)
+{
+    return v ? "TRUE" : "FALSE";
+}
+char *strconv_cstr(STR *v)
+{
+    char *s = malloc(strlen(v->data) + 1);
+    strcpy(s, v->data);
     return s;
 }
 char *concat(int count, ...)

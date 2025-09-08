@@ -3,6 +3,7 @@ from typing import Literal, Optional, Tuple, Union
 
 types_registry: dict[str, "Type"] = {}
 variables_registry: dict[str, "Type"] = {}
+functions_registry: dict[str, "Type"] = {}
 python_imports: set[str] = set()
 
 common: list[str] = []
@@ -511,6 +512,63 @@ class InputStatement(Statement):
         return emit(inputs)
 
 
+def expression_stringer(v: Expression, n: int, pre: list[str]) -> str:
+    c = v.c()
+    if isinstance(v, StringLiteral):
+        return '"' + c[1:-1].replace('"', '\\"') + '"'
+    if isinstance(v, (IntegerLiteral, RealLiteral, BoolLiteral)):
+        literal_converters = {IntegerLiteral: "int", RealLiteral: "double", BoolLiteral: "boolean"}
+        convert = literal_converters.get(type(v))
+        if not convert:
+            raise ValueError(f"unsupported literal type in OUTPUT: {type(v)}")
+        fmt_name = f"fmt_{n}"
+        pre.append(indent(f"const char *{fmt_name} = strconv_{convert}({c});", 1))
+        return fmt_name
+    if isinstance(v, Variable):
+        name = v.name.split(".", 1)[0]
+        variable_type = variables_registry.get(name)
+        variable_converters = {"INTEGER": "int", "REAL": "double", "BOOLEAN": "boolean", "STRING": "cstr"}
+        convert = variable_converters.get(variable_type)
+        if not convert:
+            raise ValueError(f"unsupported variable [{name}] type in OUTPUT: {variable_type}")
+        fmt_name = f"fmt_{n}"
+        x = "&" if convert == "cstr" else ""
+        pre.append(indent(f"const char *{fmt_name} = strconv_{convert}({x}{c});", 1))
+        return fmt_name
+    if isinstance(v, ConcatenationOperation):
+        return c
+    if isinstance(v, FunctionInvoke):
+        if v.name in ["CHARACTER", "SUBSTR"]:
+            return c
+        if v.name in ["FIX", "LENGTH"]:
+            fmt_name = f"fmt_{n}"
+            pre.append(indent(f"const char *{fmt_name} = strconv_int({c});", 1))
+            return fmt_name
+        if v.name in ["FLOAT"]:
+            fmt_name = f"fmt_{n}"
+            pre.append(indent(f"const char *{fmt_name} = strconv_double({c});", 1))
+            return fmt_name
+        if v.name in functions_registry:
+            function_type = functions_registry[v.name]
+            if function_type == "INTEGER":
+                fmt_name = f"fmt_{n}"
+                pre.append(indent(f"const char *{fmt_name} = strconv_int({c});", 1))
+                return fmt_name
+            if function_type == "REAL":
+                fmt_name = f"fmt_{n}"
+                pre.append(indent(f"const char *{fmt_name} = strconv_double({c});", 1))
+                return fmt_name
+            if function_type == "BOOLEAN":
+                fmt_name = f"fmt_{n}"
+                pre.append(indent(f"const char *{fmt_name} = strconv_boolean({c});", 1))
+                return fmt_name
+            if function_type == "STRING":
+                return c + ".data"
+            raise ValueError(f"unsupported function={v.name} return type in OUTPUT: {function_type}")
+        raise ValueError(f"unsupported function invocation in OUTPUT: {v.name}")
+    assert False, f"unsupported output argument type: {type(v)}"
+
+
 @dataclass
 class OutputStatement(Statement):
     arguments: list[Expression]
@@ -519,22 +577,13 @@ class OutputStatement(Statement):
         return f"OUTPUT({', '.join(e.meta() for e in self.arguments)})"
 
     def c(self) -> str:
-        def format_string(v: Expression) -> str:
-            if not isinstance(v, StringLiteral):
-                return v.c()
-            return '"' + v.c()[1:-1].replace('"', '\\"') + '"'
+        output = ["{"]
 
-        def format(argument: Expression) -> str:
-            if isinstance(argument, Variable):
-                name = argument.name.split(".", 1)[0]
-                type = variables_registry.get(name)
-                if type != "STRING":
-                    return f"strconv({argument.c()})"
-                return f"{argument.c()}.data"
-            return format_string(argument)
+        arguments = ", ".join(expression_stringer(argument, n, output) for n, argument in enumerate(self.arguments, 1))
+        output.append(indent(f"output({len(self.arguments)}, {arguments});", 1))
 
-        arguments = ", ".join(format(argument) for argument in self.arguments)
-        return f"output({len(self.arguments)}, {arguments});"
+        output.append("}")
+        return emit(output)
 
     def py(self) -> str:
         def format(argument: Expression) -> str:

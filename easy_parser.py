@@ -38,6 +38,7 @@ from easy_nodes import (
     TypeIsStatement,
     UnaryOperation,
     Variable,
+    functions_registry,
     types_registry,
     variables_registry,
 )
@@ -205,6 +206,7 @@ class Parser:
             type = None
             if token.value == "FUNCTION":
                 type = self.type()
+                functions_registry[name] = type
 
             self.eat(":")
             segment = self.segment()
@@ -498,16 +500,16 @@ class Parser:
         if name.type == "IDENT" and self.peek().value == "(":
             self.i += 1
             self.eat("(")
-            arguments = self.arguments()
+            if self.current().value != ")":
+                arguments = self.arguments()
+            else:
+                arguments = []
             self.eat(")")
             return FunctionInvoke(name.value, arguments)
         return self.factor()
 
     def factor(self) -> Expression:
         token = self.current()
-        if token.type == "IDENT":
-            variable = self.variable_name()
-            return variable
         if token.type == "INTEGER":
             self.i += 1
             return IntegerLiteral(int(token.value))
@@ -531,6 +533,9 @@ class Parser:
         if token.value in ("TRUE", "FALSE"):
             self.i += 1
             return BoolLiteral(token.value == "TRUE")
+        if token.type == "IDENT":
+            variable = self.variable_name()
+            return variable
         self.error(
             f"expected an identifier or INTEGER/REAL/STRING literal or '+', '-', '(', 'TRUE/FALSE', "
             f"not {token.type}('{token.value}')",

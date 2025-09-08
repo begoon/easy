@@ -5,6 +5,7 @@ PROGRAM Trivia3:
     BEGIN
         SET p.x := 1;
         SET p.y := 2;
-        OUTPUT p.x, p.y, b;
+        SET p.x := p.y;
+        OUTPUT b;
     END;
 END PROGRAM Trivia3;
