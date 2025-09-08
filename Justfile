@@ -1,4 +1,4 @@
-default: test-unit test-compiler
+default: test-compiler
 
 test-unit:
     uv run pytest

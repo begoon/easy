@@ -1,0 +1,3 @@
+PROGRAM OutputSubscript:
+  OUTPUT b, p.x.z, c.t[0][2][1];
+END PROGRAM OutputSubscript;

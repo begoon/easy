@@ -1,0 +1,16 @@
+PROGRAM Expression
+    Statements:
+        SET x := a
+        SET x := (a + b)
+        SET x := (+a)
+        SET x := (-a)
+        SET x := (a + (b * с))
+        SET x := ((((-b) + (1 - 2)) - (LENGTH('3') * 7)) ^ 1)
+        SET x := (((-b) + (1 - 2)) - func(3))
+        SET x := (NOT(a < b))
+        SET x := 2:(strconv(a) || strconv(b))
+        SET x := 2:('a' || strconv(b))
+        SET x := 3:('a' || strconv(b) || strconv(c))
+        SET x := 2:(strconv(a) || 2:(strconv(b) || strconv(SUBSTR('abc', 0, 2))))
+        SET x := 3:(strconv(a) || strconv(b) || strconv(SUBSTR('abc', 0, 2)))
+        SET x := 2:(strconv(a) || CHARACTER(b))

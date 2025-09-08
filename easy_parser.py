@@ -44,25 +44,31 @@ from easy_nodes import (
 
 
 class ParseError(Exception):
-    def __init__(self, message: str, token: Token, source: str):
+    def __init__(self, message: str, token: Token, source: str, filename: str):
         super().__init__(message)
         self.message = message
         self.token = token
         self.source = source
+        self.filename = filename
 
     def __str__(self) -> str:
         error_line = self.source.splitlines()[self.token.line - 1]
-        return f"{self.message} at {self.token.line}:{self.token.col}\n{error_line}\n{' ' * (self.token.col - 1)}^"
+        return (
+            f"{self.message} at "
+            f"{self.filename}:{self.token.line}:{self.token.col}\n"
+            f"{error_line}\n{' ' * (self.token.col - 1)}^"
+        )
 
 
 class Parser:
-    def __init__(self, tokens: list[Token], source: str):
+    def __init__(self, tokens: list[Token], source: str, filename: str | None = None):
         self.tokens = tokens
         self.i = 0
         self.source = source
+        self.filename = filename
 
     def error(self, message: str, token: Token) -> None:
-        raise ParseError(message, token, self.source)
+        raise ParseError(message, token, self.source, self.filename)
 
     def current(self) -> Token:
         return self.tokens[self.i]

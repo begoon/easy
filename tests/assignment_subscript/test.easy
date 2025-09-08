@@ -1,0 +1,3 @@
+PROGRAM AssignmentSubscript:
+  SET p.x[0][1][100] := p.y;
+END PROGRAM AssignmentSubscript;

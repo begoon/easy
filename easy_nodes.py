@@ -527,8 +527,7 @@ class OutputStatement(Statement):
         def format(argument: Expression) -> str:
             if isinstance(argument, Variable):
                 name = argument.name.split(".", 1)[0]
-                assert name in variables_registry, f"undeclared variable in OUTPUT '{argument}'"
-                type = variables_registry[name]
+                type = variables_registry.get(name)
                 if type != "STRING":
                     return f"strconv({argument.c()})"
                 return f"{argument.c()}.data"

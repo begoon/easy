@@ -1,0 +1,5 @@
+PROGRAM Tokens:
+  SET a := 0;
+  SET a := b := 1;
+  SET a := /* b /* \n */ */ c;
+END PROGRAM Tokens;

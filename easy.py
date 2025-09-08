@@ -6,22 +6,9 @@ import sys
 from pathlib import Path
 
 from easy_lexer import Lexer, Token
-from easy_nodes import Array, ProgramStatement, common, emit, python_imports, types_registry
+from easy_nodes import Array, common, emit, python_imports, types_registry
 from easy_parser import Parser
 from peg.peg_parser import PEGParser
-
-
-def parse(code: str) -> ProgramStatement:
-    lexer = Lexer(code)
-    tokens = lexer.tokens()
-    return Parser(tokens, code).program()
-
-
-# ---
-
-
-def compile(source: str) -> ProgramStatement:
-    return parse(source)
 
 
 def flag(argv: list[str], name: str) -> int | None:
@@ -58,7 +45,7 @@ if __name__ == "__main__":
 
         tokens_file.write_text("\n".join(format_token(t) for t in tokens) + "\n")
 
-    ast = Parser(tokens, source).program()
+    ast = Parser(tokens, source, str(input_file)).program()
     if "-a" in sys.argv:
         ast_file = input_file.with_suffix(".ast")
         ast_file.write_text(ast.meta() + "\n")

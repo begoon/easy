@@ -1,0 +1,16 @@
+PROGRAM Expression:
+  SET x := a;
+  SET x := a + b;
+  SET x := +a;
+  SET x := -a;
+  SET x := a + b * с;
+  SET x := -b + (1 - 2) - LENGTH("3") * 7 XOR 1;
+  SET x := -b + (1 - 2) - func( 3 );
+  SET x := NOT a < b;
+  SET x := a || b;
+  SET x := "a" || b;
+  SET x := "a" || b || c;
+  SET x := a || (b || SUBSTR("abc", 0, 2));
+  SET x := a || b || SUBSTR("abc", 0, 2);
+  SET x := a || CHARACTER(b);
+END PROGRAM Expression;

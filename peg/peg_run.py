@@ -1,8 +1,9 @@
 import json
+from pathlib import Path
 
 from peg.peg_parser import PEGParser
 
-grammar = open("peg/easy.peg").read()
+grammar = (Path(__file__).parent / "easy.peg").read_text
 
 p = PEGParser(grammar, start="compilation")
 
