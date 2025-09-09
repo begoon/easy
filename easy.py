@@ -9,6 +9,7 @@ from easy_lexer import Lexer, Token
 from easy_nodes import Array, common, emit, python_imports, types_registry
 from easy_parser import Parser
 from peg.peg_parser import PEGParser
+from yamler import yamlizer
 
 
 def flag(argv: list[str], name: str) -> int | None:
@@ -49,6 +50,10 @@ if __name__ == "__main__":
     if "-a" in sys.argv:
         ast_file = input_file.with_suffix(".ast")
         ast_file.write_text(ast.meta() + "\n")
+
+    if "-y" in sys.argv:
+        yaml_file = input_file.with_suffix(".yaml")
+        yaml_file.write_text(yamlizer(ast) + "\n")
 
     if "-j" in sys.argv:
         peg_ast_file = input_file.with_suffix(".json")

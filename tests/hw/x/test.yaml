@@ -1,0 +1,59 @@
+node: ProgramStatement
+name: hw
+segment:
+  node: Segment
+  types: []
+  variables:
+    - node: DeclareStatement
+      names:
+        - a
+      type: INTEGER
+  subroutines: []
+  statements:
+    node: Statements
+    statements:
+      - node: SetStatement
+        names:
+          - a
+        expression:
+          node: IntegerLiteral
+          value: 100
+        indexes:
+          a: []
+      - node: OutputStatement
+        arguments:
+          - node: ConcatenationOperation
+            parts:
+              - node: StringLiteral
+                value: 'abc '
+              - node: Variable
+                name: a
+                indexes: []
+      - node: ForStatement
+        variable:
+          node: Variable
+          name: a
+          indexes:
+        init:
+          node: IntegerLiteral
+          value: 0
+        do:
+          node: Segment
+          types: []
+          variables: []
+          subroutines: []
+          statements:
+            node: Statements
+            statements:
+              - node: OutputStatement
+                arguments:
+                  - node: Variable
+                    name: a
+                    indexes: []
+        by:
+        to:
+          node: IntegerLiteral
+          value: 10
+        condition:
+      - node: ExitStatement
+

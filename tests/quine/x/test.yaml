@@ -1,0 +1,73 @@
+node: ProgramStatement
+name: Q
+segment:
+  node: Segment
+  types: []
+  variables:
+    - node: DeclareStatement
+      names:
+        - s
+      type: STRING
+  subroutines: []
+  statements:
+    node: Statements
+    statements:
+      - node: SetStatement
+        names:
+          - s
+        expression:
+          node: StringLiteral
+          value: 'PROGRAM Q: DECLARE s STRING; SET s := %; OUTPUT SUBSTR(s, 0, 38)
+            || CHARACTER(34) || s || CHARACTER(34) || SUBSTR(s, 39, LENGTH(s)-38);
+            EXIT; END PROGRAM Q;'
+        indexes:
+          s: []
+      - node: OutputStatement
+        arguments:
+          - node: ConcatenationOperation
+            parts:
+              - node: FunctionInvoke
+                name: SUBSTR
+                arguments:
+                  - node: Variable
+                    name: s
+                    indexes: []
+                  - node: IntegerLiteral
+                    value: 0
+                  - node: IntegerLiteral
+                    value: 38
+              - node: FunctionInvoke
+                name: CHARACTER
+                arguments:
+                  - node: IntegerLiteral
+                    value: 34
+              - node: Variable
+                name: s
+                indexes: []
+              - node: FunctionInvoke
+                name: CHARACTER
+                arguments:
+                  - node: IntegerLiteral
+                    value: 34
+              - node: FunctionInvoke
+                name: SUBSTR
+                arguments:
+                  - node: Variable
+                    name: s
+                    indexes: []
+                  - node: IntegerLiteral
+                    value: 39
+                  - node: BinaryOperation
+                    operation: '-'
+                    left:
+                      node: FunctionInvoke
+                      name: LENGTH
+                      arguments:
+                        - node: Variable
+                          name: s
+                          indexes: []
+                    right:
+                      node: IntegerLiteral
+                      value: 38
+      - node: ExitStatement
+

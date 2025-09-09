@@ -77,6 +77,13 @@ def process(test: Path) -> None:
 
         flags.append("-a")
 
+    expected_yaml = x.with_suffix(".yaml")
+    if expected_yaml.exists():
+        created_yaml = test.with_suffix(".yaml")
+        removals.append(created_yaml)
+
+        flags.append("-y")
+
     expected_peg_ast = x.with_suffix(".json")
     if expected_peg_ast.exists():
         created_peg_ast = test.with_suffix(".json")
@@ -105,6 +112,9 @@ def process(test: Path) -> None:
 
     if expected_ast.exists():
         diff(expected_ast, created_ast)
+
+    if expected_yaml.exists():
+        diff(expected_yaml, created_yaml)
 
     if expected_peg_ast.exists():
         diff(expected_peg_ast, created_peg_ast)
