@@ -535,7 +535,7 @@ def expression_stringer(v: Expression, format: list[str], callee: str = "OUTPUT"
         x = "&" if convert == "S" else ""
         return x + v.name
     if isinstance(v, ConcatenationOperation):
-        format.append("s")
+        format.append("A")
         return c
     if isinstance(v, FunctionInvoke):
         if v.name in ["CHARACTER", "SUBSTR"]:

@@ -75,13 +75,13 @@ int main()
             if (sieve[i])
             {
                 count = (count + 1);
-                output("s", concat("sisi", "Prime[", count, "] = ", i));
+                output("A", concat("sisi", "Prime[", count, "] = ", i));
             }
         }
     }
     else
     {
-        output("s", concat("sis", "Input value ", topnum, " non-positive."));
+        output("A", concat("sis", "Input value ", topnum, " non-positive."));
     }
     exit(0);
 }

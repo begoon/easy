@@ -5,7 +5,7 @@ int main()
 {
     scanf("%d", &i);
     scanf("%s", s.data);
-    output("s", concat("sis", "i = [", i, "]"));
-    output("s", concat("sSs", "str = [", &s, "]"));
+    output("A", concat("sis", "i = [", i, "]"));
+    output("A", concat("sSs", "str = [", &s, "]"));
     exit(0);
 }

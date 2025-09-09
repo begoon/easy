@@ -2,7 +2,7 @@
 int x = {0};
 void a(int x)
 {
-    output("s", concat("si", "a(): ", x));
+    output("A", concat("si", "a(): ", x));
 }
 int b(int x)
 {

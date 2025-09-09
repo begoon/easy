@@ -8,7 +8,8 @@ extern void usleep(int);
 #define FALSE 0
 typedef struct
 {
-    char data[256];
+    char _;
+    char data[1024];
 } STR;
 int FIX(double v) { return (int)v; }
 double FLOAT(int v) { return (double)v; }

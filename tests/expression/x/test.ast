@@ -13,6 +13,6 @@ PROGRAM Expression
         SET x := ||:('ii', a, b)
         SET x := ||:('si', 'a', b)
         SET x := ||:('sii', 'a', b, c)
-        SET x := ||:('is', a, ||:('iA', b, SUBSTR('abc', 0, 2)))
+        SET x := ||:('iA', a, ||:('iA', b, SUBSTR('abc', 0, 2)))
         SET x := ||:('iiA', a, b, SUBSTR('abc', 0, 2))
         SET x := ||:('iA', a, CHARACTER(b))

@@ -30,7 +30,7 @@ int main()
     strcpy(s.data, "abc");
     output("sisrsbsSs", "i:", a, " r:", r, " b:", b, " s:", &s, "%%");
     output("Asisisr", CHARACTER(50), " ", LENGTH(from_cstring("123")), " ", FIX(23.56), " ", FLOAT(543));
-    output("s", concat("ss", "123", "456"));
+    output("A", concat("ss", "123", "456"));
     output("sisrsbsAs", "i:", fa(), " r:", fr(), " b:", fb(), " s:", fs(), "$$");
     exit(0);
 }

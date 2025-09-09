@@ -43,7 +43,7 @@ void print()
     {
         output("s", "*");
     }
-    output("s", concat("sA", " ", CHARACTER(13)));
+    output("A", concat("sA", " ", CHARACTER(13)));
     for (y = 0; y <= (h - 1); y += 1)
     {
         output("s", "*");
@@ -58,13 +58,13 @@ void print()
                 output("s", " ");
             }
         }
-        output("s", concat("sA", "*", CHARACTER(13)));
+        output("A", concat("sA", "*", CHARACTER(13)));
     }
     for (x = 0; x <= (w + 1); x += 1)
     {
         output("s", "*");
     }
-    output("s", concat("sA", " ", CHARACTER(13)));
+    output("A", concat("sA", " ", CHARACTER(13)));
 }
 void glider(int x, int y)
 {
@@ -129,7 +129,7 @@ int main()
     for (i = 1; i <= 12; i += 1)
     {
         print();
-        output("s", concat("si", "GENERATION: ", i));
+        output("A", concat("si", "GENERATION: ", i));
         evolution();
         if ((i % 10) == 0)
         {
