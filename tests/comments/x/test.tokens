@@ -1,0 +1,10 @@
+tests/comments/test.easy:1:1	 PROGRAM / KEYWORD
+tests/comments/test.easy:1:9	 Comments / IDENT
+tests/comments/test.easy:1:17	 : / SYMBOL
+tests/comments/test.easy:17:3	 EXIT / KEYWORD
+tests/comments/test.easy:17:7	 ; / SYMBOL
+tests/comments/test.easy:20:1	 END / KEYWORD
+tests/comments/test.easy:20:5	 PROGRAM / KEYWORD
+tests/comments/test.easy:20:13	 Comments / IDENT
+tests/comments/test.easy:20:21	 ; / SYMBOL
+tests/comments/test.easy:20:22	  / EOF

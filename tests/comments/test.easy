@@ -1,0 +1,20 @@
+PROGRAM Comments:
+  // line comment
+
+  /*
+   block
+   */
+
+  /*
+   /* block nested */
+   */
+
+  /*
+   /* // block nested */
+   */
+
+  // /*
+  EXIT;
+  // */
+
+END PROGRAM Comments;

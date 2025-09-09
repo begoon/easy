@@ -1,0 +1,16 @@
+node: ProgramStatement
+token: PROGRAM / KEYWORD at 1:1
+name: Comments
+segment:
+  node: Segment
+  token: EXIT / KEYWORD at 17:3
+  types: []
+  variables: []
+  subroutines: []
+  statements:
+    node: Statements
+    token: EXIT / KEYWORD at 17:3
+    statements:
+      - node: ExitStatement
+        token: EXIT / KEYWORD at 17:3
+

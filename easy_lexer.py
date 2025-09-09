@@ -105,6 +105,15 @@ class Lexer:
 
             if comments():
                 continue
+
+            # "//" comments
+            if self.current() == "/" and self.peek() == "/":
+                self.advance(2)
+                while (c := self.current()) and c != "\n":
+                    self.advance()
+                self.advance()
+                continue
+
             break
 
     def number(self) -> Token:
