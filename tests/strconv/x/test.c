@@ -1,4 +1,4 @@
-#include "preamble.c"
+#include "runtime.c"
 int main()
 {
     output("s", "abc");

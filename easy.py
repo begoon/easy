@@ -69,7 +69,7 @@ if __name__ == "__main__":
     code_c = ast.c().strip()
 
     with open(output_c, "w") as f:
-        f.write('#include "preamble.c"\n')
+        f.write('#include "runtime.c"\n')
         if types_registry:
             for name, definition in types_registry.items():
                 v = "typedef "
@@ -90,12 +90,12 @@ if __name__ == "__main__":
         with open(output_py, "w") as f:
             if python_imports:
                 imports = ", ".join(sorted(python_imports))
-                f.write(f"from preamble import {imports}\n\n")
+                f.write(f"from runtime import {imports}\n\n")
             f.write(code_py + "\n")
         code_py = ast.py().strip()
 
         with open(output_py, "w") as f:
             if python_imports:
                 imports = ", ".join(sorted(python_imports))
-                f.write(f"from preamble import {imports}\n\n")
+                f.write(f"from runtime import {imports}\n\n")
             f.write(code_py + "\n")

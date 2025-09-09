@@ -1,4 +1,4 @@
-#include "preamble.c"
+#include "runtime.c"
 int a = {0};
 double r = {0};
 int b = {0};

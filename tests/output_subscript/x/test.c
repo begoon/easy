@@ -1,4 +1,4 @@
-#include "preamble.c"
+#include "runtime.c"
 int b = {0};
 int p = {0};
 int c = {0};

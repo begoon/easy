@@ -1,4 +1,4 @@
-#include "preamble.c"
+#include "runtime.c"
 int i = {0};
 STR s = {0};
 int main()

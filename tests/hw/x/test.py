@@ -1,4 +1,4 @@
-from preamble import runtime_print
+from runtime import runtime_print
 
 a = 0
 a = 100

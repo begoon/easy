@@ -1,4 +1,4 @@
-#include "preamble.c"
+#include "runtime.c"
 typedef struct { int a; STR b; } T;
 T t = {0};
 int main()

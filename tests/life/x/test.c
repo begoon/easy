@@ -1,4 +1,4 @@
-#include "preamble.c"
+#include "runtime.c"
 typedef int Field[0 + 25 + /* @ */ 1][0 + 80];
 int w = {0};
 int h = {0};

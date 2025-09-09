@@ -1,4 +1,4 @@
-#include "preamble.c"
+#include "runtime.c"
 int topnum = {0};
 double abs(double x)
 {

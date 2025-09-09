@@ -1,4 +1,4 @@
-#include "preamble.c"
+#include "runtime.c"
 int x = {0};
 void a(int x)
 {
