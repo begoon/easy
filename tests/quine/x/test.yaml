@@ -1,73 +1,100 @@
 node: ProgramStatement
+token: PROGRAM / KEYWORD at 1:1
 name: Q
 segment:
   node: Segment
+  token: DECLARE / KEYWORD at 1:12
   types: []
   variables:
     - node: DeclareStatement
+      token: DECLARE / KEYWORD at 1:12
       names:
         - s
       type: STRING
   subroutines: []
   statements:
     node: Statements
+    token: SET / KEYWORD at 1:30
     statements:
       - node: SetStatement
+        token: SET / KEYWORD at 1:30
         names:
           - s
         expression:
           node: StringLiteral
+          token: 'PROGRAM Q: DECLARE s STRING; SET s := %; OUTPUT SUBSTR(s, 0, 38)
+            || CHARACTER(34) || s || CHARACTER(34) || SUBSTR(s, 39, LENGTH(s)-38);
+            EXIT; END PROGRAM Q; / STRING at 1:39'
           value: 'PROGRAM Q: DECLARE s STRING; SET s := %; OUTPUT SUBSTR(s, 0, 38)
             || CHARACTER(34) || s || CHARACTER(34) || SUBSTR(s, 39, LENGTH(s)-38);
             EXIT; END PROGRAM Q;'
         indexes:
           s: []
       - node: OutputStatement
+        token: OUTPUT / KEYWORD at 1:199
         arguments:
           - node: ConcatenationOperation
+            token: SUBSTR / IDENT at 1:206
             parts:
               - node: FunctionInvoke
+                token: SUBSTR / IDENT at 1:206
                 name: SUBSTR
                 arguments:
                   - node: Variable
+                    token: s / IDENT at 1:213
                     name: s
                     indexes: []
                   - node: IntegerLiteral
+                    token: 0 / INTEGER at 1:216
                     value: 0
                   - node: IntegerLiteral
+                    token: 38 / INTEGER at 1:219
                     value: 38
               - node: FunctionInvoke
+                token: CHARACTER / IDENT at 1:226
                 name: CHARACTER
                 arguments:
                   - node: IntegerLiteral
+                    token: 34 / INTEGER at 1:236
                     value: 34
               - node: Variable
+                token: s / IDENT at 1:243
                 name: s
                 indexes: []
               - node: FunctionInvoke
+                token: CHARACTER / IDENT at 1:248
                 name: CHARACTER
                 arguments:
                   - node: IntegerLiteral
+                    token: 34 / INTEGER at 1:258
                     value: 34
               - node: FunctionInvoke
+                token: SUBSTR / IDENT at 1:265
                 name: SUBSTR
                 arguments:
                   - node: Variable
+                    token: s / IDENT at 1:272
                     name: s
                     indexes: []
                   - node: IntegerLiteral
+                    token: 39 / INTEGER at 1:275
                     value: 39
                   - node: BinaryOperation
+                    token: LENGTH / IDENT at 1:279
                     operation: '-'
                     left:
                       node: FunctionInvoke
+                      token: LENGTH / IDENT at 1:279
                       name: LENGTH
                       arguments:
                         - node: Variable
+                          token: s / IDENT at 1:286
                           name: s
                           indexes: []
                     right:
                       node: IntegerLiteral
+                      token: 38 / INTEGER at 1:289
                       value: 38
       - node: ExitStatement
+        token: EXIT / KEYWORD at 1:294
 

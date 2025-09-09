@@ -96,6 +96,8 @@ class Parser:
         return self.tokens[self.i + 1] if self.i + 1 < len(self.tokens) else Token("EOF", "", current.line, current.col)
 
     def program(self) -> ProgramStatement:
+        token = self.current()
+
         self.eat("PROGRAM")
         name = self.eat("IDENT").value
         self.eat(":")
@@ -105,23 +107,24 @@ class Parser:
         self.eat(name)
         self.eat(";")
         self.eat("EOF")
-        return ProgramStatement(name, segments)
+        return ProgramStatement(token, name, segments)
 
     def segment(self) -> Segment:
+        token = self.current()
         types = self.types_section()
         variables = self.variables_section()
         subroutines = self.procedures_and_functions_section()
         statements = self.statements_section()
-        return Segment(types, variables, subroutines, statements)
+        return Segment(token, types, variables, subroutines, statements)
 
     def types_section(self) -> list[TypeIsStatement]:
         out: list[TypeIsStatement] = []
-        while self.accept("TYPE"):
+        while token := self.accept("TYPE"):
             name = self.eat("IDENT").value
             self.eat("IS")
             definition = self.type()
             self.eat(";")
-            out.append(TypeIsStatement(name, definition))
+            out.append(TypeIsStatement(token, name, definition))
             types_registry[name] = definition
         return out
 
@@ -129,13 +132,13 @@ class Parser:
         global variables_registry
 
         declarations: list[DeclareStatement] = []
-        while self.accept("DECLARE"):
+        while declare_token := self.accept("DECLARE"):
             token = self.current()
             if token.type == "IDENT":
                 name = self.eat("IDENT").value
                 type = self.type()
                 self.eat(";")
-                declarations.append(DeclareStatement([name], type))
+                declarations.append(DeclareStatement(declare_token, [name], type))
                 variables_registry[name] = type
                 continue
             if token.value == "(":
@@ -147,7 +150,7 @@ class Parser:
                 self.eat(")")
                 type = self.type()
                 self.eat(";")
-                declarations.append(DeclareStatement(names, type))
+                declarations.append(DeclareStatement(declare_token, names, type))
                 for name in names:
                     variables_registry[name] = type
                 continue
@@ -170,34 +173,35 @@ class Parser:
             self.eat("]")
             self.eat("OF")
             type = cast(Array, self.type())
-            return Array(type, start, end)
+            return Array(token, type, start, end)
         if token.value == "STRUCTURE":
             self.i += 1
 
             fields = []
-            self.eat("FIELD")
+            field_token = self.eat("FIELD")
             name = self.eat("IDENT").value
             self.eat("IS")
             type = self.type()
-            fields.append(FieldStatement(name, type))
+            fields.append(FieldStatement(field_token, name, type))
 
             while self.accept(","):
-                self.eat("FIELD")
+                field_token = self.eat("FIELD")
                 name = self.eat("IDENT").value
                 self.eat("IS")
                 type = self.type()
-                fields.append(FieldStatement(name, type))
+                fields.append(FieldStatement(field_token, name, type))
 
             self.eat("END")
             self.eat("STRUCTURE")
-            return StructureStatement(fields)
+            return StructureStatement(token, fields)
+
         return self.eat("IDENT").value
 
     def procedures_and_functions_section(self) -> list[ProcedureStatement | FunctionStatement]:
         subroutines: list[ProcedureStatement | FunctionStatement] = []
         while token := self.accept(("FUNCTION", "PROCEDURE")):
             name = self.eat("IDENT").value
-            parameters: list[Tuple[str, Union[str, "Array"]]] = []
+            parameters: list[Tuple[str, Type]] = []
             if self.accept("("):
                 if self.current().type != ")":
                     parameters = self.parameters()
@@ -214,7 +218,7 @@ class Parser:
             if token.value == "FUNCTION":
                 has_return = any(isinstance(v, ReturnStatement) for v in segment.statements.statements)
                 if not has_return:
-                    segment.statements.statements.append(ReturnStatement(0))
+                    segment.statements.statements.append(ReturnStatement(token, 0))
 
             self.eat("END")
             self.eat(token.value)
@@ -223,9 +227,9 @@ class Parser:
 
             if token.value == "PROCEDURE":
                 assert type is None, f"PROCEDURE {name} cannot have a return {type=}"
-                subroutines.append(ProcedureStatement(name, parameters, segment))
+                subroutines.append(ProcedureStatement(token, name, parameters, segment))
             else:
-                subroutines.append(FunctionStatement(name, type, parameters, segment))
+                subroutines.append(FunctionStatement(token, name, type, parameters, segment))
         return subroutines
 
     def parameters(self) -> list[tuple[str, Type]]:
@@ -260,14 +264,16 @@ class Parser:
             current = self.current()
             return (current.type == "IDENT" and current.value != "OTHERWISE") and self.peek().value == ":"
 
+        statements_token = self.current()
         while self.current().value in STATEMENTS or is_label():
             if is_label():
-                label = self.eat("IDENT").value
+                label_token = self.eat("IDENT")
+                label = label_token.value
                 self.eat(":")
-                statements.append(Label(label))
+                statements.append(Label(label_token, label))
             else:
                 statements.append(self.statement())
-        return Statements(statements)
+        return Statements(statements_token, statements)
 
     def statement(self) -> Statement:
         token = self.current()
@@ -296,7 +302,7 @@ class Parser:
         if token.value == "BEGIN":
             return self.begin_statement()
         self.eat(";")
-        return EmptyStatement()
+        return EmptyStatement(token)
 
     def arguments(self) -> list[Expression]:
         arguments = [self.expression()]
@@ -305,18 +311,19 @@ class Parser:
         return arguments
 
     def if_statement(self) -> IfStatement:
-        self.eat("IF")
+        token = self.eat("IF")
         cond = self.expression()
         self.eat("THEN")
         then_branch = self.segment()
         else_branch = self.accept("ELSE") and self.segment()
         self.eat("FI")
         self.eat(";")
-        return IfStatement(cond, then_branch, else_branch)
+        return IfStatement(token, cond, then_branch, else_branch)
 
     def for_statement(self) -> ForStatement:
-        self.eat("FOR")
-        variable = Variable(self.eat("IDENT").value)
+        token = self.eat("FOR")
+        variable_token = self.eat("IDENT")
+        variable = Variable(variable_token, variable_token.value)
         self.eat(":=")
         init = self.expression()
         by = self.accept("BY") and self.expression()
@@ -327,10 +334,10 @@ class Parser:
         self.eat("END")
         self.eat("FOR")
         self.eat(";")
-        return ForStatement(variable, init, do, by, to, condition)
+        return ForStatement(token, variable, init, do, by, to, condition)
 
     def select_statement(self) -> SelectStatement:
-        self.eat("SELECT")
+        token = self.eat("SELECT")
         expr = self.expression()
         self.eat("OF")
         cases = []
@@ -348,60 +355,60 @@ class Parser:
         self.eat("END")
         self.eat("SELECT")
         self.eat(";")
-        return SelectStatement(expr, cases)
+        return SelectStatement(token, expr, cases)
 
     def return_statement(self) -> ReturnStatement:
-        self.eat("RETURN")
+        token = self.eat("RETURN")
         if self.accept(";"):
-            return ReturnStatement()
+            return ReturnStatement(token)
         value = self.expression()
         self.eat(";")
-        return ReturnStatement(value)
+        return ReturnStatement(token, value)
 
     def exit_statement(self) -> ExitStatement:
-        self.eat("EXIT")
+        token = self.eat("EXIT")
         self.eat(";")
-        return ExitStatement()
+        return ExitStatement(token)
 
     def input_statement(self) -> InputStatement:
-        self.eat("INPUT")
+        token = self.eat("INPUT")
         variables = []
         variables.append(self.eat("IDENT").value)
         while self.accept(","):
             variables.append(self.eat("IDENT").value)
         self.eat(";")
-        return InputStatement(variables)
+        return InputStatement(token, variables)
 
     def output_statement(self) -> OutputStatement:
-        self.eat("OUTPUT")
+        token = self.eat("OUTPUT")
         expressions = [self.expression()]
         while self.accept(","):
             expressions.append(self.expression())
         self.eat(";")
-        return OutputStatement(expressions)
+        return OutputStatement(token, expressions)
 
     def repeat_statement(self) -> Statements:
-        self.eat("REPEAT")
+        token = self.eat("REPEAT")
         label = self.eat("IDENT").value
         self.eat(";")
-        return RepeatStatement(label)
+        return RepeatStatement(token, label)
 
     def repent_statement(self) -> Statements:
-        self.eat("REPENT")
+        token = self.eat("REPENT")
         label = self.eat("IDENT").value
         self.eat(";")
-        return RepentStatement(label)
+        return RepentStatement(token, label)
 
     def begin_statement(self) -> Statements:
-        self.eat("BEGIN")
+        token = self.eat("BEGIN")
         body = self.segment()
         self.eat("END")
         label = self.accept("IDENT")
         self.eat(";")
-        return BeginStatement(body, label and label.value)
+        return BeginStatement(token, body, label and label.value)
 
     def assignment_statement(self) -> SetStatement:
-        self.eat("SET")
+        token = self.eat("SET")
         variable = self.variable_name()
         indexes = {variable.name: variable.indexes}
         self.eat(":=")
@@ -417,10 +424,11 @@ class Parser:
             targets.append(variable.name)
         expr = self.expression()
         self.eat(";")
-        return SetStatement(targets, expr, indexes)
+        return SetStatement(token, targets, expr, indexes)
 
     def variable_name(self) -> Variable:
-        name = self.eat("IDENT").value
+        token = self.eat("IDENT")
+        name = token.value
         while self.accept("."):
             name += "." + self.eat("IDENT").value
         indexes = []
@@ -428,17 +436,17 @@ class Parser:
             index = self.expression()
             self.eat("]")
             indexes.append(index)
-        return Variable(name, indexes)
+        return Variable(token, name, indexes)
 
     def call_statement(self) -> CallStatement:
-        self.eat("CALL")
+        token = self.eat("CALL")
         name = self.eat("IDENT").value
         arguments = []
         if self.accept("("):
             arguments = self.arguments()
             self.eat(")")
         self.eat(";")
-        return CallStatement(name, arguments)
+        return CallStatement(token, name, arguments)
 
     def expression(self) -> Expression:
         return self.expression_OR_XOR()
@@ -448,56 +456,61 @@ class Parser:
         while operation := self.accept(("|", "XOR")):
             right = self.expression_AND()
             operation.value = {"|": "||", "XOR": "^"}.get(operation.value, operation.value)
-            left = BinaryOperation(operation.value, left, right)
+            left = BinaryOperation(operation, operation.value, left, right)
         return left
 
     def expression_AND(self) -> Expression:
+        token = self.current()
         left = self.expression_NOT()
         while operation := self.accept("&"):
             right = self.expression_NOT()
             operation.value = "&&"
-            left = BinaryOperation(operation.value, left, right)
+            left = BinaryOperation(token, operation.value, left, right)
         return left
 
     def expression_NOT(self) -> Expression:
-        if self.accept("NOT"):
-            return UnaryOperation("NOT", self.expression_NOT())
-        return self.expression_relation()
+        if token := self.accept("NOT"):
+            return UnaryOperation(token, "NOT", self.expression_NOT())
+        return self.expression_RELATION()
 
-    def expression_relation(self) -> Expression:
+    def expression_RELATION(self) -> Expression:
+        token = self.current()
         left = self.expression_CONCATENATION()
         while operation := self.accept(("<", ">", "=", "<=", ">=", "<>")):
             right = self.expression_CONCATENATION()
             operation.value = {"=": "==", "<>": "!="}.get(operation.value, operation.value)
-            left = BinaryOperation(operation.value, left, right)
+            left = BinaryOperation(token, operation.value, left, right)
         return left
 
     def expression_CONCATENATION(self) -> Expression:
+        token = self.current()
         parts = [self.expression_ADDING()]
         while self.accept("||"):
             parts.append(self.expression_ADDING())
         if len(parts) == 1:
             return parts[0]
-        return ConcatenationOperation(parts)
+        return ConcatenationOperation(token, parts)
 
     def expression_ADDING(self) -> Expression:
+        token = self.current()
         left = self.expression_MULTIPLYING()
         while operation := self.accept(("+", "-")):
             right = self.expression_MULTIPLYING()
-            left = BinaryOperation(operation.value, left, right)
+            left = BinaryOperation(token, operation.value, left, right)
         return left
 
     def expression_MULTIPLYING(self) -> Expression:
+        token = self.current()
         left = self.expression_FUNCTION_CALL()
         while operation := self.accept(("*", "/", "MOD")):
             right = self.expression_FUNCTION_CALL()
             operation.value = {"MOD": "%"}.get(operation.value, operation.value)
-            left = BinaryOperation(operation.value, left, right)
+            left = BinaryOperation(token, operation.value, left, right)
         return left
 
     def expression_FUNCTION_CALL(self) -> Expression | FunctionInvoke:
-        name = self.current()
-        if name.type == "IDENT" and self.peek().value == "(":
+        token = self.current()
+        if token.type == "IDENT" and self.peek().value == "(":
             self.i += 1
             self.eat("(")
             if self.current().value != ")":
@@ -505,26 +518,26 @@ class Parser:
             else:
                 arguments = []
             self.eat(")")
-            return FunctionInvoke(name.value, arguments)
+            return FunctionInvoke(token, token.value, arguments)
         return self.factor()
 
     def factor(self) -> Expression:
         token = self.current()
         if token.type == "INTEGER":
             self.i += 1
-            return IntegerLiteral(int(token.value))
+            return IntegerLiteral(token, int(token.value))
         if token.type == "REAL":
             self.i += 1
-            return RealLiteral(float(token.value))
+            return RealLiteral(token, float(token.value))
         if token.type == "STRING":
             self.i += 1
-            return StringLiteral(token.value)
+            return StringLiteral(token, token.value)
         if token.value == "+":
             self.i += 1
-            return UnaryOperation("+", self.factor())
+            return UnaryOperation(token, "+", self.factor())
         if token.value == "-":
             self.i += 1
-            return UnaryOperation("-", self.factor())
+            return UnaryOperation(token, "-", self.factor())
         if token.value == "(":
             self.i += 1
             expression = self.expression()
@@ -532,7 +545,7 @@ class Parser:
             return expression
         if token.value in ("TRUE", "FALSE"):
             self.i += 1
-            return BoolLiteral(token.value == "TRUE")
+            return BoolLiteral(token, token.value == "TRUE")
         if token.type == "IDENT":
             variable = self.variable_name()
             return variable

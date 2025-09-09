@@ -3,6 +3,7 @@ __pycache__/
 
 tests/**/*.tokens
 tests/**/*.ast
+tests/**/*.yaml
 tests/**/*.c
 tests/**/*.py
 tests/**/*.json

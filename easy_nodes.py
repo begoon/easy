@@ -1,6 +1,8 @@
 from dataclasses import dataclass
 from typing import Literal, Optional, Tuple, Union
 
+from easy_lexer import Token
+
 types_registry: dict[str, "Type"] = {}
 variables_registry: dict[str, "Type"] = {}
 functions_registry: dict[str, "Type"] = {}
@@ -11,9 +13,9 @@ common: list[str] = []
 
 def TYPE(v: "Type") -> str:
     if isinstance(v, Array):
-        return v
+        return v.c()
     if isinstance(v, StructureStatement):
-        return v.meta()
+        return v.c()
     if v in types_registry:
         return v
     type = {"INTEGER": "int", "REAL": "double", "BOOLEAN": "int", "STRING": "STR"}.get(v)
@@ -24,6 +26,8 @@ def TYPE(v: "Type") -> str:
 
 @dataclass
 class Node:
+    token: Token
+
     def c(self) -> str:
         print(self)
         raise NotImplementedError()
@@ -79,7 +83,7 @@ class Statements(Node):
 
 
 @dataclass
-class Segment:
+class Segment(Node):
     types: list["TypeIsStatement"]
     variables: list["DeclareStatement"]
     subroutines: list[Subroutine]
@@ -147,7 +151,7 @@ class Segment:
                     elif type == "STRING":
                         parts.append(f"{name} = ''")
                     else:
-                        raise ValueError(f"unsupported variable type in python: {type}")
+                        raise ValueError(f"unsupported variable type in python: {type} [{self.token}]")
         if self.subroutines:
             for subroutine in self.subroutines:
                 parts.append(subroutine.py())
@@ -156,13 +160,13 @@ class Segment:
 
 
 @dataclass
-class DeclareStatement:
+class DeclareStatement(Node):
     names: list[str]
     type: "Type"
 
 
 @dataclass
-class TypeIsStatement:
+class TypeIsStatement(Node):
     name: str
     definition: "Type"
 
@@ -174,7 +178,7 @@ class Array(Node):
     end: Expression
 
     def c(self, variable: str) -> str:
-        assert variable, "Array.c() requires a name parameter"
+        assert variable, f"Array.c() requires a name parameter at {self.token}"
         start = self.start.c() if self.start else "0"
         end = self.end.c()
         t = f"[{start} + {end} + /* @ */ 1]"
@@ -196,13 +200,13 @@ class Array(Node):
 
 
 @dataclass
-class FieldStatement:
+class FieldStatement(Node):
     name: str
     type: "Type"
 
 
 @dataclass
-class StructureStatement:
+class StructureStatement(Node):
     fields: list[FieldStatement]
 
     def meta(self) -> str:
@@ -226,7 +230,7 @@ class StructureStatement:
             elif type == "STRING":
                 v.append(f"    {field.name}: str = ''")
             else:
-                raise ValueError(f"unsupported field type in Python: {type}")
+                raise ValueError(f"unsupported field type in python: {type} [{self.token}]")
         return "\n".join(v)
 
 
@@ -521,7 +525,7 @@ def expression_stringer(v: Expression, format: list[str], callee: str = "OUTPUT"
         literal_formats = {IntegerLiteral: "i", RealLiteral: "r", BoolLiteral: "b"}
         convert = literal_formats.get(type(v))
         if not convert:
-            raise ValueError(f"unsupported literal type in {callee}: {type(v)}")
+            raise ValueError(f"unsupported literal type=[{type(v).__name__}] in {callee} at {v.token}")
         format.append(convert)
         return c
     if isinstance(v, Variable):
@@ -530,7 +534,7 @@ def expression_stringer(v: Expression, format: list[str], callee: str = "OUTPUT"
         variable_formats = {"INTEGER": "i", "REAL": "r", "BOOLEAN": "b", "STRING": "S"}
         convert = variable_formats.get(variable_type)
         if not convert:
-            raise ValueError(f"unsupported variable=[{name}] type=[{variable_type}] in {callee}")
+            raise ValueError(f"unsupported variable=[{name}] type=[{variable_type}] in {callee} at {v.token}")
         format.append(convert)
         x = "&" if convert == "S" else ""
         return x + v.name
@@ -561,9 +565,9 @@ def expression_stringer(v: Expression, format: list[str], callee: str = "OUTPUT"
             if function_type == "STRING":
                 format.append("A")
                 return c
-            raise ValueError(f"unsupported function={v.name} return type in {callee}: {function_type}")
-        raise ValueError(f"unsupported function invocation in {callee}: {v.name}")
-    assert False, f"unsupported output argument type: {type(v)}"
+            raise ValueError(f"unsupported function={v.name} return type={function_type} in {callee} at {v.token}")
+        raise ValueError(f"unsupported function={v.name} invocation in {callee} at {v.token}")
+    assert False, f"unsupported {callee} argument type={type(v).__name__} at {v.token}"
 
 
 @dataclass

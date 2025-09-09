@@ -27,6 +27,7 @@ if __name__ == "__main__":
         print("  -c <output.c>  - specify output C file (default: input.c)")
         print("  -t             - generate tokens file (default: off)")
         print("  -a             - generate AST file (default: off)")
+        print("  -y             - generate YAML AST file (default: off)")
         print("  -j             - generate PEG JSON AST file (default: off)")
         print("  -p <output.py> - generate Python file (default: input.py)")
         sys.exit(1)
@@ -42,7 +43,7 @@ if __name__ == "__main__":
         tokens_file = input_file.with_suffix(".tokens")
 
         def format_token(token: Token) -> str:
-            return f"{input_file}:{token.line}:{token.col}\t {token.value}"
+            return f"{input_file}:{token.line}:{token.col}\t {token.value} / {token.type}"
 
         tokens_file.write_text("\n".join(format_token(t) for t in tokens) + "\n")
 

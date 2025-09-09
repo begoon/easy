@@ -1,25 +1,25 @@
-tests/tokens/test.easy:1:1	 PROGRAM
-tests/tokens/test.easy:1:9	 Tokens
-tests/tokens/test.easy:1:15	 :
-tests/tokens/test.easy:2:3	 SET
-tests/tokens/test.easy:2:7	 a
-tests/tokens/test.easy:2:9	 :=
-tests/tokens/test.easy:2:12	 0
-tests/tokens/test.easy:2:13	 ;
-tests/tokens/test.easy:3:3	 SET
-tests/tokens/test.easy:3:7	 a
-tests/tokens/test.easy:3:9	 :=
-tests/tokens/test.easy:3:12	 b
-tests/tokens/test.easy:3:14	 :=
-tests/tokens/test.easy:3:17	 1
-tests/tokens/test.easy:3:18	 ;
-tests/tokens/test.easy:4:3	 SET
-tests/tokens/test.easy:4:7	 a
-tests/tokens/test.easy:4:9	 :=
-tests/tokens/test.easy:4:29	 c
-tests/tokens/test.easy:4:30	 ;
-tests/tokens/test.easy:5:1	 END
-tests/tokens/test.easy:5:5	 PROGRAM
-tests/tokens/test.easy:5:13	 Tokens
-tests/tokens/test.easy:5:19	 ;
-tests/tokens/test.easy:6:1	 
+tests/tokens/test.easy:1:1	 PROGRAM / KEYWORD
+tests/tokens/test.easy:1:9	 Tokens / IDENT
+tests/tokens/test.easy:1:15	 : / SYMBOL
+tests/tokens/test.easy:2:3	 SET / KEYWORD
+tests/tokens/test.easy:2:7	 a / IDENT
+tests/tokens/test.easy:2:9	 := / SYMBOL
+tests/tokens/test.easy:2:12	 0 / INTEGER
+tests/tokens/test.easy:2:13	 ; / SYMBOL
+tests/tokens/test.easy:3:3	 SET / KEYWORD
+tests/tokens/test.easy:3:7	 a / IDENT
+tests/tokens/test.easy:3:9	 := / SYMBOL
+tests/tokens/test.easy:3:12	 b / IDENT
+tests/tokens/test.easy:3:14	 := / SYMBOL
+tests/tokens/test.easy:3:17	 1 / INTEGER
+tests/tokens/test.easy:3:18	 ; / SYMBOL
+tests/tokens/test.easy:4:3	 SET / KEYWORD
+tests/tokens/test.easy:4:7	 a / IDENT
+tests/tokens/test.easy:4:9	 := / SYMBOL
+tests/tokens/test.easy:4:29	 c / IDENT
+tests/tokens/test.easy:4:30	 ; / SYMBOL
+tests/tokens/test.easy:5:1	 END / KEYWORD
+tests/tokens/test.easy:5:5	 PROGRAM / KEYWORD
+tests/tokens/test.easy:5:13	 Tokens / IDENT
+tests/tokens/test.easy:5:19	 ; / SYMBOL
+tests/tokens/test.easy:6:1	  / EOF

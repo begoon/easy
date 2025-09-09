@@ -4,6 +4,7 @@ from typing import Mapping
 
 from ruamel.yaml import YAML
 
+from easy_lexer import Token
 from easy_nodes import Node
 
 
@@ -20,11 +21,14 @@ def walker(obj: Node, *, seen: set[int] | None = None) -> Node:
     seen.add(oid)
 
     if is_dataclass(obj):
-        data = {}
-        data["node"] = obj.__class__.__name__
-        for f in fields(obj):
-            value = getattr(obj, f.name)
-            data[f.name] = walker(value, seen=seen)
+        if isinstance(obj, Token):
+            data = f"{obj.value} / {obj.type} at {obj.line}:{obj.col}"
+        else:
+            data = {}
+            data["node"] = obj.__class__.__name__
+            for f in fields(obj):
+                value = getattr(obj, f.name)
+                data[f.name] = walker(value, seen=seen)
         seen.remove(oid)
         return data
 

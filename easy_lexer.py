@@ -38,9 +38,6 @@ KEYWORDS = {
     "CASE",
     "OTHERWISE",
     #
-    "FIX",
-    "FLOAT",
-    #
     "TRUE",
     "FALSE",
 }
@@ -136,9 +133,9 @@ class Lexer:
             while self.current().isalnum() or self.current() == "_":
                 v += self.current()
                 self.advance()
-        value = v.lower()
+        value = v
         if value in KEYWORDS:
-            return Token(value.upper(), value, line, col)
+            return Token("KEYWORD", value, line, col)
         return Token("IDENT", v, line, col)
 
     def string(self) -> Token:

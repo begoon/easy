@@ -1,59 +1,78 @@
 node: ProgramStatement
+token: PROGRAM / KEYWORD at 1:1
 name: hw
 segment:
   node: Segment
+  token: DECLARE / KEYWORD at 2:1
   types: []
   variables:
     - node: DeclareStatement
+      token: DECLARE / KEYWORD at 2:1
       names:
         - a
       type: INTEGER
   subroutines: []
   statements:
     node: Statements
+    token: SET / KEYWORD at 3:1
     statements:
       - node: SetStatement
+        token: SET / KEYWORD at 3:1
         names:
           - a
         expression:
           node: IntegerLiteral
+          token: 100 / INTEGER at 3:10
           value: 100
         indexes:
           a: []
       - node: OutputStatement
+        token: OUTPUT / KEYWORD at 4:1
         arguments:
           - node: ConcatenationOperation
+            token: abc  / STRING at 4:8
             parts:
               - node: StringLiteral
+                token: abc  / STRING at 4:8
                 value: 'abc '
               - node: Variable
+                token: a / IDENT at 4:18
                 name: a
                 indexes: []
       - node: ForStatement
+        token: FOR / KEYWORD at 5:1
         variable:
           node: Variable
+          token: a / IDENT at 5:5
           name: a
           indexes:
         init:
           node: IntegerLiteral
+          token: 0 / INTEGER at 5:10
           value: 0
         do:
           node: Segment
+          token: OUTPUT / KEYWORD at 6:3
           types: []
           variables: []
           subroutines: []
           statements:
             node: Statements
+            token: OUTPUT / KEYWORD at 6:3
             statements:
               - node: OutputStatement
+                token: OUTPUT / KEYWORD at 6:3
                 arguments:
                   - node: Variable
+                    token: a / IDENT at 6:10
                     name: a
                     indexes: []
         by:
         to:
           node: IntegerLiteral
+          token: 10 / INTEGER at 5:15
           value: 10
         condition:
       - node: ExitStatement
+        token: EXIT / KEYWORD at 8:1
 
