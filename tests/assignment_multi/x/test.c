@@ -5,7 +5,5 @@ int main()
 {
     a = 123;
     b = 123;
-    {
-        output(1, concat(4, "> ", strconv(a), "-", strconv(b)));
-    }
+    output("s", concat("sisi", "> ", a, "-", b));
 }

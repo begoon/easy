@@ -1,5 +1,5 @@
 PROGRAM Expression:
-  DECLARE (a, b) INTEGER;
+  DECLARE (a, b, c) INTEGER;
   SET x := a;
   SET x := a + b;
   SET x := +a;

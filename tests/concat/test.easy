@@ -1,4 +1,4 @@
-PROGRAM Output:
+PROGRAM Concat:
   DECLARE a INTEGER;
   DECLARE r REAL;
   DECLARE b BOOLEAN;
@@ -9,18 +9,18 @@ PROGRAM Output:
   FUNCTION fb BOOLEAN: RETURN TRUE; END FUNCTION fb;
   FUNCTION fs STRING: DECLARE s STRING; SET s := "xyz"; RETURN s; END FUNCTION fs;
 
-  OUTPUT 0, " - ", 0.001, " = ", TRUE, " <> ", FALSE;
+  OUTPUT 0 || " - " || 0.001 || " = " || TRUE || " <> " || FALSE;
 
   SET a := 321;
   SET r := 1.003;
   SET b := TRUE;
   SET s := "abc";
-  OUTPUT "i:", a, " r:", r, " b:", b, " s:", s, "%%";
+  OUTPUT "i:" || a || " r:" || r || " b:" || b || " s:" || s || "%%";
 
-  OUTPUT CHARACTER(50), " ", LENGTH("123"), " ", FIX(23.56), " ", FLOAT(543);
+  OUTPUT CHARACTER(50) || " " || LENGTH("123") || " " || FIX(23.56) || " " || FLOAT(543);
   OUTPUT "123" || "456";
   
-  OUTPUT "i:", fa(), " r:", fr(), " b:", fb(), " s:", fs(), "$$";
+  OUTPUT "i:" || fa() || " r:" || fr() || " b:" || fb() || " s:" || fs() || "$$";
 
   EXIT;
-END PROGRAM Output;
+END PROGRAM Concat;

@@ -4,6 +4,6 @@ STR a = {0};
 STR b = {0};
 int main()
 {
-    x = concat(2, a.data, concat(2, b.data, SUBSTR("abc", 0, 2)));
+    x = concat("Ss", &a, concat("SA", &b, SUBSTR(from_cstring("abc"), 0, 2)));
     exit(0);
 }

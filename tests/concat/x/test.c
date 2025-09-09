@@ -23,14 +23,14 @@ STR fs()
 }
 int main()
 {
-    output("isrsbsb", 0, " - ", 0.001, " = ", 1, " <> ", 0);
+    output("s", concat("isrsbsb", 0, " - ", 0.001, " = ", 1, " <> ", 0));
     a = 321;
     r = 1.003;
     b = 1;
     strcpy(s.data, "abc");
-    output("sisrsbsSs", "i:", a, " r:", r, " b:", b, " s:", &s, "%%");
-    output("Asisisr", CHARACTER(50), " ", LENGTH(from_cstring("123")), " ", FIX(23.56), " ", FLOAT(543));
+    output("s", concat("sisrsbsSs", "i:", a, " r:", r, " b:", b, " s:", &s, "%%"));
+    output("s", concat("Asisisr", CHARACTER(50), " ", LENGTH(from_cstring("123")), " ", FIX(23.56), " ", FLOAT(543)));
     output("s", concat("ss", "123", "456"));
-    output("sisrsbsAs", "i:", fa(), " r:", fr(), " b:", fb(), " s:", fs(), "$$");
+    output("s", concat("sisrsbsAs", "i:", fa(), " r:", fr(), " b:", fb(), " s:", fs(), "$$"));
     exit(0);
 }

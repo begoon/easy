@@ -189,7 +189,7 @@ def diff(expected_file: Path, created_file: Path) -> None:
 
 
 verbose = "-v" in sys.argv or os.getenv("DEBUG")
-update = "-u" in sys.argv
+update = "-u" in sys.argv or os.getenv("UPDATE")
 
 
 def flag(argv: list[str], name: str) -> int | None:

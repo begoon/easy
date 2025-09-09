@@ -12,101 +12,84 @@ typedef struct
 } STR;
 int FIX(double v) { return (int)v; }
 double FLOAT(int v) { return (double)v; }
-int LENGTH(char *s) { return strlen(s); }
-char *CHARACTER(int c)
+int LENGTH(STR s) { return strlen(s.data); }
+STR CHARACTER(int c)
 {
-    char *v = malloc(2);
-    v[0] = (char)c;
-    v[1] = '\0';
+    STR v = {0};
+    v.data[0] = (char)c;
+    v.data[1] = '\0';
     return v;
 }
-char *SUBSTR(const char *str, int start, int length)
+STR SUBSTR(STR str, int start, int length)
 {
-    char *sub = malloc(length + 1);
-    if (!sub)
-        return NULL;
-    strncpy(sub, str + start, length);
-    sub[length] = '\0';
-    return sub;
+    STR v = {0};
+    strncpy(v.data, str.data + start, length);
+    v.data[length] = '\0';
+    return v;
 }
-char *strconv_int(int v)
+STR from_cstring(const char *s)
 {
-    char *s = malloc(12);
-    sprintf(s, "%d", v);
-    return s;
+    STR v = {0};
+    strncpy(v.data, s, sizeof(v.data) - 1);
+    return v;
 }
-char *strconv(int v)
-{
-    return strconv_int(v);
-}
-
-char *strconv_double(double v)
-{
-    char *s = malloc(12);
-    sprintf(s, "%f", v);
-    return s;
-}
-char *strconv_boolean(int v)
-{
-    return v ? "TRUE" : "FALSE";
-}
-char *strconv_cstr(STR *v)
-{
-    char *s = malloc(strlen(v->data) + 1);
-    strcpy(s, v->data);
-    return s;
-}
-char *concat(int count, ...)
+// i - INTEGER (int)
+// r - REAL (double)
+// s - STRING (char *)
+// b - BOOLEAN (int, 0 or 1)
+STR concat(const char *fmt, ...)
 {
     va_list args;
-    va_start(args, count);
+    va_start(args, fmt);
 
-    size_t sz = 0;
-    for (int i = 0; i < count; i++)
+    STR r = {0};
+
+    int sz = 0;
+    for (; *fmt != '\0'; fmt += 1)
     {
-        sz += strlen(va_arg(args, char *));
+        int n = 0;
+        if (*fmt == 'i')
+            n = sprintf(r.data + sz, "%d", va_arg(args, int));
+        else if (*fmt == 'r')
+            n = sprintf(r.data + sz, "%f", va_arg(args, double));
+        else if (*fmt == 'b')
+            n = sprintf(r.data + sz, "%s", va_arg(args, int) ? "TRUE" : "FALSE");
+        else if (*fmt == 's')
+            n = sprintf(r.data + sz, "%s", va_arg(args, const char *));
+        else if (*fmt == 'S')
+            n = sprintf(r.data + sz, "%s", (va_arg(args, STR *))->data);
+        else if (*fmt == 'A')
+            n = sprintf(r.data + sz, "%s", va_arg(args, STR).data);
+        sz += n;
+    }
+    va_end(args);
+    return r;
+}
+void output(const char *fmt, ...)
+{
+    va_list args;
+    va_start(args, fmt);
+
+    int n = 0;
+    for (; *fmt != '\0'; fmt += 1)
+    {
+        if (*fmt == 'i')
+            n = printf("%d", va_arg(args, int));
+        else if (*fmt == 'r')
+            n = printf("%f", va_arg(args, double));
+        else if (*fmt == 'b')
+            n = printf("%s", va_arg(args, int) ? "TRUE" : "FALSE");
+        else if (*fmt == 's')
+            n = printf("%s", va_arg(args, const char *));
+        else if (*fmt == 'S')
+            n = printf("%s", va_arg(args, STR *)->data);
+        else if (*fmt == 'A')
+            n = printf("%s", va_arg(args, STR).data);
     }
     va_end(args);
 
-    char *result = malloc(sz + 1);
-    if (!result)
-        return NULL;
-
-    result[0] = '\0';
-
-    va_start(args, count);
-    for (int i = 0; i < count; i++)
-    {
-        strcat(result, va_arg(args, char *));
-    }
-    va_end(args);
-
-    return result;
-}
-void output(int count, ...)
-{
-    va_list args;
-    va_start(args, count);
-
-    if (count < 1)
-    {
-        va_end(args);
-        return;
-    }
-
-    const char *s = NULL;
-    for (int i = 0; i < count; i++)
-    {
-        s = va_arg(args, const char *);
-        if (!s)
-            s = "(null)";
-        fputs(s, stdout);
-    }
-
-    if (s && strlen(s) > 1)
+    if (n > 1)
         putchar('\n');
-
-    va_end(args);
 }
 void pause(double seconds)
 {

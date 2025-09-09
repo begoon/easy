@@ -147,7 +147,7 @@ class Segment:
                     elif type == "STRING":
                         parts.append(f"{name} = ''")
                     else:
-                        raise ValueError(f"unsupported variable type in Python: {type}")
+                        raise ValueError(f"unsupported variable type in python: {type}")
         if self.subroutines:
             for subroutine in self.subroutines:
                 parts.append(subroutine.py())
@@ -512,60 +512,57 @@ class InputStatement(Statement):
         return emit(inputs)
 
 
-def expression_stringer(v: Expression, n: int, pre: list[str]) -> str:
+def expression_stringer(v: Expression, format: list[str], callee: str = "OUTPUT") -> str:
     c = v.c()
     if isinstance(v, StringLiteral):
+        format.append("s")
         return '"' + c[1:-1].replace('"', '\\"') + '"'
     if isinstance(v, (IntegerLiteral, RealLiteral, BoolLiteral)):
-        literal_converters = {IntegerLiteral: "int", RealLiteral: "double", BoolLiteral: "boolean"}
-        convert = literal_converters.get(type(v))
+        literal_formats = {IntegerLiteral: "i", RealLiteral: "r", BoolLiteral: "b"}
+        convert = literal_formats.get(type(v))
         if not convert:
-            raise ValueError(f"unsupported literal type in OUTPUT: {type(v)}")
-        fmt_name = f"fmt_{n}"
-        pre.append(indent(f"const char *{fmt_name} = strconv_{convert}({c});", 1))
-        return fmt_name
+            raise ValueError(f"unsupported literal type in {callee}: {type(v)}")
+        format.append(convert)
+        return c
     if isinstance(v, Variable):
         name = v.name.split(".", 1)[0]
         variable_type = variables_registry.get(name)
-        variable_converters = {"INTEGER": "int", "REAL": "double", "BOOLEAN": "boolean", "STRING": "cstr"}
-        convert = variable_converters.get(variable_type)
+        variable_formats = {"INTEGER": "i", "REAL": "r", "BOOLEAN": "b", "STRING": "S"}
+        convert = variable_formats.get(variable_type)
         if not convert:
-            raise ValueError(f"unsupported variable [{name}] type in OUTPUT: {variable_type}")
-        fmt_name = f"fmt_{n}"
-        x = "&" if convert == "cstr" else ""
-        pre.append(indent(f"const char *{fmt_name} = strconv_{convert}({x}{c});", 1))
-        return fmt_name
+            raise ValueError(f"unsupported variable=[{name}] type=[{variable_type}] in {callee}")
+        format.append(convert)
+        x = "&" if convert == "S" else ""
+        return x + v.name
     if isinstance(v, ConcatenationOperation):
+        format.append("s")
         return c
     if isinstance(v, FunctionInvoke):
         if v.name in ["CHARACTER", "SUBSTR"]:
+            format.append("A")
             return c
         if v.name in ["FIX", "LENGTH"]:
-            fmt_name = f"fmt_{n}"
-            pre.append(indent(f"const char *{fmt_name} = strconv_int({c});", 1))
-            return fmt_name
+            format.append("i")
+            return c
         if v.name in ["FLOAT"]:
-            fmt_name = f"fmt_{n}"
-            pre.append(indent(f"const char *{fmt_name} = strconv_double({c});", 1))
-            return fmt_name
+            format.append("r")
+            return c
         if v.name in functions_registry:
             function_type = functions_registry[v.name]
             if function_type == "INTEGER":
-                fmt_name = f"fmt_{n}"
-                pre.append(indent(f"const char *{fmt_name} = strconv_int({c});", 1))
-                return fmt_name
+                format.append("i")
+                return c
             if function_type == "REAL":
-                fmt_name = f"fmt_{n}"
-                pre.append(indent(f"const char *{fmt_name} = strconv_double({c});", 1))
-                return fmt_name
+                format.append("r")
+                return c
             if function_type == "BOOLEAN":
-                fmt_name = f"fmt_{n}"
-                pre.append(indent(f"const char *{fmt_name} = strconv_boolean({c});", 1))
-                return fmt_name
+                format.append("b")
+                return c
             if function_type == "STRING":
-                return c + ".data"
-            raise ValueError(f"unsupported function={v.name} return type in OUTPUT: {function_type}")
-        raise ValueError(f"unsupported function invocation in OUTPUT: {v.name}")
+                format.append("A")
+                return c
+            raise ValueError(f"unsupported function={v.name} return type in {callee}: {function_type}")
+        raise ValueError(f"unsupported function invocation in {callee}: {v.name}")
     assert False, f"unsupported output argument type: {type(v)}"
 
 
@@ -574,15 +571,16 @@ class OutputStatement(Statement):
     arguments: list[Expression]
 
     def meta(self) -> str:
-        return f"OUTPUT({', '.join(e.meta() for e in self.arguments)})"
+        format: list[str] = []
+        [expression_stringer(argument, format) for argument in self.arguments]
+        return f"OUTPUT('{''.join(format)}', {', '.join(e.meta() for e in self.arguments)})"
 
     def c(self) -> str:
-        output = ["{"]
+        output = []
 
-        arguments = ", ".join(expression_stringer(argument, n, output) for n, argument in enumerate(self.arguments, 1))
-        output.append(indent(f"output({len(self.arguments)}, {arguments});", 1))
-
-        output.append("}")
+        format: list[str] = []
+        arguments = ", ".join(expression_stringer(argument, format) for argument in self.arguments)
+        output.append(f'output("{"".join(format)}", {arguments});')
         return emit(output)
 
     def py(self) -> str:
@@ -727,7 +725,9 @@ class FunctionInvoke(Expression):
             if isinstance(argument, Variable):
                 type = variables_registry.get(argument.name)
                 if type == "STRING":
-                    return f"{argument.name}.data"
+                    return f"{argument.name}"
+            if isinstance(argument, StringLiteral):
+                return f"from_cstring({argument.c()})"
             return argument.c()
 
         return f"{self.name}({', '.join(format(a) for a in self.arguments)})"
@@ -766,41 +766,16 @@ class ConcatenationOperation(Expression):
     parts: list[Expression]
 
     def meta(self) -> str:
-        def format(v: Expression) -> str:
-            if isinstance(v, StringLiteral):
-                return repr(v.value)
-
-            if isinstance(v, ConcatenationOperation):
-                return v.meta()
-
-            if isinstance(v, FunctionInvoke) and v.name in "CHARACTER":
-                return v.meta()
-
-            s = v.meta()
-            return f"strconv({s})"
-
-        parts = [format(v) for v in self.parts]
-        return f"{len(parts)}:(" + " || ".join(parts) + ")"
+        format: list[str] = []
+        [expression_stringer(argument, format) for argument in self.parts]
+        return f"||:('{''.join(format)}', {', '.join(e.meta() for e in self.parts)})"
 
     def c(self) -> str:
-        def format(v: Expression) -> str:
-            is_concatenation = isinstance(v, ConcatenationOperation)
-            is_string_literal = isinstance(v, StringLiteral)
-            is_function = isinstance(v, FunctionInvoke) and v.name in ("CHARACTER", "SUBSTR")
-
-            skip_stringify = any([is_string_literal, is_concatenation, is_function])
-
-            str = v.c()
-            if isinstance(v, Variable):
-                global variables_registry
-                type = variables_registry.get(v.name)
-                if type == "STRING":
-                    return f"{v.name}.data"
-                return f"strconv({str})"
-            return str if skip_stringify else f"strconv({str})"
-
-        parts = [format(v) for v in self.parts]
-        return f"concat({len(parts)}, {', '.join(parts)})"
+        output = []
+        format: list[str] = []
+        arguments = ", ".join(expression_stringer(argument, format, "||") for argument in self.parts)
+        output.append(f'concat("{"".join(format)}", {arguments})')
+        return emit(output)
 
     def py(self) -> str:
         def format(v: Expression) -> str:

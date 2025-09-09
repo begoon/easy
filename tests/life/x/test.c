@@ -38,51 +38,33 @@ void print()
 {
     int x = {0};
     int y = {0};
-    {
-        output(2, "** [ EASY LIFE ]", " ");
-    }
+    output("ss", "** [ EASY LIFE ]", " ");
     for (x = 0; x <= ((w + 1) - 17); x += 1)
     {
-        {
-            output(1, "*");
-        }
+        output("s", "*");
     }
-    {
-        output(1, concat(2, " ", CHARACTER(13)));
-    }
+    output("s", concat("sA", " ", CHARACTER(13)));
     for (y = 0; y <= (h - 1); y += 1)
     {
-        {
-            output(1, "*");
-        }
+        output("s", "*");
         for (x = 0; x <= (w - 1); x += 1)
         {
             if (field[y][x] == 1)
             {
-                {
-                    output(1, "x");
-                }
+                output("s", "x");
             }
             else
             {
-                {
-                    output(1, " ");
-                }
+                output("s", " ");
             }
         }
-        {
-            output(1, concat(2, "*", CHARACTER(13)));
-        }
+        output("s", concat("sA", "*", CHARACTER(13)));
     }
     for (x = 0; x <= (w + 1); x += 1)
     {
-        {
-            output(1, "*");
-        }
+        output("s", "*");
     }
-    {
-        output(1, concat(2, " ", CHARACTER(13)));
-    }
+    output("s", concat("sA", " ", CHARACTER(13)));
 }
 void glider(int x, int y)
 {
@@ -147,9 +129,7 @@ int main()
     for (i = 1; i <= 12; i += 1)
     {
         print();
-        {
-            output(1, concat(2, "GENERATION: ", strconv(i)));
-        }
+        output("s", concat("si", "GENERATION: ", i));
         evolution();
         if ((i % 10) == 0)
         {

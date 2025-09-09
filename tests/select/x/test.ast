@@ -6,12 +6,12 @@ PROGRAM Test
         SELECT TRUE
             CASE (a < 0):
                 Statements:
-                    OUTPUT('a < 0')
+                    OUTPUT('s', 'a < 0')
             CASE (a == 0):
                 Statements:
-                    OUTPUT('a = 0')
+                    OUTPUT('s', 'a = 0')
             OTHERWISE:
                 Statements:
-                    OUTPUT('otherwise')
+                    OUTPUT('s', 'otherwise')
         END SELECT
         EXIT
