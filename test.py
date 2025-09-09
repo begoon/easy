@@ -6,6 +6,8 @@ import traceback
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 
+from easy import arg
+
 TESTS_FOLDER = Path("tests")
 
 
@@ -53,7 +55,10 @@ def run_tests(filter: str | None) -> None:
 
 def process(test: Path) -> None:
     test /= "test"
-    print(test.parent.name)
+    if verbose:
+        print("[TEST]", test.parent.name)
+    else:
+        print(test.parent.name, end=" ", flush=True)
 
     program = test.with_suffix(".easy")
 
@@ -141,7 +146,7 @@ def process(test: Path) -> None:
 
             input_file = x.with_suffix(".input")
             if input_file.exists():
-                cmd.insert(0, "<" + str(input_file))
+                cmd.append("<" + str(input_file))
 
             run(cmd)
             diff(expected_output, created_output)
@@ -159,7 +164,7 @@ def process(test: Path) -> None:
 
     for removal in removals:
         if removal.exists():
-            if verbose:
+            if verbose > 1:
                 print(f"[DEL] {removal}")
             removal.unlink()
 
@@ -198,8 +203,9 @@ def diff(expected_file: Path, created_file: Path) -> None:
             exit(1)
 
 
-verbose = "-v" in sys.argv or os.getenv("DEBUG")
-update = "-u" in sys.argv or os.getenv("UPDATE")
+verbose = (v := os.getenv("VERBOSE", arg(sys.argv, "--verbose"))) and int(v) or 0
+
+update = "--update" in sys.argv or os.getenv("UPDATE")
 
 
 def flag(argv: list[str], name: str) -> int | None:
@@ -214,3 +220,5 @@ def arg(argv: list[str], name: str) -> str | None:
 if __name__ == "__main__":
     name = arg(sys.argv, "--filter")
     run_tests(name)
+    if not verbose:
+        print()
