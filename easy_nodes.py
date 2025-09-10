@@ -1,3 +1,4 @@
+import json
 from dataclasses import dataclass
 from typing import Literal, Optional, Tuple, Union
 
@@ -5,23 +6,31 @@ from easy_lexer import Token
 
 types_registry: dict[str, "Type"] = {}
 variables_registry: dict[str, "Type"] = {}
-functions_registry: dict[str, "Type"] = {}
+functions_registry: dict[str, "Type"] = {
+    "LENGTH": "INTEGER",
+    "CHARACTER": "STRING",
+    "SUBSTR": "STRING",
+    "FIX": "INTEGER",
+    "FLOAT": "REAL",
+}
 python_imports: set[str] = set()
 
 common: list[str] = []
 
 
-def TYPE(v: "Type") -> str:
-    if isinstance(v, Array):
-        return v.c()
-    if isinstance(v, StructureStatement):
-        return v.c()
-    if v in types_registry:
-        return v
-    type = {"INTEGER": "int", "REAL": "double", "BOOLEAN": "int", "STRING": "STR"}.get(v)
-    if not type:
-        raise ValueError(f"unknown type '{v}'")
-    return type
+def expand_type(name: "Type") -> str:
+    if name in ("INTEGER", "REAL", "BOOLEAN", "STRING"):
+        return name
+    if isinstance(name, Array):
+        return expand_type(name.type)
+    custom = types_registry.get(name)
+    if custom:
+        return expand_type(custom)
+    return "?"
+
+
+def is_number(name: str) -> bool:
+    return name in ("INTEGER", "REAL")
 
 
 @dataclass
@@ -48,7 +57,7 @@ class Statement(Node):
 
 @dataclass
 class Expression(Node):
-    pass
+    type: "Type"
 
 
 @dataclass
@@ -306,46 +315,59 @@ class FunctionStatement(Node):
 
 @dataclass
 class SetStatement(Statement):
-    names: list[str]
+    variables: list["Variable"]
     expression: Expression
-    indexes: dict[str, list[Optional[Expression]]]
-
-    @staticmethod
-    def variable_indexes(indexes: list[Optional[Expression]]) -> str:
-        return "".join(f"[{index.meta()}]" for index in indexes if index is not None)
 
     def meta(self) -> str:
         v = "SET "
-        for name in self.names:
-            indexes = self.variable_indexes(self.indexes.get(name, []))
-            v += f"{name}{indexes} := "
+        for variable in self.variables:
+            v += f"{variable.meta()} := "
         v += self.expression.meta()
         return v
 
     def c(self) -> str:
-        global variables_registry
-
         v = []
-        for name in self.names:
-            type = variables_registry.get(name)
-            if type == "STRING":
-
-                def T(v: Expression) -> str:
-                    if not isinstance(v, StringLiteral):
-                        return v.c()
-                    return '"' + v.c()[1:-1].replace('"', '\\"') + '"'
-
-                return f"strcpy({name}.data, {T(self.expression)});"
-            indexes = self.variable_indexes(self.indexes.get(name, []))
-            v.append(f"{name}{indexes} = {self.expression.c()};")
-        return "\n".join(v)
+        for variable in self.variables:
+            SetStatement.check_variable(variable, self.expression.type, self.token)
+            v.append(f"{variable.c()} = {self.expression.c()};")
+        return emit(v)
 
     def py(self) -> str:
         v = []
-        for name in self.names:
-            indexes = self.variable_indexes(self.indexes.get(name, []))
-            v.append(f"{name}{indexes} = {self.expression.py()}")
-        return "\n".join(v)
+        for variable in self.variables:
+            SetStatement.check_variable(variable, self.expression.type, self.token)
+            v.append(f"{variable.py()} = {self.expression.py()}")
+        return emit(v)
+
+    @staticmethod
+    def check_variable(variable: "Variable", target_type: Type, token: Token) -> "Variable":
+
+        if "." in variable.name or "[" in variable.name:
+            # TODO: (!)
+            return variable
+
+        if variable.name not in variables_registry:
+            raise ValueError(f"undeclared variable in SET [{variable.name}] at {token}")
+
+        target_type = expand_type(target_type)
+
+        type = expand_type(variables_registry.get(variable.name))
+        if not type or type == "?":
+            raise ValueError(f"undefined variable=[{variable.name}] type in SET at {token}")
+
+        if isinstance(type, Array):
+            type = type.type
+
+        if type != target_type:
+            raise ValueError(
+                f"type mismatch in SET variable [{variable.name}]:\n"
+                + f"  {type=} != {target_type=}\n"
+                + f"  variable [{variable}]\n"
+                + f"  expected [{target_type}]\n"
+                + f"  not      [{type}]\n"
+                + f"at {token}\n"
+                + f"known variables:\n{json.dumps(variables_registry, indent=2)}"
+            )
 
 
 @dataclass
@@ -392,18 +414,19 @@ class ForStatement(Statement):
     condition: Optional[Expression] = None
 
     def meta(self) -> str:
-        v = f"FOR {self.variable.meta()} := {self.init.meta()}"
+        v = [f"FOR {self.variable.meta()} := {self.init.meta()}"]
 
         if self.by:
-            v += f" BY {self.by.meta()}"
+            v.append(f"BY {self.by.meta()}")
         if self.to:
-            v += f" TO {self.to.meta()}"
+            v.append(f"TO {self.to.meta()}")
         if self.condition:
-            v += f" WHILE {self.condition.meta()}"
+            v.append(f"WHILE {self.condition.meta()}")
 
-        v += " DO"
+        v.append("DO")
 
-        return emit([v, indent(self.do.meta(), 1), "END FOR"])
+        vv = " ".join(v)
+        return emit([vv, indent(self.do.meta(), 1), "END FOR"])
 
     def c(self) -> str:
         v = [
@@ -514,60 +537,6 @@ class InputStatement(Statement):
                 assert type == "INTEGER", f"unexpected variable type in INPUT '{variable}': {type}"
                 inputs.append(f"{variable} = int(input())")
         return emit(inputs)
-
-
-def expression_stringer(v: Expression, format: list[str], callee: str = "OUTPUT") -> str:
-    c = v.c()
-    if isinstance(v, StringLiteral):
-        format.append("s")
-        return '"' + c[1:-1].replace('"', '\\"') + '"'
-    if isinstance(v, (IntegerLiteral, RealLiteral, BoolLiteral)):
-        literal_formats = {IntegerLiteral: "i", RealLiteral: "r", BoolLiteral: "b"}
-        convert = literal_formats.get(type(v))
-        if not convert:
-            raise ValueError(f"unsupported literal type=[{type(v).__name__}] in {callee} at {v.token}")
-        format.append(convert)
-        return c
-    if isinstance(v, Variable):
-        name = v.name.split(".", 1)[0]
-        variable_type = variables_registry.get(name)
-        variable_formats = {"INTEGER": "i", "REAL": "r", "BOOLEAN": "b", "STRING": "S"}
-        convert = variable_formats.get(variable_type)
-        if not convert:
-            raise ValueError(f"unsupported variable=[{name}] type=[{variable_type}] in {callee} at {v.token}")
-        format.append(convert)
-        x = "&" if convert == "S" else ""
-        return x + v.name
-    if isinstance(v, ConcatenationOperation):
-        format.append("A")
-        return c
-    if isinstance(v, FunctionInvoke):
-        if v.name in ["CHARACTER", "SUBSTR"]:
-            format.append("A")
-            return c
-        if v.name in ["FIX", "LENGTH"]:
-            format.append("i")
-            return c
-        if v.name in ["FLOAT"]:
-            format.append("r")
-            return c
-        if v.name in functions_registry:
-            function_type = functions_registry[v.name]
-            if function_type == "INTEGER":
-                format.append("i")
-                return c
-            if function_type == "REAL":
-                format.append("r")
-                return c
-            if function_type == "BOOLEAN":
-                format.append("b")
-                return c
-            if function_type == "STRING":
-                format.append("A")
-                return c
-            raise ValueError(f"unsupported function={v.name} return type={function_type} in {callee} at {v.token}")
-        raise ValueError(f"unsupported function={v.name} invocation in {callee} at {v.token}")
-    assert False, f"unsupported {callee} argument type={type(v).__name__} at {v.token}"
 
 
 @dataclass
@@ -717,7 +686,7 @@ class EmptyStatement(Statement):
 
 
 @dataclass
-class FunctionInvoke(Expression):
+class FunctionCall(Expression):
     name: str
     arguments: list[Expression]
 
@@ -725,19 +694,10 @@ class FunctionInvoke(Expression):
         return f"{self.name}({', '.join(a.meta() for a in self.arguments)})"
 
     def c(self) -> str:
-        def format(argument: Expression) -> str:
-            if isinstance(argument, Variable):
-                type = variables_registry.get(argument.name)
-                if type == "STRING":
-                    return f"{argument.name}"
-            if isinstance(argument, StringLiteral):
-                return f"from_cstring({argument.c()})"
-            return argument.c()
-
-        return f"{self.name}({', '.join(format(a) for a in self.arguments)})"
+        return f"{self.name}({', '.join(a.c() for a in self.arguments)})"
 
     def py(self) -> str:
-        return f"{self.name}({', '.join(a.py() for a in self.arguments)}) # FUNCTION {self.name}"
+        return f"{self.name}({', '.join(a.py() for a in self.arguments)}"
 
 
 @dataclass
@@ -750,6 +710,32 @@ class BinaryOperation(Expression):
         return f"({self.left.meta()} {self.operation} {self.right.meta()})"
 
     def c(self) -> str:
+
+        left_type = expand_type(self.left.type)
+        right_type = expand_type(self.right.type)
+        allowed = left_type == right_type or (is_number(left_type) and is_number(right_type))
+        assert allowed, (
+            f"\n{self=}"
+            f"\ntype mismatch in binary operation '{self.operation}':\n"
+            f"{self.left=}\n{self.right=}\n" + f"at {self.token}\n"
+        )
+
+        def type_mismatch(v: BinaryOperation) -> str:
+            return f"unsupported type '{v.left.type}' in binary operation '{v.operation}' at {v.token}"
+
+        if self.operation in ("+", "-", "*", "/", "MOD"):
+            operations = {"MOD": "%"}
+            self.operation = operations.get(self.operation, self.operation)
+            assert left_type in ("INTEGER", "REAL"), type_mismatch(self)
+        elif self.operation in ("<", "<=", ">", ">=", "=", "<>", "|", "XOR"):
+            operations = {"=": "==", "<>": "!=", "|": "||", "XOR": "^"}
+            self.operation = operations.get(self.operation, self.operation)
+            assert left_type in ("BOOLEAN", "INTEGER", "REAL"), type_mismatch(self)
+        elif self.operation == "||":
+            assert left_type in ("STRING",), type_mismatch(self)
+        else:
+            raise ValueError(f"unsupported binary operation '{self.operation}' at {self.token}")
+
         return f"({self.left.c()} {self.operation} {self.right.c()})"
 
     def py(self) -> str:
@@ -785,7 +771,7 @@ class ConcatenationOperation(Expression):
         def format(v: Expression) -> str:
             is_concatenation = isinstance(v, ConcatenationOperation)
             is_string_literal = isinstance(v, StringLiteral)
-            is_function = isinstance(v, FunctionInvoke) and v.name in ("CHARACTER", "SUBSTR")
+            is_function = isinstance(v, FunctionCall) and v.name in ("CHARACTER", "SUBSTR")
 
             skip_stringify = any([is_string_literal, is_concatenation, is_function])
 
@@ -822,11 +808,11 @@ class UnaryOperation(Expression):
 @dataclass
 class Variable(Expression):
     name: str
-    indexes: list[Optional[Expression]] = None
+    indexes: list[Expression]
 
     def meta(self) -> str:
         indexes = "".join(f"[{index.meta()}]" for index in self.indexes) if self.indexes else ""
-        return self.name + indexes
+        return f"{self.name}{indexes}"
 
     def c(self) -> str:
         indexes = "".join(f"[{index.c()}]" for index in self.indexes) if self.indexes else ""
@@ -841,6 +827,9 @@ class Variable(Expression):
 class IntegerLiteral(Expression):
     value: int
 
+    def type(self) -> Type:
+        return "INTEGER"
+
     def meta(self) -> str:
         return repr(self.value)
 
@@ -854,6 +843,9 @@ class IntegerLiteral(Expression):
 @dataclass
 class RealLiteral(Expression):
     value: float
+
+    def type(self) -> Type:
+        return "REAL"
 
     def meta(self) -> str:
         return repr(self.value)
@@ -873,7 +865,8 @@ class StringLiteral(Expression):
         return repr(self.value)
 
     def c(self) -> str:
-        return f'"{self.value}"'
+        value = self.value.replace('"', r"\"")
+        return f'from_cstring("{value}")'
 
     def py(self) -> str:
         return repr(self.value)
@@ -883,11 +876,14 @@ class StringLiteral(Expression):
 class BoolLiteral(Expression):
     value: bool
 
+    def type(self) -> Type:
+        return "BOOLEAN"
+
     def meta(self) -> str:
         return "TRUE" if self.value else "FALSE"
 
     def c(self) -> str:
-        return "1" if self.value else "0"
+        return "TRUE" if self.value else "FALSE"
 
     def py(self) -> str:
         return "True" if self.value else "False"
@@ -908,6 +904,9 @@ class ProgramStatement(Node):
         return emit([self.segment.py()])
 
 
+# --------------------------
+
+
 def indent(s: str, n: int) -> str:
     pad = "    " * n
     return "\n".join(pad + line for line in s.splitlines())
@@ -915,3 +914,50 @@ def indent(s: str, n: int) -> str:
 
 def emit(lines: list[str]) -> str:
     return "\n".join(lines)
+
+
+def TYPE(v: "Type") -> str:
+    if isinstance(v, Array):
+        return v.c()
+    if isinstance(v, StructureStatement):
+        return v.c()
+    if v in types_registry:
+        return v
+    type = {"INTEGER": "int", "REAL": "double", "BOOLEAN": "int", "STRING": "STR"}.get(v)
+    if not type:
+        raise ValueError(f"unknown type '{v}'")
+    return type
+
+
+def expression_stringer(v: Expression, format: list[str], callee: str = "OUTPUT") -> str:
+    c = v.c()
+    if isinstance(v, (IntegerLiteral, RealLiteral, BoolLiteral, StringLiteral)):
+        literal_formats = {IntegerLiteral: "i", RealLiteral: "r", BoolLiteral: "b", StringLiteral: "A"}
+        convert = literal_formats.get(type(v))
+        if not convert:
+            raise ValueError(f"unsupported literal type=[{type(v).__name__}] in {callee} at {v.token}")
+        format.append(convert)
+        return c
+    if isinstance(v, Variable):
+        name = v.name.split(".", 1)[0]
+        variable_type = variables_registry.get(name)
+        variable_formats = {"INTEGER": "i", "REAL": "r", "BOOLEAN": "b", "STRING": "A"}
+        convert = variable_formats.get(variable_type)
+        if not convert:
+            raise ValueError(f"unsupported variable=[{name}] type=[{variable_type}] in {callee} at {v.token}")
+        format.append(convert)
+        return v.name
+    if isinstance(v, ConcatenationOperation):
+        format.append("A")
+        return c
+    if isinstance(v, FunctionCall):
+        if v.name in functions_registry:
+            function_type = functions_registry[v.name]
+            function_type_formats = {"INTEGER": "i", "REAL": "r", "BOOLEAN": "b", "STRING": "A"}
+            convert = function_type_formats.get(function_type)
+            if convert:
+                format.append(convert)
+                return c
+            raise ValueError(f"unsupported function={v.name} return type={function_type} in {callee} at {v.token}")
+        raise ValueError(f"unsupported function={v.name} invocation in {callee} at {v.token}")
+    assert False, f"unsupported {callee} argument type={type(v).__name__} at {v.token}"

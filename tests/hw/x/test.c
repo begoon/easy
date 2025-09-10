@@ -3,7 +3,7 @@ int a = {0};
 int main()
 {
     a = 100;
-    output("A", concat("si", "abc ", a));
+    output("A", concat("Ai", from_cstring("abc "), a));
     for (a = 0; a <= 10; a += 1)
     {
         output("i", a);

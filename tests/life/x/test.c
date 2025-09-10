@@ -38,41 +38,41 @@ void print()
 {
     int x = {0};
     int y = {0};
-    output("ss", "** [ EASY LIFE ]", " ");
+    output("AA", from_cstring("** [ EASY LIFE ]"), from_cstring(" "));
     for (x = 0; x <= ((w + 1) - 17); x += 1)
     {
-        output("s", "*");
+        output("A", from_cstring("*"));
     }
-    output("A", concat("sA", " ", CHARACTER(13)));
+    output("A", concat("AA", from_cstring(" "), CHARACTER(13)));
     for (y = 0; y <= (h - 1); y += 1)
     {
-        output("s", "*");
+        output("A", from_cstring("*"));
         for (x = 0; x <= (w - 1); x += 1)
         {
-            if (field[y][x] == 1)
+            if (field[y][x] == TRUE)
             {
-                output("s", "x");
+                output("A", from_cstring("x"));
             }
             else
             {
-                output("s", " ");
+                output("A", from_cstring(" "));
             }
         }
-        output("A", concat("sA", "*", CHARACTER(13)));
+        output("A", concat("AA", from_cstring("*"), CHARACTER(13)));
     }
     for (x = 0; x <= (w + 1); x += 1)
     {
-        output("s", "*");
+        output("A", from_cstring("*"));
     }
-    output("A", concat("sA", " ", CHARACTER(13)));
+    output("A", concat("AA", from_cstring(" "), CHARACTER(13)));
 }
 void glider(int x, int y)
 {
-    field[y][x] = 1;
-    field[y][(x + 1)] = 1;
-    field[y][(x + 2)] = 1;
-    field[(y + 1)][x] = 1;
-    field[(y + 2)][(x + 1)] = 1;
+    field[y][x] = TRUE;
+    field[y][(x + 1)] = TRUE;
+    field[y][(x + 2)] = TRUE;
+    field[(y + 1)][x] = TRUE;
+    field[(y + 2)][(x + 1)] = TRUE;
 }
 void evolution()
 {
@@ -87,18 +87,18 @@ void evolution()
             int alive = {0};
             alive = field[y][x];
             n = neighbours(x, y);
-            if (alive == 1)
+            if (alive == TRUE)
             {
                 if ((n < 2) || (n > 3))
                 {
-                    alive = 0;
+                    alive = FALSE;
                 }
             }
             else
             {
                 if (n == 3)
                 {
-                    alive = 1;
+                    alive = TRUE;
                 }
             }
             next[y][x] = alive;
@@ -120,7 +120,7 @@ int main()
     {
         for (x = 0; x <= (w - 1); x += 1)
         {
-            field[y][x] = 0;
+            field[y][x] = FALSE;
         }
     }
     glider(30, 15);
@@ -129,7 +129,7 @@ int main()
     for (i = 1; i <= 12; i += 1)
     {
         print();
-        output("A", concat("si", "GENERATION: ", i));
+        output("A", concat("Ai", from_cstring("GENERATION: "), i));
         evolution();
         if ((i % 10) == 0)
         {

@@ -6,6 +6,16 @@
             "name": "Real",
             "body": {
                 "type": "segment_body",
+                "var_decls": [
+                    {
+                        "type": "variable_declaration",
+                        "names": "a",
+                        "t": {
+                            "type": "type",
+                            "bt": "REAL"
+                        }
+                    }
+                ],
                 "stmts": [
                     {
                         "type": "assignment_statement",

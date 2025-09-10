@@ -1,5 +1,5 @@
 PROGRAM A:
-  DECLARE x INTEGER;
+  DECLARE x STRING;
   DECLARE (a, b) STRING;
   SET x := a || (b || SUBSTR("abc", 0, 2));
   EXIT;

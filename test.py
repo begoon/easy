@@ -205,7 +205,7 @@ def diff(expected_file: Path, created_file: Path) -> None:
 
 verbose = (v := os.getenv("VERBOSE", arg(sys.argv, "--verbose"))) and int(v) or 0
 
-update = "--update" in sys.argv or os.getenv("UPDATE")
+update = "--update" in sys.argv or "-U" in sys.argv or os.getenv("UPDATE")
 
 
 def flag(argv: list[str], name: str) -> int | None:

@@ -12,7 +12,7 @@
                         "names": "x",
                         "t": {
                             "type": "type",
-                            "bt": "INTEGER"
+                            "bt": "STRING"
                         }
                     },
                     {

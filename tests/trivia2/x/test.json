@@ -40,6 +40,20 @@
                         }
                     }
                 ],
+                "var_decls": [
+                    {
+                        "type": "variable_declaration",
+                        "names": {
+                            "type": "declared_multiple_names",
+                            "head": "a",
+                            "tail": "p"
+                        },
+                        "t": {
+                            "type": "type",
+                            "bt": "INTEGER"
+                        }
+                    }
+                ],
                 "stmts": [
                     {
                         "type": "simple_compound",

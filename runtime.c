@@ -38,6 +38,8 @@ STR from_cstring(const char *s)
 // r - REAL (double)
 // s - STRING (char *)
 // b - BOOLEAN (int, 0 or 1)
+// S - STRING (STR *)
+// A - STRING (STR)
 STR concat(const char *fmt, ...)
 {
     va_list args;

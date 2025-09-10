@@ -1,18 +1,25 @@
 PROGRAM Expression
     Variables:
-        a, b, c: INTEGER
+        x, a, b, c: INTEGER
+        s: STRING
+        f: BOOLEAN
+    Subroutines:
+        FUNCTION func() : INTEGER
+            Statements:
+                RETURN 0
     Statements:
         SET x := a
         SET x := (a + b)
         SET x := (+a)
         SET x := (-a)
-        SET x := (a + (b * с))
-        SET x := ((((-b) + (1 - 2)) - (LENGTH('3') * 7)) ^ 1)
+        SET x := (a + (b * c))
+        SET x := (((-b) + (1 - 2)) - (LENGTH('3') * 7))
         SET x := (((-b) + (1 - 2)) - func(3))
-        SET x := (NOT(a < b))
-        SET x := ||:('ii', a, b)
-        SET x := ||:('si', 'a', b)
-        SET x := ||:('sii', 'a', b, c)
-        SET x := ||:('iA', a, ||:('iA', b, SUBSTR('abc', 0, 2)))
-        SET x := ||:('iiA', a, b, SUBSTR('abc', 0, 2))
-        SET x := ||:('iA', a, CHARACTER(b))
+        SET f := (NOT(a < b))
+        SET f := ((a < b) XOR TRUE)
+        SET s := ||:('ii', a, b)
+        SET s := ||:('Ai', 'a', b)
+        SET s := ||:('Aii', 'a', b, c)
+        SET s := ||:('iA', a, ||:('iA', b, SUBSTR('abc', 0, 2)))
+        SET s := ||:('iiA', a, b, SUBSTR('abc', 0, 2))
+        SET s := ||:('iA', a, CHARACTER(b))

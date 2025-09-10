@@ -2,19 +2,19 @@
 STR s = {0};
 int main()
 {
-    strcpy(s.data, "\"");
-    output("S", &s);
-    output("s", "<1>");
-    output("s", "");
-    output("s", "<2>");
-    output("s", "\"");
-    output("s", "<3>");
-    output("S", &s);
-    output("s", "<4>");
-    output("s", "...");
-    strcpy(s.data, "\"");
-    strcpy(s.data, "we said \"ok\"");
-    strcpy(s.data, "str = [");
-    strcpy(s.data, "abc = [");
+    s = from_cstring("\"");
+    output("A", s);
+    output("A", from_cstring("<1>"));
+    output("A", from_cstring(""));
+    output("A", from_cstring("<2>"));
+    output("A", from_cstring("\""));
+    output("A", from_cstring("<3>"));
+    output("A", s);
+    output("A", from_cstring("<4>"));
+    output("A", from_cstring("..."));
+    s = from_cstring("\"");
+    s = from_cstring("we said \"ok\"");
+    s = from_cstring("str = [");
+    s = from_cstring("abc = [");
     exit(0);
 }

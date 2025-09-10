@@ -17,9 +17,9 @@ PROGRAM Eratosthenes
                 SELECT TRUE
                     CASE (a < 0):
                         Statements:
-                            OUTPUT('s', 'a < 0 in FUNCTION integersqrt.')
+                            OUTPUT('A', 'a < 0 in FUNCTION integersqrt.')
                             EXIT
-                    CASE (a == 0):
+                    CASE (a = 0):
                         Statements:
                             RETURN 0
                     CASE (a > 0):
@@ -72,11 +72,11 @@ PROGRAM Eratosthenes
                         IF sieve[i] THEN
                             Statements:
                                 SET count := (count + 1)
-                                OUTPUT('A', ||:('sisi', 'Prime[', count, '] = ', i))
+                                OUTPUT('A', ||:('AiAi', 'Prime[', count, '] = ', i))
                         FI
                 END FOR
         ELSE
             Statements:
-                OUTPUT('A', ||:('sis', 'Input value ', topnum, ' non-positive.'))
+                OUTPUT('A', ||:('AiA', 'Input value ', topnum, ' non-positive.'))
         FI
         EXIT

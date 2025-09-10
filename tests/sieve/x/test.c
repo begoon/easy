@@ -16,7 +16,7 @@ int integersqrt(int a)
 {
     if (a < 0)
     {
-        output("s", "a < 0 in FUNCTION integersqrt.");
+        output("A", from_cstring("a < 0 in FUNCTION integersqrt."));
         exit(0);
     }
     else if (a == 0)
@@ -55,7 +55,7 @@ int main()
         topnum = (topnum + 1);
         for (i = 1; i <= topnum; i += 1)
         {
-            sieve[i] = 1;
+            sieve[i] = TRUE;
         }
         limit = (integersqrt(topnum) + 1);
         for (i = 2; i <= limit; i += 1)
@@ -65,7 +65,7 @@ int main()
                 int j = {0};
                 for (j = (2 * i); j <= topnum; j += i)
                 {
-                    sieve[j] = 0;
+                    sieve[j] = FALSE;
                 }
             }
         }
@@ -75,13 +75,13 @@ int main()
             if (sieve[i])
             {
                 count = (count + 1);
-                output("A", concat("sisi", "Prime[", count, "] = ", i));
+                output("A", concat("AiAi", from_cstring("Prime["), count, from_cstring("] = "), i));
             }
         }
     }
     else
     {
-        output("A", concat("sis", "Input value ", topnum, " non-positive."));
+        output("A", concat("AiA", from_cstring("Input value "), topnum, from_cstring(" non-positive.")));
     }
     exit(0);
 }

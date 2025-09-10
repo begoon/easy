@@ -4,7 +4,7 @@ PROGRAM Call
     Subroutines:
         PROCEDURE a(x)
             Statements:
-                OUTPUT('A', ||:('si', 'a(): ', x))
+                OUTPUT('A', ||:('Ai', 'a(): ', x))
         FUNCTION b(INTEGER x) : INTEGER
             Statements:
                 RETURN (x + 1)

@@ -4,5 +4,5 @@ T t = {0};
 int main()
 {
     t.a = 1;
-    output("s", ".");
+    output("A", from_cstring("."));
 }

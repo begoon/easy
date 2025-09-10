@@ -5,5 +5,5 @@ int main()
 {
     a = 123;
     b = 123;
-    output("A", concat("sisi", "> ", a, "-", b));
+    output("A", concat("AiAi", from_cstring("> "), a, from_cstring("-"), b));
 }

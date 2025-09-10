@@ -13,24 +13,24 @@ double fr()
 }
 int fb()
 {
-    return 1;
+    return TRUE;
 }
 STR fs()
 {
     STR s = {0};
-    strcpy(s.data, "xyz");
+    s = from_cstring("xyz");
     return s;
 }
 int main()
 {
-    output("isrsbsb", 0, " - ", 0.001, " = ", 1, " <> ", 0);
+    output("iArAbAb", 0, from_cstring(" - "), 0.001, from_cstring(" = "), TRUE, from_cstring(" <> "), FALSE);
     a = 321;
     r = 1.003;
-    b = 1;
-    strcpy(s.data, "abc");
-    output("sisrsbsSs", "i:", a, " r:", r, " b:", b, " s:", &s, "%%");
-    output("Asisisr", CHARACTER(50), " ", LENGTH(from_cstring("123")), " ", FIX(23.56), " ", FLOAT(543));
-    output("A", concat("ss", "123", "456"));
-    output("sisrsbsAs", "i:", fa(), " r:", fr(), " b:", fb(), " s:", fs(), "$$");
+    b = TRUE;
+    s = from_cstring("abc");
+    output("AiArAbAAA", from_cstring("i:"), a, from_cstring(" r:"), r, from_cstring(" b:"), b, from_cstring(" s:"), s, from_cstring("%%"));
+    output("AAiAiAr", CHARACTER(50), from_cstring(" "), LENGTH(from_cstring("123")), from_cstring(" "), FIX(23.56), from_cstring(" "), FLOAT(543));
+    output("A", concat("AA", from_cstring("123"), from_cstring("456")));
+    output("AiArAbAAA", from_cstring("i:"), fa(), from_cstring(" r:"), fr(), from_cstring(" b:"), fb(), from_cstring(" s:"), fs(), from_cstring("$$"));
     exit(0);
 }

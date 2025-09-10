@@ -1,4 +1,5 @@
 PROGRAM Real:
+  DECLARE a REAL;
   SET a := 2.;
   SET a := 2.0;
   SET a := 2.e3;

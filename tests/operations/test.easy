@@ -1,0 +1,12 @@
+PROGRAM Operations:
+  DECLARE (a, b, c) INTEGER;
+  DECLARE s STRING;
+
+  SET a := 1;
+  SET b := 2;
+  SET c := (a + 0) + b;
+  OUTPUT c, "...";
+
+  SET s := s || "abc";
+  OUTPUT s;
+END PROGRAM Operations;

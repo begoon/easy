@@ -36,7 +36,7 @@ if __name__ == "__main__":
 
     source = input_file.read_text()
 
-    lexer = Lexer(source)
+    lexer = Lexer(source, input_file)
 
     tokens = lexer.tokens()
     if "-t" in sys.argv:
@@ -47,7 +47,7 @@ if __name__ == "__main__":
 
         tokens_file.write_text("\n".join(format_token(t) for t in tokens) + "\n")
 
-    ast = Parser(tokens, source, str(input_file)).program()
+    ast = Parser(tokens, source).program()
     if "-a" in sys.argv:
         ast_file = input_file.with_suffix(".ast")
         ast_file.write_text(ast.meta() + "\n")

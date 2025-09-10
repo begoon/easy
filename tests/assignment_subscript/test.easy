@@ -1,3 +1,4 @@
 PROGRAM AssignmentSubscript:
+  DECLARE p INTEGER;
   SET p.x[0][1][100] := p.y;
 END PROGRAM AssignmentSubscript;

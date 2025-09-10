@@ -1,17 +1,23 @@
 PROGRAM Expression:
-  DECLARE (a, b, c) INTEGER;
+  DECLARE (x, a, b, c) INTEGER;
+  DECLARE s STRING;
+  DECLARE f BOOLEAN;
+  FUNCTION func INTEGER: RETURN 0; END FUNCTION func;
   SET x := a;
   SET x := a + b;
   SET x := +a;
   SET x := -a;
-  SET x := a + b * с;
-  SET x := -b + (1 - 2) - LENGTH("3") * 7 XOR 1;
-  SET x := -b + (1 - 2) - func( 3 );
-  SET x := NOT a < b;
-  SET x := a || b;
-  SET x := "a" || b;
-  SET x := "a" || b || c;
-  SET x := a || (b || SUBSTR("abc", 0, 2));
-  SET x := a || b || SUBSTR("abc", 0, 2);
-  SET x := a || CHARACTER(b);
+  SET x := a + b * c;
+  SET x := -b + (1 - 2) - LENGTH("3") * 7;
+  SET x := -b + (1 - 2) - func(3);
+
+  SET f := NOT a < b;
+  SET f := (a < b) XOR TRUE;
+
+  SET s := a || b;
+  SET s := "a" || b;
+  SET s := "a" || b || c;
+  SET s := a || (b || SUBSTR("abc", 0, 2));
+  SET s := a || b || SUBSTR("abc", 0, 2);
+  SET s := a || CHARACTER(b);
 END PROGRAM Expression;

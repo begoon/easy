@@ -6,6 +6,16 @@
             "name": "AssignmentSubscript",
             "body": {
                 "type": "segment_body",
+                "var_decls": [
+                    {
+                        "type": "variable_declaration",
+                        "names": "p",
+                        "t": {
+                            "type": "type",
+                            "bt": "INTEGER"
+                        }
+                    }
+                ],
                 "stmts": [
                     {
                         "type": "assignment_statement",

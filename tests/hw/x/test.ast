@@ -3,7 +3,7 @@ PROGRAM hw
         a: INTEGER
     Statements:
         SET a := 100
-        OUTPUT('A', ||:('si', 'abc ', a))
+        OUTPUT('A', ||:('Ai', 'abc ', a))
         FOR a := 0 TO 10 DO
             Statements:
                 OUTPUT('i', a)

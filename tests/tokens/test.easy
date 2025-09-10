@@ -1,4 +1,5 @@
 PROGRAM Tokens:
+  DECLARE (a, b, c) INTEGER;
   SET a := 0;
   SET a := b := 1;
   SET a := /* b /* \n */ */ c;

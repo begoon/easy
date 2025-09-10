@@ -1,5 +1,6 @@
 PROGRAM Test:
     TYPE Point IS STRUCTURE FIELD x IS INTEGER, FIELD y IS INTEGER END STRUCTURE;
+    DECLARE (a, p) INTEGER;
     BEGIN
         SET p.x := 1;
         SET p.y := 2;
