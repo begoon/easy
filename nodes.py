@@ -1,6 +1,6 @@
 import json
 from dataclasses import dataclass
-from typing import Literal, Optional, Tuple, Union
+from typing import Callable, List, Literal, Optional, Tuple, Union
 
 from lexer import Token
 
@@ -328,46 +328,16 @@ class SetStatement(Statement):
     def c(self) -> str:
         v = []
         for variable in self.variables:
-            SetStatement.check_variable(variable, self.expression.type, self.token)
+            # SetStatement.check_variable(variable, self.expression.type, self.token)
             v.append(f"{variable.c()} = {self.expression.c()};")
         return emit(v)
 
     def py(self) -> str:
         v = []
         for variable in self.variables:
-            SetStatement.check_variable(variable, self.expression.type, self.token)
+            # SetStatement.check_variable(variable, self.expression.type, self.token)
             v.append(f"{variable.py()} = {self.expression.py()}")
         return emit(v)
-
-    @staticmethod
-    def check_variable(variable: "Variable", target_type: Type, token: Token) -> "Variable":
-
-        if "." in variable.name or "[" in variable.name:
-            # TODO: (!)
-            return variable
-
-        if variable.name not in variables_registry:
-            raise ValueError(f"undeclared variable in SET [{variable.name}] at {token}")
-
-        target_type = expand_type(target_type)
-
-        type = expand_type(variables_registry.get(variable.name))
-        if not type or type == "?":
-            raise ValueError(f"undefined variable=[{variable.name}] type in SET at {token}")
-
-        if isinstance(type, Array):
-            type = type.type
-
-        if type != target_type:
-            raise ValueError(
-                f"type mismatch in SET variable [{variable.name}]:\n"
-                + f"  {type=} != {target_type=}\n"
-                + f"  variable [{variable}]\n"
-                + f"  expected [{target_type}]\n"
-                + f"  not      [{type}]\n"
-                + f"at {token}\n"
-                + f"known variables:\n{json.dumps(variables_registry, indent=2)}"
-            )
 
 
 @dataclass
@@ -509,21 +479,23 @@ class SelectStatement(Statement):
 
 @dataclass
 class InputStatement(Statement):
-    variables: list[str]
+    variables: list["Variable"]
 
     def meta(self) -> str:
-        return f"INPUT({', '.join(str(e) for e in self.variables)})"
+        return f"INPUT({', '.join(e.meta() for e in self.variables)})"
 
     def c(self) -> str:
         inputs = []
         for variable in self.variables:
-            assert variable in variables_registry, f"undeclared variable '{variable}'"
-            type = variables_registry[variable]
+            type = variable.type
             if type == "STRING":
-                inputs.append(f'scanf("%s", {variable}.data);')
+                inputs.append(f'scanf("%s", {variable.name}.data);')
+            elif type == "INTEGER":
+                inputs.append(f'scanf("%d", &{variable.name});')
+            elif type == "REAL":
+                inputs.append(f'scanf("%lf", &{variable.name});')
             else:
-                assert type == "INTEGER", f"unexpected variable type in INPUT '{variable}': {type}"
-                inputs.append(f'scanf("%d", &{variable});')
+                assert False, f"unsupported variable type in INPUT [{variable}]"
         return emit(inputs)
 
     def py(self) -> str:
@@ -804,19 +776,25 @@ class UnaryOperation(Expression):
 @dataclass
 class Variable(Expression):
     name: str
-    indexes: list[Expression]
+    parts: Optional[list[Expression | str]] = None
+
+    def fqn(self, f: Callable[[Expression], str]) -> str:
+        v = [self.name]
+        for part in self.parts or []:
+            if isinstance(part, str):
+                v.append(part)
+            else:
+                v.append(f"[{f(part)}]")
+        return "".join(v)
 
     def meta(self) -> str:
-        indexes = "".join(f"[{index.meta()}]" for index in self.indexes) if self.indexes else ""
-        return f"{self.name}{indexes}"
+        return self.name
 
     def c(self) -> str:
-        indexes = "".join(f"[{index.c()}]" for index in self.indexes) if self.indexes else ""
-        return self.name + indexes
+        return self.name
 
     def py(self) -> str:
-        indexes = "".join(f"[{index.py()}]" for index in self.indexes) if self.indexes else ""
-        return self.name + indexes
+        return self.name
 
 
 @dataclass
@@ -948,3 +926,34 @@ def expression_stringer(v: Expression, format: list[str], callee: str = "OUTPUT"
             raise ValueError(f"unsupported function={v.name} return type={function_type} in {callee} at {v.token}")
         raise ValueError(f"unsupported function={v.name} invocation in {callee} at {v.token}")
     assert False, f"unsupported {callee} argument type={type(v).__name__} at {v.token}"
+
+
+def lookup_check_variable(variable: Variable, expected_type: Type, token: Token) -> Variable:
+    if "." in variable.name or "[" in variable.name:
+        # TODO: (!)
+        return variable
+
+    if variable.name not in variables_registry:
+        raise ValueError(f"undeclared variable in SET [{variable.name}] at {token}")
+
+    expected_type = expand_type(expected_type)
+
+    type = expand_type(variables_registry.get(variable.name))
+    if not type or type == "?":
+        raise ValueError(f"undefined variable=[{variable.name}] type in SET at {token}")
+
+    if isinstance(type, Array):
+        type = type.type
+
+    if type != expected_type:
+        raise ValueError(
+            f"type mismatch in SET variable [{variable.name}]:\n"
+            + f"  {type=} != {expected_type=}\n"
+            + f"  variable [{variable}]\n"
+            + f"  expected [{expected_type}]\n"
+            + f"  not      [{type}]\n"
+            + f"at {token}\n"
+            + f"known variables:\n{json.dumps(variables_registry, indent=2)}"
+        )
+
+    variable.type = type

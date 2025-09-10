@@ -17,6 +17,14 @@
                     },
                     {
                         "type": "variable_declaration",
+                        "names": "f",
+                        "t": {
+                            "type": "type",
+                            "basic_type": "REAL"
+                        }
+                    },
+                    {
+                        "type": "variable_declaration",
                         "names": "s",
                         "t": {
                             "type": "type",
@@ -31,6 +39,11 @@
                             {
                                 "type": "variable",
                                 "base": "i",
+                                "parts": []
+                            },
+                            {
+                                "type": "variable",
+                                "base": "f",
                                 "parts": []
                             }
                         ]
@@ -67,7 +80,24 @@
                         "list": [
                             {
                                 "type": "concat_expr",
-                                "head": "\"str = [\"",
+                                "head": "\"f = [\"",
+                                "tail": [
+                                    {
+                                        "type": "variable",
+                                        "base": "f",
+                                        "parts": []
+                                    },
+                                    "\"]\""
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "type": "output_statement",
+                        "list": [
+                            {
+                                "type": "concat_expr",
+                                "head": "\"s = [\"",
                                 "tail": [
                                     {
                                         "type": "variable",

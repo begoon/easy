@@ -1,3 +1,4 @@
+import re
 from typing import Tuple, Union, cast
 
 from lexer import Token
@@ -41,9 +42,11 @@ from nodes import (
     expand_type,
     functions_registry,
     is_number,
+    lookup_check_variable,
     types_registry,
     variables_registry,
 )
+from yamler import yamlizer
 
 
 class ParseError(Exception):
@@ -129,8 +132,6 @@ class Parser:
         return out
 
     def variables_section(self) -> list[DeclareStatement]:
-        global variables_registry
-
         declarations: list[DeclareStatement] = []
         while declare_token := self.accept("DECLARE"):
             token = self.current()
@@ -373,12 +374,26 @@ class Parser:
         self.eat(";")
         return ExitStatement(token)
 
+    def input_variable(self) -> Variable:
+        variable = self.variable()
+
+        if variables_registry.get(variable.name) is None:
+            self.error(f"undefined variable in INPUT [{variable}]", variable.token)
+
+        type = variables_registry[variable.name]
+        variable.type = type
+
+        if type not in ("INTEGER", "REAL", "STRING"):
+            self.error(f"cannot use variable [{variable}] of type {type} in INPUT", variable.token)
+        return variable
+
     def input_statement(self) -> InputStatement:
         token = self.eat("INPUT")
-        variables = []
-        variables.append(self.eat("IDENT").value)
+        variables = [self.input_variable()]
+
         while self.accept(","):
-            variables.append(self.eat("IDENT").value)
+            variables.append(self.input_variable())
+
         self.eat(";")
         return InputStatement(token, variables)
 
@@ -413,7 +428,6 @@ class Parser:
     def assignment_statement(self) -> SetStatement:
         token = self.eat("SET")
         variable = self.variable()
-        # indexes = {variable.name: variable.indexes}
         self.eat(":=")
         targets = [variable]
 
@@ -422,28 +436,36 @@ class Parser:
             if current.type != "IDENT" or self.peek().value != ":=":
                 break
             variable = self.variable()
-            # indexes[variable.name] = variable.indexes
             self.eat(":=")
             targets.append(variable)
+
         expr = self.expression()
-        # print(expr)
-        type = expr.type
         for target in targets:
-            target.type = type
+            lookup_check_variable(target, expr.type, token)
+
         self.eat(";")
         return SetStatement(token, targets, expr)
 
     def variable(self) -> Variable:
         token = self.eat("IDENT")
         name = token.value
-        while self.accept("."):
-            name += "." + self.eat("IDENT").value
-        indexes = []
-        while self.accept("["):
-            index = self.expression()
-            self.eat("]")
-            indexes.append(index)
-        return Variable(token, "?", name, indexes)
+        parts = []
+        while True:
+            if self.accept("."):
+                part = self.eat("IDENT").value
+                parts.append(part)
+                name += "." + part
+                continue
+            if self.accept("["):
+                index = self.expression()
+                if index.type != "INTEGER":
+                    self.error(f"array index must be INTEGER, not {index.type}", index.token)
+                self.eat("]")
+                parts.append(index)
+                name += "[" + index.c() + "]"
+                continue
+            break
+        return Variable(token, "UNKNOWN", name, parts if parts else None)
 
     def call_statement(self) -> CallStatement:
         token = self.eat("CALL")
@@ -519,8 +541,10 @@ class Parser:
         left = self.expression_FUNCTION_CALL()
         while operation := self.accept(("*", "/", "MOD")):
             right = self.expression_FUNCTION_CALL()
-            assert left.type == right.type, f"cannot {operation.value} {left=} and {right=}"
-            assert left.type in ("INTEGER", "REAL"), f"cannot [{operation.value}] {left}"
+            if left.type != right.type:
+                self.error(f"{left=} and {right=} must be of the same type to perform [{operation.value}]", token)
+            if left.type not in ("INTEGER", "REAL"):
+                self.error(f"operation only supported for INTEGER and REAL, not [{left.type}]", token)
             type = left.type
             left = BinaryOperation(token, type, operation.value, left, right)
         return left
@@ -567,13 +591,12 @@ class Parser:
             return BoolLiteral(token, "BOOLEAN", token.value == "TRUE")
         if token.type == "IDENT":
             variable = self.variable()
-            name = variable.name.split(".")[0]
+            name = re.split(r"[\.\[]", variable.name)[0]
             if name not in variables_registry:
-                print(variables_registry)
-                self.error(f"undefined variable [{name}]", token)
+                self.error(f"undefined variable [{name}]\n{yamlizer(variables_registry)}", token)
             variable.type = variables_registry[name]
-            if variable.type == "?":
-                self.error(f"cannot use variable [{variable=}] with unknown type", token)
+            if variable.type == "UNKNOWN":
+                self.error(f"cannot use variable [{variable=}] with unknown type in expression", token)
             return variable
         self.error(
             f"expected an identifier or INTEGER/REAL/STRING literal or '+', '-', '(', 'TRUE/FALSE', "

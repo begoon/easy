@@ -23,7 +23,7 @@ segment:
             token: a / IDENT at 3:5
             type: INTEGER
             name: a
-            indexes: []
+            parts:
         expression:
           node: IntegerLiteral
           token: 100 / INTEGER at 3:10
@@ -44,7 +44,7 @@ segment:
                 token: a / IDENT at 4:18
                 type: INTEGER
                 name: a
-                indexes: []
+                parts:
       - node: ForStatement
         token: FOR / KEYWORD at 5:1
         variable:
@@ -52,7 +52,7 @@ segment:
           token: a / IDENT at 5:5
           type: INTEGER
           name: a
-          indexes: []
+          parts: []
         init:
           node: IntegerLiteral
           token: 0 / INTEGER at 5:10
@@ -75,7 +75,7 @@ segment:
                     token: a / IDENT at 6:10
                     type: INTEGER
                     name: a
-                    indexes: []
+                    parts:
         by:
         to:
           node: IntegerLiteral

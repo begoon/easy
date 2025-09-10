@@ -1,11 +1,13 @@
 PROGRAM Input:
   DECLARE i INTEGER;
+  DECLARE f REAL;
   DECLARE s STRING;
 
-  INPUT i;
+  INPUT i, f;
   INPUT s;
 
   OUTPUT "i = [" || i || "]";
-  OUTPUT "str = [" || s || "]";
+  OUTPUT "f = [" || f || "]";
+  OUTPUT "s = [" || s || "]";
   EXIT;
 END PROGRAM Input;
