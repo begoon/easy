@@ -1,6 +1,6 @@
 import json
 from dataclasses import dataclass
-from typing import Callable, List, Literal, Optional, Tuple, Union
+from typing import Callable, Literal, Optional, Tuple, Union
 
 from lexer import Token
 
@@ -16,21 +16,6 @@ functions_registry: dict[str, "Type"] = {
 python_imports: set[str] = set()
 
 common: list[str] = []
-
-
-def expand_type(name: "Type") -> str:
-    if name in ("INTEGER", "REAL", "BOOLEAN", "STRING"):
-        return name
-    if isinstance(name, Array):
-        return expand_type(name.type)
-    custom = types_registry.get(name)
-    if custom:
-        return expand_type(custom)
-    return "?"
-
-
-def is_number(name: str) -> bool:
-    return name in ("INTEGER", "REAL")
 
 
 @dataclass
@@ -892,6 +877,21 @@ def TYPE(v: "Type") -> str:
     if not type:
         raise ValueError(f"unknown type '{v}'")
     return type
+
+
+def expand_type(name: "Type") -> str:
+    if name in ("INTEGER", "REAL", "BOOLEAN", "STRING"):
+        return name
+    if isinstance(name, Array):
+        return expand_type(name.type)
+    custom = types_registry.get(name)
+    if custom:
+        return expand_type(custom)
+    return "?"
+
+
+def is_number(name: str) -> bool:
+    return name in ("INTEGER", "REAL")
 
 
 def expression_stringer(v: Expression, format: list[str], callee: str = "OUTPUT") -> str:
