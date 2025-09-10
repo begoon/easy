@@ -6,23 +6,23 @@
             "name": "Life",
             "body": {
                 "type": "segment_body",
-                "type_defs": [
+                "type_definitions": [
                     {
                         "type": "type_definition",
                         "name": "Field",
                         "def": {
                             "type": "type",
-                            "arr": {
+                            "arrayed_type": {
                                 "type": "arrayed_type",
                                 "lo": "25",
-                                "elem": {
+                                "element_type": {
                                     "type": "type",
-                                    "arr": {
+                                    "arrayed_type": {
                                         "type": "arrayed_type",
                                         "lo": "80",
-                                        "elem": {
+                                        "element_type": {
                                             "type": "type",
-                                            "bt": "BOOLEAN"
+                                            "basic_type": "BOOLEAN"
                                         }
                                     }
                                 }
@@ -30,7 +30,7 @@
                         }
                     }
                 ],
-                "var_decls": [
+                "variable_declarations": [
                     {
                         "type": "variable_declaration",
                         "names": {
@@ -40,7 +40,7 @@
                         },
                         "t": {
                             "type": "type",
-                            "bt": "INTEGER"
+                            "basic_type": "INTEGER"
                         }
                     },
                     {
@@ -63,7 +63,7 @@
                         },
                         "t": {
                             "type": "type",
-                            "bt": "INTEGER"
+                            "basic_type": "INTEGER"
                         }
                     },
                     {
@@ -71,11 +71,11 @@
                         "names": "i",
                         "t": {
                             "type": "type",
-                            "bt": "INTEGER"
+                            "basic_type": "INTEGER"
                         }
                     }
                 ],
-                "proc_defs": [
+                "subroutine_definitions": [
                     {
                         "type": "function_definition",
                         "name": {
@@ -85,28 +85,28 @@
                                 "head": {
                                     "type": "internal_parameter",
                                     "id": "x",
-                                    "t": {
+                                    "parameter_type": {
                                         "type": "type",
-                                        "bt": "INTEGER"
+                                        "basic_type": "INTEGER"
                                     }
                                 },
                                 "tail": {
                                     "type": "internal_parameter",
                                     "id": "y",
-                                    "t": {
+                                    "parameter_type": {
                                         "type": "type",
-                                        "bt": "INTEGER"
+                                        "basic_type": "INTEGER"
                                     }
                                 }
                             }
                         },
-                        "ret": {
+                        "return_type": {
                             "type": "type",
-                            "bt": "BOOLEAN"
+                            "basic_type": "BOOLEAN"
                         },
                         "body": {
                             "type": "segment_body",
-                            "stmts": [
+                            "statements": [
                                 {
                                     "type": "return_statement",
                                     "value": {
@@ -179,34 +179,34 @@
                                 "head": {
                                     "type": "internal_parameter",
                                     "id": "x",
-                                    "t": {
+                                    "parameter_type": {
                                         "type": "type",
-                                        "bt": "INTEGER"
+                                        "basic_type": "INTEGER"
                                     }
                                 },
                                 "tail": {
                                     "type": "internal_parameter",
                                     "id": "y",
-                                    "t": {
+                                    "parameter_type": {
                                         "type": "type",
-                                        "bt": "INTEGER"
+                                        "basic_type": "INTEGER"
                                     }
                                 }
                             }
                         },
-                        "ret": {
+                        "return_type": {
                             "type": "type",
-                            "bt": "INTEGER"
+                            "basic_type": "INTEGER"
                         },
                         "body": {
                             "type": "segment_body",
-                            "var_decls": [
+                            "variable_declarations": [
                                 {
                                     "type": "variable_declaration",
                                     "names": "n",
                                     "t": {
                                         "type": "type",
-                                        "bt": "INTEGER"
+                                        "basic_type": "INTEGER"
                                     }
                                 },
                                 {
@@ -218,11 +218,11 @@
                                     },
                                     "t": {
                                         "type": "type",
-                                        "bt": "INTEGER"
+                                        "basic_type": "INTEGER"
                                     }
                                 }
                             ],
-                            "stmts": [
+                            "statements": [
                                 {
                                     "type": "assignment_statement",
                                     "targets": [
@@ -275,7 +275,7 @@
                                     },
                                     "body": {
                                         "type": "segment_body",
-                                        "stmts": [
+                                        "statements": [
                                             {
                                                 "type": "simple_iteration_statement",
                                                 "tgt": {
@@ -314,7 +314,7 @@
                                                 },
                                                 "body": {
                                                     "type": "segment_body",
-                                                    "stmts": [
+                                                    "statements": [
                                                         {
                                                             "type": "simple_conditional_statement",
                                                             "cond": {
@@ -350,7 +350,7 @@
                                                             },
                                                             "then_body": {
                                                                 "type": "segment_body",
-                                                                "stmts": [
+                                                                "statements": [
                                                                     {
                                                                         "type": "simple_conditional_statement",
                                                                         "cond": {
@@ -372,7 +372,7 @@
                                                                         },
                                                                         "then_body": {
                                                                             "type": "segment_body",
-                                                                            "stmts": [
+                                                                            "statements": [
                                                                                 {
                                                                                     "type": "simple_conditional_statement",
                                                                                     "cond": {
@@ -397,7 +397,7 @@
                                                                                     },
                                                                                     "then_body": {
                                                                                         "type": "segment_body",
-                                                                                        "stmts": [
+                                                                                        "statements": [
                                                                                             {
                                                                                                 "type": "assignment_statement",
                                                                                                 "targets": [
@@ -449,11 +449,11 @@
                         "end_name": "neighbours"
                     },
                     {
-                        "type": "subprogram_definition",
+                        "type": "procedure_definition",
                         "name": "print",
                         "body": {
                             "type": "segment_body",
-                            "var_decls": [
+                            "variable_declarations": [
                                 {
                                     "type": "variable_declaration",
                                     "names": {
@@ -463,11 +463,11 @@
                                     },
                                     "t": {
                                         "type": "type",
-                                        "bt": "INTEGER"
+                                        "basic_type": "INTEGER"
                                     }
                                 }
                             ],
-                            "stmts": [
+                            "statements": [
                                 {
                                     "type": "output_statement",
                                     "list": [
@@ -510,7 +510,7 @@
                                     },
                                     "body": {
                                         "type": "segment_body",
-                                        "stmts": [
+                                        "statements": [
                                             {
                                                 "type": "output_statement",
                                                 "list": [
@@ -566,7 +566,7 @@
                                     },
                                     "body": {
                                         "type": "segment_body",
-                                        "stmts": [
+                                        "statements": [
                                             {
                                                 "type": "output_statement",
                                                 "list": [
@@ -602,7 +602,7 @@
                                                 },
                                                 "body": {
                                                     "type": "segment_body",
-                                                    "stmts": [
+                                                    "statements": [
                                                         {
                                                             "type": "simple_conditional_statement",
                                                             "cond": {
@@ -636,7 +636,7 @@
                                                             },
                                                             "then_body": {
                                                                 "type": "segment_body",
-                                                                "stmts": [
+                                                                "statements": [
                                                                     {
                                                                         "type": "output_statement",
                                                                         "list": [
@@ -647,7 +647,7 @@
                                                             },
                                                             "else_body": {
                                                                 "type": "segment_body",
-                                                                "stmts": [
+                                                                "statements": [
                                                                     {
                                                                         "type": "output_statement",
                                                                         "list": [
@@ -709,7 +709,7 @@
                                     },
                                     "body": {
                                         "type": "segment_body",
-                                        "stmts": [
+                                        "statements": [
                                             {
                                                 "type": "output_statement",
                                                 "list": [
@@ -741,7 +741,7 @@
                         "end_name": "print"
                     },
                     {
-                        "type": "subprogram_definition",
+                        "type": "procedure_definition",
                         "name": {
                             "type": "procedure_name",
                             "params": {
@@ -749,24 +749,24 @@
                                 "head": {
                                     "type": "internal_parameter",
                                     "id": "x",
-                                    "t": {
+                                    "parameter_type": {
                                         "type": "type",
-                                        "bt": "INTEGER"
+                                        "basic_type": "INTEGER"
                                     }
                                 },
                                 "tail": {
                                     "type": "internal_parameter",
                                     "id": "y",
-                                    "t": {
+                                    "parameter_type": {
                                         "type": "type",
-                                        "bt": "INTEGER"
+                                        "basic_type": "INTEGER"
                                     }
                                 }
                             }
                         },
                         "body": {
                             "type": "segment_body",
-                            "stmts": [
+                            "statements": [
                                 {
                                     "type": "assignment_statement",
                                     "targets": [
@@ -962,11 +962,11 @@
                         "end_name": "glider"
                     },
                     {
-                        "type": "subprogram_definition",
+                        "type": "procedure_definition",
                         "name": "evolution",
                         "body": {
                             "type": "segment_body",
-                            "var_decls": [
+                            "variable_declarations": [
                                 {
                                     "type": "variable_declaration",
                                     "names": {
@@ -976,7 +976,7 @@
                                     },
                                     "t": {
                                         "type": "type",
-                                        "bt": "INTEGER"
+                                        "basic_type": "INTEGER"
                                     }
                                 },
                                 {
@@ -984,7 +984,7 @@
                                     "names": "n",
                                     "t": {
                                         "type": "type",
-                                        "bt": "INTEGER"
+                                        "basic_type": "INTEGER"
                                     }
                                 },
                                 {
@@ -999,7 +999,7 @@
                                     }
                                 }
                             ],
-                            "stmts": [
+                            "statements": [
                                 {
                                     "type": "simple_iteration_statement",
                                     "tgt": {
@@ -1029,7 +1029,7 @@
                                     },
                                     "body": {
                                         "type": "segment_body",
-                                        "stmts": [
+                                        "statements": [
                                             {
                                                 "type": "simple_iteration_statement",
                                                 "tgt": {
@@ -1059,17 +1059,17 @@
                                                 },
                                                 "body": {
                                                     "type": "segment_body",
-                                                    "var_decls": [
+                                                    "variable_declarations": [
                                                         {
                                                             "type": "variable_declaration",
                                                             "names": "alive",
                                                             "t": {
                                                                 "type": "type",
-                                                                "bt": "BOOLEAN"
+                                                                "basic_type": "BOOLEAN"
                                                             }
                                                         }
                                                     ],
-                                                    "stmts": [
+                                                    "statements": [
                                                         {
                                                             "type": "assignment_statement",
                                                             "targets": [
@@ -1151,7 +1151,7 @@
                                                             },
                                                             "then_body": {
                                                                 "type": "segment_body",
-                                                                "stmts": [
+                                                                "statements": [
                                                                     {
                                                                         "type": "simple_conditional_statement",
                                                                         "cond": {
@@ -1179,7 +1179,7 @@
                                                                         },
                                                                         "then_body": {
                                                                             "type": "segment_body",
-                                                                            "stmts": [
+                                                                            "statements": [
                                                                                 {
                                                                                     "type": "assignment_statement",
                                                                                     "targets": [
@@ -1205,7 +1205,7 @@
                                                             },
                                                             "else_body": {
                                                                 "type": "segment_body",
-                                                                "stmts": [
+                                                                "statements": [
                                                                     {
                                                                         "type": "simple_conditional_statement",
                                                                         "cond": {
@@ -1220,7 +1220,7 @@
                                                                         },
                                                                         "then_body": {
                                                                             "type": "segment_body",
-                                                                            "stmts": [
+                                                                            "statements": [
                                                                                 {
                                                                                     "type": "assignment_statement",
                                                                                     "targets": [
@@ -1313,7 +1313,7 @@
                                     },
                                     "body": {
                                         "type": "segment_body",
-                                        "stmts": [
+                                        "statements": [
                                             {
                                                 "type": "simple_iteration_statement",
                                                 "tgt": {
@@ -1343,7 +1343,7 @@
                                                 },
                                                 "body": {
                                                     "type": "segment_body",
-                                                    "stmts": [
+                                                    "statements": [
                                                         {
                                                             "type": "assignment_statement",
                                                             "targets": [
@@ -1403,7 +1403,7 @@
                         "end_name": "evolution"
                     }
                 ],
-                "stmts": [
+                "statements": [
                     {
                         "type": "assignment_statement",
                         "targets": [
@@ -1461,7 +1461,7 @@
                         },
                         "body": {
                             "type": "segment_body",
-                            "stmts": [
+                            "statements": [
                                 {
                                     "type": "simple_iteration_statement",
                                     "tgt": {
@@ -1491,7 +1491,7 @@
                                     },
                                     "body": {
                                         "type": "segment_body",
-                                        "stmts": [
+                                        "statements": [
                                             {
                                                 "type": "assignment_statement",
                                                 "targets": [
@@ -1539,7 +1539,7 @@
                                 "type": "procedure_identifier",
                                 "name": "glider"
                             },
-                            "args": [
+                            "argument": [
                                 "30",
                                 "15"
                             ]
@@ -1553,7 +1553,7 @@
                                 "type": "procedure_identifier",
                                 "name": "glider"
                             },
-                            "args": [
+                            "argument": [
                                 "40",
                                 "10"
                             ]
@@ -1567,7 +1567,7 @@
                                 "type": "procedure_identifier",
                                 "name": "glider"
                             },
-                            "args": [
+                            "argument": [
                                 "50",
                                 "20"
                             ]
@@ -1593,7 +1593,7 @@
                         },
                         "body": {
                             "type": "segment_body",
-                            "stmts": [
+                            "statements": [
                                 {
                                     "type": "call_statement",
                                     "ref": {
@@ -1647,7 +1647,7 @@
                                     },
                                     "then_body": {
                                         "type": "segment_body",
-                                        "stmts": [
+                                        "statements": [
                                             {
                                                 "type": "call_statement",
                                                 "ref": {
@@ -1656,7 +1656,7 @@
                                                         "type": "procedure_identifier",
                                                         "name": "glider"
                                                     },
-                                                    "args": [
+                                                    "argument": [
                                                         "40",
                                                         "10"
                                                     ]
@@ -1670,7 +1670,7 @@
                                                         "type": "procedure_identifier",
                                                         "name": "glider"
                                                     },
-                                                    "args": [
+                                                    "argument": [
                                                         "30",
                                                         "15"
                                                     ]

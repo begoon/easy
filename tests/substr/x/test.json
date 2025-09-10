@@ -6,17 +6,17 @@
             "name": "Substr",
             "body": {
                 "type": "segment_body",
-                "var_decls": [
+                "variable_declarations": [
                     {
                         "type": "variable_declaration",
                         "names": "s",
                         "t": {
                             "type": "type",
-                            "bt": "STRING"
+                            "basic_type": "STRING"
                         }
                     }
                 ],
-                "stmts": [
+                "statements": [
                     {
                         "type": "assignment_statement",
                         "targets": [

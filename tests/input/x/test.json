@@ -6,13 +6,13 @@
             "name": "Input",
             "body": {
                 "type": "segment_body",
-                "var_decls": [
+                "variable_declarations": [
                     {
                         "type": "variable_declaration",
                         "names": "i",
                         "t": {
                             "type": "type",
-                            "bt": "INTEGER"
+                            "basic_type": "INTEGER"
                         }
                     },
                     {
@@ -20,11 +20,11 @@
                         "names": "s",
                         "t": {
                             "type": "type",
-                            "bt": "STRING"
+                            "basic_type": "STRING"
                         }
                     }
                 ],
-                "stmts": [
+                "statements": [
                     {
                         "type": "input_statement",
                         "list": [

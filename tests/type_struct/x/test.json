@@ -6,13 +6,13 @@
             "name": "Type2",
             "body": {
                 "type": "segment_body",
-                "type_defs": [
+                "type_definitions": [
                     {
                         "type": "type_definition",
                         "name": "Point",
                         "def": {
                             "type": "type",
-                            "str": {
+                            "structured_type": {
                                 "type": "structured_type",
                                 "fields": {
                                     "type": "field_list",
@@ -21,7 +21,7 @@
                                         "name": "x",
                                         "t": {
                                             "type": "type",
-                                            "bt": "INTEGER"
+                                            "basic_type": "INTEGER"
                                         }
                                     },
                                     "tail": {
@@ -31,7 +31,7 @@
                                             "name": "y",
                                             "t": {
                                                 "type": "type",
-                                                "bt": "INTEGER"
+                                                "basic_type": "INTEGER"
                                             }
                                         }
                                     }
@@ -40,7 +40,7 @@
                         }
                     }
                 ],
-                "var_decls": [
+                "variable_declarations": [
                     {
                         "type": "variable_declaration",
                         "names": "t",

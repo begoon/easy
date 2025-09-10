@@ -6,7 +6,7 @@
             "name": "AssignmentMulti",
             "body": {
                 "type": "segment_body",
-                "var_decls": [
+                "variable_declarations": [
                     {
                         "type": "variable_declaration",
                         "names": {
@@ -16,11 +16,11 @@
                         },
                         "t": {
                             "type": "type",
-                            "bt": "INTEGER"
+                            "basic_type": "INTEGER"
                         }
                     }
                 ],
-                "stmts": [
+                "statements": [
                     {
                         "type": "assignment_statement",
                         "targets": [

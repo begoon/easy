@@ -6,7 +6,7 @@
             "name": "Character",
             "body": {
                 "type": "segment_body",
-                "stmts": [
+                "statements": [
                     {
                         "type": "output_statement",
                         "list": [

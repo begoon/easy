@@ -6,13 +6,13 @@
             "name": "Concat",
             "body": {
                 "type": "segment_body",
-                "var_decls": [
+                "variable_declarations": [
                     {
                         "type": "variable_declaration",
                         "names": "a",
                         "t": {
                             "type": "type",
-                            "bt": "INTEGER"
+                            "basic_type": "INTEGER"
                         }
                     },
                     {
@@ -20,7 +20,7 @@
                         "names": "r",
                         "t": {
                             "type": "type",
-                            "bt": "REAL"
+                            "basic_type": "REAL"
                         }
                     },
                     {
@@ -28,7 +28,7 @@
                         "names": "b",
                         "t": {
                             "type": "type",
-                            "bt": "BOOLEAN"
+                            "basic_type": "BOOLEAN"
                         }
                     },
                     {
@@ -36,21 +36,21 @@
                         "names": "s",
                         "t": {
                             "type": "type",
-                            "bt": "STRING"
+                            "basic_type": "STRING"
                         }
                     }
                 ],
-                "proc_defs": [
+                "subroutine_definitions": [
                     {
                         "type": "function_definition",
                         "name": "fa",
-                        "ret": {
+                        "return_type": {
                             "type": "type",
-                            "bt": "INTEGER"
+                            "basic_type": "INTEGER"
                         },
                         "body": {
                             "type": "segment_body",
-                            "stmts": [
+                            "statements": [
                                 {
                                     "type": "return_statement",
                                     "value": "1"
@@ -62,13 +62,13 @@
                     {
                         "type": "function_definition",
                         "name": "fr",
-                        "ret": {
+                        "return_type": {
                             "type": "type",
-                            "bt": "REAL"
+                            "basic_type": "REAL"
                         },
                         "body": {
                             "type": "segment_body",
-                            "stmts": [
+                            "statements": [
                                 {
                                     "type": "return_statement",
                                     "value": "2.345"
@@ -80,13 +80,13 @@
                     {
                         "type": "function_definition",
                         "name": "fb",
-                        "ret": {
+                        "return_type": {
                             "type": "type",
-                            "bt": "BOOLEAN"
+                            "basic_type": "BOOLEAN"
                         },
                         "body": {
                             "type": "segment_body",
-                            "stmts": [
+                            "statements": [
                                 {
                                     "type": "return_statement",
                                     "value": {
@@ -102,23 +102,23 @@
                     {
                         "type": "function_definition",
                         "name": "fs",
-                        "ret": {
+                        "return_type": {
                             "type": "type",
-                            "bt": "STRING"
+                            "basic_type": "STRING"
                         },
                         "body": {
                             "type": "segment_body",
-                            "var_decls": [
+                            "variable_declarations": [
                                 {
                                     "type": "variable_declaration",
                                     "names": "s",
                                     "t": {
                                         "type": "type",
-                                        "bt": "STRING"
+                                        "basic_type": "STRING"
                                     }
                                 }
                             ],
-                            "stmts": [
+                            "statements": [
                                 {
                                     "type": "assignment_statement",
                                     "targets": [
@@ -146,7 +146,7 @@
                         "end_name": "fs"
                     }
                 ],
-                "stmts": [
+                "statements": [
                     {
                         "type": "output_statement",
                         "list": [

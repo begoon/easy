@@ -680,7 +680,7 @@ def _simplify_ast(node):
             items.append(tail)
         return items
 
-    if t in {"output_list", "input_list", "declared_names", "actual_argument_list"}:
+    if t in {"output_list", "input_list", "declared_names", "argument_list"}:
         return _concat_head_tail(simp)
 
     # collapse trivial expression wrappers

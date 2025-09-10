@@ -194,12 +194,15 @@ def diff(expected_file: Path, created_file: Path) -> None:
                     break
                 mismatch_column += 1
 
+            print()
+            print("-" * 80)
             print(f"{expected_file}:{i}:{RED}{mismatch_column}{NC}")
             print(f"          {" " * (mismatch_column-1)}↓")
             print(f"expected: {WHITE}{expected}{NC}")
             print(f"created:  {RED}{created}{NC}")
             print(f"          {" " * (mismatch_column-1)}↑")
             print(f"{created_file}:{i}:{RED}{mismatch_column}{NC}")
+            print("-" * 80)
             exit(1)
 
 

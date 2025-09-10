@@ -6,13 +6,13 @@
             "name": "Structure",
             "body": {
                 "type": "segment_body",
-                "type_defs": [
+                "type_definitions": [
                     {
                         "type": "type_definition",
                         "name": "T",
                         "def": {
                             "type": "type",
-                            "str": {
+                            "structured_type": {
                                 "type": "structured_type",
                                 "fields": {
                                     "type": "field_list",
@@ -21,7 +21,7 @@
                                         "name": "a",
                                         "t": {
                                             "type": "type",
-                                            "bt": "INTEGER"
+                                            "basic_type": "INTEGER"
                                         }
                                     },
                                     "tail": {
@@ -31,7 +31,7 @@
                                             "name": "b",
                                             "t": {
                                                 "type": "type",
-                                                "bt": "STRING"
+                                                "basic_type": "STRING"
                                             }
                                         }
                                     }
@@ -40,7 +40,7 @@
                         }
                     }
                 ],
-                "var_decls": [
+                "variable_declarations": [
                     {
                         "type": "variable_declaration",
                         "names": "t",
@@ -53,7 +53,7 @@
                         }
                     }
                 ],
-                "stmts": [
+                "statements": [
                     {
                         "type": "assignment_statement",
                         "targets": [

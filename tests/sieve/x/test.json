@@ -6,17 +6,17 @@
             "name": "Eratosthenes",
             "body": {
                 "type": "segment_body",
-                "var_decls": [
+                "variable_declarations": [
                     {
                         "type": "variable_declaration",
                         "names": "topnum",
                         "t": {
                             "type": "type",
-                            "bt": "INTEGER"
+                            "basic_type": "INTEGER"
                         }
                     }
                 ],
-                "proc_defs": [
+                "subroutine_definitions": [
                     {
                         "type": "function_definition",
                         "name": {
@@ -26,20 +26,20 @@
                                 "head": {
                                     "type": "internal_parameter",
                                     "id": "x",
-                                    "t": {
+                                    "parameter_type": {
                                         "type": "type",
-                                        "bt": "REAL"
+                                        "basic_type": "REAL"
                                     }
                                 }
                             }
                         },
-                        "ret": {
+                        "return_type": {
                             "type": "type",
-                            "bt": "REAL"
+                            "basic_type": "REAL"
                         },
                         "body": {
                             "type": "segment_body",
-                            "stmts": [
+                            "statements": [
                                 {
                                     "type": "simple_conditional_statement",
                                     "cond": {
@@ -54,7 +54,7 @@
                                     },
                                     "then_body": {
                                         "type": "segment_body",
-                                        "stmts": [
+                                        "statements": [
                                             {
                                                 "type": "return_statement",
                                                 "value": {
@@ -71,7 +71,7 @@
                                     },
                                     "else_body": {
                                         "type": "segment_body",
-                                        "stmts": [
+                                        "statements": [
                                             {
                                                 "type": "return_statement",
                                                 "value": {
@@ -96,20 +96,20 @@
                                 "head": {
                                     "type": "internal_parameter",
                                     "id": "a",
-                                    "t": {
+                                    "parameter_type": {
                                         "type": "type",
-                                        "bt": "INTEGER"
+                                        "basic_type": "INTEGER"
                                     }
                                 }
                             }
                         },
-                        "ret": {
+                        "return_type": {
                             "type": "type",
-                            "bt": "INTEGER"
+                            "basic_type": "INTEGER"
                         },
                         "body": {
                             "type": "segment_body",
-                            "stmts": [
+                            "statements": [
                                 {
                                     "type": "simple_selection",
                                     "sel": {
@@ -163,7 +163,7 @@
                                         "body": [
                                             {
                                                 "type": "segment_body",
-                                                "stmts": [
+                                                "statements": [
                                                     {
                                                         "type": "output_statement",
                                                         "list": [
@@ -174,7 +174,7 @@
                                             },
                                             {
                                                 "type": "segment_body",
-                                                "stmts": [
+                                                "statements": [
                                                     {
                                                         "type": "return_statement",
                                                         "value": "0"
@@ -183,7 +183,7 @@
                                             },
                                             {
                                                 "type": "segment_body",
-                                                "var_decls": [
+                                                "variable_declarations": [
                                                     {
                                                         "type": "variable_declaration",
                                                         "names": {
@@ -193,7 +193,7 @@
                                                         },
                                                         "t": {
                                                             "type": "type",
-                                                            "bt": "REAL"
+                                                            "basic_type": "REAL"
                                                         }
                                                     },
                                                     {
@@ -201,7 +201,7 @@
                                                         "names": "epsilon",
                                                         "t": {
                                                             "type": "type",
-                                                            "bt": "REAL"
+                                                            "basic_type": "REAL"
                                                         }
                                                     },
                                                     {
@@ -209,11 +209,11 @@
                                                         "names": "sqrt",
                                                         "t": {
                                                             "type": "type",
-                                                            "bt": "INTEGER"
+                                                            "basic_type": "INTEGER"
                                                         }
                                                     }
                                                 ],
-                                                "stmts": [
+                                                "statements": [
                                                     {
                                                         "type": "assignment_statement",
                                                         "targets": [
@@ -357,7 +357,7 @@
                                                         },
                                                         "body": {
                                                             "type": "segment_body",
-                                                            "stmts": [
+                                                            "statements": [
                                                                 ";"
                                                             ]
                                                         }
@@ -431,7 +431,7 @@
                                                         },
                                                         "body": {
                                                             "type": "segment_body",
-                                                            "stmts": [
+                                                            "statements": [
                                                                 ";"
                                                             ]
                                                         }
@@ -455,7 +455,7 @@
                         "end_name": "integersqrt"
                     }
                 ],
-                "stmts": [
+                "statements": [
                     {
                         "type": "input_statement",
                         "list": [
@@ -480,13 +480,13 @@
                         },
                         "then_body": {
                             "type": "segment_body",
-                            "var_decls": [
+                            "variable_declarations": [
                                 {
                                     "type": "variable_declaration",
                                     "names": "sieve",
                                     "t": {
                                         "type": "type",
-                                        "arr": {
+                                        "arrayed_type": {
                                             "type": "arrayed_type",
                                             "lo": "1",
                                             "hi": {
@@ -494,9 +494,9 @@
                                                 "base": "topnum",
                                                 "parts": []
                                             },
-                                            "elem": {
+                                            "element_type": {
                                                 "type": "type",
-                                                "bt": "BOOLEAN"
+                                                "basic_type": "BOOLEAN"
                                             }
                                         }
                                     }
@@ -513,11 +513,11 @@
                                     },
                                     "t": {
                                         "type": "type",
-                                        "bt": "INTEGER"
+                                        "basic_type": "INTEGER"
                                     }
                                 }
                             ],
-                            "stmts": [
+                            "statements": [
                                 {
                                     "type": "assignment_statement",
                                     "targets": [
@@ -565,7 +565,7 @@
                                     },
                                     "body": {
                                         "type": "segment_body",
-                                        "stmts": [
+                                        "statements": [
                                             {
                                                 "type": "assignment_statement",
                                                 "targets": [
@@ -649,7 +649,7 @@
                                     },
                                     "body": {
                                         "type": "segment_body",
-                                        "stmts": [
+                                        "statements": [
                                             {
                                                 "type": "simple_conditional_statement",
                                                 "cond": {
@@ -667,17 +667,17 @@
                                                 },
                                                 "then_body": {
                                                     "type": "segment_body",
-                                                    "var_decls": [
+                                                    "variable_declarations": [
                                                         {
                                                             "type": "variable_declaration",
                                                             "names": "j",
                                                             "t": {
                                                                 "type": "type",
-                                                                "bt": "INTEGER"
+                                                                "basic_type": "INTEGER"
                                                             }
                                                         }
                                                     ],
-                                                    "stmts": [
+                                                    "statements": [
                                                         {
                                                             "type": "simple_iteration_statement",
                                                             "tgt": {
@@ -719,7 +719,7 @@
                                                             },
                                                             "body": {
                                                                 "type": "segment_body",
-                                                                "stmts": [
+                                                                "statements": [
                                                                     {
                                                                         "type": "assignment_statement",
                                                                         "targets": [
@@ -793,7 +793,7 @@
                                     },
                                     "body": {
                                         "type": "segment_body",
-                                        "stmts": [
+                                        "statements": [
                                             {
                                                 "type": "simple_conditional_statement",
                                                 "cond": {
@@ -811,7 +811,7 @@
                                                 },
                                                 "then_body": {
                                                     "type": "segment_body",
-                                                    "stmts": [
+                                                    "statements": [
                                                         {
                                                             "type": "assignment_statement",
                                                             "targets": [
@@ -867,7 +867,7 @@
                         },
                         "else_body": {
                             "type": "segment_body",
-                            "stmts": [
+                            "statements": [
                                 {
                                     "type": "output_statement",
                                     "list": [

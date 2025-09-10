@@ -8,8 +8,11 @@ Boolean   <- 'TRUE' / 'FALSE'
 String <- '"' ( '""' / '\\' . / (!'"' .) )* '"'
         / "'" ( "''" / '\\' . / (!"'" .) )* "'"
 
-RealX      <- whole:[0-9]+ '.' frac:[0-9]+ ([eE] sign:[+\-]? exp:[0-9]+)?
-IntegerX   <- digits:[0-9]+
+WS1 <- [ \t\r\n]+
+
+# Just in case if I would need to break number into pieces.
+# Real      <- whole:[0-9]+ '.' frac:[0-9]+ ([eE] sign:[+\-]? exp:[0-9]+)?
+# Integer   <- digits:[0-9]+
 
 Reserved <- ( 'PROGRAM' / 'END' / 'EXTERNAL' / 'PROCEDURE' / 'FUNCTION'
          / 'TYPE' / 'IS' / 'ARRAY' / 'OF' / 'STRUCTURE' / 'FIELD'
@@ -46,39 +49,39 @@ main_program <-
 external_procedure <- external_subprogram / external_function
 
 external_subprogram <-
-    external_subprogram_head ':' body:segment_body
+    external_procedure_head ':' body:segment_body
     'END' 'EXTERNAL' 'PROCEDURE' end_name:Identifier ';'
 
 external_function <-
     external_function_head ':' body:segment_body
     'END' 'EXTERNAL' 'FUNCTION' end_name:Identifier ';'
 
-external_subprogram_head <- 'EXTERNAL' 'PROCEDURE' name:external_procedure_name
-external_function_head   <- 'EXTERNAL' 'FUNCTION'  name:external_procedure_name ret:external_type
+external_procedure_head <- 'EXTERNAL' 'PROCEDURE' name:external_procedure_name
+external_function_head   <- 'EXTERNAL' 'FUNCTION'  name:external_procedure_name return_type:external_type
 
 external_procedure_name <- Identifier / Identifier params:external_parameter_list
 external_parameter_list <- '(' head:external_parameter (',' tail:external_parameter)* ')'
-external_parameter      <- id:Identifier t:external_type name_kw:('NAME')?
+external_parameter      <- id:Identifier type:external_type name:'NAME'?
 
-external_type <- bt:basic_type
+external_type <- basic_type:basic_type
 
 # ===== SEGMENTS =====
 
 segment_body <-
-    type_defs:type_definition*
-    var_decls:variable_declaration*
-    proc_defs:procedure_definition*
-    stmts:executable_statement+
+    type_definitions:type_definition*
+    variable_declarations:variable_declaration*
+    subroutine_definitions:subroutine_definition*
+    statements:executable_statement+
 
 # ===== TYPES =====
 
 type_definition <- 'TYPE' name:Identifier 'IS' def:type ';'
 
-type <- bt:basic_type / arr:arrayed_type / str:structured_type / ref:type_identifier
+type <- basic_type:basic_type / arrayed_type:arrayed_type / structured_type:structured_type / ref:type_identifier
 
 basic_type <- 'INTEGER' / 'REAL' / 'BOOLEAN' / 'STRING'
 
-arrayed_type <- 'ARRAY' bounds 'OF' elem:type
+arrayed_type <- 'ARRAY' bounds 'OF' element_type:type
 
 bounds <- '[' lo:expression ']' / '[' lo:expression ':' hi:expression ']'
 
@@ -99,20 +102,20 @@ declared_multiple_names <- '(' head:Identifier (',' tail:Identifier)* ')'
 
 # ===== INTERNAL PROCEDURES =====
 
-procedure_definition <- subprogram_definition / function_definition / external_subprogram_def / external_function_def
+subroutine_definition <- procedure_definition / function_definition / external_subprogram_def / external_function_def
 
-subprogram_definition <- subprogram_head ':' body:segment_body 'END' 'PROCEDURE' end_name:Identifier ';'
-function_definition   <- function_head   ':' body:segment_body 'END' 'FUNCTION'  end_name:Identifier ';'
+procedure_definition <- procedure_head ':' body:segment_body 'END' 'PROCEDURE' end_name:Identifier ';'
+function_definition  <- function_head  ':' body:segment_body 'END' 'FUNCTION'  end_name:Identifier ';'
 
-external_subprogram_def <- head:external_subprogram_head ';'
+external_subprogram_def <- head:external_procedure_head ';'
 external_function_def   <- head:external_function_head ';'
 
-subprogram_head <- 'PROCEDURE' name:procedure_name
-function_head   <- 'FUNCTION'  name:procedure_name ret:type
+procedure_head <- 'PROCEDURE' name:procedure_name
+function_head  <- 'FUNCTION'  name:procedure_name return_type:type
 
 procedure_name          <-  Identifier params:internal_parameter_list / Identifier
 internal_parameter_list <- '(' head:internal_parameter (',' tail:internal_parameter)* ')'
-internal_parameter      <- id:Identifier t:type name_kw:('NAME')?
+internal_parameter      <- id:Identifier parameter_type:type name:'NAME'?
 
 # ===== EXECUTABLE STATEMENTS =====
 
@@ -140,9 +143,9 @@ target <- var:variable ':='
 
 call_statement <- 'CALL' ref:procedure_reference ';'
 
-procedure_reference <-  id:procedure_identifier args:actual_argument_list / id:procedure_identifier
+procedure_reference <-  id:procedure_identifier argument:argument_list / id:procedure_identifier
 procedure_identifier <- name:Identifier
-actual_argument_list <- '(' head:expression (',' tail:expression)* ')'
+argument_list <- '(' head:expression (',' tail:expression)* ')'
 
 # ----- RETURNS -----
 
@@ -174,8 +177,8 @@ simple_compound <- 'BEGIN' body:segment_body ('END' end_name:Identifier ';' / 'E
 iteration_statement <- simple_iteration_statement / lbl:label simple_iteration_statement
 
 simple_iteration_statement <-
-    'FOR'i tgt:iteration_target ctrl:control 'DO'i body:segment_body
-    ('END'i 'FOR'i end_name:Identifier ';' / 'END'i 'FOR'i ';')
+    'FOR' tgt:iteration_target ctrl:control 'DO' body:segment_body
+    ('END' 'FOR' end_name:Identifier ';' / 'END' 'FOR' ';')
 
 iteration_target <- var:variable ':='
 
@@ -186,9 +189,9 @@ control <- (step_control while_control?) / while_control
 step_control <- init:initial_value ( step:step limit:limit? / limit:limit step:step? )
 
 initial_value <- expression
-step          <- 'BY'i value:expression
-limit         <- 'TO'i value:expression
-while_control <- 'WHILE'i cond:expression
+step          <- 'BY' value:expression
+limit         <- 'TO' value:expression
+while_control <- 'WHILE' cond:expression
 
 
 # ----- SELECTION -----
@@ -196,16 +199,16 @@ while_control <- 'WHILE'i cond:expression
 selection_statement <- simple_selection / (lbl:label simple_selection)
 
 simple_selection <-
-    'SELECT'i sel:expression 'OF'i body:selection_body end:selection_end
+    'SELECT' sel:expression 'OF' body:selection_body end:selection_end
 
 selection_body <- case_list escape_case?
-selection_end  <- 'END'i 'SELECT'i end_name:Identifier ';' / 'END'i 'SELECT'i ';'
+selection_end  <- 'END' 'SELECT' end_name:Identifier ';' / 'END' 'SELECT' ';'
 
 case_list <- case+
-case      <- 'CASE'i sel:selector ':' body:case_body
+case      <- 'CASE' sel:selector ':' body:case_body
 
 selector    <- '(' head:expression (',' tail:expression)* ')'
-escape_case <- 'OTHERWISE'i ':' body:case_body
+escape_case <- 'OTHERWISE' ':' body:case_body
 case_body   <- segment_body
 
 # ----- REPEAT / REPENT -----

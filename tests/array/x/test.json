@@ -6,23 +6,23 @@
             "name": "Array",
             "body": {
                 "type": "segment_body",
-                "type_defs": [
+                "type_definitions": [
                     {
                         "type": "type_definition",
                         "name": "B",
                         "def": {
                             "type": "type",
-                            "arr": {
+                            "arrayed_type": {
                                 "type": "arrayed_type",
                                 "lo": "25",
-                                "elem": {
+                                "element_type": {
                                     "type": "type",
-                                    "arr": {
+                                    "arrayed_type": {
                                         "type": "arrayed_type",
                                         "lo": "80",
-                                        "elem": {
+                                        "element_type": {
                                             "type": "type",
-                                            "bt": "BOOLEAN"
+                                            "basic_type": "BOOLEAN"
                                         }
                                     }
                                 }
@@ -30,7 +30,7 @@
                         }
                     }
                 ],
-                "var_decls": [
+                "variable_declarations": [
                     {
                         "type": "variable_declaration",
                         "names": "b",
@@ -43,7 +43,7 @@
                         }
                     }
                 ],
-                "stmts": [
+                "statements": [
                     {
                         "type": "assignment_statement",
                         "targets": [

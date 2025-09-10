@@ -6,25 +6,25 @@
             "name": "Type",
             "body": {
                 "type": "segment_body",
-                "type_defs": [
+                "type_definitions": [
                     {
                         "type": "type_definition",
                         "name": "Field",
                         "def": {
                             "type": "type",
-                            "arr": {
+                            "arrayed_type": {
                                 "type": "arrayed_type",
                                 "lo": "1",
                                 "hi": "100",
-                                "elem": {
+                                "element_type": {
                                     "type": "type",
-                                    "bt": "INTEGER"
+                                    "basic_type": "INTEGER"
                                 }
                             }
                         }
                     }
                 ],
-                "proc_defs": [
+                "subroutine_definitions": [
                     {
                         "type": "function_definition",
                         "name": {
@@ -34,7 +34,7 @@
                                 "head": {
                                     "type": "internal_parameter",
                                     "id": "f",
-                                    "t": {
+                                    "parameter_type": {
                                         "type": "type",
                                         "ref": {
                                             "type": "type_identifier",
@@ -44,13 +44,13 @@
                                 }
                             }
                         },
-                        "ret": {
+                        "return_type": {
                             "type": "type",
-                            "bt": "BOOLEAN"
+                            "basic_type": "BOOLEAN"
                         },
                         "body": {
                             "type": "segment_body",
-                            "stmts": [
+                            "statements": [
                                 {
                                     "type": "return_statement",
                                     "value": "0"

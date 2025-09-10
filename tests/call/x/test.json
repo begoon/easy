@@ -6,19 +6,19 @@
             "name": "Call",
             "body": {
                 "type": "segment_body",
-                "var_decls": [
+                "variable_declarations": [
                     {
                         "type": "variable_declaration",
                         "names": "x",
                         "t": {
                             "type": "type",
-                            "bt": "INTEGER"
+                            "basic_type": "INTEGER"
                         }
                     }
                 ],
-                "proc_defs": [
+                "subroutine_definitions": [
                     {
-                        "type": "subprogram_definition",
+                        "type": "procedure_definition",
                         "name": {
                             "type": "procedure_name",
                             "params": {
@@ -26,16 +26,16 @@
                                 "head": {
                                     "type": "internal_parameter",
                                     "id": "x",
-                                    "t": {
+                                    "parameter_type": {
                                         "type": "type",
-                                        "bt": "INTEGER"
+                                        "basic_type": "INTEGER"
                                     }
                                 }
                             }
                         },
                         "body": {
                             "type": "segment_body",
-                            "stmts": [
+                            "statements": [
                                 {
                                     "type": "output_statement",
                                     "list": [
@@ -63,20 +63,20 @@
                                 "head": {
                                     "type": "internal_parameter",
                                     "id": "x",
-                                    "t": {
+                                    "parameter_type": {
                                         "type": "type",
-                                        "bt": "INTEGER"
+                                        "basic_type": "INTEGER"
                                     }
                                 }
                             }
                         },
-                        "ret": {
+                        "return_type": {
                             "type": "type",
-                            "bt": "INTEGER"
+                            "basic_type": "INTEGER"
                         },
                         "body": {
                             "type": "segment_body",
-                            "stmts": [
+                            "statements": [
                                 {
                                     "type": "return_statement",
                                     "value": {
@@ -95,7 +95,7 @@
                         "end_name": "b"
                     }
                 ],
-                "stmts": [
+                "statements": [
                     {
                         "type": "call_statement",
                         "ref": {
@@ -104,7 +104,7 @@
                                 "type": "procedure_identifier",
                                 "name": "a"
                             },
-                            "args": [
+                            "argument": [
                                 "100"
                             ]
                         }
