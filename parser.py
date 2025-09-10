@@ -1,7 +1,7 @@
 from typing import Tuple, Union, cast
 
-from easy_lexer import Token
-from easy_nodes import (
+from lexer import Token
+from nodes import (
     Array,
     BeginStatement,
     BinaryOperation,

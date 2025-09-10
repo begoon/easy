@@ -2,7 +2,7 @@ import json
 from dataclasses import dataclass
 from typing import Literal, Optional, Tuple, Union
 
-from easy_lexer import Token
+from lexer import Token
 
 types_registry: dict[str, "Type"] = {}
 variables_registry: dict[str, "Type"] = {}
@@ -727,28 +727,24 @@ class BinaryOperation(Expression):
             operations = {"MOD": "%"}
             self.operation = operations.get(self.operation, self.operation)
             assert left_type in ("INTEGER", "REAL"), type_mismatch(self)
+
         elif self.operation in ("<", "<=", ">", ">=", "=", "<>", "|", "XOR"):
             operations = {"=": "==", "<>": "!=", "|": "||", "XOR": "^"}
             self.operation = operations.get(self.operation, self.operation)
             assert left_type in ("BOOLEAN", "INTEGER", "REAL"), type_mismatch(self)
+
         elif self.operation == "||":
             assert left_type in ("STRING",), type_mismatch(self)
+
         else:
             raise ValueError(f"unsupported binary operation '{self.operation}' at {self.token}")
 
         return f"({self.left.c()} {self.operation} {self.right.c()})"
 
     def py(self) -> str:
-        op = self.operation
-        if op == "AND":
-            op = "and"
-        elif op == "OR":
-            op = "or"
-        elif op == "=":
-            op = "=="
-        elif op == "<>":
-            op = "!="
-        return f"({self.left.py()} {op} {self.right.py()})"
+        operations = {"AND": "and", "OR": "or", "=": "==", "<>": "!="}
+        operation = operations.get(self.operation, self.operation)
+        return f"({self.left.py()} {operation} {self.right.py()})"
 
 
 @dataclass
@@ -827,9 +823,6 @@ class Variable(Expression):
 class IntegerLiteral(Expression):
     value: int
 
-    def type(self) -> Type:
-        return "INTEGER"
-
     def meta(self) -> str:
         return repr(self.value)
 
@@ -843,9 +836,6 @@ class IntegerLiteral(Expression):
 @dataclass
 class RealLiteral(Expression):
     value: float
-
-    def type(self) -> Type:
-        return "REAL"
 
     def meta(self) -> str:
         return repr(self.value)
@@ -875,9 +865,6 @@ class StringLiteral(Expression):
 @dataclass
 class BoolLiteral(Expression):
     value: bool
-
-    def type(self) -> Type:
-        return "BOOLEAN"
 
     def meta(self) -> str:
         return "TRUE" if self.value else "FALSE"

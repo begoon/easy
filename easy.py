@@ -5,10 +5,10 @@ import pathlib
 import sys
 from pathlib import Path
 
-from easy_lexer import Lexer, Token
-from easy_nodes import Array, common, emit, python_imports, types_registry
-from easy_parser import Parser
-from peg.peg_parser import PEGParser
+from lexer import Lexer, Token
+from nodes import Array, common, emit, python_imports, types_registry
+from parser import Parser
+from peg.parser import PEGParser
 from yamler import yamlizer
 
 

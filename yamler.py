@@ -4,8 +4,8 @@ from typing import Mapping
 
 from ruamel.yaml import YAML
 
-from easy_lexer import Token
-from easy_nodes import Node
+from lexer import Token
+from nodes import Node
 
 
 def walker(obj: Node, *, seen: set[int] | None = None) -> Node:

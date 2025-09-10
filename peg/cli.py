@@ -2,7 +2,7 @@ import json
 import sys
 from pathlib import Path
 
-from peg.peg_parser import PEGParser
+from peg.parser import PEGParser
 
 grammar = (Path(__file__).parent / "easy.peg").read_text
 
