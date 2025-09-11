@@ -229,7 +229,8 @@ class Parser:
             self.eat(";")
 
             if token.value == "PROCEDURE":
-                assert type is None, f"PROCEDURE {name} cannot have a return {type=}"
+                if type is not None:
+                    self.error(f"PROCEDURE [{name}] cannot have a return type", token)
                 subroutines.append(ProcedureStatement(token, name, parameters, segment))
             else:
                 subroutines.append(FunctionStatement(token, name, type, parameters, segment))
@@ -529,9 +530,12 @@ class Parser:
             right_type = expand_type(right.type, token)
 
             allowed = left_type == right_type or (is_number(left_type) and is_number(right_type))
-            assert allowed, f"cannot perform [{operation.value}] {left=} and {right=}"
+            if not allowed:
+                self.error(f"illegal types for [{operation.value}] on {left} and {right}", token)
 
-            assert left_type in ("BOOLEAN", "INTEGER", "REAL"), f"cannot perform [{operation.value}] on {left}"
+            if left_type not in ("BOOLEAN", "INTEGER", "REAL"):
+                self.error(f"cannot perform [{operation.value}] on {left}", token)
+
             left = BinaryOperation(token, "BOOLEAN", operation.value, left, right)
         return left
 
@@ -547,10 +551,13 @@ class Parser:
 
     def expression_ADDING(self) -> Expression:
         left = self.expression_MULTIPLYING()
-        while operation := self.accept(("+", "-")):
+        operations = ("+", "-")
+        while operation := self.accept(operations):
             right = self.expression_MULTIPLYING()
-            assert left.type == right.type, f"cannot {operation.value} {left=} and {right=}"
-            assert left.type in ("INTEGER", "REAL"), f"cannot [{operation.value}] {left}"
+            if left.type != right.type:
+                self.error(f"{left=} and {right=} must be of the same type to perform [{operation.value}]", operation)
+            if not is_number(left.type):
+                self.error("operation only supported for INTEGER and REAL", operation)
             type = left.type
             left = BinaryOperation(operation, type, operation.value, left, right)
         return left
@@ -587,19 +594,18 @@ class Parser:
     def factor(self) -> Expression:
         token = self.current()
         if token.type == "INTEGER":
-            token = self.eat("INTEGER")
+            token = self.eat(token.type)
             return IntegerLiteral(token, token.type, int(token.value))
         if token.type == "REAL":
-            token = self.eat("REAL")
+            token = self.eat(token.type)
             return RealLiteral(token, token.type, float(token.value))
         if token.type == "STRING":
-            self.i += 1
+            token = self.eat(token.type)
             return StringLiteral(token, token.type, token.value)
         if token.value in ("+", "-"):
             token = self.eat(("+", "-"))
             factor = self.factor()
-            type = factor.type
-            return UnaryOperation(token, type, token.value, factor)
+            return UnaryOperation(token, factor.type, token.value, factor)
         if token.value == "(":
             self.eat("(")
             expression = self.expression()
@@ -609,13 +615,7 @@ class Parser:
             token = self.eat(("TRUE", "FALSE"))
             return BoolLiteral(token, "BOOLEAN", token.value == "TRUE")
         if token.type == "IDENT":
-            variable = self.variable()
-            name = variable.parts[0]
-            if name not in variables_registry:
-                self.error(f"undefined variable [{name}]\n{yamlizer(variables_registry)}", token)
-            variable.type = variables_registry[name]
-            if variable.type == "UNKNOWN":
-                self.error(f"cannot use variable [{variable=}] with unknown type in expression", token)
+            variable = self.known_variable()
             return variable
         self.error(
             f"expected an identifier or INTEGER/REAL/STRING literal or '+', '-', '(', 'TRUE/FALSE', "
