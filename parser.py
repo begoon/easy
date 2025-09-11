@@ -1,4 +1,3 @@
-import re
 from typing import Tuple, Union, cast
 
 from lexer import Token
@@ -42,7 +41,6 @@ from nodes import (
     expand_type,
     functions_registry,
     is_number,
-    lookup_check_variable,
     types_registry,
     variables_registry,
 )
@@ -59,7 +57,8 @@ class ParseError(Exception):
     def __str__(self) -> str:
         error_line = self.source.splitlines()[self.token.line - 1]
         return (
-            f"{self.message} at "
+            f"{self.message}\n"
+            "at "
             f"{self.token.filename}:{self.token.line}:{self.token.col}\n"
             f"{error_line}\n{' ' * (self.token.col - 1)}^"
         )
@@ -326,8 +325,7 @@ class Parser:
 
     def for_statement(self) -> ForStatement:
         token = self.eat("FOR")
-        variable_token = self.eat("IDENT")
-        variable = Variable(variable_token, "INTEGER", variable_token.value, [])
+        variable = self.known_variable(("INTEGER", "REAL"))
         self.eat(":=")
         init = self.expression()
         by = self.accept("BY") and self.expression()
@@ -374,25 +372,29 @@ class Parser:
         self.eat(";")
         return ExitStatement(token)
 
-    def input_variable(self) -> Variable:
+    def known_variable(self, allowed_types: tuple[str] | None = None) -> Variable:
         variable = self.variable()
 
-        if variables_registry.get(variable.name) is None:
-            self.error(f"undefined variable in INPUT [{variable}]", variable.token)
+        compound = len(variable.parts) > 1
+        if not compound and variables_registry.get(variable.name) is None:
+            self.error(f"undefined variable [{variable}]", variable.token)
 
-        type = variables_registry[variable.name]
+        name = variable.parts[0]
+        type = variables_registry[name]
         variable.type = type
 
-        if type not in ("INTEGER", "REAL", "STRING"):
-            self.error(f"cannot use variable [{variable}] of type {type} in INPUT", variable.token)
+        if allowed_types and (type not in allowed_types):
+            self.error(f"illegal [{variable}] {type=}, allowed types: {",".join(allowed_types)}", variable.token)
         return variable
 
     def input_statement(self) -> InputStatement:
         token = self.eat("INPUT")
-        variables = [self.input_variable()]
+
+        allowed_types = ("INTEGER", "REAL", "STRING")
+        variables = [self.known_variable(allowed_types)]
 
         while self.accept(","):
-            variables.append(self.input_variable())
+            variables.append(self.known_variable(allowed_types))
 
         self.eat(";")
         return InputStatement(token, variables)
@@ -427,7 +429,7 @@ class Parser:
 
     def assignment_statement(self) -> SetStatement:
         token = self.eat("SET")
-        variable = self.variable()
+        variable = self.known_variable()
         self.eat(":=")
         targets = [variable]
 
@@ -435,21 +437,38 @@ class Parser:
             current = self.current()
             if current.type != "IDENT" or self.peek().value != ":=":
                 break
-            variable = self.variable()
+            variable = self.known_variable()
             self.eat(":=")
             targets.append(variable)
 
-        expr = self.expression()
+        expression = self.expression()
         for target in targets:
-            lookup_check_variable(target, expr.type, token)
+            self.check_variable_type(target, expression.type, token)
 
         self.eat(";")
-        return SetStatement(token, targets, expr)
+        return SetStatement(token, targets, expression)
+
+    def check_variable_type(self, variable: Variable, expected_type: Type, token: Token) -> Variable:
+        if len(variable.parts) > 1:  # TODO: (!), check field and array types
+            return variable
+
+        expanded_expected_type = expand_type(expected_type, token)
+        expanded_variable_type = expand_type(variables_registry.get(variable.name), token)
+
+        if expanded_expected_type != expanded_variable_type:
+            self.error(
+                f"variable [{variable.name}] type mismatch:\n"
+                + f"variable type: {expanded_variable_type}\n"
+                + f"expected type: {expanded_expected_type}",
+                token,
+            )
+
+        variable.type = expanded_variable_type
 
     def variable(self) -> Variable:
         token = self.eat("IDENT")
         name = token.value
-        parts = []
+        parts = [name]
         while True:
             if self.accept("."):
                 part = self.eat("IDENT").value
@@ -459,13 +478,13 @@ class Parser:
             if self.accept("["):
                 index = self.expression()
                 if index.type != "INTEGER":
-                    self.error(f"array index must be INTEGER, not {index.type}", index.token)
+                    self.error(f"expected INTEGER array index, not {index.type}", index.token)
                 self.eat("]")
                 parts.append(index)
                 name += "[" + index.c() + "]"
                 continue
             break
-        return Variable(token, "UNKNOWN", name, parts if parts else None)
+        return Variable(token, "UNKNOWN", name, parts)
 
     def call_statement(self) -> CallStatement:
         token = self.eat("CALL")
@@ -506,8 +525,8 @@ class Parser:
         while operation := self.accept(("<", ">", "=", "<=", ">=", "<>")):
             right = self.expression_CONCATENATION()
 
-            left_type = expand_type(left.type)
-            right_type = expand_type(right.type)
+            left_type = expand_type(left.type, token)
+            right_type = expand_type(right.type, token)
 
             allowed = left_type == right_type or (is_number(left_type) and is_number(right_type))
             assert allowed, f"cannot perform [{operation.value}] {left=} and {right=}"
@@ -591,7 +610,7 @@ class Parser:
             return BoolLiteral(token, "BOOLEAN", token.value == "TRUE")
         if token.type == "IDENT":
             variable = self.variable()
-            name = re.split(r"[\.\[]", variable.name)[0]
+            name = variable.parts[0]
             if name not in variables_registry:
                 self.error(f"undefined variable [{name}]\n{yamlizer(variables_registry)}", token)
             variable.type = variables_registry[name]

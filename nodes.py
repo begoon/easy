@@ -1,4 +1,3 @@
-import json
 from dataclasses import dataclass
 from typing import Callable, Literal, Optional, Tuple, Union
 
@@ -172,7 +171,7 @@ class Array(Node):
     end: Expression
 
     def c(self, variable: str) -> str:
-        assert variable, f"Array.c() requires a name parameter at {self.token}"
+        assert variable, f"array.c() requires a name parameter at {self.token}"
         start = self.start.c() if self.start else "0"
         end = self.end.c()
         t = f"[{start} + {end} + /* @ */ 1]"
@@ -313,14 +312,12 @@ class SetStatement(Statement):
     def c(self) -> str:
         v = []
         for variable in self.variables:
-            # SetStatement.check_variable(variable, self.expression.type, self.token)
             v.append(f"{variable.c()} = {self.expression.c()};")
         return emit(v)
 
     def py(self) -> str:
         v = []
         for variable in self.variables:
-            # SetStatement.check_variable(variable, self.expression.type, self.token)
             v.append(f"{variable.py()} = {self.expression.py()}")
         return emit(v)
 
@@ -539,7 +536,7 @@ class RepeatStatement(Statement):
         return f"goto {self.label};"
 
     def py(self) -> str:
-        assert False, "REPEAT is not supported in Python"
+        assert False, "REPEAT is not supported in python"
 
 
 @dataclass
@@ -553,7 +550,7 @@ class RepentStatement(Statement):
         return f"goto {self.label};"
 
     def py(self) -> str:
-        assert False, "REPENT is not supported in Python"
+        assert False, "REPENT is not supported in python"
 
 
 @dataclass
@@ -575,11 +572,10 @@ class BeginStatement(Statement):
         return emit(v)
 
     def py(self) -> str:
-        v = ["# BEGIN"]
+        v = []
         v.append(indent(self.body.py(), 1))
-        v.append("# END")
         if self.label:
-            v.append(f"# LABEL {self.label}")
+            assert False, "labels are not supported in python"
         return emit(v)
 
 
@@ -668,8 +664,8 @@ class BinaryOperation(Expression):
 
     def c(self) -> str:
 
-        left_type = expand_type(self.left.type)
-        right_type = expand_type(self.right.type)
+        left_type = expand_type(self.left.type, self.token)
+        right_type = expand_type(self.right.type, self.token)
         allowed = left_type == right_type or (is_number(left_type) and is_number(right_type))
         assert allowed, (
             f"\n{self=}"
@@ -694,7 +690,7 @@ class BinaryOperation(Expression):
             assert left_type in ("STRING",), type_mismatch(self)
 
         else:
-            raise ValueError(f"unsupported binary operation '{self.operation}' at {self.token}")
+            raise ValueError(f"invalid binary operation [{self.operation}] at {self.token}")
 
         return f"({self.left.c()} {self.operation} {self.right.c()})"
 
@@ -879,15 +875,15 @@ def TYPE(v: "Type") -> str:
     return type
 
 
-def expand_type(name: "Type") -> str:
+def expand_type(name: Type, token: Token) -> str:
     if name in ("INTEGER", "REAL", "BOOLEAN", "STRING"):
         return name
     if isinstance(name, Array):
-        return expand_type(name.type)
+        return expand_type(name.type, token)
     custom = types_registry.get(name)
     if custom:
-        return expand_type(custom)
-    return "?"
+        return expand_type(custom, token)
+    raise ValueError(f"unknown type '{name}' at {token}")
 
 
 def is_number(name: str) -> bool:
@@ -923,37 +919,6 @@ def expression_stringer(v: Expression, format: list[str], callee: str = "OUTPUT"
             if convert:
                 format.append(convert)
                 return c
-            raise ValueError(f"unsupported function={v.name} return type={function_type} in {callee} at {v.token}")
-        raise ValueError(f"unsupported function={v.name} invocation in {callee} at {v.token}")
-    assert False, f"unsupported {callee} argument type={type(v).__name__} at {v.token}"
-
-
-def lookup_check_variable(variable: Variable, expected_type: Type, token: Token) -> Variable:
-    if "." in variable.name or "[" in variable.name:
-        # TODO: (!)
-        return variable
-
-    if variable.name not in variables_registry:
-        raise ValueError(f"undeclared variable in SET [{variable.name}] at {token}")
-
-    expected_type = expand_type(expected_type)
-
-    type = expand_type(variables_registry.get(variable.name))
-    if not type or type == "?":
-        raise ValueError(f"undefined variable=[{variable.name}] type in SET at {token}")
-
-    if isinstance(type, Array):
-        type = type.type
-
-    if type != expected_type:
-        raise ValueError(
-            f"type mismatch in SET variable [{variable.name}]:\n"
-            + f"  {type=} != {expected_type=}\n"
-            + f"  variable [{variable}]\n"
-            + f"  expected [{expected_type}]\n"
-            + f"  not      [{type}]\n"
-            + f"at {token}\n"
-            + f"known variables:\n{json.dumps(variables_registry, indent=2)}"
-        )
-
-    variable.type = type
+            raise ValueError(f"unsupported function=[{v.name}] return type=[{function_type}] in {callee} at {v.token}")
+        raise ValueError(f"unsupported function=[{v.name}] invocation in {callee} at {v.token}")
+    assert False, f"unsupported [{callee}] argument type=[{type(v).__name__}] at {v.token}"

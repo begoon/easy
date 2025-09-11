@@ -24,6 +24,7 @@ segment:
             type: STRING
             name: s
             parts:
+              - s
         expression:
           node: StringLiteral
           token: 'PROGRAM Q: DECLARE s STRING; SET s := %; OUTPUT SUBSTR(s, 0, 38)
@@ -50,6 +51,7 @@ segment:
                     type: STRING
                     name: s
                     parts:
+                      - s
                   - node: IntegerLiteral
                     token: 0 / INTEGER at 1:216
                     type: INTEGER
@@ -72,6 +74,7 @@ segment:
                 type: STRING
                 name: s
                 parts:
+                  - s
               - node: FunctionCall
                 token: CHARACTER / IDENT at 1:248
                 type: STRING
@@ -91,6 +94,7 @@ segment:
                     type: STRING
                     name: s
                     parts:
+                      - s
                   - node: IntegerLiteral
                     token: 39 / INTEGER at 1:275
                     type: INTEGER
@@ -110,6 +114,7 @@ segment:
                           type: STRING
                           name: s
                           parts:
+                            - s
                     right:
                       node: IntegerLiteral
                       token: 38 / INTEGER at 1:289
