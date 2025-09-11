@@ -75,26 +75,26 @@ def process(test: Path) -> None:
 
         flags.append("-t")
 
-    expected_ast = x.with_suffix(".ast")
+    expected_meta = x.with_suffix(".meta")
+    if expected_meta.exists():
+        created_meta = test.with_suffix(".meta")
+        removals.append(created_meta)
+
+        flags.append("-m")
+
+    expected_ast = x.with_suffix(".yaml")
     if expected_ast.exists():
-        created_ast = test.with_suffix(".ast")
+        created_ast = test.with_suffix(".yaml")
         removals.append(created_ast)
 
         flags.append("-a")
 
-    expected_yaml = x.with_suffix(".yaml")
-    if expected_yaml.exists():
-        created_yaml = test.with_suffix(".yaml")
-        removals.append(created_yaml)
-
-        flags.append("-y")
-
-    expected_peg_ast = x.with_suffix(".json")
+    expected_peg_ast = x.with_suffix(".peg.yaml")
     if expected_peg_ast.exists():
-        created_peg_ast = test.with_suffix(".json")
+        created_peg_ast = test.with_suffix(".peg.yaml")
         removals.append(created_peg_ast)
 
-        flags.append("-j")
+        flags.append("-e")
 
     expected_c = x.with_suffix(".c")
     if expected_c.exists():
@@ -115,11 +115,11 @@ def process(test: Path) -> None:
     if expected_tokens.exists():
         diff(expected_tokens, created_tokens)
 
+    if expected_meta.exists():
+        diff(expected_meta, created_meta)
+
     if expected_ast.exists():
         diff(expected_ast, created_ast)
-
-    if expected_yaml.exists():
-        diff(expected_yaml, created_yaml)
 
     if expected_peg_ast.exists():
         diff(expected_peg_ast, created_peg_ast)

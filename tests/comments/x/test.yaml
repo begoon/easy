@@ -13,4 +13,3 @@ segment:
     statements:
       - node: ExitStatement
         token: EXIT / KEYWORD at 17:3
-

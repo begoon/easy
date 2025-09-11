@@ -1,0 +1,42 @@
+  - type: program_segment
+    main:
+      type: main_program
+      name: Type
+      body:
+        type: segment_body
+        type_definitions:
+          - type: type_definition
+            name: Field
+            def:
+              type: type
+              arrayed_type:
+                type: arrayed_type
+                lo: '1'
+                hi: '100'
+                element_type:
+                  type: type
+                  basic_type: INTEGER
+        subroutine_definitions:
+          - type: function_definition
+            name:
+              type: procedure_name
+              params:
+                type: internal_parameter_list
+                head:
+                  type: internal_parameter
+                  id: f
+                  parameter_type:
+                    type: type
+                    ref:
+                      type: type_identifier
+                      name: Field
+            return_type:
+              type: type
+              basic_type: BOOLEAN
+            body:
+              type: segment_body
+              statements:
+                - type: return_statement
+                  value: '0'
+            end_name: a
+      end_name: Type

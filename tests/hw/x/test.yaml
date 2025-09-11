@@ -89,4 +89,3 @@ segment:
         condition:
       - node: ExitStatement
         token: EXIT / KEYWORD at 8:1
-

@@ -6,7 +6,6 @@ tests/**/*.ast
 tests/**/*.yaml
 tests/**/*.c
 tests/**/*.py
-tests/**/*.json
 tests/**/*.exe
 tests/**/*.output
 

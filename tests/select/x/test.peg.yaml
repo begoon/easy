@@ -1,0 +1,65 @@
+  - type: program_segment
+    main:
+      type: main_program
+      name: Test
+      body:
+        type: segment_body
+        variable_declarations:
+          - type: variable_declaration
+            names: a
+            t:
+              type: type
+              basic_type: INTEGER
+        statements:
+          - type: assignment_statement
+            targets:
+              - type: target
+                var:
+                  type: variable
+                  base: a
+                  parts: []
+            expr: '100'
+          - type: simple_selection
+            sel:
+              type: variable
+              base: 'TRUE'
+              parts: []
+            body:
+              type: selection_body
+              sel:
+                - type: selector
+                  head:
+                    type: rel_expr
+                    head:
+                      type: variable
+                      base: a
+                      parts: []
+                    op: <
+                    rhs: '0'
+                - type: selector
+                  head:
+                    type: rel_expr
+                    head:
+                      type: variable
+                      base: a
+                      parts: []
+                    op: '='
+                    rhs: '0'
+              body:
+                - type: segment_body
+                  statements:
+                    - type: output_statement
+                      list:
+                        - '"a < 0"'
+                - type: segment_body
+                  statements:
+                    - type: output_statement
+                      list:
+                        - '"a = 0"'
+                - type: segment_body
+                  statements:
+                    - type: output_statement
+                      list:
+                        - '"otherwise"'
+            end: END SELECT;
+      end_name: Test

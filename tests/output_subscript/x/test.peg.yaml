@@ -1,0 +1,36 @@
+  - type: program_segment
+    main:
+      type: main_program
+      name: OutputSubscript
+      body:
+        type: segment_body
+        variable_declarations:
+          - type: variable_declaration
+            names:
+              type: declared_multiple_names
+              head: b
+              tail:
+                - p
+                - c
+            t:
+              type: type
+              basic_type: INTEGER
+        statements:
+          - type: output_statement
+            list:
+              - type: variable
+                base: b
+                parts: []
+              - type: variable
+                base: p
+                parts:
+                  - field: x
+                  - field: z
+              - type: variable
+                base: c
+                parts:
+                  - field: t
+                  - index: '0'
+                  - index: '2'
+                  - index: '1'
+      end_name: OutputSubscript

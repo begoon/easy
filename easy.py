@@ -48,21 +48,21 @@ if __name__ == "__main__":
         tokens_file.write_text("\n".join(format_token(t) for t in tokens) + "\n")
 
     ast = Parser(tokens, source).program()
+
+    if "-m" in sys.argv:
+        meta_file = input_file.with_suffix(".meta")
+        meta_file.write_text(ast.meta() + "\n")
+
     if "-a" in sys.argv:
-        ast_file = input_file.with_suffix(".ast")
-        ast_file.write_text(ast.meta() + "\n")
+        ast_file = input_file.with_suffix(".yaml")
+        ast_file.write_text(yamlizer(ast))
 
-    if "-y" in sys.argv:
-        yaml_file = input_file.with_suffix(".yaml")
-        yaml_file.write_text(yamlizer(ast) + "\n")
-
-    if "-j" in sys.argv:
-        peg_ast_file = input_file.with_suffix(".json")
-
-        grammar = open("peg/easy.peg").read()
+    if "-e" in sys.argv:
+        grammar = Path("peg/easy.peg").read_text()
         peg_ast = PEGParser(grammar, start="compilation").parse(source)
 
-        peg_ast_file.write_text(json.dumps(peg_ast, indent=4) + "\n")
+        peg_ast_file = input_file.with_suffix(".peg.yaml")
+        peg_ast_file.write_text(yamlizer(peg_ast))
 
     output_c = Path(arg(sys.argv, "-c") or input_file.with_suffix(".c"))
 

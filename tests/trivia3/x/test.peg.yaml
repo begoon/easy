@@ -1,0 +1,84 @@
+  - type: program_segment
+    main:
+      type: main_program
+      name: Trivia3
+      body:
+        type: segment_body
+        type_definitions:
+          - type: type_definition
+            name: Point
+            def:
+              type: type
+              structured_type:
+                type: structured_type
+                fields:
+                  type: field_list
+                  head:
+                    type: field
+                    name: x
+                    t:
+                      type: type
+                      basic_type: INTEGER
+                  tail:
+                    type: field_list
+                    head:
+                      type: field
+                      name: y
+                      t:
+                        type: type
+                        basic_type: INTEGER
+        variable_declarations:
+          - type: variable_declaration
+            names: p
+            t:
+              type: type
+              ref:
+                type: type_identifier
+                name: Point
+          - type: variable_declaration
+            names: b
+            t:
+              type: type
+              basic_type: BOOLEAN
+        statements:
+          - type: simple_compound
+            body:
+              type: segment_body
+              statements:
+                - type: assignment_statement
+                  targets:
+                    - type: target
+                      var:
+                        type: variable
+                        base: p
+                        parts:
+                          - field: x
+                  expr: '1'
+                - type: assignment_statement
+                  targets:
+                    - type: target
+                      var:
+                        type: variable
+                        base: p
+                        parts:
+                          - field: y
+                  expr: '2'
+                - type: assignment_statement
+                  targets:
+                    - type: target
+                      var:
+                        type: variable
+                        base: p
+                        parts:
+                          - field: x
+                  expr:
+                    type: variable
+                    base: p
+                    parts:
+                      - field: y
+                - type: output_statement
+                  list:
+                    - type: variable
+                      base: b
+                      parts: []
+      end_name: Trivia3

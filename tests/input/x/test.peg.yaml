@@ -1,0 +1,64 @@
+  - type: program_segment
+    main:
+      type: main_program
+      name: Input
+      body:
+        type: segment_body
+        variable_declarations:
+          - type: variable_declaration
+            names: i
+            t:
+              type: type
+              basic_type: INTEGER
+          - type: variable_declaration
+            names: f
+            t:
+              type: type
+              basic_type: REAL
+          - type: variable_declaration
+            names: s
+            t:
+              type: type
+              basic_type: STRING
+        statements:
+          - type: input_statement
+            list:
+              - type: variable
+                base: i
+                parts: []
+              - type: variable
+                base: f
+                parts: []
+          - type: input_statement
+            list:
+              - type: variable
+                base: s
+                parts: []
+          - type: output_statement
+            list:
+              - type: concat_expr
+                head: '"i = ["'
+                tail:
+                  - type: variable
+                    base: i
+                    parts: []
+                  - '"]"'
+          - type: output_statement
+            list:
+              - type: concat_expr
+                head: '"f = ["'
+                tail:
+                  - type: variable
+                    base: f
+                    parts: []
+                  - '"]"'
+          - type: output_statement
+            list:
+              - type: concat_expr
+                head: '"s = ["'
+                tail:
+                  - type: variable
+                    base: s
+                    parts: []
+                  - '"]"'
+      end_name: Input
