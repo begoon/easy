@@ -13,10 +13,10 @@ i = 1
 while True:
     if i > 100:
         break
-    if not i <= 10:
+    if not (i <= 10):
         break
     x = 0
-    x = a + i
+    x = (a + i)
     runtime_print(x)
     i += 3
 s = 'abc'

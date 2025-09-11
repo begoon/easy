@@ -6,3 +6,11 @@ def runtime_print(*args, **kwargs) -> None:
 
 def CHARACTER(n: int) -> str:
     return chr(n)
+
+
+def FLOAT(n: int) -> float:
+    return float(n)
+
+
+def FIX(n: float) -> int:
+    return int(n)

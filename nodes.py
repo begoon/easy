@@ -326,7 +326,7 @@ class FunctionStatement(Node):
     def py(self) -> str:
         arguments = ", ".join(name for name, _ in self.arguments)
         v = [
-            f"def {self.name}({arguments}) -> {TYPE(self.type)}:",
+            f"def {self.name}({arguments}):",
             indent(self.segment.py(), 1),
         ]
         return emit(v)
@@ -441,7 +441,7 @@ class ForStatement(Statement):
             f"{variable} = {self.init.py() if self.init else 0}",
             "while True:",
         ]
-        if self.to or self.condition:
+        if self.to:
             v.append(indent(f"if {variable} > {self.to.py()}:", 1))
             v.append(indent("break", 2))
         if self.condition:
@@ -518,13 +518,15 @@ class InputStatement(Statement):
     def py(self) -> str:
         inputs = []
         for variable in self.variables:
-            assert variable in variables_registry, f"undeclared variable '{variable}'"
-            type = variables_registry[variable]
+            type = variable.type
             if type == "STRING":
-                inputs.append(f"{variable} = input()")
+                inputs.append(f"{variable.name} = input()")
+            elif type == "INTEGER":
+                inputs.append(f"{variable.name} = int(input())")
+            elif type == "REAL":
+                inputs.append(f"{variable.name} = float(input())")
             else:
-                assert type == "INTEGER", f"unexpected variable type in INPUT '{variable}': {type}"
-                inputs.append(f"{variable} = int(input())")
+                assert False, f"unsupported variable type in INPUT [{variable}]"
         return emit(inputs)
 
 
@@ -678,8 +680,8 @@ class FunctionCall(Expression):
         return f"{self.name}({', '.join(a.c() for a in self.arguments)})"
 
     def py(self) -> str:
-        if self.name in ("CHARACTER",):
-            python_runtime_imports.add("CHARACTER")
+        if self.name in ("CHARACTER", "FIX", "FLOAT"):
+            python_runtime_imports.add(self.name)
         return f"{self.name}({', '.join(a.py() for a in self.arguments)})"
 
 
@@ -730,7 +732,7 @@ class BinaryOperation(Expression):
         rhs = self.right.py()
         if operation == "==" and rhs == "True":
             return f"{self.left.py()}"
-        return f"{self.left.py()} {operation} {self.right.py()}"
+        return f"({self.left.py()} {operation} {self.right.py()})"
 
 
 @dataclass
