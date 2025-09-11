@@ -1,12 +1,18 @@
 #!/usr/bin/env python3
 #
-import json
 import pathlib
 import sys
 from pathlib import Path
 
 from lexer import Lexer, Token
-from nodes import Array, common, emit, python_imports, types_registry
+from nodes import (
+    Array,
+    common,
+    emit,
+    python_imports,
+    python_runtime_imports,
+    types_registry,
+)
 from parser import Parser
 from peg.parser import PEGParser
 from yamler import yamlizer
@@ -26,9 +32,9 @@ if __name__ == "__main__":
         print("usage: easy.py <input.easy> [-c <output.c>] [-t] [-a] [-j] [-p <output.py>]")
         print("  -c <output.c>  - specify output C file (default: input.c)")
         print("  -t             - generate tokens file (default: off)")
-        print("  -a             - generate AST file (default: off)")
-        print("  -y             - generate YAML AST file (default: off)")
-        print("  -j             - generate PEG JSON AST file (default: off)")
+        print("  -m             - generate meta file (default: off)")
+        print("  -a             - generate YAML AST file (default: off)")
+        print("  -e             - generate PEG YAML AST file (default: off)")
         print("  -p <output.py> - generate Python file (default: input.py)")
         sys.exit(1)
 
@@ -89,13 +95,11 @@ if __name__ == "__main__":
 
         with open(output_py, "w") as f:
             if python_imports:
-                imports = ", ".join(sorted(python_imports))
-                f.write(f"from runtime import {imports}\n\n")
-            f.write(code_py + "\n")
-        code_py = ast.py().strip()
+                for v in sorted(python_imports):
+                    f.write(f"{v}\n")
+                f.write("\n")
 
-        with open(output_py, "w") as f:
-            if python_imports:
-                imports = ", ".join(sorted(python_imports))
+            if python_runtime_imports:
+                imports = ", ".join(sorted(python_runtime_imports))
                 f.write(f"from runtime import {imports}\n\n")
             f.write(code_py + "\n")

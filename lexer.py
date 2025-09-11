@@ -61,7 +61,6 @@ class Token:
         if self.filename:
             v += f"{self.filename}"
         v = f"{v}:{self.line}:{self.col}"
-        print(v)
         return v
 
     def __repr__(self) -> str:

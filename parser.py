@@ -44,7 +44,6 @@ from nodes import (
     types_registry,
     variables_registry,
 )
-from yamler import yamlizer
 
 
 class ParseError(Exception):
@@ -450,7 +449,7 @@ class Parser:
         return SetStatement(token, targets, expression)
 
     def check_variable_type(self, variable: Variable, expected_type: Type, token: Token) -> Variable:
-        if len(variable.parts) > 1:  # TODO: (!), check field and array types
+        if len(variable.parts) > 1:  # TODO: (!), support fields and arrays
             return variable
 
         expanded_expected_type = expand_type(expected_type, token)

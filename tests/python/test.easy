@@ -1,0 +1,23 @@
+PROGRAM Python:
+  TYPE Field IS ARRAY [1:25] OF ARRAY [1:80] OF INTEGER;
+
+  DECLARE r STRUCTURE FIELD x IS INTEGER, FIELD y IS INTEGER END STRUCTURE;
+  DECLARE a ARRAY [1:25] OF ARRAY [1:80] OF INTEGER;
+  DECLARE (i, a) INTEGER;
+  DECLARE s STRING;
+  DECLARE f Field;
+
+  SET a := 123;
+  FOR i := 1 BY 3 TO 100 WHILE i <= 10 DO
+    DECLARE x INTEGER;
+    SET x := a + i;
+    OUTPUT x;
+  END FOR;
+
+  SET s := "abc";
+  OUTPUT s || "<->" || "xyz";
+
+  SET f[10][20] := 99;
+  
+  EXIT;
+END PROGRAM Python;

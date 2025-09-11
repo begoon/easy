@@ -12,8 +12,8 @@ functions_registry: dict[str, "Type"] = {
     "FIX": "INTEGER",
     "FLOAT": "REAL",
 }
+python_runtime_imports: set[str] = set()
 python_imports: set[str] = set()
-
 common: list[str] = []
 
 
@@ -133,21 +133,56 @@ class Segment(Node):
         parts = []
         if self.variables:
             for v in self.variables:
-                type = v.type.meta() if isinstance(v.type, Node) else v.type
                 for name in v.names:
-                    if type == "INTEGER":
-                        parts.append(f"{name} = 0")
-                    elif type == "REAL":
-                        parts.append(f"{name} = 0.0")
-                    elif type == "BOOLEAN":
-                        parts.append(f"{name} = False")
-                    elif type == "STRING":
-                        parts.append(f"{name} = ''")
-                    else:
-                        raise ValueError(f"unsupported variable type in python: {type} [{self.token}]")
+
+                    def initer(name: str, type: Type) -> None:
+                        if type == "INTEGER":
+                            return "0"
+                        elif type == "REAL":
+                            return "0.0"
+                        elif type == "BOOLEAN":
+                            return "False"
+                        elif type == "STRING":
+                            return '""'
+
+                        elif isinstance(type, str) and type in types_registry:
+                            return initer(name, types_registry[type])
+
+                        elif isinstance(type, Array):
+                            lo = type.start.py() if type.start else "0"
+                            hi = type.end.py()
+                            sz = lo + "+" + hi + "+1"
+                            initial_value = initer(name, type.type)
+                            return f"[{initial_value} for _ in range({sz})]"
+
+                        elif isinstance(v.type, StructureStatement):
+                            python_imports.add("from dataclasses import make_dataclass")
+                            field_descriptors = []
+                            initial_values = []
+                            for field in type.fields:
+                                initial_value = initer(field.name, field.type)
+                                initial_values.append(initial_value)
+                                type = expand_type(field.type, self.token)
+                                types = {"INTEGER": "int", "REAL": "float", "BOOLEAN": "bool", "STRING": "str"}
+                                if type in types:
+                                    type = types[type]
+                                else:
+                                    raise ValueError(f"unsupported field type in python: [{type}] [{self.token}]")
+                                field_descriptor = f'("{field.name}", {type})'
+                                field_descriptors.append(field_descriptor)
+                            fields = ", ".join(field_descriptors)
+                            return f'make_dataclass("{name}_STRUCTURE", [{fields}])({", ".join(initial_values)})'
+                        else:
+                            raise ValueError(f"unsupported variable type in python: {type} [{self.token}]")
+
+                    parts.append(f"{name} = {initer(name, v.type)}")
+
         if self.subroutines:
+            parts.append("\n")
             for subroutine in self.subroutines:
                 parts.append(subroutine.py())
+                parts.append("\n")
+
         parts.append(self.statements.py())
         return emit(parts)
 
@@ -291,7 +326,7 @@ class FunctionStatement(Node):
     def py(self) -> str:
         arguments = ", ".join(name for name, _ in self.arguments)
         v = [
-            f"def {self.name}({arguments}) -> {self.type}:",
+            f"def {self.name}({arguments}) -> {TYPE(self.type)}:",
             indent(self.segment.py(), 1),
         ]
         return emit(v)
@@ -504,25 +539,18 @@ class OutputStatement(Statement):
 
     def c(self) -> str:
         output = []
-
         format: list[str] = []
         arguments = ", ".join(expression_stringer(argument, format) for argument in self.arguments)
         output.append(f'output("{"".join(format)}", {arguments});')
         return emit(output)
 
     def py(self) -> str:
-        def format(argument: Expression) -> str:
-            if isinstance(argument, Variable):
-                name = argument.name.split(".", 1)[0]
-                type = variables_registry.get(name)
-                if type != "STRING":
-                    return f"str({argument.py()})"
-                return argument.py()
-            return argument.py().replace("'", '"')
+        python_runtime_imports.add("runtime_print")
 
-        arguments = ", ".join(format(argument) for argument in self.arguments)
-        python_imports.add("runtime_print")
-        return f"runtime_print({arguments})"
+        output = []
+        arguments = ", ".join(argument.py() for argument in self.arguments)
+        output.append(f"runtime_print({arguments})")
+        return emit(output)
 
 
 @dataclass
@@ -594,7 +622,7 @@ class CallStatement(Statement):
 
     def py(self) -> str:
         arguments = ", ".join(arg.py() for arg in self.arguments)
-        return f"{self.name}({arguments}) # CALL {self.name}"
+        return f"{self.name}({arguments})"
 
 
 @dataclass
@@ -650,7 +678,9 @@ class FunctionCall(Expression):
         return f"{self.name}({', '.join(a.c() for a in self.arguments)})"
 
     def py(self) -> str:
-        return f"{self.name}({', '.join(a.py() for a in self.arguments)}"
+        if self.name in ("CHARACTER",):
+            python_runtime_imports.add("CHARACTER")
+        return f"{self.name}({', '.join(a.py() for a in self.arguments)})"
 
 
 @dataclass
@@ -695,9 +725,12 @@ class BinaryOperation(Expression):
         return f"({self.left.c()} {self.operation} {self.right.c()})"
 
     def py(self) -> str:
-        operations = {"AND": "and", "OR": "or", "=": "==", "<>": "!="}
+        operations = {"AND": "and", "OR": "or", "=": "==", "<>": "!=", "||": "or", "XOR": "^"}
         operation = operations.get(self.operation, self.operation)
-        return f"({self.left.py()} {operation} {self.right.py()})"
+        rhs = self.right.py()
+        if operation == "==" and rhs == "True":
+            return f"{self.left.py()}"
+        return f"{self.left.py()} {operation} {self.right.py()}"
 
 
 @dataclass
@@ -903,6 +936,13 @@ def expression_stringer(v: Expression, format: list[str], callee: str = "OUTPUT"
         name = v.name.split(".", 1)[0]
         variable_type = variables_registry.get(name)
         variable_formats = {"INTEGER": "i", "REAL": "r", "BOOLEAN": "b", "STRING": "A"}
+
+        if str(variable_type) not in variable_formats:
+            raise ValueError(
+                f"expression stringer requires primitive variable types in {callee} at {v.token}\n"
+                f"{", ".join(v for v in variable_formats)}\n"
+                f"'{name}': '{variable_type}'"
+            )
         convert = variable_formats.get(variable_type)
         if not convert:
             raise ValueError(f"unsupported variable=[{name}] type=[{variable_type}] in {callee} at {v.token}")
