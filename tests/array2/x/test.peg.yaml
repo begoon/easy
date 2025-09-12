@@ -20,7 +20,24 @@
                     lo: '80'
                     element_type:
                       type: type
-                      basic_type: BOOLEAN
+                      structured_type:
+                        type: structured_type
+                        fields:
+                          type: field_list
+                          head:
+                            type: field
+                            name: x
+                            t:
+                              type: type
+                              basic_type: INTEGER
+                          tail:
+                            type: field_list
+                            head:
+                              type: field
+                              name: y
+                              t:
+                                type: type
+                                basic_type: REAL
         variable_declarations:
           - type: variable_declaration
             names: b
@@ -39,12 +56,14 @@
                   parts:
                     - index: '1'
                     - index: '2'
+                    - field: x
             expr:
               type: variable
               base: b
               parts:
                 - index: '2'
                 - index: '1'
+                - field: x
           - type: output_statement
             list:
               - '"."'
