@@ -209,12 +209,14 @@ class Array(Node):
         assert variable, f"array.c() requires a name parameter at {self.token}"
         start = self.start.c() if self.start else "0"
         end = self.end.c()
-        t = f"[{start} + {end} + /* @ */ 1]"
+        sz = f"{start} + {end} + 1"
+        bounds = f"[{sz}]"
         v = self.type
         while isinstance(v, Array):
-            t += f"[{v.start.c() if v.start else '0'} + {v.end.c()}]"
+            bounds += f"[{v.start.c() if v.start else '0'} + {v.end.c()}]"
             v = v.type
-        return f"{TYPE(v)} {variable}{t}"
+        x = f"/* struct {{ int sz; unsigned char data[{sz}]; }} {variable}_ARRAY; */"
+        return f"{x} {TYPE(v)} {variable}{bounds}"
 
     def py(self) -> str:
         start = self.start.py() + ":" if self.start else ""

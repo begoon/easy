@@ -130,8 +130,10 @@ def process(test: Path) -> None:
     if expected_py.exists():
         diff(expected_py, created_py)
 
+    skip_run = expected_c.exists() and os.getenv("SKIP_RUN")
+
     expected_output = x.with_suffix(".output")
-    if expected_output.exists():
+    if expected_output.exists() and not skip_run:
         created_output = test.with_suffix(".output")
         removals.append(created_output)
 
