@@ -48,7 +48,7 @@ int main()
     scanf("%d", &topnum);
     if (topnum > 0)
     {
-        /* struct { int sz; unsigned char data[1 + topnum + 1]; } sieve_ARRAY; */ int sieve[1 + topnum + 1];
+        int sieve[1 + topnum + 1];
         int i = {0};
         int limit = {0};
         int count = {0};

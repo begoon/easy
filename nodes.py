@@ -215,8 +215,7 @@ class Array(Node):
         while isinstance(v, Array):
             bounds += f"[{v.start.c() if v.start else '0'} + {v.end.c()}]"
             v = v.type
-        x = f"/* struct {{ int sz; unsigned char data[{sz}]; }} {variable}_ARRAY; */"
-        return f"{x} {TYPE(v)} {variable}{bounds}"
+        return f"{TYPE(v)} {variable}{bounds}"
 
     def py(self) -> str:
         start = self.start.py() + ":" if self.start else ""

@@ -1,5 +1,5 @@
 #include "runtime.c"
-typedef /* struct { int sz; unsigned char data[0 + 25 + 1]; } B_ARRAY; */ int B[0 + 25 + 1][0 + 80];
+typedef int B[0 + 25 + 1][0 + 80];
 B b = {0};
 int main()
 {
