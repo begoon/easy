@@ -1,9 +1,8 @@
 #include "runtime.c"
-typedef int B[0 + 25 + 1][0 + 80];
-B b = {0};
+struct { struct { int x; double y; int f; } a[0 + 80 + 1]; STR x; } b[0 + 25 + 1];
 int main()
 {
-    b[1][2] = b[2][1];
-    output("A", from_cstring("."));
+    b[1].a[2] = b[2].a[1];
+    output("A", from_cstring("..."));
     exit(0);
 }

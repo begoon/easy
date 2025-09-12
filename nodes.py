@@ -155,24 +155,31 @@ class Segment(Node):
                             initial_value = initer(name, type.type)
                             return f"[{initial_value} for _ in range({sz})]"
 
-                        elif isinstance(v.type, StructureStatement):
+                        elif isinstance(type, StructureStatement):
                             python_imports.add("from dataclasses import make_dataclass")
                             field_descriptors = []
                             initial_values = []
+
                             for field in type.fields:
                                 initial_value = initer(field.name, field.type)
                                 initial_values.append(initial_value)
-                                type = expand_type(field.type, self.token)
+                                # field_type = expand_type(field.type, self.token)
                                 types = {"INTEGER": "int", "REAL": "float", "BOOLEAN": "bool", "STRING": "str"}
-                                if type in types:
-                                    type = types[type]
+                                if isinstance(field.type, str):
+                                    if field.type in types:
+                                        field_type = types[field.type]
+                                    else:
+                                        raise ValueError(
+                                            f"unsupported field type in python: [{field_type}] [{self.token}]"
+                                        )
                                 else:
-                                    raise ValueError(f"unsupported field type in python: [{type}] [{self.token}]")
-                                field_descriptor = f'("{field.name}", {type})'
+                                    field_type = field.type.py()
+                                field_descriptor = f'("{field.name}", {field_type})'
                                 field_descriptors.append(field_descriptor)
                             fields = ", ".join(field_descriptors)
                             return f'make_dataclass("{name}_STRUCTURE", [{fields}])({", ".join(initial_values)})'
                         else:
+                            assert 0, type
                             raise ValueError(f"unsupported variable type in python: {type} [{self.token}]")
 
                     parts.append(f"{name} = {initer(name, v.type)}")
@@ -218,9 +225,7 @@ class Array(Node):
         return f"{TYPE(v)} {variable}{bounds}"
 
     def py(self) -> str:
-        start = self.start.py() + ":" if self.start else ""
-        end = self.end.py()
-        return f"[] # {start}{end} OF {self.type}"
+        return "list"
 
     def meta(self) -> str:
         start = self.start.meta() + ":" if self.start else ""
@@ -243,7 +248,14 @@ class StructureStatement(Node):
         return " ".join(v)
 
     def c(self) -> str:
-        v = ["struct {", " ".join(f"{TYPE(field.type)} {field.name};" for field in self.fields), "}"]
+        def format(field: FieldStatement) -> str:
+            type = field.type
+            if isinstance(type, Array):
+                return type.c(field.name)
+            else:
+                return f"{TYPE(type)} {field.name}"
+
+        v = ["struct {", " ".join(f"{format(field)};" for field in self.fields), "}"]
         return " ".join(v)
 
     def py(self) -> str:
@@ -681,7 +693,7 @@ class FunctionCall(Expression):
         return f"{self.name}({', '.join(a.c() for a in self.arguments)})"
 
     def py(self) -> str:
-        if self.name in ("CHARACTER", "FIX", "FLOAT"):
+        if self.name in ("CHARACTER", "FIX", "FLOAT", "LENGTH", "SUBSTR"):
             python_runtime_imports.add(self.name)
         return f"{self.name}({', '.join(a.py() for a in self.arguments)})"
 
@@ -795,23 +807,26 @@ class Variable(Expression):
     name: str
     parts: Optional[list[Expression | str]] = None
 
-    def fqn(self, f: Callable[[Expression], str]) -> str:
-        v = [self.name]
-        for part in self.parts or []:
-            if isinstance(part, str):
-                v.append(part)
-            else:
-                v.append(f"[{f(part)}]")
-        return "".join(v)
-
     def meta(self) -> str:
         return self.name
 
     def c(self) -> str:
-        return self.name
+        v = self.parts[0]
+        for part in self.parts[1:]:
+            if isinstance(part, str):
+                v += f".{part}"
+            else:
+                v += f"[{part.c()}]"
+        return v
 
     def py(self) -> str:
-        return self.name
+        v = self.parts[0]
+        for part in self.parts[1:]:
+            if isinstance(part, str):
+                v += f".{part}"
+            else:
+                v += f"[{part.py()}]"
+        return v
 
 
 @dataclass
@@ -898,9 +913,9 @@ def emit(lines: list[str]) -> str:
     return "\n".join(lines)
 
 
-def TYPE(v: "Type") -> str:
+def TYPE(v: "Type", name: str = "") -> str:
     if isinstance(v, Array):
-        return v.c()
+        return v.c(name)
     if isinstance(v, StructureStatement):
         return v.c()
     if v in types_registry:
@@ -916,6 +931,8 @@ def expand_type(name: Type, token: Token) -> str:
         return name
     if isinstance(name, Array):
         return expand_type(name.type, token)
+    if isinstance(name, StructureStatement):
+        return name
     custom = types_registry.get(name)
     if custom:
         return expand_type(custom, token)

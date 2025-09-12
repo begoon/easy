@@ -73,8 +73,7 @@ while True:
         break
     row[i] = 0
     i += 1
-i = FIX((N / 2))
-row[i] = 1
+row[FIX((N / 2))] = 1
 print()
 n = 1
 while True:

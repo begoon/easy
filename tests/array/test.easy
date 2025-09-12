@@ -1,7 +1,18 @@
 PROGRAM Array:
-  TYPE B IS ARRAY[25] OF ARRAY [80] OF BOOLEAN;
-  DECLARE b B;
-  SET b[1][2] := b[2][1];
-  OUTPUT ".";
+  DECLARE b
+    ARRAY[25] OF
+      STRUCTURE
+        FIELD a IS
+          ARRAY [80] OF
+            STRUCTURE
+              FIELD x IS INTEGER,
+              FIELD y IS REAL,
+              FIELD f IS BOOLEAN
+            END STRUCTURE,
+        FIELD x IS STRING
+      END STRUCTURE;
+
+  SET b[1].a[2] := b[2].a[1];
+  OUTPUT "...";
   EXIT;
 END PROGRAM Array;

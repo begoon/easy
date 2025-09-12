@@ -81,8 +81,7 @@ int main()
     {
         row[i] = 0;
     }
-    i = FIX((N / 2));
-    row[i] = 1;
+    row[FIX((N / 2))] = 1;
     print();
     for (n = 1; n <= 10; n += 1)
     {

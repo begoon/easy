@@ -48,8 +48,7 @@ PROGRAM Rule110:
   SET N := 32;
 
   FOR i := 1 TO N DO SET row[i] := 0; END FOR;
-  SET i := FIX(N/2);
-  SET row[i] := 1;
+  SET row[FIX(N/2)] := 1;
 
   CALL print;
 
