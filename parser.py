@@ -553,7 +553,9 @@ class Parser:
         operations = ("+", "-")
         while operation := self.accept(operations):
             right = self.expression_MULTIPLYING()
-            if left.type != right.type:
+            left_type = expand_type(left.type, operation)
+            right_type = expand_type(right.type, operation)
+            if left_type != right_type:
                 self.error(f"{left=} and {right=} must be of the same type to perform [{operation.value}]", operation)
             if not is_number(left.type):
                 self.error("operation only supported for INTEGER and REAL", operation)

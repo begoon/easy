@@ -1,0 +1,61 @@
+PROGRAM Rule110:
+  TYPE Row IS ARRAY [1:32] OF INTEGER;
+
+  DECLARE row Row;
+  DECLARE (N, n, i) INTEGER;
+
+  PROCEDURE step:
+    DECLARE i INTEGER;
+    DECLARE next Row;
+
+    FOR i := 1 TO N DO SET next[i] := 0; END FOR;
+
+    FOR i := 1 TO N DO
+      DECLARE (left, c, right) INTEGER;
+      DECLARE s INTEGER;
+      DECLARE j INTEGER;
+
+      SET j := i - 1;
+      IF j < 1 THEN SET j := N; FI;
+      SET left := row[j];
+
+      SET c := row[i];
+
+      SET j := i + 1;
+      IF j > N THEN SET j := 1; FI;
+      SET right := row[j];
+
+      SET s := left + c + right;
+
+      SELECT TRUE OF 
+        CASE (s = 2): SET next[i] := 1;
+        CASE (s = 0 | s = 3): SET next[i] := 0;
+        OTHERWISE: IF c = 1 THEN SET next[i] := 1; ELSE SET next[i] := right; FI;
+      END SELECT;
+    END FOR;
+
+    FOR i := 1 TO N DO SET row[i] := next[i]; END FOR;
+  END PROCEDURE step;
+
+  PROCEDURE print:
+    DECLARE i INTEGER;
+    FOR i := 1 TO N DO
+      IF row[i] = 1 THEN OUTPUT "X"; ELSE OUTPUT "."; FI;
+    END FOR;
+    OUTPUT "  ";
+  END PROCEDURE print;
+
+  SET N := 32;
+
+  FOR i := 1 TO N DO SET row[i] := 0; END FOR;
+  SET i := FIX(N/2);
+  SET row[i] := 1;
+
+  CALL print;
+
+  FOR n := 1 TO 10 DO
+    CALL step;
+    CALL print;
+  END FOR;
+
+END PROGRAM Rule110;
