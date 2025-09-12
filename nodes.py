@@ -715,8 +715,8 @@ class BinaryOperation(Expression):
             self.operation = operations.get(self.operation, self.operation)
             assert left_type in ("INTEGER", "REAL"), type_mismatch(self)
 
-        elif self.operation in ("<", "<=", ">", ">=", "=", "<>", "|", "XOR"):
-            operations = {"=": "==", "<>": "!=", "|": "||", "XOR": "^"}
+        elif self.operation in ("<", "<=", ">", ">=", "=", "<>", "&", "|", "XOR"):
+            operations = {"=": "==", "<>": "!=", "&": "&&", "|": "||", "XOR": "^"}
             self.operation = operations.get(self.operation, self.operation)
             assert left_type in ("BOOLEAN", "INTEGER", "REAL"), type_mismatch(self)
 
@@ -729,7 +729,7 @@ class BinaryOperation(Expression):
         return f"({self.left.c()} {self.operation} {self.right.c()})"
 
     def py(self) -> str:
-        operations = {"AND": "and", "OR": "or", "=": "==", "<>": "!=", "||": "or", "XOR": "^"}
+        operations = {"AND": "and", "OR": "or", "=": "==", "<>": "!=", "&&": "and", "||": "or", "XOR": "^"}
         operation = operations.get(self.operation, self.operation)
         rhs = self.right.py()
         if operation == "==" and rhs == "True":

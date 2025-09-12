@@ -1,6 +1,9 @@
 def runtime_print(*args, **kwargs) -> None:
+    if not args:
+        return
     print(*args, end="", sep="")
-    if args and len(str(args[-1])) > 1:
+    last = args[-1]
+    if len(str(last)) > 1 or isinstance(last, int):
         print()
 
 

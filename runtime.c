@@ -91,7 +91,7 @@ void output(const char *fmt, ...)
     }
     va_end(args);
 
-    if (n > 1)
+    if (n > 1 || fmt[-1] == 'i')
         putchar('\n');
 }
 void pause(double seconds)

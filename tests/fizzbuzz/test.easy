@@ -1,0 +1,17 @@
+PROGRAM FizzBuzz:
+  DECLARE n INTEGER;
+
+  PROCEDURE FizzBuzz(n INTEGER):
+    DECLARE i INTEGER;
+    FOR i := 1 TO n DO
+      SELECT TRUE OF
+        CASE (i MOD 3 = 0 & i MOD 5 = 0): OUTPUT "FizzBuzz";
+        CASE (i MOD 3 = 0): OUTPUT "Fizz";
+        CASE (i MOD 5 = 0): OUTPUT "Buzz";
+        OTHERWISE: OUTPUT i;
+      END SELECT;
+    END FOR;
+  END PROCEDURE FizzBuzz;
+
+  CALL FizzBuzz(20);
+END PROGRAM FizzBuzz;
