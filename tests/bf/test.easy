@@ -7,7 +7,7 @@ PROGRAM BF:
     DECLARE tape Tape;
     DECLARE out STRING;
 
-     DECLARE pc INTEGER;
+    DECLARE pc INTEGER;
     DECLARE ptr INTEGER;
 
     DECLARE ch STRING;
