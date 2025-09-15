@@ -316,15 +316,8 @@ class SET(Statement):
         v = []
 
         for target in self.target:
-            fqn = self.scope + "|" + target.name
-            variable = variables_list.get(fqn)
-
-            while variable is None and "|" in fqn:
-                fqn = "|".join(fqn.split(".")[:-1]) + "|" + target.name
-                variable = variables_list.get(fqn)
-
+            variable = discover_variable(target)
             _, reference = expand_variable_reference(variable, target)
-
             v.append(f"{reference} = {self.expression.c()};")
         return emit(v)
 
@@ -404,8 +397,7 @@ class INPUT(Statement):
     def c(self) -> str:
         inputs = []
         for variable_reference in self.variables:
-            fqn = variable_reference.scope + "|" + variable_reference.name
-            variable = variables_list.get(fqn)
+            variable = discover_variable(variable_reference)
             type, reference = expand_variable_reference(variable, variable_reference)
 
             if isinstance(type, StringType):
@@ -415,7 +407,7 @@ class INPUT(Statement):
             elif isinstance(type, RealType):
                 inputs.append(f'scanf("%lf", &{reference});')
             else:
-                assert False, f"unsupported variable '{variable}' type in INPUT"
+                assert False, f"unsupported variable '{variable}' type in INPUT at {variable.token}"
         return emit(inputs)
 
 
@@ -563,12 +555,7 @@ class VariableReference(Entity):
     parts: list[VariableSubscript | VariableField]
 
     def c(self) -> str:
-        fqn = self.scope + "|" + self.name
-
-        while fqn not in variables_list and "|" in fqn:
-            fqn = "|".join(fqn.split(".")[:-1]) + "|" + self.name
-
-        variable = variables_list.get(fqn)
+        variable = discover_variable(self)
 
         _, reference = expand_variable_reference(variable, self)
         return reference
@@ -651,12 +638,7 @@ def expression_stringer(v: Expression, format: list[str], callee: str = "OUTPUT"
         format.append(convert)
         return c
     if isinstance(v, VariableReference):
-        fqn = v.scope + "|" + v.name
-
-        while fqn not in variables_list and "|" in fqn:
-            fqn = "|".join(fqn.split(".")[:-1]) + "|" + v.name
-
-        variable = variables_list.get(fqn)
+        variable = discover_variable(v)
 
         type, reference = expand_variable_reference(variable, v)
         if isinstance(type, AliasType):
@@ -1297,17 +1279,29 @@ def expand_variable_reference(variable: Variable, variable_reference: VariableRe
         if isinstance(part, VariableSubscript):
             if isinstance(type, AliasType):
                 type = type.reference_type
-            assert isinstance(type, ArrayType), f"expected array type, found {type}"
+            assert isinstance(type, ArrayType), f"reference type of subscript must be ArrayType, not {type}"
             type = type.type
             reference += ".data" + part.c()
         elif isinstance(part, VariableField):
             if isinstance(type, AliasType):
                 type = type.reference_type
-            assert isinstance(type, StructType), f"expected structure type, found {type}"
+            assert isinstance(
+                type, StructType
+            ), f"reference type of field must be StructType, not {type}, at {part.token}"
             field = next((f for f in type.fields if f.name == part.name), None)
             assert field is not None, f"field '{part.name}' not found in {type}"
             type = field.type
             reference += part.c()
         else:
-            assert False, f"unexpected part '{part}'"
+            assert False, f"unexpected part '{part}' at {variable.token}"
     return type, reference
+
+
+def discover_variable(v: VariableReference) -> Variable:
+    scope = v.scope.split(".")
+    while scope and not (variable := variables_list.get(".".join(scope) + "|" + v.name)):
+        scope.pop()
+
+    if variable is None:
+        raise Exception(f"undefined variable '{v.name}' in scope '{v.scope}' at {v.token}")
+    return variable
