@@ -24,4 +24,32 @@
     ],
     "python.testing.unittestEnabled": false,
     "python.testing.pytestEnabled": true,
+    "editor.tokenColorCustomizations": {
+        "textMateRules": [
+            {
+                "scope": "keyword.control.easy",
+                "settings": {
+                    "foreground": "#ffd900"
+                }
+            },
+            {
+                "scope": "string.quoted.double.easy",
+                "settings": {
+                    "foreground": "#00FF00"
+                }
+            },
+            {
+                "scope": "constant.numeric.easy",
+                "settings": {
+                    "foreground": "#faf7fa"
+                }
+            },
+            {
+                "scope": "constant.other",
+                "settings": {
+                    "foreground": "#FF4500"
+                }
+            },
+        ]
+    }
 }

@@ -1,9 +1,11 @@
-PROGRAM Test:
+PROGRAM Trivia2:
     TYPE Point IS STRUCTURE FIELD x IS INTEGER, FIELD y IS INTEGER END STRUCTURE;
-    DECLARE (a, p) INTEGER;
+    DECLARE a INTEGER;
+    DECLARE p Point;
     BEGIN
         SET p.x := 1;
         SET p.y := 2;
         SET a := p.x;
     END;
-END PROGRAM Test;
+    OUTPUT a, " ", p.y, " ", p.x;
+END PROGRAM Trivia2;

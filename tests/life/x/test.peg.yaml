@@ -638,11 +638,6 @@
                     type: type
                     basic_type: INTEGER
                 - type: variable_declaration
-                  names: n
-                  t:
-                    type: type
-                    basic_type: INTEGER
-                - type: variable_declaration
                   names: next
                   t:
                     type: type
@@ -701,6 +696,11 @@
                               t:
                                 type: type
                                 basic_type: BOOLEAN
+                            - type: variable_declaration
+                              names: n
+                              t:
+                                type: type
+                                basic_type: INTEGER
                           statements:
                             - type: assignment_statement
                               targets:
@@ -834,79 +834,17 @@
                                 type: variable
                                 base: alive
                                 parts: []
-                - type: simple_iteration_statement
-                  tgt:
-                    type: iteration_target
-                    var:
-                      type: variable
-                      base: y
-                      parts: []
-                  ctrl:
-                    type: control
-                    init: '0'
-                    limit:
-                      type: limit
-                      value:
-                        type: add_expr
-                        head:
-                          type: variable
-                          base: h
-                          parts: []
-                        op: '-'
-                        rhs: '1'
-                  body:
-                    type: segment_body
-                    statements:
-                      - type: simple_iteration_statement
-                        tgt:
-                          type: iteration_target
-                          var:
-                            type: variable
-                            base: x
-                            parts: []
-                        ctrl:
-                          type: control
-                          init: '0'
-                          limit:
-                            type: limit
-                            value:
-                              type: add_expr
-                              head:
-                                type: variable
-                                base: w
-                                parts: []
-                              op: '-'
-                              rhs: '1'
-                        body:
-                          type: segment_body
-                          statements:
-                            - type: assignment_statement
-                              targets:
-                                - type: target
-                                  var:
-                                    type: variable
-                                    base: field
-                                    parts:
-                                      - index:
-                                          type: variable
-                                          base: y
-                                          parts: []
-                                      - index:
-                                          type: variable
-                                          base: x
-                                          parts: []
-                              expr:
-                                type: variable
-                                base: next
-                                parts:
-                                  - index:
-                                      type: variable
-                                      base: y
-                                      parts: []
-                                  - index:
-                                      type: variable
-                                      base: x
-                                      parts: []
+                - type: assignment_statement
+                  targets:
+                    - type: target
+                      var:
+                        type: variable
+                        base: field
+                        parts: []
+                  expr:
+                    type: variable
+                    base: next
+                    parts: []
             end_name: evolution
         statements:
           - type: assignment_statement

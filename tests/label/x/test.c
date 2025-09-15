@@ -1,5 +1,9 @@
 #include "runtime.c"
-int i = {0};
+typedef int INTEGER;
+typedef double REAL;
+typedef int BOOLEAN;
+typedef STR STRING;
+int i = 0;
 int main()
 {
     if_label:

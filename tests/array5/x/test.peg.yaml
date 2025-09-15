@@ -1,0 +1,169 @@
+  - type: program_segment
+    main:
+      type: main_program
+      name: Array5
+      body:
+        type: segment_body
+        type_definitions:
+          - type: type_definition
+            name: Field
+            def:
+              type: type
+              arrayed_type:
+                type: arrayed_type
+                lo: '1'
+                hi: '100'
+                element_type:
+                  type: type
+                  structured_type:
+                    type: structured_type
+                    fields:
+                      type: field_list
+                      head:
+                        type: field
+                        name: score
+                        t:
+                          type: type
+                          basic_type: INTEGER
+                      tail:
+                        type: field_list
+                        head:
+                          type: field
+                          name: name
+                          t:
+                            type: type
+                            basic_type: STRING
+        variable_declarations:
+          - type: variable_declaration
+            names: f
+            t:
+              type: type
+              ref:
+                type: type_identifier
+                name: Field
+        subroutine_definitions:
+          - type: function_definition
+            name:
+              type: procedure_name
+              params:
+                type: internal_parameter_list
+                head:
+                  type: internal_parameter
+                  id: f
+                  parameter_type:
+                    type: type
+                    ref:
+                      type: type_identifier
+                      name: Field
+            return_type:
+              type: type
+              ref:
+                type: type_identifier
+                name: Field
+            body:
+              type: segment_body
+              statements:
+                - type: output_statement
+                  list:
+                    - type: concat_expr
+                      head: '"BEFORE: "'
+                      tail:
+                        - type: variable
+                          base: f
+                          parts:
+                            - index: '10'
+                            - field: score
+                        - '" "'
+                        - type: variable
+                          base: f
+                          parts:
+                            - index: '10'
+                            - field: name
+                - type: assignment_statement
+                  targets:
+                    - type: target
+                      var:
+                        type: variable
+                        base: f
+                        parts:
+                          - index: '10'
+                          - field: score
+                  expr: '123'
+                - type: assignment_statement
+                  targets:
+                    - type: target
+                      var:
+                        type: variable
+                        base: f
+                        parts:
+                          - index: '10'
+                          - field: name
+                  expr:
+                    type: concat_expr
+                    head:
+                      type: variable
+                      base: f
+                      parts:
+                        - index: '10'
+                        - field: name
+                    tail: '"xyz"'
+                - type: return_statement
+                  value:
+                    type: variable
+                    base: f
+                    parts: []
+            end_name: a
+        statements:
+          - type: assignment_statement
+            targets:
+              - type: target
+                var:
+                  type: variable
+                  base: f
+                  parts:
+                    - index: '10'
+                    - field: score
+            expr: '321'
+          - type: assignment_statement
+            targets:
+              - type: target
+                var:
+                  type: variable
+                  base: f
+                  parts:
+                    - index: '10'
+                    - field: name
+            expr: '"abc"'
+          - type: assignment_statement
+            targets:
+              - type: target
+                var:
+                  type: variable
+                  base: f
+                  parts: []
+            expr:
+              type: function_reference
+              fn:
+                type: function_identifier
+                name: a
+              head:
+                type: variable
+                base: f
+                parts: []
+          - type: output_statement
+            list:
+              - type: concat_expr
+                head: '"AFTER: "'
+                tail:
+                  - type: variable
+                    base: f
+                    parts:
+                      - index: '10'
+                      - field: score
+                  - '" "'
+                  - type: variable
+                    base: f
+                    parts:
+                      - index: '10'
+                      - field: name
+      end_name: Array5

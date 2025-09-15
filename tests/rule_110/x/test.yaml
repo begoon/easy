@@ -1,954 +1,958 @@
-node: ProgramStatement
-token: PROGRAM / KEYWORD at 1:1
+node: PROGRAM
+token: <PROGRAM|KEYWORD tests/rule_110/test.easy:1:1>
+scope: '@'
 name: Rule110
 segment:
   node: Segment
-  token: TYPE / KEYWORD at 2:3
+  token: <TYPE|KEYWORD tests/rule_110/test.easy:2:3>
+  scope: PROGRAM:Rule110
   types:
-    - node: TypeIsStatement
-      token: TYPE / KEYWORD at 2:3
+    - node: TYPEIS
+      token: <TYPE|KEYWORD tests/rule_110/test.easy:2:3>
+      scope: PROGRAM:Rule110
       name: Row
       definition:
-        node: Array
-        token: ARRAY / IDENT at 2:15
-        type: INTEGER
-        start:
+        node: ArrayType
+        type:
+          node: IntegerType
+        hi:
           node: IntegerLiteral
-          token: 1 / INTEGER at 2:22
-          type: INTEGER
-          value: 1
-        end:
-          node: IntegerLiteral
-          token: 32 / INTEGER at 2:24
+          token: <32|INTEGER tests/rule_110/test.easy:2:24>
+          scope: PROGRAM:Rule110
           type: INTEGER
           value: 32
+        lo:
+          node: IntegerLiteral
+          token: <1|INTEGER tests/rule_110/test.easy:2:22>
+          scope: PROGRAM:Rule110
+          type: INTEGER
+          value: 1
   variables:
-    - node: DeclareStatement
-      token: DECLARE / KEYWORD at 4:3
+    - node: DECLARE
+      token: <DECLARE|KEYWORD tests/rule_110/test.easy:4:3>
+      scope: PROGRAM:Rule110
       names:
         - row
-      type: Row
-    - node: DeclareStatement
-      token: DECLARE / KEYWORD at 5:3
+      type:
+        node: AliasType
+        reference_name: Row
+        reference_type:
+          node: ArrayType
+          type:
+            node: IntegerType
+          hi:
+            node: IntegerLiteral
+            token: <32|INTEGER tests/rule_110/test.easy:2:24>
+            scope: PROGRAM:Rule110
+            type: INTEGER
+            value: 32
+          lo:
+            node: IntegerLiteral
+            token: <1|INTEGER tests/rule_110/test.easy:2:22>
+            scope: PROGRAM:Rule110
+            type: INTEGER
+            value: 1
+    - node: DECLARE
+      token: <DECLARE|KEYWORD tests/rule_110/test.easy:5:3>
+      scope: PROGRAM:Rule110
       names:
         - N
         - n
         - i
-      type: INTEGER
+      type:
+        node: IntegerType
   subroutines:
-    - node: ProcedureStatement
-      token: PROCEDURE / KEYWORD at 7:3
+    - node: PROCEDURE
+      token: <PROCEDURE|KEYWORD tests/rule_110/test.easy:7:3>
+      scope: PROGRAM:Rule110.PROCEDURE:step
       name: step
       arguments: []
       segment:
         node: Segment
-        token: DECLARE / KEYWORD at 8:5
+        token: <DECLARE|KEYWORD tests/rule_110/test.easy:8:5>
+        scope: PROGRAM:Rule110.PROCEDURE:step
         types: []
         variables:
-          - node: DeclareStatement
-            token: DECLARE / KEYWORD at 8:5
+          - node: DECLARE
+            token: <DECLARE|KEYWORD tests/rule_110/test.easy:8:5>
+            scope: PROGRAM:Rule110.PROCEDURE:step
             names:
               - i
-            type: INTEGER
-          - node: DeclareStatement
-            token: DECLARE / KEYWORD at 9:5
+            type:
+              node: IntegerType
+          - node: DECLARE
+            token: <DECLARE|KEYWORD tests/rule_110/test.easy:9:5>
+            scope: PROGRAM:Rule110.PROCEDURE:step
             names:
               - next
-            type: Row
+            type:
+              node: AliasType
+              reference_name: Row
+              reference_type:
+                node: ArrayType
+                type:
+                  node: IntegerType
+                hi:
+                  node: IntegerLiteral
+                  token: <32|INTEGER tests/rule_110/test.easy:2:24>
+                  scope: PROGRAM:Rule110
+                  type: INTEGER
+                  value: 32
+                lo:
+                  node: IntegerLiteral
+                  token: <1|INTEGER tests/rule_110/test.easy:2:22>
+                  scope: PROGRAM:Rule110
+                  type: INTEGER
+                  value: 1
         subroutines: []
         statements:
-          node: Statements
-          token: FOR / KEYWORD at 11:5
-          statements:
-            - node: ForStatement
-              token: FOR / KEYWORD at 11:5
-              variable:
-                node: Variable
-                token: i / IDENT at 11:9
-                type: INTEGER
-                name: i
-                parts:
-                  - i
-              init:
-                node: IntegerLiteral
-                token: 1 / INTEGER at 11:14
-                type: INTEGER
-                value: 1
-              do:
-                node: Segment
-                token: SET / KEYWORD at 11:24
-                types: []
-                variables: []
-                subroutines: []
-                statements:
-                  node: Statements
-                  token: SET / KEYWORD at 11:24
-                  statements:
-                    - node: SetStatement
-                      token: SET / KEYWORD at 11:24
-                      variables:
-                        - node: Variable
-                          token: next / IDENT at 11:28
-                          type: Row
-                          name: next[i]
-                          parts:
-                            - next
-                            - node: Variable
-                              token: i / IDENT at 11:33
-                              type: INTEGER
-                              name: i
-                              parts:
-                                - i
-                      expression:
-                        node: IntegerLiteral
-                        token: 0 / INTEGER at 11:39
-                        type: INTEGER
-                        value: 0
-              by:
-              to:
-                node: Variable
-                token: N / IDENT at 11:19
-                type: INTEGER
-                name: N
-                parts:
-                  - N
-              condition:
-            - node: ForStatement
-              token: FOR / KEYWORD at 13:5
-              variable:
-                node: Variable
-                token: i / IDENT at 13:9
-                type: INTEGER
-                name: i
-                parts:
-                  - i
-              init:
-                node: IntegerLiteral
-                token: 1 / INTEGER at 13:14
-                type: INTEGER
-                value: 1
-              do:
-                node: Segment
-                token: DECLARE / KEYWORD at 14:7
-                types: []
-                variables:
-                  - node: DeclareStatement
-                    token: DECLARE / KEYWORD at 14:7
-                    names:
-                      - left
-                      - c
-                      - right
-                    type: INTEGER
-                  - node: DeclareStatement
-                    token: DECLARE / KEYWORD at 15:7
-                    names:
-                      - s
-                    type: INTEGER
-                  - node: DeclareStatement
-                    token: DECLARE / KEYWORD at 16:7
-                    names:
-                      - j
-                    type: INTEGER
-                subroutines: []
-                statements:
-                  node: Statements
-                  token: SET / KEYWORD at 18:7
-                  statements:
-                    - node: SetStatement
-                      token: SET / KEYWORD at 18:7
-                      variables:
-                        - node: Variable
-                          token: j / IDENT at 18:11
-                          type: INTEGER
-                          name: j
-                          parts:
-                            - j
-                      expression:
-                        node: BinaryOperation
-                        token: '- / SYMBOL at 18:18'
-                        type: INTEGER
-                        operation: '-'
-                        left:
-                          node: Variable
-                          token: i / IDENT at 18:16
-                          type: INTEGER
-                          name: i
-                          parts:
-                            - i
-                        right:
-                          node: IntegerLiteral
-                          token: 1 / INTEGER at 18:20
-                          type: INTEGER
-                          value: 1
-                    - node: IfStatement
-                      token: IF / KEYWORD at 19:7
-                      cond:
-                        node: BinaryOperation
-                        token: j / IDENT at 19:10
-                        type: BOOLEAN
-                        operation: <
-                        left:
-                          node: Variable
-                          token: j / IDENT at 19:10
-                          type: INTEGER
-                          name: j
-                          parts:
-                            - j
-                        right:
-                          node: IntegerLiteral
-                          token: 1 / INTEGER at 19:14
-                          type: INTEGER
-                          value: 1
-                      then_branch:
-                        node: Segment
-                        token: SET / KEYWORD at 19:21
-                        types: []
-                        variables: []
-                        subroutines: []
-                        statements:
-                          node: Statements
-                          token: SET / KEYWORD at 19:21
-                          statements:
-                            - node: SetStatement
-                              token: SET / KEYWORD at 19:21
-                              variables:
-                                - node: Variable
-                                  token: j / IDENT at 19:25
-                                  type: INTEGER
-                                  name: j
-                                  parts:
-                                    - j
-                              expression:
-                                node: Variable
-                                token: N / IDENT at 19:30
-                                type: INTEGER
-                                name: N
-                                parts:
-                                  - N
-                      else_branch:
-                    - node: SetStatement
-                      token: SET / KEYWORD at 20:7
-                      variables:
-                        - node: Variable
-                          token: left / IDENT at 20:11
-                          type: INTEGER
-                          name: left
-                          parts:
-                            - left
-                      expression:
-                        node: Variable
-                        token: row / IDENT at 20:19
-                        type: Row
-                        name: row[j]
-                        parts:
-                          - row
-                          - node: Variable
-                            token: j / IDENT at 20:23
-                            type: INTEGER
-                            name: j
-                            parts:
-                              - j
-                    - node: SetStatement
-                      token: SET / KEYWORD at 22:7
-                      variables:
-                        - node: Variable
-                          token: c / IDENT at 22:11
-                          type: INTEGER
-                          name: c
-                          parts:
-                            - c
-                      expression:
-                        node: Variable
-                        token: row / IDENT at 22:16
-                        type: Row
-                        name: row[i]
-                        parts:
-                          - row
-                          - node: Variable
-                            token: i / IDENT at 22:20
-                            type: INTEGER
+          - node: FOR
+            token: <FOR|KEYWORD tests/rule_110/test.easy:11:5>
+            scope: PROGRAM:Rule110.PROCEDURE:step
+            variable:
+              node: VariableReference
+              token: <i|IDENT tests/rule_110/test.easy:11:9>
+              scope: PROGRAM:Rule110.PROCEDURE:step
+              name: i
+              parts: []
+            init:
+              node: IntegerLiteral
+              token: <1|INTEGER tests/rule_110/test.easy:11:14>
+              scope: PROGRAM:Rule110.PROCEDURE:step
+              type: INTEGER
+              value: 1
+            do:
+              node: Segment
+              token: <SET|KEYWORD tests/rule_110/test.easy:11:24>
+              scope: PROGRAM:Rule110.PROCEDURE:step
+              types: []
+              variables: []
+              subroutines: []
+              statements:
+                - node: SET
+                  token: <SET|KEYWORD tests/rule_110/test.easy:11:24>
+                  scope: PROGRAM:Rule110.PROCEDURE:step
+                  target:
+                    - node: VariableReference
+                      token: <next|IDENT tests/rule_110/test.easy:11:28>
+                      scope: PROGRAM:Rule110.PROCEDURE:step
+                      name: next
+                      parts:
+                        - node: VariableSubscript
+                          token: <i|IDENT tests/rule_110/test.easy:11:33>
+                          value:
+                            node: VariableReference
+                            token: <i|IDENT tests/rule_110/test.easy:11:33>
+                            scope: PROGRAM:Rule110.PROCEDURE:step
                             name: i
-                            parts:
-                              - i
-                    - node: SetStatement
-                      token: SET / KEYWORD at 24:7
-                      variables:
-                        - node: Variable
-                          token: j / IDENT at 24:11
-                          type: INTEGER
+                            parts: []
+                  expression:
+                    node: IntegerLiteral
+                    token: <0|INTEGER tests/rule_110/test.easy:11:39>
+                    scope: PROGRAM:Rule110.PROCEDURE:step
+                    type: INTEGER
+                    value: 0
+            by:
+            to:
+              node: VariableReference
+              token: <N|IDENT tests/rule_110/test.easy:11:19>
+              scope: PROGRAM:Rule110.PROCEDURE:step
+              name: N
+              parts: []
+            condition:
+          - node: FOR
+            token: <FOR|KEYWORD tests/rule_110/test.easy:13:5>
+            scope: PROGRAM:Rule110.PROCEDURE:step
+            variable:
+              node: VariableReference
+              token: <i|IDENT tests/rule_110/test.easy:13:9>
+              scope: PROGRAM:Rule110.PROCEDURE:step
+              name: i
+              parts: []
+            init:
+              node: IntegerLiteral
+              token: <1|INTEGER tests/rule_110/test.easy:13:14>
+              scope: PROGRAM:Rule110.PROCEDURE:step
+              type: INTEGER
+              value: 1
+            do:
+              node: Segment
+              token: <DECLARE|KEYWORD tests/rule_110/test.easy:14:7>
+              scope: PROGRAM:Rule110.PROCEDURE:step
+              types: []
+              variables:
+                - node: DECLARE
+                  token: <DECLARE|KEYWORD tests/rule_110/test.easy:14:7>
+                  scope: PROGRAM:Rule110.PROCEDURE:step
+                  names:
+                    - left
+                    - c
+                    - right
+                  type:
+                    node: IntegerType
+                - node: DECLARE
+                  token: <DECLARE|KEYWORD tests/rule_110/test.easy:15:7>
+                  scope: PROGRAM:Rule110.PROCEDURE:step
+                  names:
+                    - s
+                  type:
+                    node: IntegerType
+                - node: DECLARE
+                  token: <DECLARE|KEYWORD tests/rule_110/test.easy:16:7>
+                  scope: PROGRAM:Rule110.PROCEDURE:step
+                  names:
+                    - j
+                  type:
+                    node: IntegerType
+              subroutines: []
+              statements:
+                - node: SET
+                  token: <SET|KEYWORD tests/rule_110/test.easy:18:7>
+                  scope: PROGRAM:Rule110.PROCEDURE:step
+                  target:
+                    - node: VariableReference
+                      token: <j|IDENT tests/rule_110/test.easy:18:11>
+                      scope: PROGRAM:Rule110.PROCEDURE:step
+                      name: j
+                      parts: []
+                  expression:
+                    node: BinaryOperation
+                    token: <-|SYMBOL tests/rule_110/test.easy:18:18>
+                    scope: PROGRAM:Rule110.PROCEDURE:step
+                    type: <class 'type'>
+                    operation: '-'
+                    left:
+                      node: VariableReference
+                      token: <i|IDENT tests/rule_110/test.easy:18:16>
+                      scope: PROGRAM:Rule110.PROCEDURE:step
+                      name: i
+                      parts: []
+                    right:
+                      node: IntegerLiteral
+                      token: <1|INTEGER tests/rule_110/test.easy:18:20>
+                      scope: PROGRAM:Rule110.PROCEDURE:step
+                      type: INTEGER
+                      value: 1
+                - node: IF
+                  token: <IF|KEYWORD tests/rule_110/test.easy:19:7>
+                  scope: PROGRAM:Rule110.PROCEDURE:step
+                  cond:
+                    node: BinaryOperation
+                    token: <j|IDENT tests/rule_110/test.easy:19:10>
+                    scope: PROGRAM:Rule110.PROCEDURE:step
+                    type: BOOLEAN
+                    operation: <
+                    left:
+                      node: VariableReference
+                      token: <j|IDENT tests/rule_110/test.easy:19:10>
+                      scope: PROGRAM:Rule110.PROCEDURE:step
+                      name: j
+                      parts: []
+                    right:
+                      node: IntegerLiteral
+                      token: <1|INTEGER tests/rule_110/test.easy:19:14>
+                      scope: PROGRAM:Rule110.PROCEDURE:step
+                      type: INTEGER
+                      value: 1
+                  then_branch:
+                    node: Segment
+                    token: <SET|KEYWORD tests/rule_110/test.easy:19:21>
+                    scope: PROGRAM:Rule110.PROCEDURE:step
+                    types: []
+                    variables: []
+                    subroutines: []
+                    statements:
+                      - node: SET
+                        token: <SET|KEYWORD tests/rule_110/test.easy:19:21>
+                        scope: PROGRAM:Rule110.PROCEDURE:step
+                        target:
+                          - node: VariableReference
+                            token: <j|IDENT tests/rule_110/test.easy:19:25>
+                            scope: PROGRAM:Rule110.PROCEDURE:step
+                            name: j
+                            parts: []
+                        expression:
+                          node: VariableReference
+                          token: <N|IDENT tests/rule_110/test.easy:19:30>
+                          scope: PROGRAM:Rule110.PROCEDURE:step
+                          name: N
+                          parts: []
+                  else_branch:
+                - node: SET
+                  token: <SET|KEYWORD tests/rule_110/test.easy:20:7>
+                  scope: PROGRAM:Rule110.PROCEDURE:step
+                  target:
+                    - node: VariableReference
+                      token: <left|IDENT tests/rule_110/test.easy:20:11>
+                      scope: PROGRAM:Rule110.PROCEDURE:step
+                      name: left
+                      parts: []
+                  expression:
+                    node: VariableReference
+                    token: <row|IDENT tests/rule_110/test.easy:20:19>
+                    scope: PROGRAM:Rule110.PROCEDURE:step
+                    name: row
+                    parts:
+                      - node: VariableSubscript
+                        token: <j|IDENT tests/rule_110/test.easy:20:23>
+                        value:
+                          node: VariableReference
+                          token: <j|IDENT tests/rule_110/test.easy:20:23>
+                          scope: PROGRAM:Rule110.PROCEDURE:step
                           name: j
-                          parts:
-                            - j
-                      expression:
-                        node: BinaryOperation
-                        token: + / SYMBOL at 24:18
-                        type: INTEGER
-                        operation: +
-                        left:
-                          node: Variable
-                          token: i / IDENT at 24:16
-                          type: INTEGER
+                          parts: []
+                - node: SET
+                  token: <SET|KEYWORD tests/rule_110/test.easy:22:7>
+                  scope: PROGRAM:Rule110.PROCEDURE:step
+                  target:
+                    - node: VariableReference
+                      token: <c|IDENT tests/rule_110/test.easy:22:11>
+                      scope: PROGRAM:Rule110.PROCEDURE:step
+                      name: c
+                      parts: []
+                  expression:
+                    node: VariableReference
+                    token: <row|IDENT tests/rule_110/test.easy:22:16>
+                    scope: PROGRAM:Rule110.PROCEDURE:step
+                    name: row
+                    parts:
+                      - node: VariableSubscript
+                        token: <i|IDENT tests/rule_110/test.easy:22:20>
+                        value:
+                          node: VariableReference
+                          token: <i|IDENT tests/rule_110/test.easy:22:20>
+                          scope: PROGRAM:Rule110.PROCEDURE:step
                           name: i
-                          parts:
-                            - i
-                        right:
+                          parts: []
+                - node: SET
+                  token: <SET|KEYWORD tests/rule_110/test.easy:24:7>
+                  scope: PROGRAM:Rule110.PROCEDURE:step
+                  target:
+                    - node: VariableReference
+                      token: <j|IDENT tests/rule_110/test.easy:24:11>
+                      scope: PROGRAM:Rule110.PROCEDURE:step
+                      name: j
+                      parts: []
+                  expression:
+                    node: BinaryOperation
+                    token: <+|SYMBOL tests/rule_110/test.easy:24:18>
+                    scope: PROGRAM:Rule110.PROCEDURE:step
+                    type: <class 'type'>
+                    operation: +
+                    left:
+                      node: VariableReference
+                      token: <i|IDENT tests/rule_110/test.easy:24:16>
+                      scope: PROGRAM:Rule110.PROCEDURE:step
+                      name: i
+                      parts: []
+                    right:
+                      node: IntegerLiteral
+                      token: <1|INTEGER tests/rule_110/test.easy:24:20>
+                      scope: PROGRAM:Rule110.PROCEDURE:step
+                      type: INTEGER
+                      value: 1
+                - node: IF
+                  token: <IF|KEYWORD tests/rule_110/test.easy:25:7>
+                  scope: PROGRAM:Rule110.PROCEDURE:step
+                  cond:
+                    node: BinaryOperation
+                    token: <j|IDENT tests/rule_110/test.easy:25:10>
+                    scope: PROGRAM:Rule110.PROCEDURE:step
+                    type: BOOLEAN
+                    operation: '>'
+                    left:
+                      node: VariableReference
+                      token: <j|IDENT tests/rule_110/test.easy:25:10>
+                      scope: PROGRAM:Rule110.PROCEDURE:step
+                      name: j
+                      parts: []
+                    right:
+                      node: VariableReference
+                      token: <N|IDENT tests/rule_110/test.easy:25:14>
+                      scope: PROGRAM:Rule110.PROCEDURE:step
+                      name: N
+                      parts: []
+                  then_branch:
+                    node: Segment
+                    token: <SET|KEYWORD tests/rule_110/test.easy:25:21>
+                    scope: PROGRAM:Rule110.PROCEDURE:step
+                    types: []
+                    variables: []
+                    subroutines: []
+                    statements:
+                      - node: SET
+                        token: <SET|KEYWORD tests/rule_110/test.easy:25:21>
+                        scope: PROGRAM:Rule110.PROCEDURE:step
+                        target:
+                          - node: VariableReference
+                            token: <j|IDENT tests/rule_110/test.easy:25:25>
+                            scope: PROGRAM:Rule110.PROCEDURE:step
+                            name: j
+                            parts: []
+                        expression:
                           node: IntegerLiteral
-                          token: 1 / INTEGER at 24:20
+                          token: <1|INTEGER tests/rule_110/test.easy:25:30>
+                          scope: PROGRAM:Rule110.PROCEDURE:step
                           type: INTEGER
                           value: 1
-                    - node: IfStatement
-                      token: IF / KEYWORD at 25:7
-                      cond:
-                        node: BinaryOperation
-                        token: j / IDENT at 25:10
-                        type: BOOLEAN
-                        operation: '>'
-                        left:
-                          node: Variable
-                          token: j / IDENT at 25:10
-                          type: INTEGER
+                  else_branch:
+                - node: SET
+                  token: <SET|KEYWORD tests/rule_110/test.easy:26:7>
+                  scope: PROGRAM:Rule110.PROCEDURE:step
+                  target:
+                    - node: VariableReference
+                      token: <right|IDENT tests/rule_110/test.easy:26:11>
+                      scope: PROGRAM:Rule110.PROCEDURE:step
+                      name: right
+                      parts: []
+                  expression:
+                    node: VariableReference
+                    token: <row|IDENT tests/rule_110/test.easy:26:20>
+                    scope: PROGRAM:Rule110.PROCEDURE:step
+                    name: row
+                    parts:
+                      - node: VariableSubscript
+                        token: <j|IDENT tests/rule_110/test.easy:26:24>
+                        value:
+                          node: VariableReference
+                          token: <j|IDENT tests/rule_110/test.easy:26:24>
+                          scope: PROGRAM:Rule110.PROCEDURE:step
                           name: j
-                          parts:
-                            - j
-                        right:
-                          node: Variable
-                          token: N / IDENT at 25:14
-                          type: INTEGER
-                          name: N
-                          parts:
-                            - N
-                      then_branch:
-                        node: Segment
-                        token: SET / KEYWORD at 25:21
-                        types: []
-                        variables: []
-                        subroutines: []
-                        statements:
-                          node: Statements
-                          token: SET / KEYWORD at 25:21
+                          parts: []
+                - node: SET
+                  token: <SET|KEYWORD tests/rule_110/test.easy:28:7>
+                  scope: PROGRAM:Rule110.PROCEDURE:step
+                  target:
+                    - node: VariableReference
+                      token: <s|IDENT tests/rule_110/test.easy:28:11>
+                      scope: PROGRAM:Rule110.PROCEDURE:step
+                      name: s
+                      parts: []
+                  expression:
+                    node: BinaryOperation
+                    token: <+|SYMBOL tests/rule_110/test.easy:28:25>
+                    scope: PROGRAM:Rule110.PROCEDURE:step
+                    type: <class 'type'>
+                    operation: +
+                    left:
+                      node: BinaryOperation
+                      token: <+|SYMBOL tests/rule_110/test.easy:28:21>
+                      scope: PROGRAM:Rule110.PROCEDURE:step
+                      type: <class 'type'>
+                      operation: +
+                      left:
+                        node: VariableReference
+                        token: <left|IDENT tests/rule_110/test.easy:28:16>
+                        scope: PROGRAM:Rule110.PROCEDURE:step
+                        name: left
+                        parts: []
+                      right:
+                        node: VariableReference
+                        token: <c|IDENT tests/rule_110/test.easy:28:23>
+                        scope: PROGRAM:Rule110.PROCEDURE:step
+                        name: c
+                        parts: []
+                    right:
+                      node: VariableReference
+                      token: <right|IDENT tests/rule_110/test.easy:28:27>
+                      scope: PROGRAM:Rule110.PROCEDURE:step
+                      name: right
+                      parts: []
+                - node: SELECT
+                  token: <SELECT|KEYWORD tests/rule_110/test.easy:30:7>
+                  scope: PROGRAM:Rule110.PROCEDURE:step
+                  expr:
+                    node: BoolLiteral
+                    token: <TRUE|KEYWORD tests/rule_110/test.easy:30:14>
+                    scope: PROGRAM:Rule110.PROCEDURE:step
+                    type: BOOLEAN
+                    value: true
+                  cases:
+                    -   - node: BinaryOperation
+                          token: <s|IDENT tests/rule_110/test.easy:31:15>
+                          scope: PROGRAM:Rule110.PROCEDURE:step
+                          type: BOOLEAN
+                          operation: '='
+                          left:
+                            node: VariableReference
+                            token: <s|IDENT tests/rule_110/test.easy:31:15>
+                            scope: PROGRAM:Rule110.PROCEDURE:step
+                            name: s
+                            parts: []
+                          right:
+                            node: IntegerLiteral
+                            token: <2|INTEGER tests/rule_110/test.easy:31:19>
+                            scope: PROGRAM:Rule110.PROCEDURE:step
+                            type: INTEGER
+                            value: 2
+                        - node: Segment
+                          token: <SET|KEYWORD tests/rule_110/test.easy:31:23>
+                          scope: PROGRAM:Rule110.PROCEDURE:step
+                          types: []
+                          variables: []
+                          subroutines: []
                           statements:
-                            - node: SetStatement
-                              token: SET / KEYWORD at 25:21
-                              variables:
-                                - node: Variable
-                                  token: j / IDENT at 25:25
-                                  type: INTEGER
-                                  name: j
+                            - node: SET
+                              token: <SET|KEYWORD 
+                                tests/rule_110/test.easy:31:23>
+                              scope: PROGRAM:Rule110.PROCEDURE:step
+                              target:
+                                - node: VariableReference
+                                  token: <next|IDENT 
+                                    tests/rule_110/test.easy:31:27>
+                                  scope: PROGRAM:Rule110.PROCEDURE:step
+                                  name: next
                                   parts:
-                                    - j
+                                    - node: VariableSubscript
+                                      token: <i|IDENT 
+                                        tests/rule_110/test.easy:31:32>
+                                      value:
+                                        node: VariableReference
+                                        token: <i|IDENT 
+                                          tests/rule_110/test.easy:31:32>
+                                        scope: PROGRAM:Rule110.PROCEDURE:step
+                                        name: i
+                                        parts: []
                               expression:
                                 node: IntegerLiteral
-                                token: 1 / INTEGER at 25:30
+                                token: <1|INTEGER 
+                                  tests/rule_110/test.easy:31:38>
+                                scope: PROGRAM:Rule110.PROCEDURE:step
                                 type: INTEGER
                                 value: 1
-                      else_branch:
-                    - node: SetStatement
-                      token: SET / KEYWORD at 26:7
-                      variables:
-                        - node: Variable
-                          token: right / IDENT at 26:11
-                          type: INTEGER
-                          name: right
-                          parts:
-                            - right
-                      expression:
-                        node: Variable
-                        token: row / IDENT at 26:20
-                        type: Row
-                        name: row[j]
-                        parts:
-                          - row
-                          - node: Variable
-                            token: j / IDENT at 26:24
-                            type: INTEGER
-                            name: j
-                            parts:
-                              - j
-                    - node: SetStatement
-                      token: SET / KEYWORD at 28:7
-                      variables:
-                        - node: Variable
-                          token: s / IDENT at 28:11
-                          type: INTEGER
-                          name: s
-                          parts:
-                            - s
-                      expression:
-                        node: BinaryOperation
-                        token: + / SYMBOL at 28:25
-                        type: INTEGER
-                        operation: +
-                        left:
-                          node: BinaryOperation
-                          token: + / SYMBOL at 28:21
-                          type: INTEGER
-                          operation: +
+                    -   - node: BinaryOperation
+                          token: <||SYMBOL tests/rule_110/test.easy:32:21>
+                          scope: PROGRAM:Rule110.PROCEDURE:step
+                          type: BOOLEAN
+                          operation: '|'
                           left:
-                            node: Variable
-                            token: left / IDENT at 28:16
-                            type: INTEGER
-                            name: left
-                            parts:
-                              - left
+                            node: BinaryOperation
+                            token: <s|IDENT tests/rule_110/test.easy:32:15>
+                            scope: PROGRAM:Rule110.PROCEDURE:step
+                            type: BOOLEAN
+                            operation: '='
+                            left:
+                              node: VariableReference
+                              token: <s|IDENT tests/rule_110/test.easy:32:15>
+                              scope: PROGRAM:Rule110.PROCEDURE:step
+                              name: s
+                              parts: []
+                            right:
+                              node: IntegerLiteral
+                              token: <0|INTEGER tests/rule_110/test.easy:32:19>
+                              scope: PROGRAM:Rule110.PROCEDURE:step
+                              type: INTEGER
+                              value: 0
                           right:
-                            node: Variable
-                            token: c / IDENT at 28:23
-                            type: INTEGER
-                            name: c
-                            parts:
-                              - c
-                        right:
-                          node: Variable
-                          token: right / IDENT at 28:27
-                          type: INTEGER
-                          name: right
-                          parts:
-                            - right
-                    - node: SelectStatement
-                      token: SELECT / KEYWORD at 30:7
-                      expr:
-                        node: BoolLiteral
-                        token: TRUE / KEYWORD at 30:14
-                        type: BOOLEAN
-                        value: true
-                      cases:
-                        -   - node: BinaryOperation
-                              token: s / IDENT at 31:15
-                              type: BOOLEAN
-                              operation: '='
-                              left:
-                                node: Variable
-                                token: s / IDENT at 31:15
-                                type: INTEGER
-                                name: s
-                                parts:
-                                  - s
-                              right:
+                            node: BinaryOperation
+                            token: <s|IDENT tests/rule_110/test.easy:32:23>
+                            scope: PROGRAM:Rule110.PROCEDURE:step
+                            type: BOOLEAN
+                            operation: '='
+                            left:
+                              node: VariableReference
+                              token: <s|IDENT tests/rule_110/test.easy:32:23>
+                              scope: PROGRAM:Rule110.PROCEDURE:step
+                              name: s
+                              parts: []
+                            right:
+                              node: IntegerLiteral
+                              token: <3|INTEGER tests/rule_110/test.easy:32:27>
+                              scope: PROGRAM:Rule110.PROCEDURE:step
+                              type: INTEGER
+                              value: 3
+                        - node: Segment
+                          token: <SET|KEYWORD tests/rule_110/test.easy:32:31>
+                          scope: PROGRAM:Rule110.PROCEDURE:step
+                          types: []
+                          variables: []
+                          subroutines: []
+                          statements:
+                            - node: SET
+                              token: <SET|KEYWORD 
+                                tests/rule_110/test.easy:32:31>
+                              scope: PROGRAM:Rule110.PROCEDURE:step
+                              target:
+                                - node: VariableReference
+                                  token: <next|IDENT 
+                                    tests/rule_110/test.easy:32:35>
+                                  scope: PROGRAM:Rule110.PROCEDURE:step
+                                  name: next
+                                  parts:
+                                    - node: VariableSubscript
+                                      token: <i|IDENT 
+                                        tests/rule_110/test.easy:32:40>
+                                      value:
+                                        node: VariableReference
+                                        token: <i|IDENT 
+                                          tests/rule_110/test.easy:32:40>
+                                        scope: PROGRAM:Rule110.PROCEDURE:step
+                                        name: i
+                                        parts: []
+                              expression:
                                 node: IntegerLiteral
-                                token: 2 / INTEGER at 31:19
+                                token: <0|INTEGER 
+                                  tests/rule_110/test.easy:32:46>
+                                scope: PROGRAM:Rule110.PROCEDURE:step
                                 type: INTEGER
-                                value: 2
-                            - node: Segment
-                              token: SET / KEYWORD at 31:23
-                              types: []
-                              variables: []
-                              subroutines: []
-                              statements:
-                                node: Statements
-                                token: SET / KEYWORD at 31:23
+                                value: 0
+                    -   - 
+                        - node: Segment
+                          token: <IF|KEYWORD tests/rule_110/test.easy:33:20>
+                          scope: PROGRAM:Rule110.PROCEDURE:step
+                          types: []
+                          variables: []
+                          subroutines: []
+                          statements:
+                            - node: IF
+                              token: <IF|KEYWORD tests/rule_110/test.easy:33:20>
+                              scope: PROGRAM:Rule110.PROCEDURE:step
+                              cond:
+                                node: BinaryOperation
+                                token: <c|IDENT tests/rule_110/test.easy:33:23>
+                                scope: PROGRAM:Rule110.PROCEDURE:step
+                                type: BOOLEAN
+                                operation: '='
+                                left:
+                                  node: VariableReference
+                                  token: <c|IDENT 
+                                    tests/rule_110/test.easy:33:23>
+                                  scope: PROGRAM:Rule110.PROCEDURE:step
+                                  name: c
+                                  parts: []
+                                right:
+                                  node: IntegerLiteral
+                                  token: <1|INTEGER 
+                                    tests/rule_110/test.easy:33:27>
+                                  scope: PROGRAM:Rule110.PROCEDURE:step
+                                  type: INTEGER
+                                  value: 1
+                              then_branch:
+                                node: Segment
+                                token: <SET|KEYWORD 
+                                  tests/rule_110/test.easy:33:34>
+                                scope: PROGRAM:Rule110.PROCEDURE:step
+                                types: []
+                                variables: []
+                                subroutines: []
                                 statements:
-                                  - node: SetStatement
-                                    token: SET / KEYWORD at 31:23
-                                    variables:
-                                      - node: Variable
-                                        token: next / IDENT at 31:27
-                                        type: Row
-                                        name: next[i]
+                                  - node: SET
+                                    token: <SET|KEYWORD 
+                                      tests/rule_110/test.easy:33:34>
+                                    scope: PROGRAM:Rule110.PROCEDURE:step
+                                    target:
+                                      - node: VariableReference
+                                        token: <next|IDENT 
+                                          tests/rule_110/test.easy:33:38>
+                                        scope: PROGRAM:Rule110.PROCEDURE:step
+                                        name: next
                                         parts:
-                                          - next
-                                          - node: Variable
-                                            token: i / IDENT at 31:32
-                                            type: INTEGER
-                                            name: i
-                                            parts:
-                                              - i
+                                          - node: VariableSubscript
+                                            token: <i|IDENT 
+                                              tests/rule_110/test.easy:33:43>
+                                            value:
+                                              node: VariableReference
+                                              token: <i|IDENT 
+                                                tests/rule_110/test.easy:33:43>
+                                              scope: 
+                                                PROGRAM:Rule110.PROCEDURE:step
+                                              name: i
+                                              parts: []
                                     expression:
                                       node: IntegerLiteral
-                                      token: 1 / INTEGER at 31:38
+                                      token: <1|INTEGER 
+                                        tests/rule_110/test.easy:33:49>
+                                      scope: PROGRAM:Rule110.PROCEDURE:step
                                       type: INTEGER
                                       value: 1
-                        -   - node: BinaryOperation
-                              token: '| / SYMBOL at 32:21'
-                              type: BOOLEAN
-                              operation: '|'
-                              left:
-                                node: BinaryOperation
-                                token: s / IDENT at 32:15
-                                type: BOOLEAN
-                                operation: '='
-                                left:
-                                  node: Variable
-                                  token: s / IDENT at 32:15
-                                  type: INTEGER
-                                  name: s
-                                  parts:
-                                    - s
-                                right:
-                                  node: IntegerLiteral
-                                  token: 0 / INTEGER at 32:19
-                                  type: INTEGER
-                                  value: 0
-                              right:
-                                node: BinaryOperation
-                                token: s / IDENT at 32:23
-                                type: BOOLEAN
-                                operation: '='
-                                left:
-                                  node: Variable
-                                  token: s / IDENT at 32:23
-                                  type: INTEGER
-                                  name: s
-                                  parts:
-                                    - s
-                                right:
-                                  node: IntegerLiteral
-                                  token: 3 / INTEGER at 32:27
-                                  type: INTEGER
-                                  value: 3
-                            - node: Segment
-                              token: SET / KEYWORD at 32:31
-                              types: []
-                              variables: []
-                              subroutines: []
-                              statements:
-                                node: Statements
-                                token: SET / KEYWORD at 32:31
+                              else_branch:
+                                node: Segment
+                                token: <SET|KEYWORD 
+                                  tests/rule_110/test.easy:33:57>
+                                scope: PROGRAM:Rule110.PROCEDURE:step
+                                types: []
+                                variables: []
+                                subroutines: []
                                 statements:
-                                  - node: SetStatement
-                                    token: SET / KEYWORD at 32:31
-                                    variables:
-                                      - node: Variable
-                                        token: next / IDENT at 32:35
-                                        type: Row
-                                        name: next[i]
+                                  - node: SET
+                                    token: <SET|KEYWORD 
+                                      tests/rule_110/test.easy:33:57>
+                                    scope: PROGRAM:Rule110.PROCEDURE:step
+                                    target:
+                                      - node: VariableReference
+                                        token: <next|IDENT 
+                                          tests/rule_110/test.easy:33:61>
+                                        scope: PROGRAM:Rule110.PROCEDURE:step
+                                        name: next
                                         parts:
-                                          - next
-                                          - node: Variable
-                                            token: i / IDENT at 32:40
-                                            type: INTEGER
-                                            name: i
-                                            parts:
-                                              - i
+                                          - node: VariableSubscript
+                                            token: <i|IDENT 
+                                              tests/rule_110/test.easy:33:66>
+                                            value:
+                                              node: VariableReference
+                                              token: <i|IDENT 
+                                                tests/rule_110/test.easy:33:66>
+                                              scope: 
+                                                PROGRAM:Rule110.PROCEDURE:step
+                                              name: i
+                                              parts: []
                                     expression:
-                                      node: IntegerLiteral
-                                      token: 0 / INTEGER at 32:46
-                                      type: INTEGER
-                                      value: 0
-                        -   - 
-                            - node: Segment
-                              token: IF / KEYWORD at 33:20
-                              types: []
-                              variables: []
-                              subroutines: []
-                              statements:
-                                node: Statements
-                                token: IF / KEYWORD at 33:20
-                                statements:
-                                  - node: IfStatement
-                                    token: IF / KEYWORD at 33:20
-                                    cond:
-                                      node: BinaryOperation
-                                      token: c / IDENT at 33:23
-                                      type: BOOLEAN
-                                      operation: '='
-                                      left:
-                                        node: Variable
-                                        token: c / IDENT at 33:23
-                                        type: INTEGER
-                                        name: c
-                                        parts:
-                                          - c
-                                      right:
-                                        node: IntegerLiteral
-                                        token: 1 / INTEGER at 33:27
-                                        type: INTEGER
-                                        value: 1
-                                    then_branch:
-                                      node: Segment
-                                      token: SET / KEYWORD at 33:34
-                                      types: []
-                                      variables: []
-                                      subroutines: []
-                                      statements:
-                                        node: Statements
-                                        token: SET / KEYWORD at 33:34
-                                        statements:
-                                          - node: SetStatement
-                                            token: SET / KEYWORD at 33:34
-                                            variables:
-                                              - node: Variable
-                                                token: next / IDENT at 33:38
-                                                type: Row
-                                                name: next[i]
-                                                parts:
-                                                  - next
-                                                  - node: Variable
-                                                    token: i / IDENT at 33:43
-                                                    type: INTEGER
-                                                    name: i
-                                                    parts:
-                                                      - i
-                                            expression:
-                                              node: IntegerLiteral
-                                              token: 1 / INTEGER at 33:49
-                                              type: INTEGER
-                                              value: 1
-                                    else_branch:
-                                      node: Segment
-                                      token: SET / KEYWORD at 33:57
-                                      types: []
-                                      variables: []
-                                      subroutines: []
-                                      statements:
-                                        node: Statements
-                                        token: SET / KEYWORD at 33:57
-                                        statements:
-                                          - node: SetStatement
-                                            token: SET / KEYWORD at 33:57
-                                            variables:
-                                              - node: Variable
-                                                token: next / IDENT at 33:61
-                                                type: Row
-                                                name: next[i]
-                                                parts:
-                                                  - next
-                                                  - node: Variable
-                                                    token: i / IDENT at 33:66
-                                                    type: INTEGER
-                                                    name: i
-                                                    parts:
-                                                      - i
-                                            expression:
-                                              node: Variable
-                                              token: right / IDENT at 33:72
-                                              type: INTEGER
-                                              name: right
-                                              parts:
-                                                - right
-              by:
-              to:
-                node: Variable
-                token: N / IDENT at 13:19
-                type: INTEGER
-                name: N
-                parts:
-                  - N
-              condition:
-            - node: ForStatement
-              token: FOR / KEYWORD at 37:5
-              variable:
-                node: Variable
-                token: i / IDENT at 37:9
-                type: INTEGER
-                name: i
-                parts:
-                  - i
-              init:
-                node: IntegerLiteral
-                token: 1 / INTEGER at 37:14
-                type: INTEGER
-                value: 1
-              do:
-                node: Segment
-                token: SET / KEYWORD at 37:24
-                types: []
-                variables: []
-                subroutines: []
-                statements:
-                  node: Statements
-                  token: SET / KEYWORD at 37:24
-                  statements:
-                    - node: SetStatement
-                      token: SET / KEYWORD at 37:24
-                      variables:
-                        - node: Variable
-                          token: row / IDENT at 37:28
-                          type: Row
-                          name: row[i]
-                          parts:
-                            - row
-                            - node: Variable
-                              token: i / IDENT at 37:32
-                              type: INTEGER
-                              name: i
-                              parts:
-                                - i
-                      expression:
-                        node: Variable
-                        token: next / IDENT at 37:38
-                        type: Row
-                        name: next[i]
-                        parts:
-                          - next
-                          - node: Variable
-                            token: i / IDENT at 37:43
-                            type: INTEGER
-                            name: i
-                            parts:
-                              - i
-              by:
-              to:
-                node: Variable
-                token: N / IDENT at 37:19
-                type: INTEGER
-                name: N
-                parts:
-                  - N
-              condition:
-    - node: ProcedureStatement
-      token: PROCEDURE / KEYWORD at 40:3
+                                      node: VariableReference
+                                      token: <right|IDENT 
+                                        tests/rule_110/test.easy:33:72>
+                                      scope: PROGRAM:Rule110.PROCEDURE:step
+                                      name: right
+                                      parts: []
+            by:
+            to:
+              node: VariableReference
+              token: <N|IDENT tests/rule_110/test.easy:13:19>
+              scope: PROGRAM:Rule110.PROCEDURE:step
+              name: N
+              parts: []
+            condition:
+          - node: SET
+            token: <SET|KEYWORD tests/rule_110/test.easy:37:5>
+            scope: PROGRAM:Rule110.PROCEDURE:step
+            target:
+              - node: VariableReference
+                token: <row|IDENT tests/rule_110/test.easy:37:9>
+                scope: PROGRAM:Rule110.PROCEDURE:step
+                name: row
+                parts: []
+            expression:
+              node: VariableReference
+              token: <next|IDENT tests/rule_110/test.easy:37:16>
+              scope: PROGRAM:Rule110.PROCEDURE:step
+              name: next
+              parts: []
+    - node: PROCEDURE
+      token: <PROCEDURE|KEYWORD tests/rule_110/test.easy:40:3>
+      scope: PROGRAM:Rule110.PROCEDURE:print
       name: print
       arguments: []
       segment:
         node: Segment
-        token: DECLARE / KEYWORD at 41:5
+        token: <DECLARE|KEYWORD tests/rule_110/test.easy:41:5>
+        scope: PROGRAM:Rule110.PROCEDURE:print
         types: []
         variables:
-          - node: DeclareStatement
-            token: DECLARE / KEYWORD at 41:5
+          - node: DECLARE
+            token: <DECLARE|KEYWORD tests/rule_110/test.easy:41:5>
+            scope: PROGRAM:Rule110.PROCEDURE:print
             names:
               - i
-            type: INTEGER
+            type:
+              node: IntegerType
         subroutines: []
         statements:
-          node: Statements
-          token: FOR / KEYWORD at 42:5
-          statements:
-            - node: ForStatement
-              token: FOR / KEYWORD at 42:5
-              variable:
-                node: Variable
-                token: i / IDENT at 42:9
-                type: INTEGER
-                name: i
-                parts:
-                  - i
-              init:
-                node: IntegerLiteral
-                token: 1 / INTEGER at 42:14
-                type: INTEGER
-                value: 1
-              do:
-                node: Segment
-                token: IF / KEYWORD at 43:7
-                types: []
-                variables: []
-                subroutines: []
-                statements:
-                  node: Statements
-                  token: IF / KEYWORD at 43:7
-                  statements:
-                    - node: IfStatement
-                      token: IF / KEYWORD at 43:7
-                      cond:
-                        node: BinaryOperation
-                        token: row / IDENT at 43:10
-                        type: BOOLEAN
-                        operation: '='
-                        left:
-                          node: Variable
-                          token: row / IDENT at 43:10
-                          type: Row
-                          name: row[i]
-                          parts:
-                            - row
-                            - node: Variable
-                              token: i / IDENT at 43:14
-                              type: INTEGER
-                              name: i
-                              parts:
-                                - i
-                        right:
-                          node: IntegerLiteral
-                          token: 1 / INTEGER at 43:19
-                          type: INTEGER
-                          value: 1
-                      then_branch:
-                        node: Segment
-                        token: OUTPUT / KEYWORD at 43:26
-                        types: []
-                        variables: []
-                        subroutines: []
-                        statements:
-                          node: Statements
-                          token: OUTPUT / KEYWORD at 43:26
-                          statements:
-                            - node: OutputStatement
-                              token: OUTPUT / KEYWORD at 43:26
-                              arguments:
-                                - node: StringLiteral
-                                  token: X / STRING at 43:33
-                                  type: STRING
-                                  value: X
-                      else_branch:
-                        node: Segment
-                        token: OUTPUT / KEYWORD at 43:43
-                        types: []
-                        variables: []
-                        subroutines: []
-                        statements:
-                          node: Statements
-                          token: OUTPUT / KEYWORD at 43:43
-                          statements:
-                            - node: OutputStatement
-                              token: OUTPUT / KEYWORD at 43:43
-                              arguments:
-                                - node: StringLiteral
-                                  token: . / STRING at 43:50
-                                  type: STRING
-                                  value: .
-              by:
-              to:
-                node: Variable
-                token: N / IDENT at 42:19
-                type: INTEGER
-                name: N
-                parts:
-                  - N
-              condition:
-            - node: OutputStatement
-              token: OUTPUT / KEYWORD at 45:5
-              arguments:
-                - node: StringLiteral
-                  token: '   / STRING at 45:12'
-                  type: STRING
-                  value: '  '
+          - node: FOR
+            token: <FOR|KEYWORD tests/rule_110/test.easy:42:5>
+            scope: PROGRAM:Rule110.PROCEDURE:print
+            variable:
+              node: VariableReference
+              token: <i|IDENT tests/rule_110/test.easy:42:9>
+              scope: PROGRAM:Rule110.PROCEDURE:print
+              name: i
+              parts: []
+            init:
+              node: IntegerLiteral
+              token: <1|INTEGER tests/rule_110/test.easy:42:14>
+              scope: PROGRAM:Rule110.PROCEDURE:print
+              type: INTEGER
+              value: 1
+            do:
+              node: Segment
+              token: <IF|KEYWORD tests/rule_110/test.easy:43:7>
+              scope: PROGRAM:Rule110.PROCEDURE:print
+              types: []
+              variables: []
+              subroutines: []
+              statements:
+                - node: IF
+                  token: <IF|KEYWORD tests/rule_110/test.easy:43:7>
+                  scope: PROGRAM:Rule110.PROCEDURE:print
+                  cond:
+                    node: BinaryOperation
+                    token: <row|IDENT tests/rule_110/test.easy:43:10>
+                    scope: PROGRAM:Rule110.PROCEDURE:print
+                    type: BOOLEAN
+                    operation: '='
+                    left:
+                      node: VariableReference
+                      token: <row|IDENT tests/rule_110/test.easy:43:10>
+                      scope: PROGRAM:Rule110.PROCEDURE:print
+                      name: row
+                      parts:
+                        - node: VariableSubscript
+                          token: <i|IDENT tests/rule_110/test.easy:43:14>
+                          value:
+                            node: VariableReference
+                            token: <i|IDENT tests/rule_110/test.easy:43:14>
+                            scope: PROGRAM:Rule110.PROCEDURE:print
+                            name: i
+                            parts: []
+                    right:
+                      node: IntegerLiteral
+                      token: <1|INTEGER tests/rule_110/test.easy:43:19>
+                      scope: PROGRAM:Rule110.PROCEDURE:print
+                      type: INTEGER
+                      value: 1
+                  then_branch:
+                    node: Segment
+                    token: <OUTPUT|KEYWORD tests/rule_110/test.easy:43:26>
+                    scope: PROGRAM:Rule110.PROCEDURE:print
+                    types: []
+                    variables: []
+                    subroutines: []
+                    statements:
+                      - node: OUTPUT
+                        token: <OUTPUT|KEYWORD tests/rule_110/test.easy:43:26>
+                        scope: PROGRAM:Rule110.PROCEDURE:print
+                        arguments:
+                          - node: StringLiteral
+                            token: <X|STRING tests/rule_110/test.easy:43:33>
+                            scope: PROGRAM:Rule110.PROCEDURE:print
+                            type: STRING
+                            value: X
+                  else_branch:
+                    node: Segment
+                    token: <OUTPUT|KEYWORD tests/rule_110/test.easy:43:43>
+                    scope: PROGRAM:Rule110.PROCEDURE:print
+                    types: []
+                    variables: []
+                    subroutines: []
+                    statements:
+                      - node: OUTPUT
+                        token: <OUTPUT|KEYWORD tests/rule_110/test.easy:43:43>
+                        scope: PROGRAM:Rule110.PROCEDURE:print
+                        arguments:
+                          - node: StringLiteral
+                            token: <.|STRING tests/rule_110/test.easy:43:50>
+                            scope: PROGRAM:Rule110.PROCEDURE:print
+                            type: STRING
+                            value: .
+            by:
+            to:
+              node: VariableReference
+              token: <N|IDENT tests/rule_110/test.easy:42:19>
+              scope: PROGRAM:Rule110.PROCEDURE:print
+              name: N
+              parts: []
+            condition:
+          - node: OUTPUT
+            token: <OUTPUT|KEYWORD tests/rule_110/test.easy:45:5>
+            scope: PROGRAM:Rule110.PROCEDURE:print
+            arguments:
+              - node: StringLiteral
+                token: <  |STRING tests/rule_110/test.easy:45:12>
+                scope: PROGRAM:Rule110.PROCEDURE:print
+                type: STRING
+                value: '  '
   statements:
-    node: Statements
-    token: SET / KEYWORD at 48:3
-    statements:
-      - node: SetStatement
-        token: SET / KEYWORD at 48:3
-        variables:
-          - node: Variable
-            token: N / IDENT at 48:7
-            type: INTEGER
-            name: N
-            parts:
-              - N
-        expression:
-          node: IntegerLiteral
-          token: 32 / INTEGER at 48:12
-          type: INTEGER
-          value: 32
-      - node: ForStatement
-        token: FOR / KEYWORD at 50:3
-        variable:
-          node: Variable
-          token: i / IDENT at 50:7
-          type: INTEGER
-          name: i
-          parts:
-            - i
-        init:
-          node: IntegerLiteral
-          token: 1 / INTEGER at 50:12
-          type: INTEGER
-          value: 1
-        do:
-          node: Segment
-          token: SET / KEYWORD at 50:22
-          types: []
-          variables: []
-          subroutines: []
-          statements:
-            node: Statements
-            token: SET / KEYWORD at 50:22
-            statements:
-              - node: SetStatement
-                token: SET / KEYWORD at 50:22
-                variables:
-                  - node: Variable
-                    token: row / IDENT at 50:26
-                    type: Row
-                    name: row[i]
-                    parts:
-                      - row
-                      - node: Variable
-                        token: i / IDENT at 50:30
-                        type: INTEGER
-                        name: i
-                        parts:
-                          - i
-                expression:
-                  node: IntegerLiteral
-                  token: 0 / INTEGER at 50:36
-                  type: INTEGER
-                  value: 0
-        by:
-        to:
-          node: Variable
-          token: N / IDENT at 50:17
-          type: INTEGER
+    - node: SET
+      token: <SET|KEYWORD tests/rule_110/test.easy:48:3>
+      scope: PROGRAM:Rule110
+      target:
+        - node: VariableReference
+          token: <N|IDENT tests/rule_110/test.easy:48:7>
+          scope: PROGRAM:Rule110
           name: N
+          parts: []
+      expression:
+        node: IntegerLiteral
+        token: <32|INTEGER tests/rule_110/test.easy:48:12>
+        scope: PROGRAM:Rule110
+        type: INTEGER
+        value: 32
+    - node: SET
+      token: <SET|KEYWORD tests/rule_110/test.easy:51:3>
+      scope: PROGRAM:Rule110
+      target:
+        - node: VariableReference
+          token: <row|IDENT tests/rule_110/test.easy:51:7>
+          scope: PROGRAM:Rule110
+          name: row
           parts:
-            - N
-        condition:
-      - node: SetStatement
-        token: SET / KEYWORD at 51:3
-        variables:
-          - node: Variable
-            token: row / IDENT at 51:7
-            type: Row
-            name: row[FIX((N / 2))]
-            parts:
-              - row
-              - node: FunctionCall
-                token: FIX / IDENT at 51:11
-                type: INTEGER
+            - node: VariableSubscript
+              token: <FIX|IDENT tests/rule_110/test.easy:51:11>
+              value:
+                node: FunctionCall
+                token: <FIX|IDENT tests/rule_110/test.easy:51:11>
+                scope: PROGRAM:Rule110
+                type:
+                  node: BuiltinFunction
+                  name: FIX
+                  type:
+                    node: IntegerType
                 name: FIX
                 arguments:
                   - node: BinaryOperation
-                    token: N / IDENT at 51:15
-                    type: INTEGER
+                    token: <N|IDENT tests/rule_110/test.easy:51:15>
+                    scope: PROGRAM:Rule110
+                    type: <class 'type'>
                     operation: /
                     left:
-                      node: Variable
-                      token: N / IDENT at 51:15
-                      type: INTEGER
+                      node: VariableReference
+                      token: <N|IDENT tests/rule_110/test.easy:51:15>
+                      scope: PROGRAM:Rule110
                       name: N
-                      parts:
-                        - N
+                      parts: []
                     right:
                       node: IntegerLiteral
-                      token: 2 / INTEGER at 51:17
+                      token: <2|INTEGER tests/rule_110/test.easy:51:17>
+                      scope: PROGRAM:Rule110
                       type: INTEGER
                       value: 2
-        expression:
-          node: IntegerLiteral
-          token: 1 / INTEGER at 51:24
-          type: INTEGER
-          value: 1
-      - node: CallStatement
-        token: CALL / KEYWORD at 53:3
-        name: print
-        arguments: []
-      - node: ForStatement
-        token: FOR / KEYWORD at 55:3
-        variable:
-          node: Variable
-          token: n / IDENT at 55:7
-          type: INTEGER
-          name: n
-          parts:
-            - n
-        init:
-          node: IntegerLiteral
-          token: 1 / INTEGER at 55:12
-          type: INTEGER
-          value: 1
-        do:
-          node: Segment
-          token: CALL / KEYWORD at 56:5
-          types: []
-          variables: []
-          subroutines: []
-          statements:
-            node: Statements
-            token: CALL / KEYWORD at 56:5
-            statements:
-              - node: CallStatement
-                token: CALL / KEYWORD at 56:5
-                name: step
-                arguments: []
-              - node: CallStatement
-                token: CALL / KEYWORD at 57:5
-                name: print
-                arguments: []
-        by:
-        to:
-          node: IntegerLiteral
-          token: 10 / INTEGER at 55:17
-          type: INTEGER
-          value: 10
-        condition:
+      expression:
+        node: IntegerLiteral
+        token: <1|INTEGER tests/rule_110/test.easy:51:24>
+        scope: PROGRAM:Rule110
+        type: INTEGER
+        value: 1
+    - node: CALL
+      token: <CALL|KEYWORD tests/rule_110/test.easy:53:3>
+      scope: PROGRAM:Rule110
+      name: print
+      arguments: []
+    - node: FOR
+      token: <FOR|KEYWORD tests/rule_110/test.easy:55:3>
+      scope: PROGRAM:Rule110
+      variable:
+        node: VariableReference
+        token: <n|IDENT tests/rule_110/test.easy:55:7>
+        scope: PROGRAM:Rule110
+        name: n
+        parts: []
+      init:
+        node: IntegerLiteral
+        token: <1|INTEGER tests/rule_110/test.easy:55:12>
+        scope: PROGRAM:Rule110
+        type: INTEGER
+        value: 1
+      do:
+        node: Segment
+        token: <CALL|KEYWORD tests/rule_110/test.easy:56:5>
+        scope: PROGRAM:Rule110
+        types: []
+        variables: []
+        subroutines: []
+        statements:
+          - node: CALL
+            token: <CALL|KEYWORD tests/rule_110/test.easy:56:5>
+            scope: PROGRAM:Rule110
+            name: step
+            arguments: []
+          - node: CALL
+            token: <CALL|KEYWORD tests/rule_110/test.easy:57:5>
+            scope: PROGRAM:Rule110
+            name: print
+            arguments: []
+      by:
+      to:
+        node: IntegerLiteral
+        token: <10|INTEGER tests/rule_110/test.easy:55:17>
+        scope: PROGRAM:Rule110
+        type: INTEGER
+        value: 10
+      condition:

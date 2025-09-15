@@ -10,7 +10,7 @@ parser = PEGParser(grammar, start="compilation")
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
-        print("usage: peg_cli.py <input.easy>")
+        print("usage: cli.py <input.easy>")
         sys.exit(1)
 
     code = Path(sys.argv[1]).read_text()

@@ -27,6 +27,8 @@ def run_tests(filter: str | None) -> None:
     exclude = set([name[1:] for name in names if name.startswith("-")])
 
     def runnable(test: Path) -> bool:
+        if filter and filter.startswith("@") and filter[1:] in test.name:
+            return True
         if include and test.name not in include:
             return False
         if exclude and test.name in exclude:
@@ -75,13 +77,6 @@ def process(test: Path) -> None:
 
         flags.append("-t")
 
-    expected_meta = x.with_suffix(".meta")
-    if expected_meta.exists():
-        created_meta = test.with_suffix(".meta")
-        removals.append(created_meta)
-
-        flags.append("-m")
-
     expected_ast = x.with_suffix(".yaml")
     if expected_ast.exists():
         created_ast = test.with_suffix(".yaml")
@@ -114,9 +109,6 @@ def process(test: Path) -> None:
 
     if expected_tokens.exists():
         diff(expected_tokens, created_tokens)
-
-    if expected_meta.exists():
-        diff(expected_meta, created_meta)
 
     if expected_ast.exists():
         diff(expected_ast, created_ast)

@@ -5,7 +5,7 @@ from typing import Mapping
 from ruamel.yaml import YAML
 
 from lexer import Token
-from nodes import Node
+from parser import Node
 
 
 def walker(obj: Node, *, seen: set[int] | None = None) -> Node:
@@ -22,11 +22,13 @@ def walker(obj: Node, *, seen: set[int] | None = None) -> Node:
 
     if is_dataclass(obj):
         if isinstance(obj, Token):
-            data = f"{obj.value} / {obj.type} at {obj.line}:{obj.col}"
+            data = f"<{obj.value}|{obj.type} {obj.input.filename}:{obj.line}:{obj.col}>"
         else:
             data = {}
             data["node"] = obj.__class__.__name__
             for f in fields(obj):
+                if f.name.startswith("_"):
+                    continue
                 value = getattr(obj, f.name)
                 data[f.name] = walker(value, seen=seen)
         seen.remove(oid)

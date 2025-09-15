@@ -1,0 +1,56 @@
+PROGRAM BF:
+  DECLARE program STRING;
+
+  FUNCTION bf(program STRING) STRING:
+    TYPE Tape IS ARRAY [0:299] OF INTEGER;
+
+    DECLARE tape Tape;
+    DECLARE out STRING;
+
+     DECLARE pc INTEGER;
+    DECLARE ptr INTEGER;
+
+    DECLARE ch STRING;
+    DECLARE depth INTEGER;
+
+    SET tape[0] := 0;
+  
+    SET ptr := 0;
+    SET out := "";
+
+    FOR pc := 0 TO LENGTH(program)-1 DO
+      SET ch := SUBSTR(program, pc, 1);
+
+      IF ch = ">" THEN SET ptr := ptr + 1; FI;
+      IF ch = "<" THEN SET ptr := ptr - 1; FI;
+      IF ch = "+" THEN SET tape[ptr] := tape[ptr] + 1; FI;
+      IF ch = "-" THEN SET tape[ptr] := tape[ptr] - 1; FI;
+      IF ch = "." THEN SET out := out || CHARACTER(tape[ptr]); FI;
+      IF ch = "[" THEN
+        IF tape[ptr] = 0 THEN
+          FOR depth := 1 BY 0 WHILE depth > 0 DO
+            SET pc := pc + 1;
+            SET ch := SUBSTR(program, pc, 1);
+            IF ch = "[" THEN SET depth := depth + 1; FI;
+            IF ch = "]" THEN SET depth := depth - 1; FI;
+          END FOR;
+        FI;
+      FI;
+      IF ch = "]" THEN
+        IF tape[ptr] <> 0 THEN
+          FOR depth := 1 BY 0 WHILE depth > 0 DO
+          SET pc := pc - 1;
+          SET ch := SUBSTR(program, pc, 1);
+          IF ch = "]" THEN SET depth := depth + 1; FI;
+          IF ch = "[" THEN SET depth := depth - 1; FI;
+          END FOR;
+        FI;
+      FI;
+    END FOR;
+    RETURN out;
+  END FUNCTION bf;
+
+  SET program := "+++++++++++[>+++++>+++<<-]>++++++++++++++ .---- .++++++++++++++++++ .++++++ .>.";
+  OUTPUT bf(program);
+
+END PROGRAM BF;

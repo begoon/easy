@@ -1,7 +1,7 @@
   - type: program_segment
     main:
       type: main_program
-      name: Test
+      name: Trivia2
       body:
         type: segment_body
         type_definitions:
@@ -29,13 +29,17 @@
                         basic_type: INTEGER
         variable_declarations:
           - type: variable_declaration
-            names:
-              type: declared_multiple_names
-              head: a
-              tail: p
+            names: a
             t:
               type: type
               basic_type: INTEGER
+          - type: variable_declaration
+            names: p
+            t:
+              type: type
+              ref:
+                type: type_identifier
+                name: Point
         statements:
           - type: simple_compound
             body:
@@ -71,4 +75,19 @@
                     base: p
                     parts:
                       - field: x
-      end_name: Test
+          - type: output_statement
+            list:
+              - type: variable
+                base: a
+                parts: []
+              - '" "'
+              - type: variable
+                base: p
+                parts:
+                  - field: y
+              - '" "'
+              - type: variable
+                base: p
+                parts:
+                  - field: x
+      end_name: Trivia2

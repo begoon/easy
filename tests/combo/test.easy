@@ -1,0 +1,69 @@
+PROGRAM Combo:
+  TYPE Int IS INTEGER;
+  TYPE Real IS REAL;
+  TYPE Boolean IS BOOLEAN;
+  TYPE String IS STRING;
+
+  TYPE Row IS ARRAY [1:256] OF INTEGER;
+  TYPE RowAlias IS Row;
+
+  TYPE Matrix IS ARRAY [1:8] OF Row;
+
+  TYPE Record IS STRUCTURE 
+    FIELD a IS INTEGER,
+    FIELD s IS STRING
+  END STRUCTURE;
+  TYPE StructAlias IS Record;
+
+  TYPE Record2 IS STRUCTURE 
+    FIELD a IS Record, 
+    FIELD m IS Matrix 
+  END STRUCTURE;
+
+  TYPE ComboType IS STRUCTURE
+    FIELD matrix IS Matrix,
+    FIELD row IS Row,
+    FIELD record IS Record2
+  END STRUCTURE;
+
+  DECLARE (i, j) INTEGER;
+  DECLARE r Row;
+  DECLARE (m, m1) Matrix;
+  DECLARE s Record2;
+
+  PROCEDURE P1(xx INTEGER, s STRING, xx2 STRING):
+    DECLARE x INTEGER;
+    SET x := 1;
+    OUTPUT x || s || LENGTH(s) || xx || xx2 || "**";
+  END PROCEDURE P1;
+
+  FUNCTION F1(x INTEGER, s STRING) STRING:
+    RETURN s || LENGTH(s) || x;
+  END FUNCTION F1;
+
+  CALL P1(123, "123", F1(456, "456"));
+
+  SET s.a.s := "abc";
+
+  OUTPUT s.m[1][1], s.a.s;
+
+  SET s.a.s := s.a.s || "XYZ";
+
+  SET s.m := m1;
+
+  SET i := 0;
+  SET r[1] := 1;
+  SET m[2][3] := 1;
+  SET r[2] := m[2][1] := 0;
+
+  SET m1 := m;
+
+  FOR i := 1 TO 8 DO
+    FOR j := 1 TO 256 DO
+      SET m[i][j] := i * 100 + j;
+    END FOR;
+  END FOR;
+
+  OUTPUT "123", i;
+
+END PROGRAM Combo;

@@ -1,6 +1,0 @@
-PROGRAM AssignmentMulti
-    Variables:
-        a, b: INTEGER
-    Statements:
-        SET a := b := 123
-        OUTPUT('A', ||:('AiAi', '> ', a, '-', b))

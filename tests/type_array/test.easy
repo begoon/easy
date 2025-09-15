@@ -1,9 +1,0 @@
-PROGRAM Type:
-  TYPE Field IS ARRAY [1:100] OF INTEGER;
-
-  FUNCTION a(f Field) BOOLEAN:
-    RETURN 0;
-  END FUNCTION a;
-
-  EXIT;
-END PROGRAM Type;

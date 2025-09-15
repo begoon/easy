@@ -1,0 +1,17 @@
+PROGRAM Array3:
+TYPE A IS 
+  ARRAY [8] OF 
+    ARRAY [2] OF
+      ARRAY [4] OF
+        STRUCTURE
+          FIELD i IS INTEGER,
+          FIELD s IS STRING 
+        END STRUCTURE;
+  DECLARE (a, b) A;
+  SET a[1][2][3].i := 123;
+  SET a[1][2][3].s := "abc";    
+  SET b := a;
+  OUTPUT a[1][2][3].i, " ", b[1][2][3].i;
+  OUTPUT a[1][2][3].s || " " || b[1][2][3].s;
+  EXIT;
+END PROGRAM Array3;

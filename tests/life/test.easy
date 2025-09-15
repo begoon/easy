@@ -58,12 +58,12 @@ PROGRAM Life:
 
   PROCEDURE evolution:
     DECLARE (x, y) INTEGER;
-    DECLARE n INTEGER;
     DECLARE next Field;
 
     FOR y := 0 TO h-1 DO
       FOR x := 0 TO w-1 DO
         DECLARE alive BOOLEAN;
+        DECLARE n INTEGER;
 
         SET alive := field[y][x];
         SET n := neighbours(x, y);
@@ -78,11 +78,7 @@ PROGRAM Life:
       END FOR;
     END FOR;
 
-    FOR y := 0 TO h-1 DO
-      FOR x := 0 TO w-1 DO
-        SET field[y][x] := next[y][x];
-      END FOR;
-    END FOR;
+    SET field := next;
   END PROCEDURE evolution;
 
   SET w := 80;

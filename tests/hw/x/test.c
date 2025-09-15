@@ -1,5 +1,9 @@
 #include "runtime.c"
-int a = {0};
+typedef int INTEGER;
+typedef double REAL;
+typedef int BOOLEAN;
+typedef STR STRING;
+int a = 0;
 int main()
 {
     a = 100;

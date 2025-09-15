@@ -34,7 +34,7 @@ PROGRAM Rule110:
       END SELECT;
     END FOR;
 
-    FOR i := 1 TO N DO SET row[i] := next[i]; END FOR;
+    SET row := next;
   END PROCEDURE step;
 
   PROCEDURE print:
@@ -47,7 +47,7 @@ PROGRAM Rule110:
 
   SET N := 32;
 
-  FOR i := 1 TO N DO SET row[i] := 0; END FOR;
+  // FOR i := 1 TO N DO SET row[i] := 0; END FOR;
   SET row[FIX(N/2)] := 1;
 
   CALL print;

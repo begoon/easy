@@ -1,81 +1,769 @@
-from typing import Tuple, Union, cast
+from dataclasses import dataclass
+from typing import Any, Optional, Tuple, Union
 
 from lexer import Token
-from nodes import (
-    Array,
-    BeginStatement,
-    BinaryOperation,
-    BoolLiteral,
-    CallStatement,
-    ConcatenationOperation,
-    DeclareStatement,
-    EmptyStatement,
-    ExitStatement,
-    Expression,
-    FieldStatement,
-    ForStatement,
-    FunctionCall,
-    FunctionStatement,
-    IfStatement,
-    InputStatement,
-    IntegerLiteral,
-    Label,
-    OutputStatement,
-    ProcedureStatement,
-    ProgramStatement,
-    RealLiteral,
-    RepeatStatement,
-    RepentStatement,
-    ReturnStatement,
-    Segment,
-    SelectStatement,
-    SetStatement,
-    Statement,
-    Statements,
-    StringLiteral,
-    StructureStatement,
-    Type,
-    TypeIsStatement,
-    UnaryOperation,
-    Variable,
-    expand_type,
-    functions_registry,
-    is_number,
-    types_registry,
-    variables_registry,
-)
+
+# ###
 
 
+@dataclass
+class Node:
+    token: Token
+    scope: str
+
+    def c(self) -> str:
+        print(self)
+        raise NotImplementedError()
+
+    def __str__(self) -> str:
+        import yamler
+
+        return yamler.yamlizer(self)
+
+
+@dataclass
+class Statement(Node):
+    pass
+
+
+@dataclass
+class Type:
+    def c(self) -> str:
+        print(self)
+        raise NotImplementedError
+
+    def zero(self) -> str:
+        print(self)
+        raise NotImplementedError
+
+    def typedef(self, name: str = "") -> str:
+        print(self)
+        raise NotImplementedError
+
+
+@dataclass
+class Expression(Node):
+    type: Type
+
+
+@dataclass
+class PrimitiveType(Type):
+    pass
+
+
+@dataclass
+class IntegerType(PrimitiveType):
+    def c(self) -> str:
+        return "int"
+
+    def zero(self) -> str:
+        return "0"
+
+    def typedef(self, alias: str) -> str:
+        return f"typedef int {alias}"
+
+
+@dataclass
+class RealType(PrimitiveType):
+    def c(self) -> str:
+        return "double"
+
+    def zero(self) -> str:
+        return "0.0"
+
+    def typedef(self, alias: str) -> str:
+        return f"typedef double {alias}"
+
+
+@dataclass
+class BooleanType(PrimitiveType):
+    def c(self) -> str:
+        return "int"
+
+    def zero(self) -> str:
+        return "0"
+
+    def typedef(self, alias: str) -> str:
+        return f"typedef int {alias}"
+
+
+@dataclass
+class StringType(PrimitiveType):
+
+    def c(self) -> str:
+        return "STR"
+
+    def zero(self) -> str:
+        return "{0}"
+
+    def typedef(self, alias: str) -> str:
+        return f"typedef STR {alias}"
+
+
+def X(x) -> str:
+    if hasattr(x, "c"):
+        return x.c()
+    return str(x)
+
+
+@dataclass
+class ArrayType(Type):
+    type: Type
+
+    hi: Expression
+    lo: Optional[Expression] = None
+
+    def c(self) -> str:
+        v = ["struct\n{", indent(f"{self.type.c()} data[{self.sz()}];", 1), "}"]
+        return "\n".join(v)
+
+    def sz(self) -> str:
+        return X(self.lo) + " + " + X(self.hi) + " + 1"
+
+    def zero(self) -> str:
+        return "{0}"
+
+    def typedef(self, to: str) -> str:
+        return f"typedef {self.c()} {to}"
+
+
+@dataclass
+class StructField(Node):
+    name: str
+    type: Type
+
+    def c(self) -> str:
+        return f"{self.type.c()} {self.name}"
+
+
+@dataclass
+class StructType(Type):
+    fields: list[StructField]
+
+    def c(self) -> str:
+        v = ["struct\n{"]
+        for field in self.fields:
+            v.append(indent(field.c() + ";", 1))
+        v.append("}")
+        return emit(v)
+
+    def init(self) -> str:
+        return "{0}"
+
+    def zero(self) -> str:
+        return "{0}"
+
+    def typedef(self, name: str) -> str:
+        return "typedef " + self.c() + " " + name
+
+
+@dataclass
+class AliasType(Type):
+    reference_name: str
+    reference_type: Type
+
+    def c(self) -> str:
+        return f"{self.reference_name}"
+
+    def zero(self) -> str:
+        return self.reference_type.zero()
+
+    def typedef(self, alias: str) -> str:
+        return f"typedef {self.reference_name} {alias}"
+
+
+@dataclass
+class Label(Node):
+    name: str
+
+    def c(self) -> str:
+        return f"{self.name}:"
+
+
+@dataclass
+class Segment(Node):
+    types: list["TYPEIS"]
+    variables: list["DECLARE"]
+    subroutines: list[Union["FUNCTION", "PROCEDURE"]]
+    statements: list[Statement]
+
+    def c(self, main: bool = False) -> str:
+        v = []
+        if self.variables:
+            for variable in self.variables:
+                c = variable.c()
+                if main:
+                    common.append(c)
+                else:
+                    v.append(c)
+        if self.statements:
+            for statement in self.statements:
+                v.append(statement.c())
+        return emit(v)
+
+
+@dataclass
+class DECLARE(Node):
+    names: list[str]
+    type: Type
+
+    def c(self) -> str:
+        v = []
+        for name in self.names:
+            v.append(f"{self.type.c()} {name} = {self.type.zero()};")
+        return emit(v)
+
+
+@dataclass
+class TYPEIS(Node):
+    name: str
+    definition: Type
+
+
+@dataclass
+class Entity:
+    token: Token
+
+
+@dataclass
+class Array(Entity):
+    element_type: Type
+    start: Optional[Expression]
+    end: Expression
+
+    def c(self) -> str:
+        1 / 0
+        start = self.start.c() if self.start else "0"
+        end = self.end.c()
+        sz = f"{start} + {end} + 1"
+        bounds = f"[{sz}]"
+        v = self.type
+        while isinstance(v, Array):
+            bounds += f"[{v.start.c() if v.start else '0'} + {v.end.c()}]"
+            v = v.type
+        return f"{TYPE(v)} {self.name}{bounds}"
+
+
+@dataclass
+class FIELD(Entity):
+    name: str
+    type: Type
+
+    def c(self) -> str:
+        return f"{self.type.name} {self.name}"
+
+
+@dataclass
+class STRUCTURE(Node):
+    fields: list[FIELD]
+
+    def c(self) -> str:
+        v = ["struct {", " ".join(f"{field.c()};" for field in self.fields), "}"]
+        return " ".join(v)
+
+
+@dataclass
+class Argument(Entity):
+    name: str
+    type: Type
+
+    def c(self) -> str:
+        return f"{self.type.name} {self.name}"
+
+
+@dataclass
+class PROCEDURE(Node):
+    name: str
+    arguments: list[Argument]
+    segment: Segment
+
+    def c(self) -> str:
+        arguments = ", ".join(argument.c() for argument in self.arguments)
+        v = [
+            f"void {self.name}({arguments})",
+            "{",
+            indent(self.segment.c(), 1),
+            "}",
+        ]
+        return emit(v)
+
+
+@dataclass
+class FUNCTION(Node):
+    name: str
+    type: Type
+    arguments: list[Argument]
+    segment: Segment
+
+    def c(self) -> str:
+        arguments = ", ".join(argument.c() for argument in self.arguments)
+        function = functions_list.get(self.name)
+        v = [
+            f"{function.type.c()} {self.name}({arguments})",
+            "{",
+            indent(self.segment.c(), 1),
+            "}",
+        ]
+        return emit(v)
+
+
+@dataclass
+class SET(Statement):
+    target: list["VariableReference"]
+    expression: Expression
+
+    def c(self) -> str:
+        v = []
+
+        for target in self.target:
+            fqn = self.scope + "|" + target.name
+            variable = variables_list.get(fqn)
+
+            while variable is None and "|" in fqn:
+                fqn = "|".join(fqn.split(".")[:-1]) + "|" + target.name
+                variable = variables_list.get(fqn)
+
+            _, reference = expand_variable_reference(variable, target)
+
+            v.append(f"{reference} = {self.expression.c()};")
+        return emit(v)
+
+
+@dataclass
+class IF(Statement):
+    cond: Expression
+    then_branch: Segment
+    else_branch: Optional[Segment]
+
+    def c(self) -> str:
+        cond = self.cond.c()
+        if cond.startswith("(") and cond.endswith(")"):
+            cond = cond[1:-1]
+        v = [f"if ({cond})", "{", indent(self.then_branch.c(), 1), "}"]
+        if self.else_branch:
+            v.append("else")
+            v.append("{")
+            v.append(indent(self.else_branch.c(), 1))
+            v.append("}")
+        return emit(v)
+
+
+@dataclass
+class FOR(Statement):
+    variable: "VariableReference"
+    init: Expression
+    do: Segment
+    by: Optional[Expression] = None
+    to: Optional[Expression] = None
+    condition: Optional[Expression] = None
+
+    def c(self) -> str:
+        v = [
+            f"for ({self.variable.c()} = {self.init.c()}; {self.format_condition()}; {self.step()})",
+            "{",
+            indent(self.do.c(), 1),
+            "}",
+        ]
+        return emit(v)
+
+    def format_condition(self) -> str:
+        conditions = []
+        if self.condition:
+            conditions.append(self.condition.c())
+        if self.to:
+            conditions.append(f"{self.variable.c()} <= {self.to.c()}")
+        return "".join(conditions)
+
+    def step(self) -> str:
+        return f"{self.variable.c()} += " + ("1" if not self.by else self.by.c())
+
+
+@dataclass
+class SELECT(Statement):
+    expr: Expression
+    cases: list[Tuple[Expression, Segment]]
+
+    def c(self) -> str:
+        v = []
+        for i, [condition, body] in enumerate(self.cases, 0):
+            if condition is not None:
+                condition = condition.c()
+                v.append(("else " if i > 0 else "") + "if " + condition)
+            else:
+                v.append("else")
+            v.append("{")
+            v.append(indent(body.c(), 1))
+            v.append("}")
+        return emit(v)
+
+
+@dataclass
+class INPUT(Statement):
+    variables: list["VariableReference"]
+
+    def c(self) -> str:
+        inputs = []
+        for variable_reference in self.variables:
+            fqn = variable_reference.scope + "|" + variable_reference.name
+            variable = variables_list.get(fqn)
+            type, reference = expand_variable_reference(variable, variable_reference)
+
+            if isinstance(type, StringType):
+                inputs.append(f'scanf("%s", {reference}.data);')
+            elif isinstance(type, IntegerType):
+                inputs.append(f'scanf("%d", &{reference});')
+            elif isinstance(type, RealType):
+                inputs.append(f'scanf("%lf", &{reference});')
+            else:
+                assert False, f"unsupported variable '{variable}' type in INPUT"
+        return emit(inputs)
+
+
+@dataclass
+class OUTPUT(Statement):
+    arguments: list[Expression]
+
+    def c(self) -> str:
+        output = []
+        format: list[str] = []
+        arguments = ", ".join(expression_stringer(argument, format) for argument in self.arguments)
+        output.append(f'output("{"".join(format)}", {arguments});')
+        return emit(output)
+
+
+@dataclass
+class REPEAT(Statement):
+    label: str
+
+    def c(self) -> str:
+        return f"goto {self.label};"
+
+
+@dataclass
+class REPENT(Statement):
+    label: str
+
+    def c(self) -> str:
+        return f"goto {self.label};"
+
+
+@dataclass
+class BEGIN(Statement):
+    body: Segment
+    label: Optional[str] = None
+
+    def c(self) -> str:
+        v = ["{", indent(self.body.c(), 1), "}"]
+        if self.label:
+            v.append(self.label + ":")
+        return emit(v)
+
+
+@dataclass
+class CALL(Statement):
+    name: str
+    arguments: list[Expression]
+
+    def c(self) -> str:
+        arguments = ", ".join(arg.c() for arg in self.arguments)
+        return f"{self.name}({arguments});"
+
+
+@dataclass
+class RETURN(Statement):
+    value: Optional[Expression] = None
+
+    def c(self) -> str:
+        if self.value is None:
+            return "return;"
+        value = self.value.c()
+        return "return" + f" {value}" + ";"
+
+
+@dataclass
+class EXIT(Statement):
+    def c(self) -> str:
+        return "exit(0);"
+
+
+@dataclass
+class EMPTY(Statement):
+    def c(self) -> str:
+        return ";"
+
+
+@dataclass
+class FunctionCall(Expression):
+    name: str
+    arguments: list[Expression]
+
+    def c(self) -> str:
+        return f"{self.name}({', '.join(a.c() for a in self.arguments)})"
+
+
+OPERATIONS = {"|": "||", "&": "&&", "=": "==", "<>": "!=", "MOD": "%", "XOR": "^"}
+
+
+@dataclass
+class BinaryOperation(Expression):
+    operation: str
+    left: Expression
+    right: Expression
+
+    def c(self) -> str:
+        operation = OPERATIONS.get(self.operation, self.operation)
+        from_cstring = "from_cstring("
+        if operation == "==" and (rhs := self.right.c()) and rhs.startswith(from_cstring):
+            return f"strcmp({self.left.c()}.data, {rhs[len(from_cstring):-1]}) == 0"
+        return f"({self.left.c()} {operation} {self.right.c()})"
+
+
+@dataclass
+class ConcatenationOperation(Expression):
+    parts: list[Expression]
+
+    def c(self) -> str:
+        output = []
+        format: list[str] = []
+        arguments = ", ".join(expression_stringer(argument, format, "||") for argument in self.parts)
+        output.append(f'concat("{"".join(format)}", {arguments})')
+        return emit(output)
+
+
+@dataclass
+class UnaryOperation(Expression):
+    operation: str
+    expr: Expression
+
+    def c(self) -> str:
+        operation = "!" if self.operation == "NOT" else self.operation
+        return f"({operation}{self.expr.c()})"
+
+
+@dataclass
+class VariableSubscript(Entity):
+    value: Expression
+
+    def c(self) -> str:
+        return "[" + self.value.c() + "]"
+
+
+@dataclass
+class VariableField(Entity):
+    name: str
+
+    def c(self) -> str:
+        return "." + self.name
+
+
+@dataclass
+class VariableReference(Entity):
+    scope: str
+    name: str
+    parts: list[VariableSubscript | VariableField]
+
+    def c(self) -> str:
+        fqn = self.scope + "|" + self.name
+
+        while fqn not in variables_list and "|" in fqn:
+            fqn = "|".join(fqn.split(".")[:-1]) + "|" + self.name
+
+        variable = variables_list.get(fqn)
+
+        _, reference = expand_variable_reference(variable, self)
+        return reference
+
+
+@dataclass
+class Variable(Entity):
+    name: str
+    type: Type
+
+    def c(self) -> str:
+        return self.type.c() + " " + self.name
+
+
+@dataclass
+class IntegerLiteral(Expression):
+    value: int
+
+    def c(self) -> str:
+        return str(self.value)
+
+
+@dataclass
+class RealLiteral(Expression):
+    value: float
+
+    def c(self) -> str:
+        return str(self.value)
+
+
+@dataclass
+class StringLiteral(Expression):
+    value: str
+
+    def c(self) -> str:
+        value = self.value.replace('"', r"\"")
+        return f'from_cstring("{value}")'
+
+
+@dataclass
+class BoolLiteral(Expression):
+    value: bool
+
+    def c(self) -> str:
+        return "TRUE" if self.value else "FALSE"
+
+
+@dataclass
+class PROGRAM(Node):
+    name: str
+    segment: Segment
+
+    def c(self) -> str:
+        return emit(["int main()", "{", indent(self.segment.c(main=True), 1), "}"])
+
+
+# --------------------------
+
+
+def indent(s: str, n: int) -> str:
+    pad = "    " * n
+    return "\n".join(pad + line for line in s.splitlines())
+
+
+def emit(lines: list[str]) -> str:
+    return "\n".join(lines)
+
+
+def is_number(name: str) -> bool:
+    return name in ("INTEGER", "REAL")
+
+
+FORMATS = {"INTEGER": "i", "REAL": "r", "BOOLEAN": "b", "STRING": "A"}
+
+
+def expression_stringer(v: Expression, format: list[str], callee: str = "OUTPUT") -> str:
+    c = v.c()
+    if isinstance(v, (IntegerLiteral, RealLiteral, BoolLiteral, StringLiteral)):
+        convert = FORMATS.get(v.type)
+        format.append(convert)
+        return c
+    if isinstance(v, VariableReference):
+        fqn = v.scope + "|" + v.name
+
+        while fqn not in variables_list and "|" in fqn:
+            fqn = "|".join(fqn.split(".")[:-1]) + "|" + v.name
+
+        variable = variables_list.get(fqn)
+
+        type, reference = expand_variable_reference(variable, v)
+        if isinstance(type, AliasType):
+            type = type.reference_type
+        if isinstance(type, IntegerType):
+            convert = FORMATS.get("INTEGER")
+        elif isinstance(type, RealType):
+            convert = FORMATS.get("REAL")
+        elif isinstance(type, BooleanType):
+            convert = FORMATS.get("BOOLEAN")
+        elif isinstance(type, StringType):
+            convert = FORMATS.get("STRING")
+        else:
+            raise Exception(f"unsupported [{callee}] argument ${v} of type {type}")
+
+        format.append(convert)
+        return reference
+    if isinstance(v, ConcatenationOperation):
+        format.append("A")
+        return c
+    if isinstance(v, FunctionCall):
+        function = functions_list[v.name]
+        type = function.type
+        if isinstance(type, IntegerType):
+            convert = FORMATS.get("INTEGER")
+        elif isinstance(type, RealType):
+            convert = FORMATS.get("REAL")
+        elif isinstance(type, BooleanType):
+            convert = FORMATS.get("BOOLEAN")
+        elif isinstance(type, StringType):
+            convert = FORMATS.get("STRING")
+        else:
+            raise Exception(f"unsupported [{callee}] argument ${v} of type {type}")
+        format.append(convert)
+        return c
+    assert False, f"unsupported [{callee}] argument ${v}"
+
+
+common: list[str] = []
+
+types_list: dict[str, Type] = {
+    "INTEGER": IntegerType(),
+    "REAL": RealType(),
+    "BOOLEAN": BooleanType(),
+    "STRING": StringType(),
+}
+
+
+@dataclass
+class BuiltinFunction:
+    name: str
+    type: Type
+
+
+functions_list: dict[str, BuiltinFunction | FUNCTION] = {
+    "LENGTH": BuiltinFunction("LENGTH", IntegerType()),
+    "CHARACTER": BuiltinFunction("CHARACTER", StringType()),
+    "SUBSTR": BuiltinFunction("SUBSTR", StringType()),
+    "FIX": BuiltinFunction("FIX", IntegerType()),
+    "FLOAT": BuiltinFunction("FLOAT", RealType()),
+}
+
+procedures_list: dict[str, PROCEDURE] = {}
+
+variables_list: dict[str, Variable] = {}
+
+
+# ###
 class ParseError(Exception):
-    def __init__(self, message: str, token: Token, source: str):
+    def __init__(self, message: str, token: Token):
         super().__init__(message)
         self.message = message
         self.token = token
-        self.source = source
 
     def __str__(self) -> str:
-        error_line = self.source.splitlines()[self.token.line - 1]
+        token = self.token
+        error_line = token.input.text.splitlines()[token.line - 1]
         return (
             f"{self.message}\n"
             "at "
-            f"{self.token.filename}:{self.token.line}:{self.token.col}\n"
-            f"{error_line}\n{' ' * (self.token.col - 1)}^"
+            f"{token.input.filename}:{token.line}:{token.col}\n"
+            f"{error_line}\n{' ' * (token.col - 1)}^"
         )
 
 
 class Parser:
-    def __init__(self, tokens: list[Token], source: str):
+    def __init__(self, tokens: list[Token]):
         self.tokens = tokens
         self.i = 0
-        self.source = source
+        self.scopes = []
+
+    def scope(self) -> str:
+        return ".".join(self.scopes) if self.scopes else "@"
+
+    def enter_scope(self, name: str) -> None:
+        self.scopes.append(name)
+
+    def leave_scope(self) -> None:
+        self.scopes.pop()
 
     def error(self, message: str, token: Token) -> None:
-        raise ParseError(message, token, self.source)
+        raise ParseError(message, token)
 
     def current(self) -> Token:
         return self.tokens[self.i]
 
-    def eat(self, kind: Union[str, tuple[str, ...]]) -> Token:
+    def eat(self, kind: str | tuple[str, ...]) -> Token:
         kinds = (kind,) if isinstance(kind, str) else kind
         token = self.current()
         if token.type in kinds or token.value in kinds:
@@ -84,7 +772,7 @@ class Parser:
         expected = "/".join(kinds)
         self.error(f"expected '{expected}', found '{token.value}'", token)
 
-    def accept(self, kind: Union[str, tuple[str, ...]]) -> Token | None:
+    def accept(self, kind: str | tuple[str, ...]) -> Token | None:
         token = self.current()
         kinds = (kind,) if isinstance(kind, str) else kind
         if token.type in kinds or token.value in kinds:
@@ -96,19 +784,23 @@ class Parser:
         current = self.current()
         return self.tokens[self.i + 1] if self.i + 1 < len(self.tokens) else Token("EOF", "", current.line, current.col)
 
-    def program(self) -> ProgramStatement:
+    def program(self) -> PROGRAM:
         token = self.current()
 
         self.eat("PROGRAM")
         name = self.eat("IDENT").value
         self.eat(":")
+
+        self.enter_scope(f"PROGRAM:{name}")
         segments = self.segment()
+        self.leave_scope()
+
         self.eat("END")
         self.eat("PROGRAM")
         self.eat(name)
         self.eat(";")
         self.eat("EOF")
-        return ProgramStatement(token, name, segments)
+        return PROGRAM(token, self.scope(), name, segments)
 
     def segment(self) -> Segment:
         token = self.current()
@@ -116,29 +808,45 @@ class Parser:
         variables = self.variables_section()
         subroutines = self.procedures_and_functions_section()
         statements = self.statements_section()
-        return Segment(token, types, variables, subroutines, statements)
+        return Segment(token, self.scope(), types, variables, subroutines, statements)
 
-    def types_section(self) -> list[TypeIsStatement]:
-        out: list[TypeIsStatement] = []
+    def types_section(self) -> list[TYPEIS]:
+        out: list[TYPEIS] = []
         while token := self.accept("TYPE"):
             name = self.eat("IDENT").value
             self.eat("IS")
             definition = self.parse_type()
             self.eat(";")
-            out.append(TypeIsStatement(token, name, definition))
-            types_registry[name] = definition
+
+            out.append(TYPEIS(token, self.scope(), name, definition))
+            self.enlist_type(name, definition)
         return out
 
-    def variables_section(self) -> list[DeclareStatement]:
-        declarations: list[DeclareStatement] = []
+    def parse_typed_variable(self) -> Variable:
+        token = self.eat("IDENT")
+        name = token.value
+        type = self.parse_type()
+        variable = Variable(token, name, type)
+        self.enlist_variable(variable)
+        if isinstance(type, ArrayType):
+            self.enlist_type(f"{self.scope()}${name}_ARRAY_TYPE", type.type)
+        return variable
+
+    def enlist_type(self, name: str, type: Type) -> None:
+        assert name not in types_list, f"type '{name=}' already defined as {types_list[name]=}"
+        types_list[name] = type
+
+    def variables_section(self) -> list[DECLARE]:
+        declarations: list[DECLARE] = []
         while declare_token := self.accept("DECLARE"):
             token = self.current()
             if token.type == "IDENT":
                 name = self.eat("IDENT").value
                 type = self.parse_type()
                 self.eat(";")
-                declarations.append(DeclareStatement(declare_token, [name], type))
-                variables_registry[name] = type
+                declarations.append(DECLARE(declare_token, self.scope(), [name], type))
+                variable = Variable(token, name, type)
+                variables_list[self.scope() + "|" + name] = variable
                 continue
             if token.value == "(":
                 self.eat("(")
@@ -149,78 +857,79 @@ class Parser:
                 self.eat(")")
                 type = self.parse_type()
                 self.eat(";")
-                declarations.append(DeclareStatement(declare_token, names, type))
+                declarations.append(DECLARE(declare_token, self.scope(), names, type))
                 for name in names:
-                    variables_registry[name] = type
+                    variable = Variable(token, name, type)
+                    variables_list[self.scope() + "|" + name] = variable
                 continue
-            self.error(f"expected a variable and or '(', not '{token.value}' ", token)
+            self.error("expected a variable or '(' variable, ... ')'", token)
         return declarations
 
     def parse_type(self) -> Type:
         token = self.current()
         if token.value in ("INTEGER", "BOOLEAN", "REAL", "STRING"):
             self.eat(token.value)
-            return token.value
+            return types_list[token.value]
         if token.value == "ARRAY":
             self.eat(token.value)
-
             self.eat("[")
             end = self.expression()
-            start = None
+            start = 0
             if self.accept(":"):
                 start = end
                 end = self.expression()
             self.eat("]")
             self.eat("OF")
-            type = cast(Array, self.parse_type())
-            return Array(token, type, start, end)
+            element_type = self.parse_type()
+            return ArrayType(element_type, end, start)
         if token.value == "STRUCTURE":
             self.eat(token.value)
-
             fields = []
             field_token = self.eat("FIELD")
             name = self.eat("IDENT").value
             self.eat("IS")
-            type = self.parse_type()
-            fields.append(FieldStatement(field_token, name, type))
+            field_type = self.parse_type()
+            fields.append(StructField(field_token, self.scope(), name, field_type))
 
             while self.accept(","):
                 field_token = self.eat("FIELD")
                 name = self.eat("IDENT").value
                 self.eat("IS")
-                type = self.parse_type()
-                fields.append(FieldStatement(field_token, name, type))
+                field_type = self.parse_type()
+                fields.append(StructField(field_token, self.scope(), name, field_type))
 
             self.eat("END")
             self.eat("STRUCTURE")
-            return StructureStatement(token, fields)
+            return StructType(fields)
 
-        return self.eat("IDENT").value
+        token = self.eat("IDENT")
+        alias_name = token.value
 
-    def procedures_and_functions_section(self) -> list[ProcedureStatement | FunctionStatement]:
-        subroutines: list[ProcedureStatement | FunctionStatement] = []
+        if (alias_type := types_list.get(alias_name)) is None:
+            raise ParseError(f"unknown type alias '{alias_name}'", token)
+
+        return AliasType(alias_name, alias_type)
+
+    def procedures_and_functions_section(self) -> list[PROCEDURE | FUNCTION]:
+        subroutines: list[PROCEDURE | FUNCTION] = []
         while token := self.accept(("FUNCTION", "PROCEDURE")):
             name = self.eat("IDENT").value
-            parameters: list[Tuple[str, Type]] = []
+            self.enter_scope(token.value + ":" + name)
+
+            parameters: list[tuple[str, Type]] = []
             if self.accept("("):
                 if self.current().type != ")":
                     parameters = self.parameters()
                     for parameter in parameters:
-                        variables_registry[parameter[0]] = parameter[1]
+                        variables_list[self.scope() + "|" + parameter.name] = parameter
                 self.eat(")")
 
             type = None
             if token.value == "FUNCTION":
                 type = self.parse_type()
-                functions_registry[name] = type
 
             self.eat(":")
             segment = self.segment()
-
-            if token.value == "FUNCTION":
-                has_return = any(isinstance(v, ReturnStatement) for v in segment.statements.statements)
-                if not has_return:
-                    segment.statements.statements.append(ReturnStatement(token, 0))
 
             self.eat("END")
             self.eat(token.value)
@@ -228,24 +937,35 @@ class Parser:
             self.eat(";")
 
             if token.value == "PROCEDURE":
-                if type is not None:
-                    self.error(f"PROCEDURE [{name}] cannot have a return type", token)
-                subroutines.append(ProcedureStatement(token, name, parameters, segment))
+                subroutine = PROCEDURE(token, self.scope(), name, parameters, segment)
+                procedures_list[name] = subroutine
             else:
-                subroutines.append(FunctionStatement(token, name, type, parameters, segment))
+                subroutine = FUNCTION(token, self.scope(), name, type, parameters, segment)
+                functions_list[name] = subroutine
+
+            self.leave_scope()
+            subroutines.append(subroutine)
+
         return subroutines
 
-    def parameters(self) -> list[tuple[str, Type]]:
-        parameters: list[tuple[str, Type]] = []
+    def enlist_variable(self, variable: Variable) -> None:
+        fqn = self.scope() + "#" + variable.name
+        variables_list[fqn] = variable
+
+    def parameters(self) -> list[Variable]:
+        parameters: list[Variable] = []
         while True:
-            name = self.eat("IDENT").value
+            token = self.eat("IDENT")
+            name = token.value
             type = self.parse_type()
-            parameters.append((name, type))
+            variable = Variable(token, name, type)
+            parameters.append(variable)
+            self.enlist_variable(variable)
             if not self.accept(","):
                 break
         return parameters
 
-    def statements_section(self) -> Statements:
+    def statements_section(self) -> list[Statement]:
         statements: list[Statement] = []
         STATEMENTS = (
             "SET",
@@ -267,16 +987,15 @@ class Parser:
             current = self.current()
             return (current.type == "IDENT" and current.value != "OTHERWISE") and self.peek().value == ":"
 
-        statements_token = self.current()
         while self.current().value in STATEMENTS or is_label():
             if is_label():
                 label_token = self.eat("IDENT")
                 label = label_token.value
                 self.eat(":")
-                statements.append(Label(label_token, label))
+                statements.append(Label(label_token, self.scope(), label))
             else:
                 statements.append(self.statement())
-        return Statements(statements_token, statements)
+        return statements
 
     def statement(self) -> Statement:
         token = self.current()
@@ -305,7 +1024,7 @@ class Parser:
         if token.value == "BEGIN":
             return self.begin_statement()
         self.eat(";")
-        return EmptyStatement(token)
+        return EMPTY(token, self.scope())
 
     def arguments(self) -> list[Expression]:
         arguments = [self.expression()]
@@ -313,7 +1032,7 @@ class Parser:
             arguments.append(self.expression())
         return arguments
 
-    def if_statement(self) -> IfStatement:
+    def if_statement(self) -> IF:
         token = self.eat("IF")
         cond = self.expression()
         self.eat("THEN")
@@ -321,11 +1040,11 @@ class Parser:
         else_branch = self.accept("ELSE") and self.segment()
         self.eat("FI")
         self.eat(";")
-        return IfStatement(token, cond, then_branch, else_branch)
+        return IF(token, self.scope(), cond, then_branch, else_branch)
 
-    def for_statement(self) -> ForStatement:
+    def for_statement(self) -> FOR:
         token = self.eat("FOR")
-        variable = self.known_variable(("INTEGER", "REAL"))
+        variable = self.variable_reference()
         self.eat(":=")
         init = self.expression()
         by = self.accept("BY") and self.expression()
@@ -336,9 +1055,9 @@ class Parser:
         self.eat("END")
         self.eat("FOR")
         self.eat(";")
-        return ForStatement(token, variable, init, do, by, to, condition)
+        return FOR(token, self.scope(), variable, init, do, by, to, condition)
 
-    def select_statement(self) -> SelectStatement:
+    def select_statement(self) -> SELECT:
         token = self.eat("SELECT")
         expr = self.expression()
         self.eat("OF")
@@ -357,136 +1076,100 @@ class Parser:
         self.eat("END")
         self.eat("SELECT")
         self.eat(";")
-        return SelectStatement(token, expr, cases)
+        return SELECT(token, self.scope(), expr, cases)
 
-    def return_statement(self) -> ReturnStatement:
+    def return_statement(self) -> RETURN:
         token = self.eat("RETURN")
         if self.accept(";"):
-            return ReturnStatement(token)
+            return RETURN(token, self.scope())
         value = self.expression()
         self.eat(";")
-        return ReturnStatement(token, value)
+        return RETURN(token, self.scope(), value)
 
-    def exit_statement(self) -> ExitStatement:
+    def exit_statement(self) -> EXIT:
         token = self.eat("EXIT")
         self.eat(";")
-        return ExitStatement(token)
+        return EXIT(token, self.scope())
 
-    def known_variable(self, allowed_types: tuple[str] | None = None) -> Variable:
-        variable = self.variable()
-
-        compound = len(variable.parts) > 1
-        if not compound and variables_registry.get(variable.name) is None:
-            self.error(f"undefined variable [{variable}]", variable.token)
-
-        name = variable.parts[0]
-        type = variables_registry[name]
-        variable.type = type
-
-        if allowed_types and (type not in allowed_types):
-            self.error(f"illegal [{variable}] {type=}, allowed types: {",".join(allowed_types)}", variable.token)
-        return variable
-
-    def input_statement(self) -> InputStatement:
+    def input_statement(self) -> INPUT:
         token = self.eat("INPUT")
 
-        allowed_types = ("INTEGER", "REAL", "STRING")
-        variables = [self.known_variable(allowed_types)]
+        variables = [self.variable_reference()]
 
         while self.accept(","):
-            variables.append(self.known_variable(allowed_types))
+            variables.append(self.variable_reference())
 
         self.eat(";")
-        return InputStatement(token, variables)
+        return INPUT(token, self.scope(), variables)
 
-    def output_statement(self) -> OutputStatement:
+    def output_statement(self) -> OUTPUT:
         token = self.eat("OUTPUT")
         expressions = [self.expression()]
         while self.accept(","):
             expressions.append(self.expression())
         self.eat(";")
-        return OutputStatement(token, expressions)
+        return OUTPUT(token, self.scope(), expressions)
 
-    def repeat_statement(self) -> Statements:
+    def repeat_statement(self) -> REPEAT:
         token = self.eat("REPEAT")
         label = self.eat("IDENT").value
         self.eat(";")
-        return RepeatStatement(token, label)
+        return REPEAT(token, self.scope(), label)
 
-    def repent_statement(self) -> Statements:
+    def repent_statement(self) -> REPENT:
         token = self.eat("REPENT")
         label = self.eat("IDENT").value
         self.eat(";")
-        return RepentStatement(token, label)
+        return REPENT(token, self.scope(), label)
 
-    def begin_statement(self) -> Statements:
+    def begin_statement(self) -> BEGIN:
         token = self.eat("BEGIN")
         body = self.segment()
         self.eat("END")
         label = self.accept("IDENT")
         self.eat(";")
-        return BeginStatement(token, body, label and label.value)
+        return BEGIN(token, self.scope(), body, label and label.value)
 
-    def assignment_statement(self) -> SetStatement:
+    def assignment_statement(self) -> SET:
         token = self.eat("SET")
-        variable = self.known_variable()
+        variable = self.variable_reference()
         self.eat(":=")
         targets = [variable]
 
         while True:
-            current = self.current()
-            if current.type != "IDENT" or self.peek().value != ":=":
+            current_i = self.i
+            if self.current().type != "IDENT":
                 break
-            variable = self.known_variable()
+            variable = self.variable_reference()
+            if self.current().value != ":=":
+                self.i = current_i
+                break
             self.eat(":=")
             targets.append(variable)
 
         expression = self.expression()
-        for target in targets:
-            self.check_variable_type(target, expression.type, token)
-
         self.eat(";")
-        return SetStatement(token, targets, expression)
+        return SET(token, self.scope(), targets, expression)
 
-    def check_variable_type(self, variable: Variable, expected_type: Type, token: Token) -> Variable:
-        if len(variable.parts) > 1:  # TODO: (!), support fields and arrays
-            return variable
-
-        expanded_expected_type = expand_type(expected_type, token)
-        expanded_variable_type = expand_type(variables_registry.get(variable.name), token)
-
-        if expanded_expected_type != expanded_variable_type:
-            self.error(
-                f"variable [{variable.name}] type mismatch:\n"
-                + f"variable type: {expanded_variable_type}\n"
-                + f"expected type: {expanded_expected_type}",
-                token,
-            )
-
-        variable.type = expanded_variable_type
-
-    def variable(self) -> Variable:
+    def variable_reference(self) -> VariableReference:
         token = self.eat("IDENT")
         name = token.value
-        parts = [name]
+        parts: list[VariableField | VariableSubscript] = []
         while True:
             if self.accept("."):
-                part = self.eat("IDENT").value
-                parts.append(part)
-                name += "." + part
+                field_token = self.eat("IDENT")
+                parts.append(VariableField(field_token, field_token.value))
                 continue
             if self.accept("["):
-                index = self.expression()
-                if index.type != "INTEGER":
-                    self.error(f"expected INTEGER array index, not {index.type}", index.token)
+                subscript_token = self.current()
+                subscript = self.expression()
+                parts.append(VariableSubscript(subscript_token, subscript))
                 self.eat("]")
-                parts.append(index)
-                name += "[" + index.c() + "]"
                 continue
             break
-        return Variable(token, "UNKNOWN", name, parts)
+        return VariableReference(token, self.scope(), name, parts)
 
-    def call_statement(self) -> CallStatement:
+    def call_statement(self) -> CALL:
         token = self.eat("CALL")
         name = self.eat("IDENT").value
         arguments = []
@@ -494,7 +1177,7 @@ class Parser:
             arguments = self.arguments()
             self.eat(")")
         self.eat(";")
-        return CallStatement(token, name, arguments)
+        return CALL(token, self.scope(), name, arguments)
 
     def expression(self) -> Expression:
         return self.expression_OR_XOR()
@@ -503,7 +1186,7 @@ class Parser:
         left = self.expression_AND()
         while operation := self.accept(("|", "XOR")):
             right = self.expression_AND()
-            left = BinaryOperation(operation, "BOOLEAN", operation.value, left, right)
+            left = BinaryOperation(operation, self.scope(), "BOOLEAN", operation.value, left, right)
         return left
 
     def expression_AND(self) -> Expression:
@@ -511,12 +1194,12 @@ class Parser:
         left = self.expression_NOT()
         while operation := self.accept("&"):
             right = self.expression_NOT()
-            left = BinaryOperation(token, "BOOLEAN", operation.value, left, right)
+            left = BinaryOperation(token, self.scope(), "BOOLEAN", operation.value, left, right)
         return left
 
     def expression_NOT(self) -> Expression:
         if token := self.accept("NOT"):
-            return UnaryOperation(token, "BOOLEAN", token.value, self.expression_NOT())
+            return UnaryOperation(token, self.scope(), token.type, token.value, self.expression_NOT())
         return self.expression_RELATION()
 
     def expression_RELATION(self) -> Expression:
@@ -524,18 +1207,7 @@ class Parser:
         left = self.expression_CONCATENATION()
         while operation := self.accept(("<", ">", "=", "<=", ">=", "<>")):
             right = self.expression_CONCATENATION()
-
-            left_type = expand_type(left.type, token)
-            right_type = expand_type(right.type, token)
-
-            allowed = left_type == right_type or (is_number(left_type) and is_number(right_type))
-            if not allowed:
-                self.error(f"illegal types for [{operation.value}] on {left} and {right}", token)
-
-            if left_type not in ("BOOLEAN", "INTEGER", "REAL"):
-                self.error(f"cannot perform [{operation.value}] on {left}", token)
-
-            left = BinaryOperation(token, "BOOLEAN", operation.value, left, right)
+            left = BinaryOperation(token, self.scope(), "BOOLEAN", operation.value, left, right)
         return left
 
     def expression_CONCATENATION(self) -> Expression:
@@ -546,21 +1218,14 @@ class Parser:
             parts.append(part)
         if len(parts) == 1:
             return parts[0]
-        return ConcatenationOperation(token, "STRING", parts)
+        return ConcatenationOperation(token, self.scope(), "STRING", parts)
 
     def expression_ADDING(self) -> Expression:
         left = self.expression_MULTIPLYING()
         operations = ("+", "-")
         while operation := self.accept(operations):
             right = self.expression_MULTIPLYING()
-            left_type = expand_type(left.type, operation)
-            right_type = expand_type(right.type, operation)
-            if left_type != right_type:
-                self.error(f"{left=} and {right=} must be of the same type to perform [{operation.value}]", operation)
-            if not is_number(left.type):
-                self.error("operation only supported for INTEGER and REAL", operation)
-            type = left.type
-            left = BinaryOperation(operation, type, operation.value, left, right)
+            left = BinaryOperation(operation, self.scope(), type, operation.value, left, right)
         return left
 
     def expression_MULTIPLYING(self) -> Expression:
@@ -568,12 +1233,7 @@ class Parser:
         left = self.expression_FUNCTION_CALL()
         while operation := self.accept(("*", "/", "MOD")):
             right = self.expression_FUNCTION_CALL()
-            if left.type != right.type:
-                self.error(f"{left=} and {right=} must be of the same type to perform [{operation.value}]", token)
-            if left.type not in ("INTEGER", "REAL"):
-                self.error(f"operation only supported for INTEGER and REAL, not [{left.type}]", token)
-            type = left.type
-            left = BinaryOperation(token, type, operation.value, left, right)
+            left = BinaryOperation(token, self.scope(), type, operation.value, left, right)
         return left
 
     def expression_FUNCTION_CALL(self) -> Expression | FunctionCall:
@@ -586,40 +1246,68 @@ class Parser:
             else:
                 arguments = []
             self.eat(")")
-            type = functions_registry.get(name)
+            type = functions_list.get(name)
             if type is None:
                 self.error(f"undefined function [{name}]", token)
-            return FunctionCall(token, type, name, arguments)
+            return FunctionCall(token, self.scope(), type, name, arguments)
         return self.factor()
 
     def factor(self) -> Expression:
         token = self.current()
         if token.type == "INTEGER":
             token = self.eat(token.type)
-            return IntegerLiteral(token, token.type, int(token.value))
+            return IntegerLiteral(token, self.scope(), token.type, int(token.value))
         if token.type == "REAL":
             token = self.eat(token.type)
-            return RealLiteral(token, token.type, float(token.value))
+            return RealLiteral(token, self.scope(), token.type, float(token.value))
         if token.type == "STRING":
             token = self.eat(token.type)
-            return StringLiteral(token, token.type, token.value)
+            return StringLiteral(token, self.scope(), token.type, token.value)
         if token.value in ("+", "-"):
-            token = self.eat(("+", "-"))
+            token = self.eat(token.value)
             factor = self.factor()
-            return UnaryOperation(token, factor.type, token.value, factor)
+            return UnaryOperation(token, self.scope(), token.type, token.value, factor)
         if token.value == "(":
             self.eat("(")
             expression = self.expression()
             self.eat(")")
             return expression
         if token.value in ("TRUE", "FALSE"):
-            token = self.eat(("TRUE", "FALSE"))
-            return BoolLiteral(token, "BOOLEAN", token.value == "TRUE")
+            token = self.eat(token.value)
+            return BoolLiteral(token, self.scope(), "BOOLEAN", token.value == "TRUE")
         if token.type == "IDENT":
-            variable = self.known_variable()
+            variable = self.variable_reference()
             return variable
-        self.error(
-            f"expected an identifier or INTEGER/REAL/STRING literal or '+', '-', '(', 'TRUE/FALSE', "
-            f"not {token.type}('{token.value}')",
+        raise ParseError(
+            "expected an identifier or INTEGER/REAL/STRING literal or '+', '-', '(', 'TRUE/FALSE'",
             token,
         )
+
+
+def yamlizer(obj: Any) -> str:
+    import yamler
+
+    return yamler.yamlizer(obj)
+
+
+def expand_variable_reference(variable: Variable, variable_reference: VariableReference) -> tuple[Type, str]:
+    type = variable.type
+    reference = variable.name
+    for part in variable_reference.parts:
+        if isinstance(part, VariableSubscript):
+            if isinstance(type, AliasType):
+                type = type.reference_type
+            assert isinstance(type, ArrayType), f"expected array type, found {type}"
+            type = type.type
+            reference += ".data" + part.c()
+        elif isinstance(part, VariableField):
+            if isinstance(type, AliasType):
+                type = type.reference_type
+            assert isinstance(type, StructType), f"expected structure type, found {type}"
+            field = next((f for f in type.fields if f.name == part.name), None)
+            assert field is not None, f"field '{part.name}' not found in {type}"
+            type = field.type
+            reference += part.c()
+        else:
+            assert False, f"unexpected part '{part}'"
+    return type, reference

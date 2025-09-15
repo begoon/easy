@@ -26,9 +26,13 @@ PROGRAM Eratosthenes:
   END FUNCTION integersqrt;
 
   INPUT topnum;
+  IF topnum > 10000 THEN
+    OUTPUT "Input value " || topnum || " too large.";
+    EXIT;
+  FI;
 
   IF topnum > 0 THEN
-    DECLARE sieve ARRAY[1:topnum] OF BOOLEAN;
+    DECLARE sieve ARRAY[1:10000] OF BOOLEAN;
     DECLARE (i, limit, count) INTEGER;
     SET topnum := topnum + 1;
     FOR i := 1 TO topnum DO SET sieve[i] := TRUE; END FOR;

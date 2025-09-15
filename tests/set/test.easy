@@ -1,4 +1,9 @@
 PROGRAM AssignmentSubscript:
-  DECLARE p INTEGER;
-  SET p.x[0][1][100] := p.y;
+  DECLARE p STRUCTURE
+    FIELD x IS ARRAY [0:1] OF ARRAY [0:1] OF ARRAY [0:100] OF INTEGER,
+    FIELD y IS INTEGER
+  END STRUCTURE;
+  SET p.y := 123;
+  SET p.x[0][1][100] := p.y + 321;
+  OUTPUT p.x[0][1][100], " ", p.y;
 END PROGRAM AssignmentSubscript;

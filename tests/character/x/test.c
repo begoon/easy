@@ -1,4 +1,8 @@
 #include "runtime.c"
+typedef int INTEGER;
+typedef double REAL;
+typedef int BOOLEAN;
+typedef STR STRING;
 int main()
 {
     output("A", concat("AA", CHARACTER(48), CHARACTER(50)));

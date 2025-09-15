@@ -2,18 +2,10 @@
 #
 import pathlib
 import sys
+from parser import BuiltinFunction, Parser, common, emit, functions_list, procedures_list, types_list
 from pathlib import Path
 
-from lexer import Lexer, Token
-from nodes import (
-    Array,
-    common,
-    emit,
-    python_imports,
-    python_runtime_imports,
-    types_registry,
-)
-from parser import Parser
+from lexer import InputText, Lexer, Token
 from peg.parser import PEGParser
 from yamler import yamlizer
 
@@ -29,35 +21,29 @@ def arg(argv: list[str], name: str) -> str | None:
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
-        print("usage: easy.py <input.easy> [-c <output.c>] [-t] [-a] [-j] [-p <output.py>]")
+        print("usage: easy.py <input.easy> [-c <output.c>] [-t] [-a] [-e]")
         print("  -c <output.c>  - specify output C file (default: input.c)")
         print("  -t             - generate tokens file (default: off)")
-        print("  -m             - generate meta file (default: off)")
         print("  -a             - generate YAML AST file (default: off)")
         print("  -e             - generate PEG YAML AST file (default: off)")
-        print("  -p <output.py> - generate Python file (default: input.py)")
         sys.exit(1)
 
     input_file = pathlib.Path(sys.argv[1])
 
     source = input_file.read_text()
 
-    lexer = Lexer(source, input_file)
+    lexer = Lexer(InputText(filename=input_file))
 
     tokens = lexer.tokens()
     if "-t" in sys.argv:
         tokens_file = input_file.with_suffix(".tokens")
 
         def format_token(token: Token) -> str:
-            return f"{input_file}:{token.line}:{token.col}\t {token.value} / {token.type}"
+            return f"{token.input.filename}:{token.line}:{token.col}\t {token.value} / {token.type}"
 
         tokens_file.write_text("\n".join(format_token(t) for t in tokens) + "\n")
 
-    ast = Parser(tokens, source).program()
-
-    if "-m" in sys.argv:
-        meta_file = input_file.with_suffix(".meta")
-        meta_file.write_text(ast.meta() + "\n")
+    ast = Parser(tokens).program()
 
     if "-a" in sys.argv:
         ast_file = input_file.with_suffix(".yaml")
@@ -76,30 +62,17 @@ if __name__ == "__main__":
 
     with open(output_c, "w") as f:
         f.write('#include "runtime.c"\n')
-        if types_registry:
-            for name, definition in types_registry.items():
-                v = "typedef "
-                if isinstance(definition, Array):
-                    v += definition.c(variable=name)
-                else:
-                    v += definition.c() + " " + name
-                v += ";\n"
-                f.write(v)
+        for name, definition in types_list.items():
+            v = f"{definition.typedef(name)};\n"
+            f.write(v)
         if common:
             f.write(emit(common) + "\n")
+        if functions_list:
+            for v in functions_list.values():
+                if isinstance(v, BuiltinFunction):
+                    continue
+                f.write(v.c() + "\n")
+        if procedures_list:
+            for v in procedures_list.values():
+                f.write(v.c() + "\n")
         f.write(code_c + "\n")
-
-    output_py = Path(arg(sys.argv, "-p") or input_file.with_suffix(".py"))
-    if flag(sys.argv, "-p") is not None:
-        code_py = ast.py().strip()
-
-        with open(output_py, "w") as f:
-            if python_imports:
-                for v in sorted(python_imports):
-                    f.write(f"{v}\n")
-                f.write("\n")
-
-            if python_runtime_imports:
-                imports = ", ".join(sorted(python_runtime_imports))
-                f.write(f"from runtime import {imports}\n\n")
-            f.write(code_py + "\n")

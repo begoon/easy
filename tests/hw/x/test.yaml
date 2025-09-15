@@ -1,91 +1,96 @@
-node: ProgramStatement
-token: PROGRAM / KEYWORD at 1:1
+node: PROGRAM
+token: <PROGRAM|KEYWORD tests/hw/test.easy:1:1>
+scope: '@'
 name: hw
 segment:
   node: Segment
-  token: DECLARE / KEYWORD at 2:1
+  token: <DECLARE|KEYWORD tests/hw/test.easy:2:1>
+  scope: PROGRAM:hw
   types: []
   variables:
-    - node: DeclareStatement
-      token: DECLARE / KEYWORD at 2:1
+    - node: DECLARE
+      token: <DECLARE|KEYWORD tests/hw/test.easy:2:1>
+      scope: PROGRAM:hw
       names:
         - a
-      type: INTEGER
+      type:
+        node: IntegerType
   subroutines: []
   statements:
-    node: Statements
-    token: SET / KEYWORD at 3:1
-    statements:
-      - node: SetStatement
-        token: SET / KEYWORD at 3:1
-        variables:
-          - node: Variable
-            token: a / IDENT at 3:5
-            type: INTEGER
-            name: a
-            parts:
-              - a
-        expression:
-          node: IntegerLiteral
-          token: 100 / INTEGER at 3:10
-          type: INTEGER
-          value: 100
-      - node: OutputStatement
-        token: OUTPUT / KEYWORD at 4:1
-        arguments:
-          - node: ConcatenationOperation
-            token: a / IDENT at 4:18
-            type: STRING
-            parts:
-              - node: StringLiteral
-                token: abc  / STRING at 4:8
-                type: STRING
-                value: 'abc '
-              - node: Variable
-                token: a / IDENT at 4:18
-                type: INTEGER
-                name: a
-                parts:
-                  - a
-      - node: ForStatement
-        token: FOR / KEYWORD at 5:1
-        variable:
-          node: Variable
-          token: a / IDENT at 5:5
-          type: INTEGER
+    - node: SET
+      token: <SET|KEYWORD tests/hw/test.easy:3:1>
+      scope: PROGRAM:hw
+      target:
+        - node: VariableReference
+          token: <a|IDENT tests/hw/test.easy:3:5>
+          scope: PROGRAM:hw
           name: a
+          parts: []
+      expression:
+        node: IntegerLiteral
+        token: <100|INTEGER tests/hw/test.easy:3:10>
+        scope: PROGRAM:hw
+        type: INTEGER
+        value: 100
+    - node: OUTPUT
+      token: <OUTPUT|KEYWORD tests/hw/test.easy:4:1>
+      scope: PROGRAM:hw
+      arguments:
+        - node: ConcatenationOperation
+          token: <a|IDENT tests/hw/test.easy:4:18>
+          scope: PROGRAM:hw
+          type: STRING
           parts:
-            - a
-        init:
-          node: IntegerLiteral
-          token: 0 / INTEGER at 5:10
-          type: INTEGER
-          value: 0
-        do:
-          node: Segment
-          token: OUTPUT / KEYWORD at 6:3
-          types: []
-          variables: []
-          subroutines: []
-          statements:
-            node: Statements
-            token: OUTPUT / KEYWORD at 6:3
-            statements:
-              - node: OutputStatement
-                token: OUTPUT / KEYWORD at 6:3
-                arguments:
-                  - node: Variable
-                    token: a / IDENT at 6:10
-                    type: INTEGER
-                    name: a
-                    parts:
-                      - a
-        by:
-        to:
-          node: IntegerLiteral
-          token: 10 / INTEGER at 5:15
-          type: INTEGER
-          value: 10
-        condition:
-      - node: ExitStatement
-        token: EXIT / KEYWORD at 8:1
+            - node: StringLiteral
+              token: <abc |STRING tests/hw/test.easy:4:8>
+              scope: PROGRAM:hw
+              type: STRING
+              value: 'abc '
+            - node: VariableReference
+              token: <a|IDENT tests/hw/test.easy:4:18>
+              scope: PROGRAM:hw
+              name: a
+              parts: []
+    - node: FOR
+      token: <FOR|KEYWORD tests/hw/test.easy:5:1>
+      scope: PROGRAM:hw
+      variable:
+        node: VariableReference
+        token: <a|IDENT tests/hw/test.easy:5:5>
+        scope: PROGRAM:hw
+        name: a
+        parts: []
+      init:
+        node: IntegerLiteral
+        token: <0|INTEGER tests/hw/test.easy:5:10>
+        scope: PROGRAM:hw
+        type: INTEGER
+        value: 0
+      do:
+        node: Segment
+        token: <OUTPUT|KEYWORD tests/hw/test.easy:6:3>
+        scope: PROGRAM:hw
+        types: []
+        variables: []
+        subroutines: []
+        statements:
+          - node: OUTPUT
+            token: <OUTPUT|KEYWORD tests/hw/test.easy:6:3>
+            scope: PROGRAM:hw
+            arguments:
+              - node: VariableReference
+                token: <a|IDENT tests/hw/test.easy:6:10>
+                scope: PROGRAM:hw
+                name: a
+                parts: []
+      by:
+      to:
+        node: IntegerLiteral
+        token: <10|INTEGER tests/hw/test.easy:5:15>
+        scope: PROGRAM:hw
+        type: INTEGER
+        value: 10
+      condition:
+    - node: EXIT
+      token: <EXIT|KEYWORD tests/hw/test.easy:8:1>
+      scope: PROGRAM:hw

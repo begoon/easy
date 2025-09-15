@@ -1,5 +1,9 @@
 #include "runtime.c"
-int topnum = {0};
+typedef int INTEGER;
+typedef double REAL;
+typedef int BOOLEAN;
+typedef STR STRING;
+int topnum = 0;
 double abs(double x)
 {
     if (x < 0)
@@ -10,7 +14,6 @@ double abs(double x)
     {
         return x;
     }
-    return 0;
 }
 int integersqrt(int a)
 {
@@ -25,10 +28,10 @@ int integersqrt(int a)
     }
     else if (a > 0)
     {
-        double x = {0};
-        double ra = {0};
-        double epsilon = {0};
-        int sqrt = {0};
+        double x = 0.0;
+        double ra = 0.0;
+        double epsilon = 0.0;
+        int sqrt = 0;
         ra = FLOAT(a);
         epsilon = (1e-07 * ra);
         for (x = (ra / 2.0); (abs((ra - (x * x))) > epsilon); x += (((ra / x) - x) / 2.0))
@@ -41,38 +44,45 @@ int integersqrt(int a)
         }
         return sqrt;
     }
-    return 0;
 }
 int main()
 {
     scanf("%d", &topnum);
+    if (topnum > 10000)
+    {
+        output("A", concat("AiA", from_cstring("Input value "), topnum, from_cstring(" too large.")));
+        exit(0);
+    }
     if (topnum > 0)
     {
-        int sieve[1 + topnum + 1];
-        int i = {0};
-        int limit = {0};
-        int count = {0};
+        struct
+        {
+            int data[1 + 10000 + 1];
+        } sieve = {0};
+        int i = 0;
+        int limit = 0;
+        int count = 0;
         topnum = (topnum + 1);
         for (i = 1; i <= topnum; i += 1)
         {
-            sieve[i] = TRUE;
+            sieve.data[i] = TRUE;
         }
         limit = (integersqrt(topnum) + 1);
         for (i = 2; i <= limit; i += 1)
         {
-            if (sieve[i])
+            if (sieve.data[i])
             {
-                int j = {0};
+                int j = 0;
                 for (j = (2 * i); j <= topnum; j += i)
                 {
-                    sieve[j] = FALSE;
+                    sieve.data[j] = FALSE;
                 }
             }
         }
         count = 0;
         for (i = 1; i <= topnum; i += 1)
         {
-            if (sieve[i])
+            if (sieve.data[i])
             {
                 count = (count + 1);
                 output("A", concat("AiAi", from_cstring("Prime["), count, from_cstring("] = "), i));

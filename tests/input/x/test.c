@@ -1,6 +1,10 @@
 #include "runtime.c"
-int i = {0};
-double f = {0};
+typedef int INTEGER;
+typedef double REAL;
+typedef int BOOLEAN;
+typedef STR STRING;
+int i = 0;
+double f = 0.0;
 STR s = {0};
 int main()
 {

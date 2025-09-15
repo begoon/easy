@@ -2,7 +2,7 @@ __pycache__/
 *.py[cod]
 
 tests/**/*.tokens
-tests/**/*.ast
+tests/**/*.meta
 tests/**/*.yaml
 tests/**/*.c
 tests/**/*.py
@@ -10,6 +10,8 @@ tests/**/*.exe
 tests/**/*.output
 
 !tests/**/x/*.*
+
+*.o
 
 /life
 life.c

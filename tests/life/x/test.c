@@ -1,20 +1,30 @@
 #include "runtime.c"
-typedef int Field[0 + 25 + 1][0 + 80];
-int w = {0};
-int h = {0};
+typedef int INTEGER;
+typedef double REAL;
+typedef int BOOLEAN;
+typedef STR STRING;
+typedef struct
+{
+    struct
+    {
+        int data[0 + 80 + 1];
+    } data[0 + 25 + 1];
+} Field;
+int w = 0;
+int h = 0;
 Field field = {0};
-int x = {0};
-int y = {0};
-int i = {0};
+int x = 0;
+int y = 0;
+int i = 0;
 int valid(int x, int y)
 {
     return (!((((x < 0) || (x >= w)) || (y < 0)) || (y >= h)));
 }
 int neighbours(int x, int y)
 {
-    int n = {0};
-    int xx = {0};
-    int yy = {0};
+    int n = 0;
+    int xx = 0;
+    int yy = 0;
     n = 0;
     for (xx = (x - 1); xx <= (x + 1); xx += 1)
     {
@@ -24,7 +34,7 @@ int neighbours(int x, int y)
             {
                 if (valid(xx, yy))
                 {
-                    if (field[yy][xx])
+                    if (field.data[yy].data[xx])
                     {
                         n = (n + 1);
                     }
@@ -36,8 +46,8 @@ int neighbours(int x, int y)
 }
 void print()
 {
-    int x = {0};
-    int y = {0};
+    int x = 0;
+    int y = 0;
     output("AA", from_cstring("** [ EASY LIFE ]"), from_cstring(" "));
     for (x = 0; x <= ((w + 1) - 17); x += 1)
     {
@@ -49,7 +59,7 @@ void print()
         output("A", from_cstring("*"));
         for (x = 0; x <= (w - 1); x += 1)
         {
-            if (field[y][x] == TRUE)
+            if (field.data[y].data[x] == TRUE)
             {
                 output("A", from_cstring("x"));
             }
@@ -68,24 +78,24 @@ void print()
 }
 void glider(int x, int y)
 {
-    field[y][x] = TRUE;
-    field[y][(x + 1)] = TRUE;
-    field[y][(x + 2)] = TRUE;
-    field[(y + 1)][x] = TRUE;
-    field[(y + 2)][(x + 1)] = TRUE;
+    field.data[y].data[x] = TRUE;
+    field.data[y].data[(x + 1)] = TRUE;
+    field.data[y].data[(x + 2)] = TRUE;
+    field.data[(y + 1)].data[x] = TRUE;
+    field.data[(y + 2)].data[(x + 1)] = TRUE;
 }
 void evolution()
 {
-    int x = {0};
-    int y = {0};
-    int n = {0};
+    int x = 0;
+    int y = 0;
     Field next = {0};
     for (y = 0; y <= (h - 1); y += 1)
     {
         for (x = 0; x <= (w - 1); x += 1)
         {
-            int alive = {0};
-            alive = field[y][x];
+            int alive = 0;
+            int n = 0;
+            alive = field.data[y].data[x];
             n = neighbours(x, y);
             if (alive == TRUE)
             {
@@ -101,16 +111,10 @@ void evolution()
                     alive = TRUE;
                 }
             }
-            next[y][x] = alive;
+            next.data[y].data[x] = alive;
         }
     }
-    for (y = 0; y <= (h - 1); y += 1)
-    {
-        for (x = 0; x <= (w - 1); x += 1)
-        {
-            field[y][x] = next[y][x];
-        }
-    }
+    field = next;
 }
 int main()
 {
@@ -120,7 +124,7 @@ int main()
     {
         for (x = 0; x <= (w - 1); x += 1)
         {
-            field[y][x] = FALSE;
+            field.data[y].data[x] = FALSE;
         }
     }
     glider(30, 15);

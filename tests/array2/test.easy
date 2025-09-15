@@ -1,6 +1,6 @@
 PROGRAM Array2:
   TYPE B IS 
-    ARRAY[1:25] OF 
+    ARRAY [1:25] OF 
       ARRAY [80] OF 
         STRUCTURE 
           FIELD x IS INTEGER, 

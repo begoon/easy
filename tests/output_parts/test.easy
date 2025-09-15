@@ -1,4 +1,24 @@
 PROGRAM OutputSubscript:
-  DECLARE (b, p, c) INTEGER;
+  DECLARE  b INTEGER;
+  DECLARE p STRUCTURE
+    FIELD x IS STRUCTURE
+      FIELD y IS INTEGER,
+      FIELD z IS INTEGER
+    END STRUCTURE,
+    FIELD t IS ARRAY [2] OF 
+      ARRAY [3] OF 
+        ARRAY [4] OF INTEGER
+  END STRUCTURE;
+  DECLARE c STRUCTURE
+    FIELD r IS REAL,
+    FIELD s IS STRING,
+    FIELD t IS ARRAY [2] OF 
+      ARRAY [3] OF 
+        ARRAY [4] OF INTEGER
+  END STRUCTURE;
+
+  SET b := 123;
+  SET p.x.z := 456;
+  SET c.t[0][2][1] := 789;
   OUTPUT b, p.x.z, c.t[0][2][1];
 END PROGRAM OutputSubscript;

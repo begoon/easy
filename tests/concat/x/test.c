@@ -1,7 +1,11 @@
 #include "runtime.c"
-int a = {0};
-double r = {0};
-int b = {0};
+typedef int INTEGER;
+typedef double REAL;
+typedef int BOOLEAN;
+typedef STR STRING;
+int a = 0;
+double r = 0.0;
+int b = 0;
 STR s = {0};
 int fa()
 {

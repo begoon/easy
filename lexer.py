@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from pathlib import Path
 
 KEYWORDS = {
     "PROGRAM",
@@ -46,21 +47,34 @@ SYMBOLS = {*"+ - * / | & ( ) [ ] ; , . : := = <> < <= > >= ||".split(" ")}
 
 
 @dataclass
+class InputText:
+    filename: str
+    text: str
+
+    def __init__(self, *, text: str = "", filename: str | Path = None):
+        if text:
+            self.text = text
+            self.filename = ""
+        else:
+            self.text = Path(filename).read_text()
+            self.filename = str(filename)
+
+
+@dataclass
 class Token:
     type: str
     value: str
+
     line: int
     col: int
-    filename: str
+
+    input: InputText
 
     def __str__(self) -> str:
-        v = self.value
+        v = "<" + self.value
         if self.type != self.value:
-            v += f" ({self.type})"
-        v += " at "
-        if self.filename:
-            v += f"{self.filename}"
-        v = f"{v}:{self.line}:{self.col}"
+            v += f"|{self.type}"
+        v += f"|{self.input.filename}:{self.line}:{self.col}"
         return v
 
     def __repr__(self) -> str:
@@ -72,13 +86,13 @@ class LexerError(Exception):
 
 
 class Lexer:
-    def __init__(self, text: str, filename: str | None = None):
-        self.text = text
+    def __init__(self, input: InputText):
+        self.input = input
+        self.text = input.text
         self.i = 0
         self.line = 1
         self.col = 1
-        self.n = len(text)
-        self.filename = str(filename) if filename else ""
+        self.n = len(self.text)
 
     def peek(self, k=1) -> str:
         j = self.i + k
@@ -144,8 +158,8 @@ class Lexer:
             while self.current().isdigit() or self.current() in "+-eE":
                 s += self.current()
                 self.advance()
-            return Token("REAL", s, line, col, self.filename)
-        return Token("INTEGER", s, line, col, self.filename)
+            return Token("REAL", s, line, col, self.input)
+        return Token("INTEGER", s, line, col, self.input)
 
     def ident_or_keyword(self) -> Token:
         line, col = self.line, self.col
@@ -159,8 +173,8 @@ class Lexer:
                 self.advance()
         value = v
         if value in KEYWORDS:
-            return Token("KEYWORD", value, line, col, self.filename)
-        return Token("IDENT", v, line, col, self.filename)
+            return Token("KEYWORD", value, line, col, self.input)
+        return Token("IDENT", v, line, col, self.input)
 
     def string(self) -> Token:
         line, col = self.line, self.col
@@ -181,7 +195,7 @@ class Lexer:
                 break
             s += c
             self.advance()
-        return Token("STRING", s, line, col, self.filename)
+        return Token("STRING", s, line, col, self.input)
 
     def symbol(self) -> Token:
         start, col = self.line, self.col
@@ -189,12 +203,12 @@ class Lexer:
         two = self.current() + self.peek()
         if two in SYMBOLS:
             self.advance(2)
-            return Token("SYMBOL", two, start, col, self.filename)
+            return Token("SYMBOL", two, start, col, self.input)
         one = self.current()
         if one in SYMBOLS:
             self.advance()
-            return Token("SYMBOL", one, start, col, self.filename)
-        raise LexerError(f"unknown symbol '{one}' at {start}:{col}")
+            return Token("SYMBOL", one, start, col, self.input)
+        raise LexerError(f"unknown symbol '{one}' at {self.input.filename}:{start}:{col}")
 
     def tokens(self) -> list[Token]:
         v: list[Token] = []
@@ -211,5 +225,5 @@ class Lexer:
                 v.append(self.string())
             else:
                 v.append(self.symbol())
-        v.append(Token("EOF", "", self.line, self.col, self.filename))
+        v.append(Token("EOF", "", self.line, self.col, self.input))
         return v

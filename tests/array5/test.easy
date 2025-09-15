@@ -1,0 +1,22 @@
+PROGRAM Array5:
+  TYPE Field IS ARRAY [1:100] OF STRUCTURE 
+    FIELD score IS INTEGER,
+    FIELD name IS STRING
+  END STRUCTURE;
+
+  DECLARE f Field;
+
+  FUNCTION a(f Field) Field:
+    OUTPUT "BEFORE: " || f[10].score || " " || f[10].name;
+    SET f[10].score := 123;
+    SET f[10].name := f[10].name || "xyz";
+    RETURN f;
+  END FUNCTION a;
+
+  SET f[10].score := 321;
+  SET f[10].name := "abc";
+  SET f := a(f);
+  OUTPUT "AFTER: " || f[10].score || " " || f[10].name;
+
+  EXIT;
+END PROGRAM Array5;

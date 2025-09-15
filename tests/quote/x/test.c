@@ -1,4 +1,8 @@
 #include "runtime.c"
+typedef int INTEGER;
+typedef double REAL;
+typedef int BOOLEAN;
+typedef STR STRING;
 STR s = {0};
 int main()
 {

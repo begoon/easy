@@ -1,69 +1,73 @@
 #include "runtime.c"
-typedef int Row[1 + 32 + 1];
+typedef int INTEGER;
+typedef double REAL;
+typedef int BOOLEAN;
+typedef STR STRING;
+typedef struct
+{
+    int data[1 + 32 + 1];
+} Row;
 Row row = {0};
-int N = {0};
-int n = {0};
-int i = {0};
+int N = 0;
+int n = 0;
+int i = 0;
 void step()
 {
-    int i = {0};
+    int i = 0;
     Row next = {0};
     for (i = 1; i <= N; i += 1)
     {
-        next[i] = 0;
+        next.data[i] = 0;
     }
     for (i = 1; i <= N; i += 1)
     {
-        int left = {0};
-        int c = {0};
-        int right = {0};
-        int s = {0};
-        int j = {0};
+        int left = 0;
+        int c = 0;
+        int right = 0;
+        int s = 0;
+        int j = 0;
         j = (i - 1);
         if (j < 1)
         {
             j = N;
         }
-        left = row[j];
-        c = row[i];
+        left = row.data[j];
+        c = row.data[i];
         j = (i + 1);
         if (j > N)
         {
             j = 1;
         }
-        right = row[j];
+        right = row.data[j];
         s = ((left + c) + right);
         if (s == 2)
         {
-            next[i] = 1;
+            next.data[i] = 1;
         }
         else if ((s == 0) || (s == 3))
         {
-            next[i] = 0;
+            next.data[i] = 0;
         }
         else
         {
             if (c == 1)
             {
-                next[i] = 1;
+                next.data[i] = 1;
             }
             else
             {
-                next[i] = right;
+                next.data[i] = right;
             }
         }
     }
-    for (i = 1; i <= N; i += 1)
-    {
-        row[i] = next[i];
-    }
+    row = next;
 }
 void print()
 {
-    int i = {0};
+    int i = 0;
     for (i = 1; i <= N; i += 1)
     {
-        if (row[i] == 1)
+        if (row.data[i] == 1)
         {
             output("A", from_cstring("X"));
         }
@@ -77,11 +81,7 @@ void print()
 int main()
 {
     N = 32;
-    for (i = 1; i <= N; i += 1)
-    {
-        row[i] = 0;
-    }
-    row[FIX((N / 2))] = 1;
+    row.data[FIX((N / 2))] = 1;
     print();
     for (n = 1; n <= 10; n += 1)
     {

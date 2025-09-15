@@ -1,8 +1,12 @@
 #include "runtime.c"
-int n = {0};
+typedef int INTEGER;
+typedef double REAL;
+typedef int BOOLEAN;
+typedef STR STRING;
+int n = 0;
 void FizzBuzz(int n)
 {
-    int i = {0};
+    int i = 0;
     for (i = 1; i <= n; i += 1)
     {
         if (((i % 3) == 0) && ((i % 5) == 0))
