@@ -98,12 +98,12 @@ def process(test: Path) -> None:
 
         flags.extend(["-c", str(created_c)])
 
-    expected_py = x.with_suffix(".py")
-    if expected_py.exists():
-        created_py = test.with_suffix(".py")
-        removals.append(created_py)
+    expected_s = x.with_suffix(".s")
+    if expected_s.exists():
+        created_s = test.with_suffix(".s")
+        removals.append(created_s)
 
-        flags.extend(["-p", str(created_py)])
+        flags.extend(["-s", str(created_s)])
 
     run(["python", "easy.py", program, *flags])
 
@@ -119,8 +119,8 @@ def process(test: Path) -> None:
     if expected_c.exists():
         diff(expected_c, created_c)
 
-    if expected_py.exists():
-        diff(expected_py, created_py)
+    if expected_s.exists():
+        diff(expected_s, created_s)
 
     skip_run = expected_c.exists() and os.getenv("SKIP_RUN")
 
@@ -146,15 +146,6 @@ def process(test: Path) -> None:
             diff(expected_output, created_output)
 
             created_output.unlink()
-
-        if expected_py.exists():
-            cmd = ["python", created_py, ">" + str(test.with_suffix(".output"))]
-            input_file = x.with_suffix(".input")
-            if input_file.exists():
-                cmd.append("<" + str(input_file))
-
-            run(cmd, env={**os.environ, "PYTHONPATH": "."})
-            diff(expected_output, created_output)
 
     for removal in removals:
         if removal.exists():

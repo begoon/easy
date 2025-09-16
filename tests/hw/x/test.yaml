@@ -43,7 +43,7 @@ segment:
           parts:
             - node: VariableReference
               token: <abc |STRING tests/hw/test.easy:4:8>
-              scope: '*'
+              scope: ''
               name: $0
               parts: []
             - node: VariableReference

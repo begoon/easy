@@ -71,7 +71,9 @@ class Token:
     input: InputText
 
     def __str__(self) -> str:
-        v = "<" + self.value
+        value = self.value if len(self.value) < 20 else self.value[:17] + "..."
+        value = f"'{value}'" if self.type in ["STRING", "SYMBOL"] else value
+        v = "<" + value
         if self.type != self.value:
             v += f"|{self.type}"
         v += f"|{self.input.filename}:{self.line}:{self.character}"

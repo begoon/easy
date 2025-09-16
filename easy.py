@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 #
 import pathlib
+import re
 import sys
 from parser import BuiltinFunction, Parser, common, emit, functions_list, procedures_list, types_list, variables_list
 from pathlib import Path
@@ -8,6 +9,23 @@ from pathlib import Path
 from lexer import InputText, Lexer, Token
 from peg.parser import PEGParser
 from yamler import yamlizer
+
+
+def table(rows: list[list[str]]) -> str:
+    if not rows:
+        return ""
+    n_cols = max(len(row) for row in rows)
+    col_widths = [0] * n_cols
+    for row in rows:
+        for i, cell in enumerate(row):
+            col_widths[i] = max(col_widths[i], len(cell))
+
+    lines = []
+    for row in rows:
+        line = "  ".join(cell.ljust(col_widths[i]) for i, cell in enumerate(row))
+        lines.append(line)
+
+    return "\n".join(lines) + "\n"
 
 
 def flag(argv: list[str], name: str) -> int | None:
@@ -56,6 +74,43 @@ if __name__ == "__main__":
         peg_ast_file = input_file.with_suffix(".peg.yaml")
         peg_ast_file.write_text(yamlizer(peg_ast))
 
+    output_s = Path(arg(sys.argv, "-s") or input_file.with_suffix(".s"))
+    with open(output_s, "w") as f:
+        v = []
+        for name, variable in variables_list.items():
+            v.append(variable.s(name))
+        print(table(v), file=f)
+
+        v = []
+        for name, type in types_list.items():
+            v.append((name, re.sub(r"\s+", " ", type.c())))
+        print(table(v), file=f)
+
+        v = []
+        for name, function in functions_list.items():
+            is_builtin = isinstance(function, BuiltinFunction)
+            if is_builtin:
+                v.append((function.name, "->", function.type.c(), "built-in"))
+                continue
+            arguments = ", ".join([f"{v.name} {v.type.c()}" for v in function.arguments])
+            v.append(
+                (
+                    function.name,
+                    "->",
+                    function.type.c(),
+                    function.__class__.__name__,
+                    f"({arguments})",
+                    str(function.token),
+                )
+            )
+        print(table(v), file=f)
+
+        v = []
+        for name, procedure in procedures_list.items():
+            arguments = ", ".join([f"{v.name} {v.type.c()}" for v in procedure.arguments])
+            v.append((procedure.name, procedure.__class__.__name__, f"({arguments})", str(procedure.token)))
+        print(table(v), file=f)
+
     output_c = Path(arg(sys.argv, "-c") or input_file.with_suffix(".c"))
 
     code_c = ast.c().strip()
@@ -79,3 +134,6 @@ if __name__ == "__main__":
             for v in procedures_list.values():
                 f.write(v.c() + "\n")
         f.write(code_c + "\n")
+
+
+##########################################################################

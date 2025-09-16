@@ -815,7 +815,7 @@ segment:
                         arguments:
                           - node: VariableReference
                             token: <X|STRING tests/rule_110/test.easy:43:33>
-                            scope: '*'
+                            scope: ''
                             name: $0
                             parts: []
                   else_branch:
@@ -832,7 +832,7 @@ segment:
                         arguments:
                           - node: VariableReference
                             token: <.|STRING tests/rule_110/test.easy:43:50>
-                            scope: '*'
+                            scope: ''
                             name: $1
                             parts: []
             by:
@@ -849,7 +849,7 @@ segment:
             arguments:
               - node: VariableReference
                 token: <  |STRING tests/rule_110/test.easy:45:12>
-                scope: '*'
+                scope: ''
                 name: $2
                 parts: []
   statements:

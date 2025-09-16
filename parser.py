@@ -1,11 +1,7 @@
-import hashlib
-import string
 from dataclasses import dataclass
-from typing import Any, Optional, Tuple, Union, cast
+from typing import Any, Optional, Tuple, Union
 
 from lexer import Token
-
-# ###
 
 
 @dataclass
@@ -38,17 +34,12 @@ class Type:
         print(self)
         raise NotImplementedError
 
-    def typedef(self, name: str = "") -> str:
+    def typedef(self, alias: str = "") -> str:
         print(self)
         raise NotImplementedError
 
     def format(self) -> str:
         return ""
-
-
-@dataclass
-class Expression(Node):
-    type: Type
 
 
 @dataclass
@@ -120,10 +111,9 @@ class StringType(BuiltinType):
         return "A"
 
 
-def X(x) -> str:
-    if hasattr(x, "c"):
-        return x.c()
-    return str(x)
+@dataclass
+class Expression(Node):
+    type: Type
 
 
 @dataclass
@@ -143,7 +133,7 @@ class ArrayType(Type):
         return "\n".join(v)
 
     def sz(self) -> str:
-        return X(self.lo) + " + " + X(self.hi) + " + 1"
+        return self.lo.c() + " + " + self.hi.c() + " + 1"
 
     def zero(self) -> str:
         if self.dynamic:
@@ -606,11 +596,13 @@ class Variable(Entity):
         zero = self.zero.replace('"', r"\"")
         return self.type.c() + " " + self.name + f' = {{ .data = "{zero}" }}'
 
+    def s(self, scope: str) -> list[str]:
+        return (self.name, scope, type(self.type).__name__, str(self.token))
+
 
 @dataclass
 class BuiltinLiteral(Expression):
-    #
-    ...
+    pass
 
 
 @dataclass
@@ -1293,7 +1285,7 @@ class Parser:
         if token.type == "STRING":
             token = self.eat(token.type)
 
-            scope = "*"
+            scope = ""
 
             existing_const = next((v for v in variables_list.values() if v.is_const() and v.zero == token.value), None)
             if existing_const:

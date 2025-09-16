@@ -5,7 +5,7 @@ tests/**/*.tokens
 tests/**/*.meta
 tests/**/*.yaml
 tests/**/*.c
-tests/**/*.py
+tests/**/*.s
 tests/**/*.exe
 tests/**/*.output
 
