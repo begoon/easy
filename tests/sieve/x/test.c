@@ -48,17 +48,12 @@ int integersqrt(int a)
 int main()
 {
     scanf("%d", &topnum);
-    if (topnum > 10000)
-    {
-        output("A", concat("AiA", from_cstring("Input value "), topnum, from_cstring(" too large.")));
-        exit(0);
-    }
     if (topnum > 0)
     {
         struct
         {
-            int data[1 + 10000 + 1];
-        } sieve = {0};
+            int *data;
+        } sieve = { .data = malloc(sizeof(int) * (1 + topnum + 1)) };
         int i = 0;
         int limit = 0;
         int count = 0;

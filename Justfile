@@ -6,6 +6,9 @@ test-unit:
 test-compiler:
     uv run python test.py
 
+one NAME:
+    python3 easy.py tests/{{NAME}}/test.easy && cc tests/{{NAME}}/test.c -o tests/{{NAME}}/test.exe -I . && ./tests/{{NAME}}/test.exe
+
 life:
     python easy.py life.easy && clang life.c -o life && ./life
 

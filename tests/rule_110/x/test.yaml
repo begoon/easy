@@ -27,6 +27,7 @@ segment:
           scope: PROGRAM:Rule110
           type: INTEGER
           value: 1
+        dynamic: false
   variables:
     - node: DECLARE
       token: <DECLARE|KEYWORD tests/rule_110/test.easy:4:3>
@@ -52,6 +53,7 @@ segment:
             scope: PROGRAM:Rule110
             type: INTEGER
             value: 1
+          dynamic: false
     - node: DECLARE
       token: <DECLARE|KEYWORD tests/rule_110/test.easy:5:3>
       scope: PROGRAM:Rule110
@@ -104,6 +106,7 @@ segment:
                   scope: PROGRAM:Rule110
                   type: INTEGER
                   value: 1
+                dynamic: false
         subroutines: []
         statements:
           - node: FOR

@@ -322,27 +322,6 @@
                 base: topnum
                 parts: []
               op: '>'
-              rhs: '10000'
-            then_body:
-              type: segment_body
-              statements:
-                - type: output_statement
-                  list:
-                    - type: concat_expr
-                      head: '"Input value "'
-                      tail:
-                        - type: variable
-                          base: topnum
-                          parts: []
-                        - '" too large."'
-          - type: simple_conditional_statement
-            cond:
-              type: rel_expr
-              head:
-                type: variable
-                base: topnum
-                parts: []
-              op: '>'
               rhs: '0'
             then_body:
               type: segment_body
@@ -354,7 +333,10 @@
                     arrayed_type:
                       type: arrayed_type
                       lo: '1'
-                      hi: '10000'
+                      hi:
+                        type: variable
+                        base: topnum
+                        parts: []
                       element_type:
                         type: type
                         basic_type: BOOLEAN

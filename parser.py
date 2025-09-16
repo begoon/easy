@@ -111,16 +111,23 @@ class ArrayType(Type):
     type: Type
 
     hi: Expression
-    lo: Optional[Expression] = None
+    lo: Expression
+
+    dynamic: bool = False
 
     def c(self) -> str:
-        v = ["struct\n{", indent(f"{self.type.c()} data[{self.sz()}];", 1), "}"]
+        if self.dynamic:
+            v = ["struct\n{", indent(f"{self.type.c()} *data;", 1), "}"]
+        else:
+            v = ["struct\n{", indent(f"{self.type.c()} data[{self.sz()}];", 1), "}"]
         return "\n".join(v)
 
     def sz(self) -> str:
         return X(self.lo) + " + " + X(self.hi) + " + 1"
 
     def zero(self) -> str:
+        if self.dynamic:
+            return "{ .data = malloc(sizeof(" + self.type.c() + ") * (" + self.sz() + ")) }"
         return "{0}"
 
     def typedef(self, to: str) -> str:
@@ -223,25 +230,6 @@ class TYPEIS(Node):
 @dataclass
 class Entity:
     token: Token
-
-
-@dataclass
-class Array(Entity):
-    element_type: Type
-    start: Optional[Expression]
-    end: Expression
-
-    def c(self) -> str:
-        1 / 0
-        start = self.start.c() if self.start else "0"
-        end = self.end.c()
-        sz = f"{start} + {end} + 1"
-        bounds = f"[{sz}]"
-        v = self.type
-        while isinstance(v, Array):
-            bounds += f"[{v.start.c() if v.start else '0'} + {v.end.c()}]"
-            v = v.type
-        return f"{TYPE(v)} {self.name}{bounds}"
 
 
 @dataclass
@@ -804,16 +792,6 @@ class Parser:
             self.enlist_type(name, definition)
         return out
 
-    def parse_typed_variable(self) -> Variable:
-        token = self.eat("IDENT")
-        name = token.value
-        type = self.parse_type()
-        variable = Variable(token, name, type)
-        self.enlist_variable(variable)
-        if isinstance(type, ArrayType):
-            self.enlist_type(f"{self.scope()}${name}_ARRAY_TYPE", type.type)
-        return variable
-
     def enlist_type(self, name: str, type: Type) -> None:
         assert name not in types_list, f"type '{name=}' already defined as {types_list[name]=}"
         types_list[name] = type
@@ -856,14 +834,16 @@ class Parser:
             self.eat(token.value)
             self.eat("[")
             end = self.expression()
-            start = 0
+            start = IntegerLiteral(token, self.scope(), IntegerType(), 0)
             if self.accept(":"):
                 start = end
                 end = self.expression()
             self.eat("]")
             self.eat("OF")
             element_type = self.parse_type()
-            return ArrayType(element_type, end, start)
+
+            dynamic = not (isinstance(end, IntegerLiteral) and isinstance(start, IntegerLiteral))
+            return ArrayType(element_type, end, start, dynamic)
         if token.value == "STRUCTURE":
             self.eat(token.value)
             fields = []
@@ -1234,7 +1214,9 @@ class Parser:
             return FunctionCall(token, self.scope(), type, name, arguments)
         return self.factor()
 
-    def factor(self) -> Expression:
+    def factor(
+        self,
+    ) -> IntegerLiteral | RealLiteral | StringLiteral | BoolLiteral | VariableReference | UnaryOperation | Expression:
         token = self.current()
         if token.type == "INTEGER":
             token = self.eat(token.type)
