@@ -742,7 +742,6 @@ functions_list: dict[str, BuiltinFunction | FUNCTION] = {
 }
 
 procedures_list: dict[str, PROCEDURE] = {}
-
 variables_list: dict[str, Variable] = {}
 
 
@@ -845,12 +844,8 @@ class Parser:
             self.eat(";")
 
             out.append(TYPEIS(token, self.scope(), name, definition))
-            self.enlist_type(name, definition)
+            enlist_type(name, definition)
         return out
-
-    def enlist_type(self, name: str, type: Type) -> None:
-        assert name not in types_list, f"type '{name=}' already defined as {types_list[name]=}"
-        types_list[name] = type
 
     def variables_section(self) -> list[DECLARE]:
         declarations: list[DECLARE] = []
@@ -862,7 +857,7 @@ class Parser:
                 self.eat(";")
                 declarations.append(DECLARE(declare_token, self.scope(), [name], type))
                 variable = Variable(token, name, type)
-                variables_list[self.scope() + "|" + name] = variable
+                enlist_variable(variable, self.scope())
                 continue
             if token.value == "(":
                 self.eat("(")
@@ -876,7 +871,7 @@ class Parser:
                 declarations.append(DECLARE(declare_token, self.scope(), names, type))
                 for name in names:
                     variable = Variable(token, name, type)
-                    variables_list[self.scope() + "|" + name] = variable
+                    enlist_variable(variable, self.scope())
                 continue
             self.error("expected a variable or '(' variable, ... ')'", token)
         return declarations
@@ -934,12 +929,12 @@ class Parser:
             name = self.eat("IDENT").value
             self.enter_scope(token.value + ":" + name)
 
-            parameters: list[tuple[str, Type]] = []
+            parameters: list[Variable] = []
             if self.accept("("):
                 if self.current().type != ")":
                     parameters = self.parameters()
                     for parameter in parameters:
-                        variables_list[self.scope() + "|" + parameter.name] = parameter
+                        enlist_variable(parameter, self.scope())
                 self.eat(")")
 
             type = None
@@ -966,12 +961,6 @@ class Parser:
 
         return subroutines
 
-    def enlist_variable(self, variable: Variable, scope: str | None = None) -> None:
-        if scope is None:
-            scope = self.scope()
-        fqn = scope + "|" + variable.name
-        variables_list[fqn] = variable
-
     def parameters(self) -> list[Variable]:
         parameters: list[Variable] = []
         while True:
@@ -980,7 +969,7 @@ class Parser:
             type = self.parse_type()
             variable = Variable(token, name, type)
             parameters.append(variable)
-            self.enlist_variable(variable)
+            enlist_variable(variable, self.scope())
             if not self.accept(","):
                 break
         return parameters
@@ -1297,7 +1286,7 @@ class Parser:
 
             variable = Variable(token, name, StringType(), zero=token.value)
 
-            self.enlist_variable(variable, scope)
+            enlist_variable(variable, scope)
             variable_reference = VariableReference(token, scope, name, [])
             return variable_reference
         if token.value in ("+", "-"):
@@ -1316,7 +1305,7 @@ class Parser:
             variable = self.variable_reference()
             return variable
         raise ParseError(
-            "expected an identifier or INTEGER/REAL/STRING literal or '+', '-', '(', 'TRUE/FALSE'",
+            "expected an identifier or INTEGER/REAL/BOOLEAN/STRING literal or '+', '-', '(', 'TRUE/FALSE'",
             token,
         )
 
@@ -1358,7 +1347,15 @@ def discover_variable(v: VariableReference) -> Variable:
         scope.pop()
 
     if variable is None:
-        print(yamlizer(v))
-        print(yamlizer(variables_list))
         raise Exception(f"undefined variable '{v.name}' in scope '{v.scope}' at {v.token}")
     return variable
+
+
+def enlist_type(name: str, type: Type) -> None:
+    assert name not in types_list, f"type '{name=}' already defined as {types_list[name]=}"
+    types_list[name] = type
+
+
+def enlist_variable(variable: Variable, scope: str) -> None:
+    fqn = scope + "|" + variable.name
+    variables_list[fqn] = variable
