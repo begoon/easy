@@ -1,5 +1,7 @@
+import hashlib
+import string
 from dataclasses import dataclass
-from typing import Any, Optional, Tuple, Union
+from typing import Any, Optional, Tuple, Union, cast
 
 from lexer import Token
 
@@ -40,6 +42,9 @@ class Type:
         print(self)
         raise NotImplementedError
 
+    def format(self) -> str:
+        return ""
+
 
 @dataclass
 class Expression(Node):
@@ -47,12 +52,12 @@ class Expression(Node):
 
 
 @dataclass
-class PrimitiveType(Type):
+class BuiltinType(Type):
     pass
 
 
 @dataclass
-class IntegerType(PrimitiveType):
+class IntegerType(BuiltinType):
     def c(self) -> str:
         return "int"
 
@@ -62,9 +67,12 @@ class IntegerType(PrimitiveType):
     def typedef(self, alias: str) -> str:
         return f"typedef int {alias}"
 
+    def format(self) -> str:
+        return "i"
+
 
 @dataclass
-class RealType(PrimitiveType):
+class RealType(BuiltinType):
     def c(self) -> str:
         return "double"
 
@@ -74,9 +82,12 @@ class RealType(PrimitiveType):
     def typedef(self, alias: str) -> str:
         return f"typedef double {alias}"
 
+    def format(self) -> str:
+        return "r"
+
 
 @dataclass
-class BooleanType(PrimitiveType):
+class BooleanType(BuiltinType):
     def c(self) -> str:
         return "int"
 
@@ -86,18 +97,27 @@ class BooleanType(PrimitiveType):
     def typedef(self, alias: str) -> str:
         return f"typedef int {alias}"
 
+    def format(self) -> str:
+        return "b"
+
 
 @dataclass
-class StringType(PrimitiveType):
+class StringType(BuiltinType):
+    initial: Optional[str] = None
 
     def c(self) -> str:
         return "STR"
 
     def zero(self) -> str:
+        if self.initial:
+            return f'{{ .data = "{self.initial}" }}'
         return "{0}"
 
     def typedef(self, alias: str) -> str:
         return f"typedef STR {alias}"
+
+    def format(self) -> str:
+        return "A"
 
 
 def X(x) -> str:
@@ -406,7 +426,7 @@ class OUTPUT(Statement):
     def c(self) -> str:
         output = []
         format: list[str] = []
-        arguments = ", ".join(expression_stringer(argument, format) for argument in self.arguments)
+        arguments = ", ".join(expression_stringer(argument, format, "OUTPUT") for argument in self.arguments)
         output.append(f'output("{"".join(format)}", {arguments});')
         return emit(output)
 
@@ -492,10 +512,29 @@ class BinaryOperation(Expression):
 
     def c(self) -> str:
         operation = OPERATIONS.get(self.operation, self.operation)
-        from_cstring = "from_cstring("
-        if operation == "==" and (rhs := self.right.c()) and rhs.startswith(from_cstring):
-            return f"strcmp({self.left.c()}.data, {rhs[len(from_cstring):-1]}) == 0"
+        if v := string_compare(self.left, self.right, operation):
+            return v
         return f"({self.left.c()} {operation} {self.right.c()})"
+
+
+def string_compare(left: Expression, right: Expression, operation: str) -> str | None:
+    if operation not in ("==", "!="):
+        return None
+
+    def is_string_type(e: Expression) -> Tuple[bool, Optional[str]]:
+        if not isinstance(e, VariableReference):
+            return False, None
+
+        variable = discover_variable(e)
+        type, reference = expand_variable_reference(variable, e)
+        return isinstance(type, StringType), reference
+
+    is_left, left = is_string_type(left)
+    is_right, right = is_string_type(right)
+    if is_left or is_right:
+        cmp = "!=" if operation == "!=" else "=="
+        return f"strcmp({left}.data, {right}.data) {cmp} 0"
+    return None
 
 
 @dataclass
@@ -554,41 +593,73 @@ class Variable(Entity):
     name: str
     type: Type
 
+    zero: Optional[str] = None
+
     def c(self) -> str:
         return self.type.c() + " " + self.name
 
+    def is_const(self) -> bool:
+        return self.zero is not None
+
+    def const(self) -> str:
+        assert self.is_const()
+        zero = self.zero.replace('"', r"\"")
+        return self.type.c() + " " + self.name + f' = {{ .data = "{zero}" }}'
+
 
 @dataclass
-class IntegerLiteral(Expression):
+class BuiltinLiteral(Expression):
+    #
+    ...
+
+
+@dataclass
+class IntegerLiteral(BuiltinLiteral):
     value: int
 
     def c(self) -> str:
         return str(self.value)
 
+    def format(self) -> str:
+        return "i"
+
 
 @dataclass
-class RealLiteral(Expression):
+class RealLiteral(BuiltinLiteral):
     value: float
 
     def c(self) -> str:
         return str(self.value)
 
+    def format(self) -> str:
+        return "r"
+
 
 @dataclass
-class StringLiteral(Expression):
+class StringLiteral(BuiltinLiteral):
     value: str
 
     def c(self) -> str:
         value = self.value.replace('"', r"\"")
         return f'from_cstring("{value}")'
 
+    def literal(self) -> str:
+        value = self.value.replace('"', r"\"")
+        return f'"{value}"'
+
+    def format(self) -> str:
+        return "A"
+
 
 @dataclass
-class BoolLiteral(Expression):
+class BoolLiteral(BuiltinLiteral):
     value: bool
 
     def c(self) -> str:
         return "TRUE" if self.value else "FALSE"
+
+    def format(self) -> str:
+        return "b"
 
 
 @dataclass
@@ -616,53 +687,42 @@ def is_number(name: str) -> bool:
     return name in ("INTEGER", "REAL")
 
 
-FORMATS = {"INTEGER": "i", "REAL": "r", "BOOLEAN": "b", "STRING": "A"}
-
-
-def expression_stringer(v: Expression, format: list[str], callee: str = "OUTPUT") -> str:
+def expression_stringer(v: Expression, format: list[str], callee: str) -> str:
     c = v.c()
-    if isinstance(v, (IntegerLiteral, RealLiteral, BoolLiteral, StringLiteral)):
-        convert = FORMATS.get(v.type)
+    if isinstance(v, BuiltinLiteral):
+        convert = v.format()
         format.append(convert)
         return c
+
     if isinstance(v, VariableReference):
         variable = discover_variable(v)
 
         type, reference = expand_variable_reference(variable, v)
         if isinstance(type, AliasType):
             type = type.reference_type
-        if isinstance(type, IntegerType):
-            convert = FORMATS.get("INTEGER")
-        elif isinstance(type, RealType):
-            convert = FORMATS.get("REAL")
-        elif isinstance(type, BooleanType):
-            convert = FORMATS.get("BOOLEAN")
-        elif isinstance(type, StringType):
-            convert = FORMATS.get("STRING")
-        else:
-            raise Exception(f"unsupported [{callee}] argument ${v} of type {type}")
 
+        if not isinstance(type, BuiltinType):
+            raise Exception(f"unsupported {callee} variable argument {v} of type {type} at {v.token}")
+
+        convert = type.format()
         format.append(convert)
         return reference
+
     if isinstance(v, ConcatenationOperation):
         format.append("A")
         return c
+
     if isinstance(v, FunctionCall):
         function = functions_list[v.name]
         type = function.type
-        if isinstance(type, IntegerType):
-            convert = FORMATS.get("INTEGER")
-        elif isinstance(type, RealType):
-            convert = FORMATS.get("REAL")
-        elif isinstance(type, BooleanType):
-            convert = FORMATS.get("BOOLEAN")
-        elif isinstance(type, StringType):
-            convert = FORMATS.get("STRING")
-        else:
-            raise Exception(f"unsupported [{callee}] argument ${v} of type {type}")
+
+        if not isinstance(type, BuiltinType):
+            raise Exception(f"unsupported {callee} function argument ${v} of type {type} at {v.token}")
+        convert = type.format()
         format.append(convert)
         return c
-    assert False, f"unsupported [{callee}] argument ${v}"
+
+    assert False, f"unsupported {callee} argument {v} at {v.token}"
 
 
 common: list[str] = []
@@ -707,8 +767,8 @@ class ParseError(Exception):
         return (
             f"{self.message}\n"
             "at "
-            f"{token.input.filename}:{token.line}:{token.col}\n"
-            f"{error_line}\n{' ' * (token.col - 1)}^"
+            f"{token.input.filename}:{token.line}:{token.character}\n"
+            f"{error_line}\n{' ' * (token.character - 1)}^"
         )
 
 
@@ -752,7 +812,11 @@ class Parser:
 
     def peek(self) -> Token:
         current = self.current()
-        return self.tokens[self.i + 1] if self.i + 1 < len(self.tokens) else Token("EOF", "", current.line, current.col)
+        return (
+            self.tokens[self.i + 1]
+            if self.i + 1 < len(self.tokens)
+            else Token("EOF", "", current.line, current.character)
+        )
 
     def program(self) -> PROGRAM:
         token = self.current()
@@ -910,8 +974,10 @@ class Parser:
 
         return subroutines
 
-    def enlist_variable(self, variable: Variable) -> None:
-        fqn = self.scope() + "#" + variable.name
+    def enlist_variable(self, variable: Variable, scope: str | None = None) -> None:
+        if scope is None:
+            scope = self.scope()
+        fqn = scope + "|" + variable.name
         variables_list[fqn] = variable
 
     def parameters(self) -> list[Variable]:
@@ -1226,7 +1292,22 @@ class Parser:
             return RealLiteral(token, self.scope(), token.type, float(token.value))
         if token.type == "STRING":
             token = self.eat(token.type)
-            return StringLiteral(token, self.scope(), token.type, token.value)
+
+            scope = "*"
+
+            existing_const = next((v for v in variables_list.values() if v.is_const() and v.zero == token.value), None)
+            if existing_const:
+                variable_reference = VariableReference(token, scope, existing_const.name, [])
+                return variable_reference
+
+            const_i = sum(1 for v in variables_list.values() if v.is_const())
+            name = f"${const_i}"
+
+            variable = Variable(token, name, StringType(), zero=token.value)
+
+            self.enlist_variable(variable, scope)
+            variable_reference = VariableReference(token, scope, name, [])
+            return variable_reference
         if token.value in ("+", "-"):
             token = self.eat(token.value)
             factor = self.factor()
@@ -1285,5 +1366,7 @@ def discover_variable(v: VariableReference) -> Variable:
         scope.pop()
 
     if variable is None:
+        print(yamlizer(v))
+        print(yamlizer(variables_list))
         raise Exception(f"undefined variable '{v.name}' in scope '{v.scope}' at {v.token}")
     return variable

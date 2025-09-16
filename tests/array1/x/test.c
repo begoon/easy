@@ -19,9 +19,10 @@ struct
         STR x;
     } data[0 + 25 + 1];
 } b = {0};
+STR $0 = { .data = "..." };
 int main()
 {
     b.data[1].a.data[2] = b.data[2].a.data[1];
-    output("A", from_cstring("..."));
+    output("A", $0);
     exit(0);
 }

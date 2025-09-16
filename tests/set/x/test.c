@@ -17,9 +17,10 @@ struct
     } x;
     int y;
 } p = {0};
+STR $0 = { .data = " " };
 int main()
 {
     p.y = 123;
     p.x.data[0].data[1].data[100] = (p.y + 321);
-    output("iAi", p.x.data[0].data[1].data[100], from_cstring(" "), p.y);
+    output("iAi", p.x.data[0].data[1].data[100], $0, p.y);
 }

@@ -1,11 +1,11 @@
 import io
 from dataclasses import fields, is_dataclass
+from parser import Node
 from typing import Mapping
 
 from ruamel.yaml import YAML
 
 from lexer import Token
-from parser import Node
 
 
 def walker(obj: Node, *, seen: set[int] | None = None) -> Node:
@@ -22,7 +22,7 @@ def walker(obj: Node, *, seen: set[int] | None = None) -> Node:
 
     if is_dataclass(obj):
         if isinstance(obj, Token):
-            data = f"<{obj.value}|{obj.type} {obj.input.filename}:{obj.line}:{obj.col}>"
+            data = f"<{obj.value}|{obj.type} {obj.input.filename}:{obj.line}:{obj.character}>"
         else:
             data = {}
             data["node"] = obj.__class__.__name__

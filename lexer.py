@@ -66,7 +66,7 @@ class Token:
     value: str
 
     line: int
-    col: int
+    character: int
 
     input: InputText
 
@@ -74,7 +74,7 @@ class Token:
         v = "<" + self.value
         if self.type != self.value:
             v += f"|{self.type}"
-        v += f"|{self.input.filename}:{self.line}:{self.col}"
+        v += f"|{self.input.filename}:{self.line}:{self.character}"
         return v
 
     def __repr__(self) -> str:
@@ -91,7 +91,7 @@ class Lexer:
         self.text = input.text
         self.i = 0
         self.line = 1
-        self.col = 1
+        self.character = 1
         self.n = len(self.text)
 
     def peek(self, k=1) -> str:
@@ -108,9 +108,9 @@ class Lexer:
                 self.i += 1
                 if ch == "\n":
                     self.line += 1
-                    self.col = 1
+                    self.character = 1
                 else:
-                    self.col += 1
+                    self.character += 1
 
     def skip_whitespace_and_comments(self):
         while True:
@@ -146,7 +146,7 @@ class Lexer:
             break
 
     def number(self) -> Token:
-        line, col = self.line, self.col
+        line, character = self.line, self.character
         s = ""
         while self.current().isdigit():
             s += self.current()
@@ -158,11 +158,11 @@ class Lexer:
             while self.current().isdigit() or self.current() in "+-eE":
                 s += self.current()
                 self.advance()
-            return Token("REAL", s, line, col, self.input)
-        return Token("INTEGER", s, line, col, self.input)
+            return Token("REAL", s, line, character, self.input)
+        return Token("INTEGER", s, line, character, self.input)
 
     def ident_or_keyword(self) -> Token:
-        line, col = self.line, self.col
+        line, character = self.line, self.character
         v = ""
         ch = self.current()
         if ch.isalpha() or ch == "_":
@@ -173,11 +173,11 @@ class Lexer:
                 self.advance()
         value = v
         if value in KEYWORDS:
-            return Token("KEYWORD", value, line, col, self.input)
-        return Token("IDENT", v, line, col, self.input)
+            return Token("KEYWORD", value, line, character, self.input)
+        return Token("IDENT", v, line, character, self.input)
 
     def string(self) -> Token:
-        line, col = self.line, self.col
+        line, character = self.line, self.character
         quote = self.current()
         self.advance()
         s = ""
@@ -195,20 +195,20 @@ class Lexer:
                 break
             s += c
             self.advance()
-        return Token("STRING", s, line, col, self.input)
+        return Token("STRING", s, line, character, self.input)
 
     def symbol(self) -> Token:
-        start, col = self.line, self.col
+        start, character = self.line, self.character
         # try 2-char symbols first
         two = self.current() + self.peek()
         if two in SYMBOLS:
             self.advance(2)
-            return Token("SYMBOL", two, start, col, self.input)
+            return Token("SYMBOL", two, start, character, self.input)
         one = self.current()
         if one in SYMBOLS:
             self.advance()
-            return Token("SYMBOL", one, start, col, self.input)
-        raise LexerError(f"unknown symbol '{one}' at {self.input.filename}:{start}:{col}")
+            return Token("SYMBOL", one, start, character, self.input)
+        raise LexerError(f"unknown symbol '{one}' at {self.input.filename}:{start}:{character}")
 
     def tokens(self) -> list[Token]:
         v: list[Token] = []
@@ -225,5 +225,5 @@ class Lexer:
                 v.append(self.string())
             else:
                 v.append(self.symbol())
-        v.append(Token("EOF", "", self.line, self.col, self.input))
+        v.append(Token("EOF", "", self.line, self.character, self.input))
         return v

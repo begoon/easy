@@ -4,6 +4,9 @@ typedef double REAL;
 typedef int BOOLEAN;
 typedef STR STRING;
 int n = 0;
+STR $0 = { .data = "FizzBuzz" };
+STR $1 = { .data = "Fizz" };
+STR $2 = { .data = "Buzz" };
 void FizzBuzz(int n)
 {
     int i = 0;
@@ -11,15 +14,15 @@ void FizzBuzz(int n)
     {
         if (((i % 3) == 0) && ((i % 5) == 0))
         {
-            output("A", from_cstring("FizzBuzz"));
+            output("A", $0);
         }
         else if ((i % 3) == 0)
         {
-            output("A", from_cstring("Fizz"));
+            output("A", $1);
         }
         else if ((i % 5) == 0)
         {
-            output("A", from_cstring("Buzz"));
+            output("A", $2);
         }
         else
         {

@@ -15,8 +15,9 @@ typedef struct
     } data[1 + 25 + 1];
 } B;
 B b = {0};
+STR $0 = { .data = "." };
 int main()
 {
     b.data[1].data[2].x = b.data[2].data[1].x;
-    output("A", from_cstring("."));
+    output("A", $0);
 }

@@ -31,11 +31,13 @@ struct
         } data[0 + 2 + 1];
     } data[0 + 8 + 1];
 } b = {0};
+STR $0 = { .data = "abc" };
+STR $1 = { .data = " " };
 int main()
 {
     a.data[1].data[2].data[3].i = 123;
-    a.data[1].data[2].data[3].s = from_cstring("abc");
-    output("iAi", a.data[1].data[2].data[3].i, from_cstring(" "), b.data[1].data[2].data[3].i);
-    output("A", concat("AAA", a.data[1].data[2].data[3].s, from_cstring(" "), b.data[1].data[2].data[3].s));
+    a.data[1].data[2].data[3].s = $0;
+    output("iAi", a.data[1].data[2].data[3].i, $1, b.data[1].data[2].data[3].i);
+    output("A", concat("AAA", a.data[1].data[2].data[3].s, $1, b.data[1].data[2].data[3].s));
     exit(0);
 }

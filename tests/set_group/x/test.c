@@ -5,9 +5,11 @@ typedef int BOOLEAN;
 typedef STR STRING;
 int a = 0;
 int b = 0;
+STR $0 = { .data = "> " };
+STR $1 = { .data = "-" };
 int main()
 {
     a = 123;
     b = 123;
-    output("A", concat("AiAi", from_cstring("> "), a, from_cstring("-"), b));
+    output("A", concat("AiAi", $0, a, $1, b));
 }

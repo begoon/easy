@@ -6,13 +6,17 @@ typedef STR STRING;
 int i = 0;
 double f = 0.0;
 STR s = {0};
+STR $0 = { .data = "i = [" };
+STR $1 = { .data = "]" };
+STR $2 = { .data = "f = [" };
+STR $3 = { .data = "s = [" };
 int main()
 {
     scanf("%d", &i);
     scanf("%lf", &f);
     scanf("%s", s.data);
-    output("A", concat("AiA", from_cstring("i = ["), i, from_cstring("]")));
-    output("A", concat("ArA", from_cstring("f = ["), f, from_cstring("]")));
-    output("A", concat("AAA", from_cstring("s = ["), s, from_cstring("]")));
+    output("A", concat("AiA", $0, i, $1));
+    output("A", concat("ArA", $2, f, $1));
+    output("A", concat("AAA", $3, s, $1));
     exit(0);
 }

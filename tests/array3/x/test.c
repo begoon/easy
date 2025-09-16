@@ -19,12 +19,14 @@ typedef struct
 } A;
 A a = {0};
 A b = {0};
+STR $0 = { .data = "abc" };
+STR $1 = { .data = " " };
 int main()
 {
     a.data[1].data[2].data[3].i = 123;
-    a.data[1].data[2].data[3].s = from_cstring("abc");
+    a.data[1].data[2].data[3].s = $0;
     b = a;
-    output("iAi", a.data[1].data[2].data[3].i, from_cstring(" "), b.data[1].data[2].data[3].i);
-    output("A", concat("AAA", a.data[1].data[2].data[3].s, from_cstring(" "), b.data[1].data[2].data[3].s));
+    output("iAi", a.data[1].data[2].data[3].i, $1, b.data[1].data[2].data[3].i);
+    output("A", concat("AAA", a.data[1].data[2].data[3].s, $1, b.data[1].data[2].data[3].s));
     exit(0);
 }

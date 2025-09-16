@@ -41,11 +41,11 @@ segment:
           scope: PROGRAM:hw
           type: STRING
           parts:
-            - node: StringLiteral
+            - node: VariableReference
               token: <abc |STRING tests/hw/test.easy:4:8>
-              scope: PROGRAM:hw
-              type: STRING
-              value: 'abc '
+              scope: '*'
+              name: $0
+              parts: []
             - node: VariableReference
               token: <a|IDENT tests/hw/test.easy:4:18>
               scope: PROGRAM:hw

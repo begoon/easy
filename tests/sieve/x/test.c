@@ -4,6 +4,11 @@ typedef double REAL;
 typedef int BOOLEAN;
 typedef STR STRING;
 int topnum = 0;
+STR $0 = { .data = "a < 0 in FUNCTION integersqrt." };
+STR $1 = { .data = "Prime[" };
+STR $2 = { .data = "] = " };
+STR $3 = { .data = "Input value " };
+STR $4 = { .data = " non-positive." };
 double abs(double x)
 {
     if (x < 0)
@@ -19,7 +24,7 @@ int integersqrt(int a)
 {
     if (a < 0)
     {
-        output("A", from_cstring("a < 0 in FUNCTION integersqrt."));
+        output("A", $0);
         exit(0);
     }
     else if (a == 0)
@@ -80,13 +85,13 @@ int main()
             if (sieve.data[i])
             {
                 count = (count + 1);
-                output("A", concat("AiAi", from_cstring("Prime["), count, from_cstring("] = "), i));
+                output("A", concat("AiAi", $1, count, $2, i));
             }
         }
     }
     else
     {
-        output("A", concat("AiA", from_cstring("Input value "), topnum, from_cstring(" non-positive.")));
+        output("A", concat("AiA", $3, topnum, $4));
     }
     exit(0);
 }

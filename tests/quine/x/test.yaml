@@ -15,6 +15,7 @@ segment:
         - s
       type:
         node: StringType
+        initial:
   subroutines: []
   statements:
     - node: SET
@@ -27,15 +28,13 @@ segment:
           name: s
           parts: []
       expression:
-        node: StringLiteral
+        node: VariableReference
         token: '<PROGRAM Q: DECLARE s STRING; SET s := %; OUTPUT SUBSTR(s, 0, 38)
           || CHARACTER(34) || s || CHARACTER(34) || SUBSTR(s, 39, LENGTH(s)-38); EXIT;
           END PROGRAM Q;|STRING tests/quine/test.easy:1:39>'
-        scope: PROGRAM:Q
-        type: STRING
-        value: 'PROGRAM Q: DECLARE s STRING; SET s := %; OUTPUT SUBSTR(s, 0, 38) ||
-          CHARACTER(34) || s || CHARACTER(34) || SUBSTR(s, 39, LENGTH(s)-38); EXIT;
-          END PROGRAM Q;'
+        scope: '*'
+        name: $0
+        parts: []
     - node: OUTPUT
       token: <OUTPUT|KEYWORD tests/quine/test.easy:1:199>
       scope: PROGRAM:Q
@@ -53,6 +52,7 @@ segment:
                 name: SUBSTR
                 type:
                   node: StringType
+                  initial:
               name: SUBSTR
               arguments:
                 - node: VariableReference
@@ -78,6 +78,7 @@ segment:
                 name: CHARACTER
                 type:
                   node: StringType
+                  initial:
               name: CHARACTER
               arguments:
                 - node: IntegerLiteral
@@ -98,6 +99,7 @@ segment:
                 name: CHARACTER
                 type:
                   node: StringType
+                  initial:
               name: CHARACTER
               arguments:
                 - node: IntegerLiteral
@@ -113,6 +115,7 @@ segment:
                 name: SUBSTR
                 type:
                   node: StringType
+                  initial:
               name: SUBSTR
               arguments:
                 - node: VariableReference

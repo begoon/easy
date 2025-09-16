@@ -32,8 +32,8 @@ def _fmt_loc(text: str, i: int) -> Tuple[int, int, str]:
     end = text.find("\n", i)
     if end == -1:
         end = len(text)
-    col = i - start + 1
-    return line, col, text[start:end]
+    character = i - start + 1
+    return line, character, text[start:end]
 
 
 def _snippet(text: str, i: int, span: int = TRACE_SNIPPET) -> str:
@@ -46,8 +46,8 @@ def _snippet(text: str, i: int, span: int = TRACE_SNIPPET) -> str:
 def _tprint(rule: str, when: str, text: str, i: int, extra: str = ""):
     if not _trace_enabled(rule):
         return
-    line, col, _ = _fmt_loc(text, i)
-    print(f"[{rule}] {when} @ {i} (L{line}:C{col}) {extra}\n{_snippet(text, i)}")
+    line, character, _ = _fmt_loc(text, i)
+    print(f"[{rule}] {when} @ {i} (L{line}:C{character}) {extra}\n{_snippet(text, i)}")
 
 
 # -------------------------------
@@ -60,16 +60,16 @@ class PEGSyntaxError(Exception):
 
 
 class ParseError(Exception):
-    def __init__(self, message, position, line, col, context, details=None):
+    def __init__(self, message, position, line, character, context, details=None):
         super().__init__(message)
         self.position = position
         self.line = line
-        self.col = col
+        self.character = character
         self.context = context
         self.details = details or []
 
     def __str__(self):
-        parts = [f"{super().__str__()} at line {self.line}, col {self.col}", self.context]
+        parts = [f"{super().__str__()} at line {self.line}, character {self.character}", self.context]
         if self.details:
             parts.append("Expected one of:\n  " + "\n  ".join(sorted(set(self.details))[:20]))
         return "\n".join(parts)
@@ -431,8 +431,8 @@ class _Runtime:
         start = 0 if last_nl == -1 else last_nl + 1
         end = self.text.find("\n", i)
         end = len(self.text) if end == -1 else end
-        col = i - start + 1
-        return line, col, self.text[start:end]
+        character = i - start + 1
+        return line, character, self.text[start:end]
 
     def parse(self, start_rule: Optional[str] = None) -> Any:
         start = start_rule or self.g.start
@@ -440,8 +440,8 @@ class _Runtime:
         j = self._skip_ws(j)
         if not ok or j != self.n:
             i = max(j, self.farthest)
-            line, col, ctx = self._loc(i)
-            raise ParseError(f"Parse failed (stopped at rule '{start}')", i, line, col, ctx, self.expected)
+            line, character, ctx = self._loc(i)
+            raise ParseError(f"Parse failed (stopped at rule '{start}')", i, line, character, ctx, self.expected)
         return val
 
     def _apply_rule(self, name: str, i: int) -> Tuple[bool, int, Any]:

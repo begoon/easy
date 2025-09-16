@@ -9,8 +9,9 @@ typedef struct
     STR b;
 } T;
 T t = {0};
+STR $0 = { .data = "." };
 int main()
 {
     t.a = 1;
-    output("A", from_cstring("."));
+    output("A", $0);
 }

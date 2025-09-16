@@ -2,7 +2,7 @@
 #
 import pathlib
 import sys
-from parser import BuiltinFunction, Parser, common, emit, functions_list, procedures_list, types_list
+from parser import BuiltinFunction, Parser, common, emit, functions_list, procedures_list, types_list, variables_list
 from pathlib import Path
 
 from lexer import InputText, Lexer, Token
@@ -39,7 +39,7 @@ if __name__ == "__main__":
         tokens_file = input_file.with_suffix(".tokens")
 
         def format_token(token: Token) -> str:
-            return f"{token.input.filename}:{token.line}:{token.col}\t {token.value} / {token.type}"
+            return f"{token.input.filename}:{token.line}:{token.character}\t {token.value} / {token.type}"
 
         tokens_file.write_text("\n".join(format_token(t) for t in tokens) + "\n")
 
@@ -67,6 +67,9 @@ if __name__ == "__main__":
             f.write(v)
         if common:
             f.write(emit(common) + "\n")
+        for name, v in variables_list.items():
+            if v.is_const():
+                f.write(v.const() + ";\n")
         if functions_list:
             for v in functions_list.values():
                 if isinstance(v, BuiltinFunction):

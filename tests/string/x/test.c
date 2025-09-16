@@ -4,12 +4,22 @@ typedef double REAL;
 typedef int BOOLEAN;
 typedef STR STRING;
 STR s = {0};
+int b = 0;
 STR $0 = { .data = "abcXYZ" };
 STR $1 = { .data = "12345" };
 STR $2 = { .data = "abc" };
 int main()
 {
     s = $0;
+    b = strcmp(s.data, $0.data) == 0;
+    b = strcmp($0.data, s.data) == 0;
+    b = strcmp($0.data, $0.data) == 0;
+    b = strcmp(s.data, s.data) == 0;
+    s = $0;
+    b = strcmp(s.data, $0.data) != 0;
+    b = strcmp($0.data, s.data) != 0;
+    b = strcmp($0.data, $0.data) != 0;
+    b = strcmp(s.data, s.data) != 0;
     output("A", SUBSTR($1, 1, 2));
     output("A", SUBSTR(s, 1, 2));
     output("A", concat("AA", $2, SUBSTR(s, 3, 2)));

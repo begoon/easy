@@ -11,6 +11,9 @@ Row row = {0};
 int N = 0;
 int n = 0;
 int i = 0;
+STR $0 = { .data = "X" };
+STR $1 = { .data = "." };
+STR $2 = { .data = "  " };
 void step()
 {
     int i = 0;
@@ -69,14 +72,14 @@ void print()
     {
         if (row.data[i] == 1)
         {
-            output("A", from_cstring("X"));
+            output("A", $0);
         }
         else
         {
-            output("A", from_cstring("."));
+            output("A", $1);
         }
     }
-    output("A", from_cstring("  "));
+    output("A", $2);
 }
 int main()
 {

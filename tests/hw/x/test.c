@@ -4,10 +4,11 @@ typedef double REAL;
 typedef int BOOLEAN;
 typedef STR STRING;
 int a = 0;
+STR $0 = { .data = "abc " };
 int main()
 {
     a = 100;
-    output("A", concat("Ai", from_cstring("abc "), a));
+    output("A", concat("Ai", $0, a));
     for (a = 0; a <= 10; a += 1)
     {
         output("i", a);

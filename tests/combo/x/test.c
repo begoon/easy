@@ -39,6 +39,11 @@ Row r = {0};
 Matrix m = {0};
 Matrix m1 = {0};
 Record2 s = {0};
+STR $0 = { .data = "**" };
+STR $1 = { .data = "123" };
+STR $2 = { .data = "456" };
+STR $3 = { .data = "abc" };
+STR $4 = { .data = "XYZ" };
 STR F1(int x, STR s)
 {
     return concat("Aii", s, LENGTH(s), x);
@@ -47,14 +52,14 @@ void P1(int xx, STR s, STR xx2)
 {
     int x = 0;
     x = 1;
-    output("A", concat("iAiiAA", x, s, LENGTH(s), xx, xx2, from_cstring("**")));
+    output("A", concat("iAiiAA", x, s, LENGTH(s), xx, xx2, $0));
 }
 int main()
 {
-    P1(123, from_cstring("123"), F1(456, from_cstring("456")));
-    s.a.s = from_cstring("abc");
+    P1(123, $1, F1(456, $2));
+    s.a.s = $3;
     output("iA", s.m.data[1].data[1], s.a.s);
-    s.a.s = concat("AA", s.a.s, from_cstring("XYZ"));
+    s.a.s = concat("AA", s.a.s, $4);
     s.m = m1;
     i = 0;
     r.data[1] = 1;
@@ -69,5 +74,5 @@ int main()
             m.data[i].data[j] = ((i * 100) + j);
         }
     }
-    output("Ai", from_cstring("123"), i);
+    output("Ai", $1, i);
 }

@@ -10,6 +10,7 @@ typedef struct
 } Point;
 int a = 0;
 Point p = {0};
+STR $0 = { .data = " " };
 int main()
 {
     {
@@ -17,5 +18,5 @@ int main()
         p.y = 2;
         a = p.x;
     }
-    output("iAiAi", a, from_cstring(" "), p.y, from_cstring(" "), p.x);
+    output("iAiAi", a, $0, p.y, $0, p.x);
 }

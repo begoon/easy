@@ -813,11 +813,11 @@ segment:
                         token: <OUTPUT|KEYWORD tests/rule_110/test.easy:43:26>
                         scope: PROGRAM:Rule110.PROCEDURE:print
                         arguments:
-                          - node: StringLiteral
+                          - node: VariableReference
                             token: <X|STRING tests/rule_110/test.easy:43:33>
-                            scope: PROGRAM:Rule110.PROCEDURE:print
-                            type: STRING
-                            value: X
+                            scope: '*'
+                            name: $0
+                            parts: []
                   else_branch:
                     node: Segment
                     token: <OUTPUT|KEYWORD tests/rule_110/test.easy:43:43>
@@ -830,11 +830,11 @@ segment:
                         token: <OUTPUT|KEYWORD tests/rule_110/test.easy:43:43>
                         scope: PROGRAM:Rule110.PROCEDURE:print
                         arguments:
-                          - node: StringLiteral
+                          - node: VariableReference
                             token: <.|STRING tests/rule_110/test.easy:43:50>
-                            scope: PROGRAM:Rule110.PROCEDURE:print
-                            type: STRING
-                            value: .
+                            scope: '*'
+                            name: $1
+                            parts: []
             by:
             to:
               node: VariableReference
@@ -847,11 +847,11 @@ segment:
             token: <OUTPUT|KEYWORD tests/rule_110/test.easy:45:5>
             scope: PROGRAM:Rule110.PROCEDURE:print
             arguments:
-              - node: StringLiteral
+              - node: VariableReference
                 token: <  |STRING tests/rule_110/test.easy:45:12>
-                scope: PROGRAM:Rule110.PROCEDURE:print
-                type: STRING
-                value: '  '
+                scope: '*'
+                name: $2
+                parts: []
   statements:
     - node: SET
       token: <SET|KEYWORD tests/rule_110/test.easy:48:3>
