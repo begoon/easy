@@ -8,6 +8,6 @@ STR $0 = { .data = "PROGRAM Q: DECLARE s STRING; SET s := %; OUTPUT SUBSTR(s, 0,
 int main()
 {
     s = $0;
-    output("A", concat("AAAAA", SUBSTR(s, 0, 38), CHARACTER(34), s, CHARACTER(34), SUBSTR(s, 39, (LENGTH(s) - 38))));
+    $output("A", $concat("AAAAA", SUBSTR(s, 0, 38), CHARACTER(34), s, CHARACTER(34), SUBSTR(s, 39, (LENGTH(s) - 38))));
     exit(0);
 }

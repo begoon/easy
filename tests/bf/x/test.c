@@ -49,7 +49,7 @@ STR bf(STR program)
         }
         if (strcmp(ch.data, $5.data) == 0)
         {
-            out = concat("AA", out, CHARACTER(tape.data[ptr]));
+            out = $concat("AA", out, CHARACTER(tape.data[ptr]));
         }
         if (strcmp(ch.data, $6.data) == 0)
         {
@@ -95,5 +95,5 @@ STR bf(STR program)
 int main()
 {
     program = $8;
-    output("A", bf(program));
+    $output("A", bf(program));
 }

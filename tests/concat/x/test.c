@@ -41,14 +41,14 @@ STR fs()
 }
 int main()
 {
-    output("A", concat("iArAbAb", 0, $1, 0.001, $2, TRUE, $3, FALSE));
+    $output("A", $concat("iArAbAb", 0, $1, 0.001, $2, TRUE, $3, FALSE));
     a = 321;
     r = 1.003;
     b = TRUE;
     s = $4;
-    output("A", concat("AiArAbAAA", $5, a, $6, r, $7, b, $8, s, $9));
-    output("A", concat("AAiAiAr", CHARACTER(50), $10, LENGTH($11), $10, FIX(23.56), $10, FLOAT(543)));
-    output("A", concat("AA", $11, $12));
-    output("A", concat("AiArAbAAA", $5, fa(), $6, fr(), $7, fb(), $8, fs(), $13));
+    $output("A", $concat("AiArAbAAA", $5, a, $6, r, $7, b, $8, s, $9));
+    $output("A", $concat("AAiAiAr", CHARACTER(50), $10, LENGTH($11), $10, FIX(23.56), $10, FLOAT(543)));
+    $output("A", $concat("AA", $11, $12));
+    $output("A", $concat("AiArAbAAA", $5, fa(), $6, fr(), $7, fb(), $8, fs(), $13));
     exit(0);
 }

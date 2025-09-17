@@ -417,7 +417,7 @@ class OUTPUT(Statement):
         output = []
         format: list[str] = []
         arguments = ", ".join(expression_stringer(argument, format, "OUTPUT") for argument in self.arguments)
-        output.append(f'output("{"".join(format)}", {arguments});')
+        output.append(f'$output("{"".join(format)}", {arguments});')
         return emit(output)
 
 
@@ -535,7 +535,7 @@ class ConcatenationOperation(Expression):
         output = []
         format: list[str] = []
         arguments = ", ".join(expression_stringer(argument, format, "||") for argument in self.parts)
-        output.append(f'concat("{"".join(format)}", {arguments})')
+        output.append(f'$concat("{"".join(format)}", {arguments})')
         return emit(output)
 
 

@@ -40,7 +40,7 @@ STR from_cstring(const char *s)
 // b - BOOLEAN (int, 0 or 1)
 // S - STRING (STR *)
 // A - STRING (STR)
-STR concat(const char *fmt, ...)
+STR $concat(const char *fmt, ...)
 {
     va_list args;
     va_start(args, fmt);
@@ -68,7 +68,7 @@ STR concat(const char *fmt, ...)
     va_end(args);
     return r;
 }
-void output(const char *fmt, ...)
+void $output(const char *fmt, ...)
 {
     va_list args;
     va_start(args, fmt);
@@ -94,7 +94,7 @@ void output(const char *fmt, ...)
     if (n > 1 || fmt[-1] == 'i')
         putchar('\n');
 }
-void pause(double seconds)
+void $pause(double seconds)
 {
     usleep(seconds * 1e6);
 }

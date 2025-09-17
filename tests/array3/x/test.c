@@ -26,7 +26,7 @@ int main()
     a.data[1].data[2].data[3].i = 123;
     a.data[1].data[2].data[3].s = $0;
     b = a;
-    output("iAi", a.data[1].data[2].data[3].i, $1, b.data[1].data[2].data[3].i);
-    output("A", concat("AAA", a.data[1].data[2].data[3].s, $1, b.data[1].data[2].data[3].s));
+    $output("iAi", a.data[1].data[2].data[3].i, $1, b.data[1].data[2].data[3].i);
+    $output("A", $concat("AAA", a.data[1].data[2].data[3].s, $1, b.data[1].data[2].data[3].s));
     exit(0);
 }

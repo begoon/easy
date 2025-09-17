@@ -19,41 +19,41 @@ int main()
     if_label:
     if (TRUE)
     {
-        output("A", $0);
+        $output("A", $0);
     }
     for_label:
     for (i = 0; i <= 0; i += 1)
     {
-        output("A", $1);
+        $output("A", $1);
     }
     i = 0;
     select_label:
     if (i == 0)
     {
-        output("A", $2);
+        $output("A", $2);
     }
     goto repeat_label;
-    output("A", $3);
+    $output("A", $3);
     repeat_label:
     if (TRUE)
     {
-        output("A", $4);
+        $output("A", $4);
     }
     goto repent_label;
-    output("A", $5);
+    $output("A", $5);
     repent_label:
     if (TRUE)
     {
-        output("A", $6);
+        $output("A", $6);
     }
     {
-        output("A", $7);
+        $output("A", $7);
     }
     goto block_label;
     {
-        output("A", $8);
+        $output("A", $8);
     }
     block_label:
-    output("A", $9);
+    $output("A", $9);
     exit(0);
 }

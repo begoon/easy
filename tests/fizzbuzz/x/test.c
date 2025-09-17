@@ -14,19 +14,19 @@ void FizzBuzz(int n)
     {
         if (((i % 3) == 0) && ((i % 5) == 0))
         {
-            output("A", $0);
+            $output("A", $0);
         }
         else if ((i % 3) == 0)
         {
-            output("A", $1);
+            $output("A", $1);
         }
         else if ((i % 5) == 0)
         {
-            output("A", $2);
+            $output("A", $2);
         }
         else
         {
-            output("i", i);
+            $output("i", i);
         }
     }
 }

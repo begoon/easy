@@ -14,7 +14,7 @@ int main()
     a = 1;
     b = 2;
     c = ((a + 0) + b);
-    output("iA", c, $0);
-    s = concat("AA", s, $1);
-    output("A", s);
+    $output("iA", c, $0);
+    s = $concat("AA", s, $1);
+    $output("A", s);
 }

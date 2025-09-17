@@ -17,15 +17,15 @@ STR $9 = { .data = "abc = [" };
 int main()
 {
     s = $0;
-    output("A", s);
-    output("A", $1);
-    output("A", $2);
-    output("A", $3);
-    output("A", $0);
-    output("A", $4);
-    output("A", s);
-    output("A", $5);
-    output("A", $6);
+    $output("A", s);
+    $output("A", $1);
+    $output("A", $2);
+    $output("A", $3);
+    $output("A", $0);
+    $output("A", $4);
+    $output("A", s);
+    $output("A", $5);
+    $output("A", $6);
     s = $0;
     s = $7;
     s = $8;

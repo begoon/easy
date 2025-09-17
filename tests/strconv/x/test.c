@@ -6,5 +6,5 @@ typedef STR STRING;
 STR $0 = { .data = "abc" };
 int main()
 {
-    output("A", $0);
+    $output("A", $0);
 }

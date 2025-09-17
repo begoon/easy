@@ -19,5 +19,5 @@ STR $0 = { .data = "." };
 int main()
 {
     b.data[1].data[2].x = b.data[2].data[1].x;
-    output("A", $0);
+    $output("A", $0);
 }

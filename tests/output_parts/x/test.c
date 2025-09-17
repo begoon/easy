@@ -42,5 +42,5 @@ int main()
     b = 123;
     p.x.z = 456;
     c.t.data[0].data[2].data[1] = 789;
-    output("iii", b, p.x.z, c.t.data[0].data[2].data[1]);
+    $output("iii", b, p.x.z, c.t.data[0].data[2].data[1]);
 }

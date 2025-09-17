@@ -24,7 +24,7 @@ int integersqrt(int a)
 {
     if (a < 0)
     {
-        output("A", $0);
+        $output("A", $0);
         exit(0);
     }
     else if (a == 0)
@@ -85,13 +85,13 @@ int main()
             if (sieve.data[i])
             {
                 count = (count + 1);
-                output("A", concat("AiAi", $1, count, $2, i));
+                $output("A", $concat("AiAi", $1, count, $2, i));
             }
         }
     }
     else
     {
-        output("A", concat("AiA", $3, topnum, $4));
+        $output("A", $concat("AiA", $3, topnum, $4));
     }
     exit(0);
 }

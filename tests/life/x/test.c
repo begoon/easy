@@ -53,33 +53,33 @@ void print()
 {
     int x = 0;
     int y = 0;
-    output("AA", $0, $1);
+    $output("AA", $0, $1);
     for (x = 0; x <= ((w + 1) - 17); x += 1)
     {
-        output("A", $2);
+        $output("A", $2);
     }
-    output("A", concat("AA", $1, CHARACTER(13)));
+    $output("A", $concat("AA", $1, CHARACTER(13)));
     for (y = 0; y <= (h - 1); y += 1)
     {
-        output("A", $2);
+        $output("A", $2);
         for (x = 0; x <= (w - 1); x += 1)
         {
             if (field.data[y].data[x] == TRUE)
             {
-                output("A", $3);
+                $output("A", $3);
             }
             else
             {
-                output("A", $1);
+                $output("A", $1);
             }
         }
-        output("A", concat("AA", $2, CHARACTER(13)));
+        $output("A", $concat("AA", $2, CHARACTER(13)));
     }
     for (x = 0; x <= (w + 1); x += 1)
     {
-        output("A", $2);
+        $output("A", $2);
     }
-    output("A", concat("AA", $1, CHARACTER(13)));
+    $output("A", $concat("AA", $1, CHARACTER(13)));
 }
 void glider(int x, int y)
 {
@@ -138,7 +138,7 @@ int main()
     for (i = 1; i <= 12; i += 1)
     {
         print();
-        output("A", concat("Ai", $4, i));
+        $output("A", $concat("Ai", $4, i));
         evolution();
         if ((i % 10) == 0)
         {

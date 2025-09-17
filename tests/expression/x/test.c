@@ -29,17 +29,17 @@ int main()
     x = (a + (b * c));
     x = (((-b) + (1 - 2)) - (LENGTH($0) * 7));
     x = (((-b) + (1 - 2)) - func(3));
-    output("AiA", $1, x, $2);
+    $output("AiA", $1, x, $2);
     f = (!(a < b));
     f = ((a < b) ^ TRUE);
     f = ((a < b) || ((c >= 0) && FALSE));
     f = (((a >= b) && (c < 0)) || TRUE);
-    output("AbA", $3, f, $2);
-    s = concat("ii", a, b);
-    s = concat("Ai", $4, b);
-    s = concat("Aii", $4, b, c);
-    s = concat("iA", a, concat("iA", b, SUBSTR($5, 0, 2)));
-    s = concat("iiA", a, b, SUBSTR($5, 0, 2));
-    s = concat("iA", a, CHARACTER(b));
-    output("AAA", $6, s, $2);
+    $output("AbA", $3, f, $2);
+    s = $concat("ii", a, b);
+    s = $concat("Ai", $4, b);
+    s = $concat("Aii", $4, b, c);
+    s = $concat("iA", a, $concat("iA", b, SUBSTR($5, 0, 2)));
+    s = $concat("iiA", a, b, SUBSTR($5, 0, 2));
+    s = $concat("iA", a, CHARACTER(b));
+    $output("AAA", $6, s, $2);
 }

@@ -20,8 +20,8 @@ int main()
     b = strcmp($0.data, s.data) != 0;
     b = strcmp($0.data, $0.data) != 0;
     b = strcmp(s.data, s.data) != 0;
-    output("A", SUBSTR($1, 1, 2));
-    output("A", SUBSTR(s, 1, 2));
-    output("A", concat("AA", $2, SUBSTR(s, 3, 2)));
+    $output("A", SUBSTR($1, 1, 2));
+    $output("A", SUBSTR(s, 1, 2));
+    $output("A", $concat("AA", $2, SUBSTR(s, 3, 2)));
     exit(0);
 }

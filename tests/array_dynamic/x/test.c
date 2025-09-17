@@ -17,6 +17,6 @@ int main()
             int *data;
         } b = { .data = malloc(sizeof(int) * (1 + sz + 1)) };
         b.data[1] = 42;
-        output("i", b.data[1]);
+        $output("i", b.data[1]);
     }
 }

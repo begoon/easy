@@ -13,5 +13,5 @@ STR $0 = { .data = "." };
 int main()
 {
     t.a = 1;
-    output("A", $0);
+    $output("A", $0);
 }
