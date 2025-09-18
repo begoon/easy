@@ -98,6 +98,16 @@ void $pause(double seconds)
 {
     usleep(seconds * 1e6);
 }
+void *$ref(void *ptr, int index, int lo, int hi, int element_size, const char *location)
+{
+    if (index < lo || index > hi)
+    {
+        fprintf(stderr, "array index out of bounds: %d not in [%d..%d] (%s)\n", index, lo, hi, location);
+        exit(1);
+    }
+    index -= lo;
+    return (void *)((unsigned char *)ptr + index * element_size);
+}
 #pragma clang diagnostic ignored "-Wincompatible-library-redeclaration"
 #pragma clang diagnostic ignored "-Wunused-label"
 #pragma clang diagnostic ignored "-Wunused-variable"

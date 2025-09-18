@@ -30,7 +30,7 @@ INTEGER  int
 REAL     double                                                       
 BOOLEAN  int                                                          
 STRING   STR                                                          
-Field    struct { struct { int data[0 + 80 + 1]; } data[0 + 25 + 1]; }
+Field    struct { struct { int data[80 - 0 + 1]; } data[25 - 0 + 1]; }
 
 LENGTH      ->  int     built-in
 CHARACTER   ->  STR     built-in

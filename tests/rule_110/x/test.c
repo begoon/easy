@@ -5,7 +5,7 @@ typedef int BOOLEAN;
 typedef STR STRING;
 typedef struct
 {
-    int data[1 + 32 + 1];
+    int data[32 - 1 + 1];
 } Row;
 Row row = {0};
 int N = 0;
@@ -20,7 +20,7 @@ void step()
     Row next = {0};
     for (i = 1; i <= N; i += 1)
     {
-        next.data[i] = 0;
+        *(typeof(next.data[0]) *)$ref(next.data, i, 1, 32, sizeof(typeof(next.data[0])), "<i|IDENT|tests/rule_110/test.easy:11:33") = 0;
     }
     for (i = 1; i <= N; i += 1)
     {
@@ -34,32 +34,32 @@ void step()
         {
             j = N;
         }
-        left = row.data[j];
-        c = row.data[i];
+        left = *(typeof(row.data[0]) *)$ref(row.data, j, 1, 32, sizeof(typeof(row.data[0])), "<j|IDENT|tests/rule_110/test.easy:20:23");
+        c = *(typeof(row.data[0]) *)$ref(row.data, i, 1, 32, sizeof(typeof(row.data[0])), "<i|IDENT|tests/rule_110/test.easy:22:20");
         j = (i + 1);
         if (j > N)
         {
             j = 1;
         }
-        right = row.data[j];
+        right = *(typeof(row.data[0]) *)$ref(row.data, j, 1, 32, sizeof(typeof(row.data[0])), "<j|IDENT|tests/rule_110/test.easy:26:24");
         s = ((left + c) + right);
         if (s == 2)
         {
-            next.data[i] = 1;
+            *(typeof(next.data[0]) *)$ref(next.data, i, 1, 32, sizeof(typeof(next.data[0])), "<i|IDENT|tests/rule_110/test.easy:31:32") = 1;
         }
         else if ((s == 0) || (s == 3))
         {
-            next.data[i] = 0;
+            *(typeof(next.data[0]) *)$ref(next.data, i, 1, 32, sizeof(typeof(next.data[0])), "<i|IDENT|tests/rule_110/test.easy:32:40") = 0;
         }
         else
         {
             if (c == 1)
             {
-                next.data[i] = 1;
+                *(typeof(next.data[0]) *)$ref(next.data, i, 1, 32, sizeof(typeof(next.data[0])), "<i|IDENT|tests/rule_110/test.easy:33:43") = 1;
             }
             else
             {
-                next.data[i] = right;
+                *(typeof(next.data[0]) *)$ref(next.data, i, 1, 32, sizeof(typeof(next.data[0])), "<i|IDENT|tests/rule_110/test.easy:33:66") = right;
             }
         }
     }
@@ -70,7 +70,7 @@ void print()
     int i = 0;
     for (i = 1; i <= N; i += 1)
     {
-        if (row.data[i] == 1)
+        if (*(typeof(row.data[0]) *)$ref(row.data, i, 1, 32, sizeof(typeof(row.data[0])), "<i|IDENT|tests/rule_110/test.easy:43:14") == 1)
         {
             $output("A", $0);
         }
@@ -84,7 +84,7 @@ void print()
 int main()
 {
     N = 32;
-    row.data[FIX((N / 2))] = 1;
+    *(typeof(row.data[0]) *)$ref(row.data, FIX((N / 2)), 1, 32, sizeof(typeof(row.data[0])), "<FIX|IDENT|tests/rule_110/test.easy:51:11") = 1;
     print();
     for (n = 1; n <= 10; n += 1)
     {

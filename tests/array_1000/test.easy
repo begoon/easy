@@ -1,0 +1,28 @@
+PROGRAM Array1000:
+  DECLARE a ARRAY[1000:1001] OF INTEGER;
+  DECLARE b ARRAY[1000:1000] OF INTEGER;
+  DECLARE n INTEGER;
+
+  SET a[1000] := 123;
+  SET a[1001] := 456;
+
+  OUTPUT a[1000];
+  OUTPUT a[1001];
+
+  SET b[1000] := 789;
+  OUTPUT b[1000];
+
+  SET n := 1000;
+  BEGIN
+    DECLARE c ARRAY[n:n] OF REAL;
+    DECLARE d ARRAY[n:n] OF ARRAY[1] OF REAL;
+
+    OUTPUT c[n];
+    SET c[n] := 42;
+    OUTPUT c[n];
+
+    OUTPUT d[n][1];
+    SET d[n][1] := 84;
+    OUTPUT d[n][1];
+  END;
+END PROGRAM Array1000;

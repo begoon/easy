@@ -58,31 +58,31 @@ int main()
         struct
         {
             int *data;
-        } sieve = { .data = malloc(sizeof(int) * (1 + topnum + 1)) };
+        } sieve = { .data = malloc(sizeof(int) * (topnum - 1 + 1)) };
         int i = 0;
         int limit = 0;
         int count = 0;
         topnum = (topnum + 1);
         for (i = 1; i <= topnum; i += 1)
         {
-            sieve.data[i] = TRUE;
+            *(typeof(sieve.data[0]) *)$ref(sieve.data, i, 1, topnum, sizeof(typeof(sieve.data[0])), "<i|IDENT|tests/sieve/test.easy:34:39") = TRUE;
         }
         limit = (integersqrt(topnum) + 1);
         for (i = 2; i <= limit; i += 1)
         {
-            if (sieve.data[i])
+            if (*(typeof(sieve.data[0]) *)$ref(sieve.data, i, 1, topnum, sizeof(typeof(sieve.data[0])), "<i|IDENT|tests/sieve/test.easy:37:16"))
             {
                 int j = 0;
                 for (j = (2 * i); j <= topnum; j += i)
                 {
-                    sieve.data[j] = FALSE;
+                    *(typeof(sieve.data[0]) *)$ref(sieve.data, j, 1, topnum, sizeof(typeof(sieve.data[0])), "<j|IDENT|tests/sieve/test.easy:39:50") = FALSE;
                 }
             }
         }
         count = 0;
         for (i = 1; i <= topnum; i += 1)
         {
-            if (sieve.data[i])
+            if (*(typeof(sieve.data[0]) *)$ref(sieve.data, i, 1, topnum, sizeof(typeof(sieve.data[0])), "<i|IDENT|tests/sieve/test.easy:44:16"))
             {
                 count = (count + 1);
                 $output("A", $concat("AiAi", $1, count, $2, i));

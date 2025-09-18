@@ -5,7 +5,7 @@ typedef int BOOLEAN;
 typedef STR STRING;
 struct
 {
-    int data[0 + 99 + 1];
+    int data[99 - 0 + 1];
 } a = {0};
 int sz = 0;
 int main()
@@ -15,8 +15,8 @@ int main()
         struct
         {
             int *data;
-        } b = { .data = malloc(sizeof(int) * (1 + sz + 1)) };
-        b.data[1] = 42;
-        $output("i", b.data[1]);
+        } b = { .data = malloc(sizeof(int) * (sz - 1 + 1)) };
+        *(typeof(b.data[0]) *)$ref(b.data, 1, 1, sz, sizeof(typeof(b.data[0])), "<1|INTEGER|tests/array_dynamic/test.easy:9:11") = 42;
+        $output("i", *(typeof(b.data[0]) *)$ref(b.data, 1, 1, sz, sizeof(typeof(b.data[0])), "<1|INTEGER|tests/array_dynamic/test.easy:10:14"));
     }
 }

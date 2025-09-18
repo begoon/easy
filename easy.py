@@ -3,10 +3,10 @@
 import pathlib
 import re
 import sys
-from parser import BuiltinFunction, Parser, common, emit, functions_list, procedures_list, types_list, variables_list
 from pathlib import Path
 
 from lexer import InputText, Lexer, Token
+from parser import BuiltinFunction, Parser, context, emit
 from peg.parser import PEGParser
 from yamler import yamlizer
 
@@ -41,14 +41,20 @@ if __name__ == "__main__":
     if len(sys.argv) < 2:
         print("usage: easy.py <input.easy> [-c <output.c>] [-t] [-a] [-e]")
         print("  -c <output.c>  - specify output C file (default: input.c)")
-        print("  -t             - generate tokens file (default: off)")
-        print("  -a             - generate YAML AST file (default: off)")
-        print("  -e             - generate PEG YAML AST file (default: off)")
+        print("  -t             - generate tokens file (default: input.tokens)")
+        print("  -a             - generate YAML AST file (default: input.yaml)")
+        print("  -e             - generate PEG YAML AST file (default: input.peg.yaml)")
+        print("  -s <output.s>  - generate symbols file (default: input.s)")
         sys.exit(1)
 
     input_file = pathlib.Path(sys.argv[1])
 
     source = input_file.read_text()
+    flags_comment = source.splitlines()[0].strip()
+    if flags_comment.startswith("//easy:flags "):
+        flags_pairs = flags_comment.split()[1:]
+        flags = {k: v for k, v in (pair.split("=") for pair in flags_pairs)}
+        context.flags.update(flags)
 
     lexer = Lexer(InputText(filename=input_file))
 
@@ -77,17 +83,17 @@ if __name__ == "__main__":
     output_s = Path(arg(sys.argv, "-s") or input_file.with_suffix(".s"))
     with open(output_s, "w") as f:
         v = []
-        for name, variable in variables_list.items():
+        for name, variable in context.variables.items():
             v.append(variable.s(name))
         print(table(v), file=f)
 
         v = []
-        for name, type in types_list.items():
+        for name, type in context.types.items():
             v.append((name, re.sub(r"\s+", " ", type.c())))
         print(table(v), file=f)
 
         v = []
-        for name, function in functions_list.items():
+        for name, function in context.functions.items():
             is_builtin = isinstance(function, BuiltinFunction)
             if is_builtin:
                 v.append((function.name, "->", function.type.c(), "built-in"))
@@ -106,7 +112,7 @@ if __name__ == "__main__":
         print(table(v), file=f)
 
         v = []
-        for name, procedure in procedures_list.items():
+        for name, procedure in context.procedures.items():
             arguments = ", ".join([f"{v.name} {v.type.c()}" for v in procedure.arguments])
             v.append((procedure.name, procedure.__class__.__name__, f"({arguments})", str(procedure.token)))
         print(table(v), file=f)
@@ -117,22 +123,20 @@ if __name__ == "__main__":
 
     with open(output_c, "w") as f:
         f.write('#include "runtime.c"\n')
-        for name, definition in types_list.items():
+        for name, definition in context.types.items():
             v = f"{definition.typedef(name)};\n"
             f.write(v)
-        if common:
-            f.write(emit(common) + "\n")
-        for name, v in variables_list.items():
+        if context.common:
+            f.write(emit(context.common) + "\n")
+        for name, v in context.variables.items():
             if v.is_const():
                 f.write(v.const() + ";\n")
-        if functions_list:
-            for v in functions_list.values():
-                if isinstance(v, BuiltinFunction):
-                    continue
-                f.write(v.c() + "\n")
-        if procedures_list:
-            for v in procedures_list.values():
-                f.write(v.c() + "\n")
+        for v in context.functions.values():
+            if isinstance(v, BuiltinFunction):
+                continue
+            f.write(v.c() + "\n")
+        for v in context.procedures.values():
+            f.write(v.c() + "\n")
         f.write(code_c + "\n")
 
 

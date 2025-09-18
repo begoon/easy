@@ -133,7 +133,7 @@ class ArrayType(Type):
         return "\n".join(v)
 
     def sz(self) -> str:
-        return self.lo.c() + " + " + self.hi.c() + " + 1"
+        return self.hi.c() + " - " + self.lo.c() + " + 1"
 
     def zero(self) -> str:
         if self.dynamic:
@@ -210,7 +210,7 @@ class Segment(Node):
             for variable in self.variables:
                 c = variable.c()
                 if main:
-                    common.append(c)
+                    context.common.append(c)
                 else:
                     v.append(c)
         if self.statements:
@@ -295,7 +295,7 @@ class FUNCTION(Node):
 
     def c(self) -> str:
         arguments = ", ".join(argument.c() for argument in self.arguments)
-        function = functions_list.get(self.name)
+        function = context.functions.get(self.name)
         v = [
             f"{function.type.c()} {self.name}({arguments})",
             "{",
@@ -554,7 +554,10 @@ class VariableSubscript(Entity):
     value: Expression
 
     def c(self) -> str:
-        return "[" + self.value.c() + "]"
+        assert False, "use VariableSubscript.index()"
+
+    def index(self) -> str:
+        return self.value.c()
 
 
 @dataclass
@@ -705,7 +708,7 @@ def expression_stringer(v: Expression, format: list[str], callee: str) -> str:
         return c
 
     if isinstance(v, FunctionCall):
-        function = functions_list[v.name]
+        function = context.functions[v.name]
         type = function.type
 
         if not isinstance(type, BuiltinType):
@@ -717,32 +720,41 @@ def expression_stringer(v: Expression, format: list[str], callee: str) -> str:
     assert False, f"unsupported {callee} argument {v} at {v.token}"
 
 
-common: list[str] = []
-
-types_list: dict[str, Type] = {
-    "INTEGER": IntegerType(),
-    "REAL": RealType(),
-    "BOOLEAN": BooleanType(),
-    "STRING": StringType(),
-}
-
-
 @dataclass
 class BuiltinFunction:
     name: str
     type: Type
 
 
-functions_list: dict[str, BuiltinFunction | FUNCTION] = {
-    "LENGTH": BuiltinFunction("LENGTH", IntegerType()),
-    "CHARACTER": BuiltinFunction("CHARACTER", StringType()),
-    "SUBSTR": BuiltinFunction("SUBSTR", StringType()),
-    "FIX": BuiltinFunction("FIX", IntegerType()),
-    "FLOAT": BuiltinFunction("FLOAT", RealType()),
-}
+@dataclass
+class Context:
+    flags: dict[str, str]
+    common: list[str]
+    types: dict[str, Type]
+    functions: dict[str, BuiltinFunction | FUNCTION]
+    procedures: dict[str, PROCEDURE]
+    variables: dict[str, Variable]
 
-procedures_list: dict[str, PROCEDURE] = {}
-variables_list: dict[str, Variable] = {}
+
+context = Context(
+    flags={},
+    common=[],
+    types={
+        "INTEGER": IntegerType(),
+        "REAL": RealType(),
+        "BOOLEAN": BooleanType(),
+        "STRING": StringType(),
+    },
+    functions={
+        "LENGTH": BuiltinFunction("LENGTH", IntegerType()),
+        "CHARACTER": BuiltinFunction("CHARACTER", StringType()),
+        "SUBSTR": BuiltinFunction("SUBSTR", StringType()),
+        "FIX": BuiltinFunction("FIX", IntegerType()),
+        "FLOAT": BuiltinFunction("FLOAT", RealType()),
+    },
+    procedures={},
+    variables={},
+)
 
 
 # ###
@@ -880,7 +892,7 @@ class Parser:
         token = self.current()
         if token.value in ("INTEGER", "BOOLEAN", "REAL", "STRING"):
             self.eat(token.value)
-            return types_list[token.value]
+            return context.types[token.value]
         if token.value == "ARRAY":
             self.eat(token.value)
             self.eat("[")
@@ -918,7 +930,7 @@ class Parser:
         token = self.eat("IDENT")
         alias_name = token.value
 
-        if (alias_type := types_list.get(alias_name)) is None:
+        if (alias_type := context.types.get(alias_name)) is None:
             raise ParseError(f"unknown type alias '{alias_name}'", token)
 
         return AliasType(alias_name, alias_type)
@@ -951,10 +963,10 @@ class Parser:
 
             if token.value == "PROCEDURE":
                 subroutine = PROCEDURE(token, self.scope(), name, parameters, segment)
-                procedures_list[name] = subroutine
+                context.procedures[name] = subroutine
             else:
                 subroutine = FUNCTION(token, self.scope(), name, type, parameters, segment)
-                functions_list[name] = subroutine
+                context.functions[name] = subroutine
 
             self.leave_scope()
             subroutines.append(subroutine)
@@ -1255,7 +1267,7 @@ class Parser:
             else:
                 arguments = []
             self.eat(")")
-            type = functions_list.get(name)
+            type = context.functions.get(name)
             if type is None:
                 self.error(f"undefined function [{name}]", token)
             return FunctionCall(token, self.scope(), type, name, arguments)
@@ -1276,12 +1288,14 @@ class Parser:
 
             scope = ""
 
-            existing_const = next((v for v in variables_list.values() if v.is_const() and v.zero == token.value), None)
+            existing_const = next(
+                (v for v in context.variables.values() if v.is_const() and v.zero == token.value), None
+            )
             if existing_const:
                 variable_reference = VariableReference(token, scope, existing_const.name, [])
                 return variable_reference
 
-            const_i = sum(1 for v in variables_list.values() if v.is_const())
+            const_i = sum(1 for v in context.variables.values() if v.is_const())
             name = f"${const_i}"
 
             variable = Variable(token, name, StringType(), zero=token.value)
@@ -1317,20 +1331,129 @@ def yamlizer(obj: Any) -> str:
 
 
 def expand_variable_reference(variable: Variable, variable_reference: VariableReference) -> tuple[Type, str]:
+    if context.flags.get("index_check") == "0":
+        return expand_variable_reference_direct(variable, variable_reference)
+    return expand_variable_reference_bound_checked(variable, variable_reference)
+
+
+def expand_variable_reference_bound_checked(
+    variable: Variable,
+    variable_reference: VariableReference,
+) -> tuple[Type, str]:
+    variable_type: Type = variable.type
+
+    # expression for current object (or a *pointer* to it after a subscript)
+    reference_expression = variable.name
+
+    # for clean typeof(...) chains like typeof(m.data[0].data[0])
+    probe_expression = variable.name
+
+    # True iff reference_expression currently denotes a pointer to an aggregate we're indexing into.
+    is_pointer = False
+
+    parts = list(variable_reference.parts)
+    if not parts:
+        return variable_type, reference_expression
+
+    result_reference: str | None = None
+
+    for i, part in enumerate(parts):
+        if isinstance(part, VariableSubscript):
+            # resolve AliasType if needed
+            subscript_type = variable_type.reference_type if isinstance(variable_type, AliasType) else variable_type
+            assert isinstance(
+                subscript_type,
+                ArrayType,
+            ), f"reference type of subscript must be ArrayType, not {subscript_type}"
+            array_type: ArrayType = subscript_type
+
+            lo = array_type.lo.c()
+            hi = array_type.hi.c()
+            index = part.index()
+
+            # clean element typeof/sizeof
+            element_typeof = f"typeof({probe_expression}.data[0])"
+            element_sizeof = f"sizeof({element_typeof})"
+
+            # "data" part for $ref at the current level
+            data_expression = f"({reference_expression})->data" if is_pointer else f"{reference_expression}.data"
+
+            location = '"' + str(part.token).replace('"', r"\"") + '"'
+            current_reference = (
+                f"({element_typeof} *)$ref({data_expression}, {index}, {lo}, {hi}, {element_sizeof}, {location})"
+            )
+
+            is_last = i == len(parts) - 1
+            if is_last:
+                # final dimension: return an lvalue via *cast($ref(...))
+                result_reference = f"*{current_reference}"
+            else:
+                # keep a *pointer* to the selected element for chaining
+                reference_expression = current_reference
+                is_pointer = True
+                probe_expression = f"{probe_expression}.data[0]"
+
+            variable_type = array_type.type  # step into element type
+
+        elif isinstance(part, VariableField):
+            # resolve AliasType if needed
+            field_type = variable_type.reference_type if isinstance(variable_type, AliasType) else variable_type
+            assert isinstance(
+                field_type,
+                StructType,
+            ), f"reference type of field must be StructType, not {field_type}, at {part.token}"
+            struct_type: StructType = field_type
+
+            field = next((f for f in struct_type.fields if f.name == part.name), None)
+            assert field is not None, f"field '{part.name}' not found in {struct_type}"
+
+            # Choose '.' vs '->' based on whether reference_expression is currently a pointer.
+            accessor = f"->{part.name}" if is_pointer else f".{part.name}"
+            # Parenthesize before '->' to bind correctly.
+            reference_expression = (
+                f"({reference_expression}){accessor}" if is_pointer else f"{reference_expression}{accessor}"
+            )
+            # probe_expression is a value-style chain (always uses '.')
+            probe_expression = f"{probe_expression}.{part.name}"
+
+            variable_type = field.type
+
+            # After selecting a field, the expression is an lvalue (not a pointer) unless the type system
+            # models pointer fields explicitly. If yes, we can set is_pointer = isinstance(t, PointerType).
+            # In C, thought, it is always an lvalue.
+            is_pointer = False
+
+        else:
+            assert False, f"unexpected variable '{part=}' at {variable.token}"
+
+    # If no subscript or field ever occurred, just return the plain field chain lvalue.
+    if result_reference is None:
+        result_reference = reference_expression
+
+    return variable_type, result_reference
+
+
+def expand_variable_reference_direct(variable: Variable, variable_reference: VariableReference) -> tuple[Type, str]:
     type = variable.type
     reference = variable.name
     for part in variable_reference.parts:
         if isinstance(part, VariableSubscript):
             if isinstance(type, AliasType):
                 type = type.reference_type
-            assert isinstance(type, ArrayType), f"reference type of subscript must be ArrayType, not {type}"
+            assert isinstance(
+                type,
+                ArrayType,
+            ), f"reference type of subscript must be ArrayType, not {type} at {part.token}"
+            lo = type.lo.c()
+            index = f"({part.index()}) - ({lo})"
             type = type.type
-            reference += ".data" + part.c()
+            reference += ".data[" + index + "]"
         elif isinstance(part, VariableField):
             if isinstance(type, AliasType):
                 type = type.reference_type
             assert isinstance(
-                type, StructType
+                type,
+                StructType,
             ), f"reference type of field must be StructType, not {type}, at {part.token}"
             field = next((f for f in type.fields if f.name == part.name), None)
             assert field is not None, f"field '{part.name}' not found in {type}"
@@ -1343,7 +1466,7 @@ def expand_variable_reference(variable: Variable, variable_reference: VariableRe
 
 def discover_variable(v: VariableReference) -> Variable:
     scope = v.scope.split(".")
-    while scope and not (variable := variables_list.get(".".join(scope) + "|" + v.name)):
+    while scope and not (variable := context.variables.get(".".join(scope) + "|" + v.name)):
         scope.pop()
 
     if variable is None:
@@ -1352,10 +1475,10 @@ def discover_variable(v: VariableReference) -> Variable:
 
 
 def enlist_type(name: str, type: Type) -> None:
-    assert name not in types_list, f"type '{name=}' already defined as {types_list[name]=}"
-    types_list[name] = type
+    assert name not in context.types, f"type '{name=}' already defined: {context.types[name]=}"
+    context.types[name] = type
 
 
 def enlist_variable(variable: Variable, scope: str) -> None:
     fqn = scope + "|" + variable.name
-    variables_list[fqn] = variable
+    context.variables[fqn] = variable

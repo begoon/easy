@@ -13,9 +13,9 @@ struct
             {
                 int i;
                 STR s;
-            } data[0 + 4 + 1];
-        } data[0 + 2 + 1];
-    } data[0 + 8 + 1];
+            } data[4 - 0 + 1];
+        } data[2 - 0 + 1];
+    } data[8 - 0 + 1];
 } a = {0};
 struct
 {
@@ -27,17 +27,17 @@ struct
             {
                 int i;
                 STR s;
-            } data[0 + 4 + 1];
-        } data[0 + 2 + 1];
-    } data[0 + 8 + 1];
+            } data[4 - 0 + 1];
+        } data[2 - 0 + 1];
+    } data[8 - 0 + 1];
 } b = {0};
 STR $0 = { .data = "abc" };
 STR $1 = { .data = " " };
 int main()
 {
-    a.data[1].data[2].data[3].i = 123;
-    a.data[1].data[2].data[3].s = $0;
-    $output("iAi", a.data[1].data[2].data[3].i, $1, b.data[1].data[2].data[3].i);
-    $output("A", $concat("AAA", a.data[1].data[2].data[3].s, $1, b.data[1].data[2].data[3].s));
+    ((typeof(a.data[0].data[0].data[0]) *)$ref(((typeof(a.data[0].data[0]) *)$ref(((typeof(a.data[0]) *)$ref(a.data, 1, 0, 8, sizeof(typeof(a.data[0])), "<1|INTEGER|tests/array4/test.easy:10:9"))->data, 2, 0, 2, sizeof(typeof(a.data[0].data[0])), "<2|INTEGER|tests/array4/test.easy:10:12"))->data, 3, 0, 4, sizeof(typeof(a.data[0].data[0].data[0])), "<3|INTEGER|tests/array4/test.easy:10:15"))->i = 123;
+    ((typeof(a.data[0].data[0].data[0]) *)$ref(((typeof(a.data[0].data[0]) *)$ref(((typeof(a.data[0]) *)$ref(a.data, 1, 0, 8, sizeof(typeof(a.data[0])), "<1|INTEGER|tests/array4/test.easy:11:9"))->data, 2, 0, 2, sizeof(typeof(a.data[0].data[0])), "<2|INTEGER|tests/array4/test.easy:11:12"))->data, 3, 0, 4, sizeof(typeof(a.data[0].data[0].data[0])), "<3|INTEGER|tests/array4/test.easy:11:15"))->s = $0;
+    $output("iAi", ((typeof(a.data[0].data[0].data[0]) *)$ref(((typeof(a.data[0].data[0]) *)$ref(((typeof(a.data[0]) *)$ref(a.data, 1, 0, 8, sizeof(typeof(a.data[0])), "<1|INTEGER|tests/array4/test.easy:12:12"))->data, 2, 0, 2, sizeof(typeof(a.data[0].data[0])), "<2|INTEGER|tests/array4/test.easy:12:15"))->data, 3, 0, 4, sizeof(typeof(a.data[0].data[0].data[0])), "<3|INTEGER|tests/array4/test.easy:12:18"))->i, $1, ((typeof(b.data[0].data[0].data[0]) *)$ref(((typeof(b.data[0].data[0]) *)$ref(((typeof(b.data[0]) *)$ref(b.data, 1, 0, 8, sizeof(typeof(b.data[0])), "<1|INTEGER|tests/array4/test.easy:12:31"))->data, 2, 0, 2, sizeof(typeof(b.data[0].data[0])), "<2|INTEGER|tests/array4/test.easy:12:34"))->data, 3, 0, 4, sizeof(typeof(b.data[0].data[0].data[0])), "<3|INTEGER|tests/array4/test.easy:12:37"))->i);
+    $output("A", $concat("AAA", ((typeof(a.data[0].data[0].data[0]) *)$ref(((typeof(a.data[0].data[0]) *)$ref(((typeof(a.data[0]) *)$ref(a.data, 1, 0, 8, sizeof(typeof(a.data[0])), "<1|INTEGER|tests/array4/test.easy:13:12"))->data, 2, 0, 2, sizeof(typeof(a.data[0].data[0])), "<2|INTEGER|tests/array4/test.easy:13:15"))->data, 3, 0, 4, sizeof(typeof(a.data[0].data[0].data[0])), "<3|INTEGER|tests/array4/test.easy:13:18"))->s, $1, ((typeof(b.data[0].data[0].data[0]) *)$ref(((typeof(b.data[0].data[0]) *)$ref(((typeof(b.data[0]) *)$ref(b.data, 1, 0, 8, sizeof(typeof(b.data[0])), "<1|INTEGER|tests/array4/test.easy:13:35"))->data, 2, 0, 2, sizeof(typeof(b.data[0].data[0])), "<2|INTEGER|tests/array4/test.easy:13:38"))->data, 3, 0, 4, sizeof(typeof(b.data[0].data[0].data[0])), "<3|INTEGER|tests/array4/test.easy:13:41"))->s));
     exit(0);
 }

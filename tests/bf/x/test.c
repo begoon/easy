@@ -5,7 +5,7 @@ typedef int BOOLEAN;
 typedef STR STRING;
 typedef struct
 {
-    int data[0 + 299 + 1];
+    int data[299 - 0 + 1];
 } Tape;
 STR program = {0};
 STR $0 = { .data = "" };
@@ -25,7 +25,7 @@ STR bf(STR program)
     int ptr = 0;
     STR ch = {0};
     int depth = 0;
-    tape.data[0] = 0;
+    *(typeof(tape.data[0]) *)$ref(tape.data, 0, 0, 299, sizeof(typeof(tape.data[0])), "<0|INTEGER|tests/bf/test.easy:16:14") = 0;
     ptr = 0;
     out = $0;
     for (pc = 0; pc <= (LENGTH(program) - 1); pc += 1)
@@ -41,19 +41,19 @@ STR bf(STR program)
         }
         if (strcmp(ch.data, $3.data) == 0)
         {
-            tape.data[ptr] = (tape.data[ptr] + 1);
+            *(typeof(tape.data[0]) *)$ref(tape.data, ptr, 0, 299, sizeof(typeof(tape.data[0])), "<ptr|IDENT|tests/bf/test.easy:26:33") = (*(typeof(tape.data[0]) *)$ref(tape.data, ptr, 0, 299, sizeof(typeof(tape.data[0])), "<ptr|IDENT|tests/bf/test.easy:26:46") + 1);
         }
         if (strcmp(ch.data, $4.data) == 0)
         {
-            tape.data[ptr] = (tape.data[ptr] - 1);
+            *(typeof(tape.data[0]) *)$ref(tape.data, ptr, 0, 299, sizeof(typeof(tape.data[0])), "<ptr|IDENT|tests/bf/test.easy:27:33") = (*(typeof(tape.data[0]) *)$ref(tape.data, ptr, 0, 299, sizeof(typeof(tape.data[0])), "<ptr|IDENT|tests/bf/test.easy:27:46") - 1);
         }
         if (strcmp(ch.data, $5.data) == 0)
         {
-            out = $concat("AA", out, CHARACTER(tape.data[ptr]));
+            out = $concat("AA", out, CHARACTER(*(typeof(tape.data[0]) *)$ref(tape.data, ptr, 0, 299, sizeof(typeof(tape.data[0])), "<ptr|IDENT|tests/bf/test.easy:28:57")));
         }
         if (strcmp(ch.data, $6.data) == 0)
         {
-            if (tape.data[ptr] == 0)
+            if (*(typeof(tape.data[0]) *)$ref(tape.data, ptr, 0, 299, sizeof(typeof(tape.data[0])), "<ptr|IDENT|tests/bf/test.easy:30:17") == 0)
             {
                 for (depth = 1; (depth > 0); depth += 0)
                 {
@@ -72,7 +72,7 @@ STR bf(STR program)
         }
         if (strcmp(ch.data, $7.data) == 0)
         {
-            if (tape.data[ptr] != 0)
+            if (*(typeof(tape.data[0]) *)$ref(tape.data, ptr, 0, 299, sizeof(typeof(tape.data[0])), "<ptr|IDENT|tests/bf/test.easy:40:17") != 0)
             {
                 for (depth = 1; (depth > 0); depth += 0)
                 {

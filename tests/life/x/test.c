@@ -7,8 +7,8 @@ typedef struct
 {
     struct
     {
-        int data[0 + 80 + 1];
-    } data[0 + 25 + 1];
+        int data[80 - 0 + 1];
+    } data[25 - 0 + 1];
 } Field;
 int w = 0;
 int h = 0;
@@ -39,7 +39,7 @@ int neighbours(int x, int y)
             {
                 if (valid(xx, yy))
                 {
-                    if (field.data[yy].data[xx])
+                    if (*(typeof(field.data[0].data[0]) *)$ref(((typeof(field.data[0]) *)$ref(field.data, yy, 0, 25, sizeof(typeof(field.data[0])), "<yy|IDENT|tests/life/test.easy:23:22"))->data, xx, 0, 80, sizeof(typeof(field.data[0].data[0])), "<xx|IDENT|tests/life/test.easy:23:26"))
                     {
                         n = (n + 1);
                     }
@@ -64,7 +64,7 @@ void print()
         $output("A", $2);
         for (x = 0; x <= (w - 1); x += 1)
         {
-            if (field.data[y].data[x] == TRUE)
+            if (*(typeof(field.data[0].data[0]) *)$ref(((typeof(field.data[0]) *)$ref(field.data, y, 0, 25, sizeof(typeof(field.data[0])), "<y|IDENT|tests/life/test.easy:40:18"))->data, x, 0, 80, sizeof(typeof(field.data[0].data[0])), "<x|IDENT|tests/life/test.easy:40:21") == TRUE)
             {
                 $output("A", $3);
             }
@@ -83,11 +83,11 @@ void print()
 }
 void glider(int x, int y)
 {
-    field.data[y].data[x] = TRUE;
-    field.data[y].data[(x + 1)] = TRUE;
-    field.data[y].data[(x + 2)] = TRUE;
-    field.data[(y + 1)].data[x] = TRUE;
-    field.data[(y + 2)].data[(x + 1)] = TRUE;
+    *(typeof(field.data[0].data[0]) *)$ref(((typeof(field.data[0]) *)$ref(field.data, y, 0, 25, sizeof(typeof(field.data[0])), "<y|IDENT|tests/life/test.easy:52:15"))->data, x, 0, 80, sizeof(typeof(field.data[0].data[0])), "<x|IDENT|tests/life/test.easy:52:18") = TRUE;
+    *(typeof(field.data[0].data[0]) *)$ref(((typeof(field.data[0]) *)$ref(field.data, y, 0, 25, sizeof(typeof(field.data[0])), "<y|IDENT|tests/life/test.easy:53:15"))->data, (x + 1), 0, 80, sizeof(typeof(field.data[0].data[0])), "<x|IDENT|tests/life/test.easy:53:18") = TRUE;
+    *(typeof(field.data[0].data[0]) *)$ref(((typeof(field.data[0]) *)$ref(field.data, y, 0, 25, sizeof(typeof(field.data[0])), "<y|IDENT|tests/life/test.easy:54:15"))->data, (x + 2), 0, 80, sizeof(typeof(field.data[0].data[0])), "<x|IDENT|tests/life/test.easy:54:18") = TRUE;
+    *(typeof(field.data[0].data[0]) *)$ref(((typeof(field.data[0]) *)$ref(field.data, (y + 1), 0, 25, sizeof(typeof(field.data[0])), "<y|IDENT|tests/life/test.easy:55:15"))->data, x, 0, 80, sizeof(typeof(field.data[0].data[0])), "<x|IDENT|tests/life/test.easy:55:20") = TRUE;
+    *(typeof(field.data[0].data[0]) *)$ref(((typeof(field.data[0]) *)$ref(field.data, (y + 2), 0, 25, sizeof(typeof(field.data[0])), "<y|IDENT|tests/life/test.easy:56:15"))->data, (x + 1), 0, 80, sizeof(typeof(field.data[0].data[0])), "<x|IDENT|tests/life/test.easy:56:20") = TRUE;
 }
 void evolution()
 {
@@ -100,7 +100,7 @@ void evolution()
         {
             int alive = 0;
             int n = 0;
-            alive = field.data[y].data[x];
+            alive = *(typeof(field.data[0].data[0]) *)$ref(((typeof(field.data[0]) *)$ref(field.data, y, 0, 25, sizeof(typeof(field.data[0])), "<y|IDENT|tests/life/test.easy:68:28"))->data, x, 0, 80, sizeof(typeof(field.data[0].data[0])), "<x|IDENT|tests/life/test.easy:68:31");
             n = neighbours(x, y);
             if (alive == TRUE)
             {
@@ -116,7 +116,7 @@ void evolution()
                     alive = TRUE;
                 }
             }
-            next.data[y].data[x] = alive;
+            *(typeof(next.data[0].data[0]) *)$ref(((typeof(next.data[0]) *)$ref(next.data, y, 0, 25, sizeof(typeof(next.data[0])), "<y|IDENT|tests/life/test.easy:77:18"))->data, x, 0, 80, sizeof(typeof(next.data[0].data[0])), "<x|IDENT|tests/life/test.easy:77:21") = alive;
         }
     }
     field = next;
@@ -129,7 +129,7 @@ int main()
     {
         for (x = 0; x <= (w - 1); x += 1)
         {
-            field.data[y].data[x] = FALSE;
+            *(typeof(field.data[0].data[0]) *)$ref(((typeof(field.data[0]) *)$ref(field.data, y, 0, 25, sizeof(typeof(field.data[0])), "<y|IDENT|tests/life/test.easy:89:17"))->data, x, 0, 80, sizeof(typeof(field.data[0].data[0])), "<x|IDENT|tests/life/test.easy:89:20") = FALSE;
         }
     }
     glider(30, 15);
