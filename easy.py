@@ -256,7 +256,8 @@ class Lexer:
                             continue
                         self.advance()
                     if self.position >= self.n:
-                        raise LexerError(f"unterminated /* */ comment at line {self.line}")
+                        location = f"{self.input.filename}:{self.line}:{self.character}"
+                        raise LexerError(f"unterminated /* */ comment at {location}")
                     self.advance(2)
                     return True
                 return False
@@ -313,7 +314,8 @@ class Lexer:
         while True:
             c = self.current()
             if not c:
-                raise LexerError(f"unterminated string at line {line}")
+                location = f"{self.input.filename}:{line}:{character}"
+                raise LexerError(f"unterminated string at {location}")
             if c == quote:
                 self.advance()
                 # doubles quotes for escape: "it""s"
@@ -337,7 +339,8 @@ class Lexer:
         if one in SYMBOLS:
             self.advance()
             return Token("SYMBOL", one, start, character, self.context)
-        raise LexerError(f"unknown symbol '{one}' at {self.context.filename}:{start}:{character}")
+        location = f"{self.input.filename}:{start}:{character}"
+        raise LexerError(f"unknown symbol '{one}' at {location}")
 
     def tokenize(self) -> list[Token]:
         v: list[Token] = []
@@ -368,7 +371,7 @@ class Node:
 
     def c(self) -> str:
         print(self)
-        raise NotImplementedError()
+        raise GenerateError(f"c() not implemented for {self.__class__.__name__} at {self.token}")
 
     def __str__(self) -> str:
         return yamlizer(self)
@@ -383,15 +386,15 @@ class Statement(Node):
 class Type:
     def c(self) -> str:
         print(self)
-        raise NotImplementedError
+        raise GenerateError(f"c() not implemented for {self.__class__.__name__}")
 
     def zero(self) -> str:
         print(self)
-        raise NotImplementedError
+        raise GenerateError(f"zero() not implemented for {self.__class__.__name__}")
 
     def typedef(self, alias: str = "") -> str:
         print(self)
-        raise NotImplementedError
+        raise GenerateError(f"typedef() not implemented for {self.__class__.__name__}")
 
     def format(self) -> str:
         return ""
@@ -760,7 +763,7 @@ class INPUT(Statement):
             elif isinstance(type, RealType):
                 inputs.append(f'scanf("%lf", &{reference});')
             else:
-                assert False, f"unsupported variable '{variable}' type in INPUT at {variable.token}"
+                raise GenerateError(f"unsupported variable '{variable}' type in INPUT at {variable.token}")
         return emit(inputs)
 
 
@@ -909,7 +912,7 @@ class VariableSubscript(Entity):
     value: Expression
 
     def c(self) -> str:
-        assert False, "use VariableSubscript.index()"
+        raise NotImplementedError(f"use VariableSubscript.index() instead of c() at {self.token}")
 
     def index(self) -> str:
         return self.value.c()
@@ -950,7 +953,9 @@ class Variable(Entity):
         return self.zero is not None
 
     def const(self) -> str:
-        assert self.is_const()
+        if not self.is_const():
+            raise GenerateError(f"variable '{self.name}' is not a constant at {self.token}")
+
         zero = self.zero.replace('"', r"\"")
         return self.type.c() + " " + self.name + f' = {{ .data = "{zero}" }}'
 
@@ -1052,7 +1057,7 @@ def expression_stringer(v: Expression, format: list[str], callee: str) -> str:
             type = type.reference_type
 
         if not isinstance(type, BuiltinType):
-            raise Exception(f"unsupported {callee} variable argument {v} of type {type} at {v.token}")
+            raise GenerateError(f"unsupported {callee} variable argument '{v}' of type '{type}' at {v.token}")
 
         convert = type.format()
         format.append(convert)
@@ -1067,12 +1072,16 @@ def expression_stringer(v: Expression, format: list[str], callee: str) -> str:
         type = function.type
 
         if not isinstance(type, BuiltinType):
-            raise Exception(f"unsupported {callee} function argument ${v} of type {type} at {v.token}")
+            raise GenerateError(f"unsupported {callee} function argument ${v} of type {type} at {v.token}")
         convert = type.format()
         format.append(convert)
         return c
 
-    assert False, f"unsupported {callee} argument {v} at {v.token}"
+    raise GenerateError(f"unsupported {callee} argument '{v}' at {v.token}")
+
+
+class GenerateError(Exception):
+    pass
 
 
 @dataclass
@@ -1082,7 +1091,7 @@ class BuiltinFunction:
 
 
 # ###
-class ParseError(Exception):
+class ParseError(CompilerError):
     def __init__(self, message: str, token: Token):
         super().__init__(message)
         self.message = message
@@ -1116,9 +1125,6 @@ class Parser:
     def leave_scope(self) -> None:
         self.scopes.pop()
 
-    def error(self, message: str, token: Token) -> None:
-        raise ParseError(message, token)
-
     def current(self) -> Token:
         return self.tokens[self.i]
 
@@ -1129,7 +1135,7 @@ class Parser:
             self.i += 1
             return token
         expected = "/".join(kinds)
-        self.error(f"expected '{expected}', found '{token.value}'", token)
+        raise ParseError(f"expected '{expected}', found '{token.value}'", token)
 
     def accept(self, kind: str | tuple[str, ...]) -> Token | None:
         token = self.current()
@@ -1211,7 +1217,7 @@ class Parser:
                     variable = Variable(token, name, type)
                     enlist_variable(variable, self.scope())
                 continue
-            self.error("expected a variable or '(' variable, ... ')'", token)
+            raise ParseError("expected a variable or '(' variable, ... ')'", token)
         return declarations
 
     def parse_type(self) -> Type:
@@ -1595,7 +1601,7 @@ class Parser:
             self.eat(")")
             type = self.context.functions.get(name)
             if type is None:
-                self.error(f"undefined function [{name}]", token)
+                raise ParseError(f"undefined function '{name}'", token)
             return FunctionCall(token, self.scope(), type, name, arguments)
         return self.factor()
 
@@ -1683,10 +1689,11 @@ def expand_variable_reference_bound_checked(
         if isinstance(part, VariableSubscript):
             # resolve AliasType if needed
             subscript_type = variable_type.reference_type if isinstance(variable_type, AliasType) else variable_type
-            assert isinstance(
-                subscript_type,
-                ArrayType,
-            ), f"reference type of subscript must be ArrayType, not {subscript_type}"
+
+            if not isinstance(subscript_type, ArrayType):
+                raise GenerateError(
+                    f"expect ArrayType in reference type of subscript, not {subscript_type} at {part.token}"
+                )
             array_type: ArrayType = subscript_type
 
             lo = array_type.lo.c()
@@ -1720,14 +1727,14 @@ def expand_variable_reference_bound_checked(
         elif isinstance(part, VariableField):
             # resolve AliasType if needed
             field_type = variable_type.reference_type if isinstance(variable_type, AliasType) else variable_type
-            assert isinstance(
-                field_type,
-                StructType,
-            ), f"reference type of field must be StructType, not {field_type}, at {part.token}"
+
+            if not isinstance(field_type, StructType):
+                raise GenerateError(f"expect StructType in reference type of field, not {field_type}, at {part.token}")
             struct_type: StructType = field_type
 
             field = next((f for f in struct_type.fields if f.name == part.name), None)
-            assert field is not None, f"field '{part.name}' not found in {struct_type}"
+            if field is None:
+                raise GenerateError(f"field '{part.name}' not found in {struct_type} at {part.token}")
 
             # Choose '.' vs '->' based on whether reference_expression is currently a pointer.
             accessor = f"->{part.name}" if is_pointer else f".{part.name}"
@@ -1746,7 +1753,7 @@ def expand_variable_reference_bound_checked(
             is_pointer = False
 
         else:
-            assert False, f"unexpected variable '{part=}' at {variable.token}"
+            raise GenerateError(f"unexpected variable '{part=}' at {variable.token}")
 
     # If no subscript or field ever occurred, just return the plain field chain lvalue.
     if result_reference is None:
@@ -1762,10 +1769,10 @@ def expand_variable_reference_direct(variable: Variable, variable_reference: Var
         if isinstance(part, VariableSubscript):
             if isinstance(type, AliasType):
                 type = type.reference_type
-            assert isinstance(
-                type,
-                ArrayType,
-            ), f"reference type of subscript must be ArrayType, not {type} at {part.token}"
+
+            if not isinstance(type, ArrayType):
+                raise GenerateError(f"expect ArrayType in reference type of subscript, not {type} at {part.token}")
+
             lo = type.lo.c()
             index = f"({part.index()}) - ({lo})"
             type = type.type
@@ -1773,16 +1780,18 @@ def expand_variable_reference_direct(variable: Variable, variable_reference: Var
         elif isinstance(part, VariableField):
             if isinstance(type, AliasType):
                 type = type.reference_type
-            assert isinstance(
-                type,
-                StructType,
-            ), f"reference type of field must be StructType, not {type}, at {part.token}"
+
+            if not isinstance(type, StructType):
+                raise GenerateError(f"expect StructType in reference type of field, not {type} at {part.token}")
+
             field = next((f for f in type.fields if f.name == part.name), None)
-            assert field is not None, f"field '{part.name}' not found in {type}"
+            if field is None:
+                raise GenerateError(f"field '{part.name}' not found in {type} at {part.token}")
+
             type = field.type
             reference += part.c()
         else:
-            assert False, f"unexpected part '{part}' at {variable.token}"
+            raise GenerateError(f"unexpected part '{part}' at {variable.token}")
     return type, reference
 
 
@@ -1793,12 +1802,13 @@ def discover_variable(v: VariableReference) -> Variable:
         scope.pop()
 
     if variable is None:
-        raise Exception(f"undefined variable '{v.name}' in scope '{v.scope}' at {v.token}")
+        raise GenerateError(f"undefined variable '{v.name}' in scope '{v.scope}' at {v.token}")
     return variable
 
 
 def enlist_type(name: str, type: Type, context: Context) -> None:
-    assert name not in context.types, f"type '{name=}' already defined: {context.types[name]=}"
+    if name in context.types:
+        raise GenerateError(f"type '{name}' already defined: {context.types[name]=} at {type.token}")
     context.types[name] = type
 
 
