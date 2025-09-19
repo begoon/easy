@@ -6,6 +6,7 @@ import traceback
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 
+import easy
 from easy import arg
 
 TESTS_FOLDER = Path("tests")
@@ -105,7 +106,8 @@ def process(test: Path) -> None:
 
         flags.extend(["-s", str(created_s)])
 
-    run(["python", "easy.py", program, *flags])
+    # run(["python", "easy.py", program, *flags])
+    easy.run(["easy.py", str(program), *flags])
 
     if expected_tokens.exists():
         diff(expected_tokens, created_tokens)
@@ -146,6 +148,13 @@ def process(test: Path) -> None:
             diff(expected_output, created_output)
 
             created_output.unlink()
+    else:
+        if expected_c.exists():
+            obj = test.with_suffix(".o")
+            removals.append(obj)
+
+            cc_flags = ["-Wall", "-Wextra", "-Werror"]
+            run(["clang", *cc_flags, test.with_suffix(".c"), "-I", ".", "-c", "-o", obj])
 
     for removal in removals:
         if removal.exists():

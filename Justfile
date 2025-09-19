@@ -1,5 +1,11 @@
 default: test-compiler
 
+quick:
+    SKIP_RUN=1 just test-compiler
+
+update:
+    UPDATE=1 just test-compiler
+
 test-unit:
     uv run pytest
 

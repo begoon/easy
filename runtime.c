@@ -94,7 +94,7 @@ void $output(const char *fmt, ...)
     if (n > 1 || fmt[-1] == 'i')
         putchar('\n');
 }
-void $pause(double seconds)
+void pause(double seconds)
 {
     usleep(seconds * 1e6);
 }
