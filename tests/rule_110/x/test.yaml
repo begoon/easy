@@ -19,13 +19,15 @@ segment:
           node: IntegerLiteral
           token: <32|INTEGER tests/rule_110/test.easy:2:24>
           scope: PROGRAM:Rule110
-          type: INTEGER
+          type:
+            node: IntegerType
           value: 32
         lo:
           node: IntegerLiteral
           token: <1|INTEGER tests/rule_110/test.easy:2:22>
           scope: PROGRAM:Rule110
-          type: INTEGER
+          type:
+            node: IntegerType
           value: 1
         dynamic: false
   variables:
@@ -45,13 +47,15 @@ segment:
             node: IntegerLiteral
             token: <32|INTEGER tests/rule_110/test.easy:2:24>
             scope: PROGRAM:Rule110
-            type: INTEGER
+            type:
+              node: IntegerType
             value: 32
           lo:
             node: IntegerLiteral
             token: <1|INTEGER tests/rule_110/test.easy:2:22>
             scope: PROGRAM:Rule110
-            type: INTEGER
+            type:
+              node: IntegerType
             value: 1
           dynamic: false
     - node: DECLARE
@@ -98,13 +102,15 @@ segment:
                   node: IntegerLiteral
                   token: <32|INTEGER tests/rule_110/test.easy:2:24>
                   scope: PROGRAM:Rule110
-                  type: INTEGER
+                  type:
+                    node: IntegerType
                   value: 32
                 lo:
                   node: IntegerLiteral
                   token: <1|INTEGER tests/rule_110/test.easy:2:22>
                   scope: PROGRAM:Rule110
-                  type: INTEGER
+                  type:
+                    node: IntegerType
                   value: 1
                 dynamic: false
         subroutines: []
@@ -122,7 +128,8 @@ segment:
               node: IntegerLiteral
               token: <1|INTEGER tests/rule_110/test.easy:11:14>
               scope: PROGRAM:Rule110.PROCEDURE:step
-              type: INTEGER
+              type:
+                node: IntegerType
               value: 1
             do:
               node: Segment
@@ -153,7 +160,8 @@ segment:
                     node: IntegerLiteral
                     token: <0|INTEGER tests/rule_110/test.easy:11:39>
                     scope: PROGRAM:Rule110.PROCEDURE:step
-                    type: INTEGER
+                    type:
+                      node: IntegerType
                     value: 0
             by:
             to:
@@ -176,7 +184,8 @@ segment:
               node: IntegerLiteral
               token: <1|INTEGER tests/rule_110/test.easy:13:14>
               scope: PROGRAM:Rule110.PROCEDURE:step
-              type: INTEGER
+              type:
+                node: IntegerType
               value: 1
             do:
               node: Segment
@@ -222,7 +231,8 @@ segment:
                     node: BinaryOperation
                     token: <-|SYMBOL tests/rule_110/test.easy:18:18>
                     scope: PROGRAM:Rule110.PROCEDURE:step
-                    type: <class 'type'>
+                    type:
+                      node: IntegerType
                     operation: '-'
                     left:
                       node: VariableReference
@@ -234,7 +244,8 @@ segment:
                       node: IntegerLiteral
                       token: <1|INTEGER tests/rule_110/test.easy:18:20>
                       scope: PROGRAM:Rule110.PROCEDURE:step
-                      type: INTEGER
+                      type:
+                        node: IntegerType
                       value: 1
                 - node: IF
                   token: <IF|KEYWORD tests/rule_110/test.easy:19:7>
@@ -255,7 +266,8 @@ segment:
                       node: IntegerLiteral
                       token: <1|INTEGER tests/rule_110/test.easy:19:14>
                       scope: PROGRAM:Rule110.PROCEDURE:step
-                      type: INTEGER
+                      type:
+                        node: IntegerType
                       value: 1
                   then_branch:
                     node: Segment
@@ -340,7 +352,8 @@ segment:
                     node: BinaryOperation
                     token: <+|SYMBOL tests/rule_110/test.easy:24:18>
                     scope: PROGRAM:Rule110.PROCEDURE:step
-                    type: <class 'type'>
+                    type:
+                      node: IntegerType
                     operation: +
                     left:
                       node: VariableReference
@@ -352,7 +365,8 @@ segment:
                       node: IntegerLiteral
                       token: <1|INTEGER tests/rule_110/test.easy:24:20>
                       scope: PROGRAM:Rule110.PROCEDURE:step
-                      type: INTEGER
+                      type:
+                        node: IntegerType
                       value: 1
                 - node: IF
                   token: <IF|KEYWORD tests/rule_110/test.easy:25:7>
@@ -396,7 +410,8 @@ segment:
                           node: IntegerLiteral
                           token: <1|INTEGER tests/rule_110/test.easy:25:30>
                           scope: PROGRAM:Rule110.PROCEDURE:step
-                          type: INTEGER
+                          type:
+                            node: IntegerType
                           value: 1
                   else_branch:
                 - node: SET
@@ -435,13 +450,15 @@ segment:
                     node: BinaryOperation
                     token: <+|SYMBOL tests/rule_110/test.easy:28:25>
                     scope: PROGRAM:Rule110.PROCEDURE:step
-                    type: <class 'type'>
+                    type:
+                      node: IntegerType
                     operation: +
                     left:
                       node: BinaryOperation
                       token: <+|SYMBOL tests/rule_110/test.easy:28:21>
                       scope: PROGRAM:Rule110.PROCEDURE:step
-                      type: <class 'type'>
+                      type:
+                        node: IntegerType
                       operation: +
                       left:
                         node: VariableReference
@@ -468,7 +485,8 @@ segment:
                     node: BoolLiteral
                     token: <TRUE|KEYWORD tests/rule_110/test.easy:30:14>
                     scope: PROGRAM:Rule110.PROCEDURE:step
-                    type: BOOLEAN
+                    type:
+                      node: BooleanType
                     value: true
                   cases:
                     -   - node: BinaryOperation
@@ -486,7 +504,8 @@ segment:
                             node: IntegerLiteral
                             token: <2|INTEGER tests/rule_110/test.easy:31:19>
                             scope: PROGRAM:Rule110.PROCEDURE:step
-                            type: INTEGER
+                            type:
+                              node: IntegerType
                             value: 2
                         - node: Segment
                           token: <SET|KEYWORD tests/rule_110/test.easy:31:23>
@@ -521,7 +540,8 @@ segment:
                                 token: <1|INTEGER 
                                   tests/rule_110/test.easy:31:38>
                                 scope: PROGRAM:Rule110.PROCEDURE:step
-                                type: INTEGER
+                                type:
+                                  node: IntegerType
                                 value: 1
                     -   - node: BinaryOperation
                           token: <||SYMBOL tests/rule_110/test.easy:32:21>
@@ -544,7 +564,8 @@ segment:
                               node: IntegerLiteral
                               token: <0|INTEGER tests/rule_110/test.easy:32:19>
                               scope: PROGRAM:Rule110.PROCEDURE:step
-                              type: INTEGER
+                              type:
+                                node: IntegerType
                               value: 0
                           right:
                             node: BinaryOperation
@@ -562,7 +583,8 @@ segment:
                               node: IntegerLiteral
                               token: <3|INTEGER tests/rule_110/test.easy:32:27>
                               scope: PROGRAM:Rule110.PROCEDURE:step
-                              type: INTEGER
+                              type:
+                                node: IntegerType
                               value: 3
                         - node: Segment
                           token: <SET|KEYWORD tests/rule_110/test.easy:32:31>
@@ -597,7 +619,8 @@ segment:
                                 token: <0|INTEGER 
                                   tests/rule_110/test.easy:32:46>
                                 scope: PROGRAM:Rule110.PROCEDURE:step
-                                type: INTEGER
+                                type:
+                                  node: IntegerType
                                 value: 0
                     -   - 
                         - node: Segment
@@ -628,7 +651,8 @@ segment:
                                   token: <1|INTEGER 
                                     tests/rule_110/test.easy:33:27>
                                   scope: PROGRAM:Rule110.PROCEDURE:step
-                                  type: INTEGER
+                                  type:
+                                    node: IntegerType
                                   value: 1
                               then_branch:
                                 node: Segment
@@ -666,7 +690,8 @@ segment:
                                       token: <1|INTEGER 
                                         tests/rule_110/test.easy:33:49>
                                       scope: PROGRAM:Rule110.PROCEDURE:step
-                                      type: INTEGER
+                                      type:
+                                        node: IntegerType
                                       value: 1
                               else_branch:
                                 node: Segment
@@ -762,7 +787,8 @@ segment:
               node: IntegerLiteral
               token: <1|INTEGER tests/rule_110/test.easy:42:14>
               scope: PROGRAM:Rule110.PROCEDURE:print
-              type: INTEGER
+              type:
+                node: IntegerType
               value: 1
             do:
               node: Segment
@@ -799,7 +825,8 @@ segment:
                       node: IntegerLiteral
                       token: <1|INTEGER tests/rule_110/test.easy:43:19>
                       scope: PROGRAM:Rule110.PROCEDURE:print
-                      type: INTEGER
+                      type:
+                        node: IntegerType
                       value: 1
                   then_branch:
                     node: Segment
@@ -866,7 +893,8 @@ segment:
         node: IntegerLiteral
         token: <32|INTEGER tests/rule_110/test.easy:48:12>
         scope: PROGRAM:Rule110
-        type: INTEGER
+        type:
+          node: IntegerType
         value: 32
     - node: SET
       token: <SET|KEYWORD tests/rule_110/test.easy:51:3>
@@ -893,7 +921,8 @@ segment:
                   - node: BinaryOperation
                     token: <N|IDENT tests/rule_110/test.easy:51:15>
                     scope: PROGRAM:Rule110
-                    type: <class 'type'>
+                    type:
+                      node: IntegerType
                     operation: /
                     left:
                       node: VariableReference
@@ -905,13 +934,15 @@ segment:
                       node: IntegerLiteral
                       token: <2|INTEGER tests/rule_110/test.easy:51:17>
                       scope: PROGRAM:Rule110
-                      type: INTEGER
+                      type:
+                        node: IntegerType
                       value: 2
       expression:
         node: IntegerLiteral
         token: <1|INTEGER tests/rule_110/test.easy:51:24>
         scope: PROGRAM:Rule110
-        type: INTEGER
+        type:
+          node: IntegerType
         value: 1
     - node: CALL
       token: <CALL|KEYWORD tests/rule_110/test.easy:53:3>
@@ -931,7 +962,8 @@ segment:
         node: IntegerLiteral
         token: <1|INTEGER tests/rule_110/test.easy:55:12>
         scope: PROGRAM:Rule110
-        type: INTEGER
+        type:
+          node: IntegerType
         value: 1
       do:
         node: Segment
@@ -956,6 +988,7 @@ segment:
         node: IntegerLiteral
         token: <10|INTEGER tests/rule_110/test.easy:55:17>
         scope: PROGRAM:Rule110
-        type: INTEGER
+        type:
+          node: IntegerType
         value: 10
       condition:

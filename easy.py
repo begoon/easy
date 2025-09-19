@@ -938,6 +938,12 @@ class VariableReference(Entity):
         _, reference = expand_variable_reference(variable, self)
         return reference
 
+    @property
+    def type(self) -> Type:
+        variable = discover_variable(self)
+        type, _ = expand_variable_reference(variable, self)
+        return type
+
 
 @dataclass
 class Variable(Entity):
@@ -965,7 +971,9 @@ class Variable(Entity):
 
 @dataclass
 class BuiltinLiteral(Expression):
-    pass
+
+    def format(self) -> str:
+        raise NotImplementedError(f"format() not implemented for {self.__class__.__name__} at {self.token}")
 
 
 @dataclass
@@ -1578,7 +1586,7 @@ class Parser:
         operations = ("+", "-")
         while operation := self.accept(operations):
             right = self.expression_MULTIPLYING()
-            left = BinaryOperation(operation, self.scope(), type, operation.value, left, right)
+            left = BinaryOperation(operation, self.scope(), left.type, operation.value, left, right)
         return left
 
     def expression_MULTIPLYING(self) -> Expression:
@@ -1586,7 +1594,7 @@ class Parser:
         left = self.expression_FUNCTION_CALL()
         while operation := self.accept(("*", "/", "MOD")):
             right = self.expression_FUNCTION_CALL()
-            left = BinaryOperation(token, self.scope(), type, operation.value, left, right)
+            left = BinaryOperation(token, self.scope(), left.type, operation.value, left, right)
         return left
 
     def expression_FUNCTION_CALL(self) -> Expression | FunctionCall:
@@ -1611,10 +1619,10 @@ class Parser:
         token = self.current()
         if token.type == "INTEGER":
             token = self.eat(token.type)
-            return IntegerLiteral(token, self.scope(), token.type, int(token.value))
+            return IntegerLiteral(token, self.scope(), IntegerType(), int(token.value))
         if token.type == "REAL":
             token = self.eat(token.type)
-            return RealLiteral(token, self.scope(), token.type, float(token.value))
+            return RealLiteral(token, self.scope(), RealType(), float(token.value))
         if token.type == "STRING":
             token = self.eat(token.type)
 
@@ -1647,7 +1655,7 @@ class Parser:
             return expression
         if token.value in ("TRUE", "FALSE"):
             token = self.eat(token.value)
-            return BoolLiteral(token, self.scope(), "BOOLEAN", token.value == "TRUE")
+            return BoolLiteral(token, self.scope(), BooleanType(), token.value == "TRUE")
         if token.type == "IDENT":
             variable = self.variable_reference()
             return variable

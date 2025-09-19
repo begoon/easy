@@ -126,6 +126,8 @@ def process(test: Path) -> None:
 
     skip_run = expected_c.exists() and os.getenv("SKIP_RUN")
 
+    cc_flags = ["-Wall", "-Wextra", "-Werror", "-std=c23"]
+
     expected_output = x.with_suffix(".output")
     if expected_output.exists() and not skip_run:
         created_output = test.with_suffix(".output")
@@ -135,7 +137,6 @@ def process(test: Path) -> None:
             exe = test.with_suffix(".exe")
             removals.append(exe)
 
-            cc_flags = ["-Wall", "-Wextra", "-Werror"]
             run(["clang", *cc_flags, test.with_suffix(".c"), "-I", ".", "-o", exe])
 
             cmd = [exe, ">" + str(test.with_suffix(".output"))]
@@ -153,7 +154,6 @@ def process(test: Path) -> None:
             obj = test.with_suffix(".o")
             removals.append(obj)
 
-            cc_flags = ["-Wall", "-Wextra", "-Werror"]
             run(["clang", *cc_flags, test.with_suffix(".c"), "-I", ".", "-c", "-o", obj])
 
     for removal in removals:

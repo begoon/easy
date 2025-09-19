@@ -30,7 +30,8 @@ segment:
         node: IntegerLiteral
         token: <100|INTEGER tests/hw/test.easy:3:10>
         scope: PROGRAM:hw
-        type: INTEGER
+        type:
+          node: IntegerType
         value: 100
     - node: OUTPUT
       token: <OUTPUT|KEYWORD tests/hw/test.easy:4:1>
@@ -64,7 +65,8 @@ segment:
         node: IntegerLiteral
         token: <0|INTEGER tests/hw/test.easy:5:10>
         scope: PROGRAM:hw
-        type: INTEGER
+        type:
+          node: IntegerType
         value: 0
       do:
         node: Segment
@@ -88,7 +90,8 @@ segment:
         node: IntegerLiteral
         token: <10|INTEGER tests/hw/test.easy:5:15>
         scope: PROGRAM:hw
-        type: INTEGER
+        type:
+          node: IntegerType
         value: 10
       condition:
     - node: EXIT

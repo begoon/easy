@@ -1,0 +1,6 @@
+PROGRAM Eval:
+  DECLARE a INTEGER;
+
+  SET a := 1 + 42*3;
+  OUTPUT a;
+END PROGRAM Eval;
