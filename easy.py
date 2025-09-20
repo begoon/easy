@@ -1,13 +1,15 @@
 import io
+import json
 import re
 import sys
 from dataclasses import dataclass, fields, is_dataclass
 from pathlib import Path
 from typing import Any, Mapping, Optional, Tuple, Union, cast
 
-from ruamel.yaml import YAML
-
 from peg.parser import PEGParser
+
+# from ruamel.yaml import YAML
+
 
 #
 
@@ -18,7 +20,10 @@ def yamlizer(root: Any) -> str:
         if seen is None:
             seen = set()
 
-        if obj is None or isinstance(obj, (bool, int, float, str)):
+        if obj is None:
+            return ""
+
+        if isinstance(obj, (bool, int, float, str)):
             return obj
 
         oid = id(obj)
@@ -61,11 +66,13 @@ def yamlizer(root: Any) -> str:
 
     data = walker(cast(None, root))
 
-    yaml = YAML()
-    yaml.default_flow_style = False
-    yaml.indent(mapping=2, sequence=4, offset=2)
+    # yaml = YAML()
+    # yaml.default_flow_style = False
+    # yaml.width = 256
+    # yaml.indent(mapping=2, sequence=4, offset=2)
     stream = io.StringIO()
-    yaml.dump(data, stream)
+    # yaml.dump(data, stream)
+    json.dump(data, stream, indent=2)
     return stream.getvalue()
 
 
@@ -180,7 +187,7 @@ class Token:
         if self.type != self.value:
             v += f"|{self.type}"
         input = self.context.text
-        v += f"|{input.filename}:{self.line}:{self.character}"
+        v += f"|{input.filename}:{self.line}:{self.character}>"
         return v
 
     def __repr__(self) -> str:
@@ -605,9 +612,6 @@ class FIELD(Entity):
     name: str
     type: Type
 
-    def c(self) -> str:
-        return f"{self.type.name} {self.name}"
-
 
 @dataclass
 class STRUCTURE(Node):
@@ -701,7 +705,7 @@ class IF(Statement):
 class FOR(Statement):
     variable: "VariableReference"
     init: Expression
-    do: Segment
+    segment: Segment
     by: Optional[Expression] = None
     to: Optional[Expression] = None
     condition: Optional[Expression] = None
@@ -710,7 +714,7 @@ class FOR(Statement):
         v = [
             f"for ({self.variable.c()} = {self.init.c()}; {self.format_condition()}; {self.step()})",
             "{",
-            indent(self.do.c(), 1),
+            indent(self.segment.c(), 1),
             "}",
         ]
         return emit(v)
@@ -992,7 +996,7 @@ class RealLiteral(BuiltinLiteral):
     value: float
 
     def c(self) -> str:
-        return str(self.value)
+        return str(self.value).replace("-0", "-")
 
     def format(self) -> str:
         return "r"
@@ -1412,11 +1416,11 @@ class Parser:
         to = self.accept("TO") and self.expression()
         condition = self.accept("WHILE") and self.expression()
         self.eat("DO")
-        do = self.segment()
+        segment = self.segment()
         self.eat("END")
         self.eat("FOR")
         self.eat(";")
-        return FOR(token, self.scope(), variable, init, do, by, to, condition)
+        return FOR(token, self.scope(), variable, init, segment, by, to, condition)
 
     def select_statement(self) -> SELECT:
         token = self.eat("SELECT")
@@ -1547,7 +1551,7 @@ class Parser:
         left = self.expression_AND()
         while operation := self.accept(("|", "XOR")):
             right = self.expression_AND()
-            left = BinaryOperation(operation, self.scope(), "BOOLEAN", operation.value, left, right)
+            left = BinaryOperation(operation, self.scope(), BooleanType(), operation.value, left, right)
         return left
 
     def expression_AND(self) -> Expression:
@@ -1555,7 +1559,7 @@ class Parser:
         left = self.expression_NOT()
         while operation := self.accept("&"):
             right = self.expression_NOT()
-            left = BinaryOperation(token, self.scope(), "BOOLEAN", operation.value, left, right)
+            left = BinaryOperation(token, self.scope(), BooleanType(), operation.value, left, right)
         return left
 
     def expression_NOT(self) -> Expression:
@@ -1568,7 +1572,7 @@ class Parser:
         left = self.expression_CONCATENATION()
         while operation := self.accept(("<", ">", "=", "<=", ">=", "<>")):
             right = self.expression_CONCATENATION()
-            left = BinaryOperation(token, self.scope(), "BOOLEAN", operation.value, left, right)
+            left = BinaryOperation(token, self.scope(), BooleanType(), operation.value, left, right)
         return left
 
     def expression_CONCATENATION(self) -> Expression:
@@ -1579,7 +1583,7 @@ class Parser:
             parts.append(part)
         if len(parts) == 1:
             return parts[0]
-        return ConcatenationOperation(token, self.scope(), "STRING", parts)
+        return ConcatenationOperation(token, self.scope(), StringType(), parts)
 
     def expression_ADDING(self) -> Expression:
         left = self.expression_MULTIPLYING()
@@ -1607,10 +1611,10 @@ class Parser:
             else:
                 arguments = []
             self.eat(")")
-            type = self.context.functions.get(name)
-            if type is None:
+            function = self.context.functions.get(name)
+            if function is None:
                 raise ParseError(f"undefined function '{name}'", token)
-            return FunctionCall(token, self.scope(), type, name, arguments)
+            return FunctionCall(token, self.scope(), function.type, name, arguments)
         return self.factor()
 
     def factor(
@@ -1921,8 +1925,8 @@ def run(args: list[str]) -> None:
         print(f"usage: {exe} <input.easy> [-c <output.c>] [-t] [-a] [-e]")
         print("  -c <output.c>  - specify output C file (default: input.c)")
         print("  -t             - generate tokens file (default: input.tokens)")
-        print("  -a             - generate YAML AST file (default: input.yaml)")
-        print("  -e             - generate PEG YAML AST file (default: input.peg.yaml)")
+        print("  -a             - generate JSON AST file (default: input.json)")
+        print("  -e             - generate PEG JSON AST file (default: input.peg.json)")
         print("  -s <output.s>  - generate symbols file (default: input.s)")
         sys.exit(1)
 
@@ -1950,14 +1954,14 @@ def run(args: list[str]) -> None:
         tokens_file.write_text("\n".join(format_token(t) for t in tokens) + "\n")
 
     if "-a" in args:
-        ast_file = input_file.with_suffix(".yaml")
+        ast_file = input_file.with_suffix(".json")
         ast_file.write_text(yamlizer(program))
 
     if "-e" in args:
         grammar = Path("peg/easy.peg").read_text()
         peg_ast = PEGParser(grammar, start="compilation").parse(source)
 
-        peg_ast_file = input_file.with_suffix(".peg.yaml")
+        peg_ast_file = input_file.with_suffix(".peg.json")
         peg_ast_file.write_text(yamlizer(peg_ast))
 
     output_s = Path(arg(args, "-s") or input_file.with_suffix(".s"))

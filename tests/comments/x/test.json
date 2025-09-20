@@ -1,0 +1,21 @@
+{
+  "node": "PROGRAM",
+  "token": "<PROGRAM|KEYWORD tests/comments/test.easy:1:1>",
+  "scope": "@",
+  "name": "Comments",
+  "segment": {
+    "node": "Segment",
+    "token": "<EXIT|KEYWORD tests/comments/test.easy:17:3>",
+    "scope": "PROGRAM:Comments",
+    "types": [],
+    "variables": [],
+    "subroutines": [],
+    "statements": [
+      {
+        "node": "EXIT",
+        "token": "<EXIT|KEYWORD tests/comments/test.easy:17:3>",
+        "scope": "PROGRAM:Comments"
+      }
+    ]
+  }
+}

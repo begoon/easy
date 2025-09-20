@@ -1,0 +1,86 @@
+[
+  {
+    "type": "program_segment",
+    "main": {
+      "type": "main_program",
+      "name": "Structure",
+      "body": {
+        "type": "segment_body",
+        "type_definitions": [
+          {
+            "type": "type_definition",
+            "name": "T",
+            "def": {
+              "type": "type",
+              "structured_type": {
+                "type": "structured_type",
+                "fields": {
+                  "type": "field_list",
+                  "head": {
+                    "type": "field",
+                    "name": "a",
+                    "t": {
+                      "type": "type",
+                      "basic_type": "INTEGER"
+                    }
+                  },
+                  "tail": {
+                    "type": "field_list",
+                    "head": {
+                      "type": "field",
+                      "name": "b",
+                      "t": {
+                        "type": "type",
+                        "basic_type": "STRING"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        ],
+        "variable_declarations": [
+          {
+            "type": "variable_declaration",
+            "names": "t",
+            "t": {
+              "type": "type",
+              "ref": {
+                "type": "type_identifier",
+                "name": "T"
+              }
+            }
+          }
+        ],
+        "statements": [
+          {
+            "type": "assignment_statement",
+            "targets": [
+              {
+                "type": "target",
+                "var": {
+                  "type": "variable",
+                  "base": "t",
+                  "parts": [
+                    {
+                      "field": "a"
+                    }
+                  ]
+                }
+              }
+            ],
+            "expr": "1"
+          },
+          {
+            "type": "output_statement",
+            "list": [
+              "\".\""
+            ]
+          }
+        ]
+      },
+      "end_name": "Structure"
+    }
+  }
+]

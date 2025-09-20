@@ -1,0 +1,144 @@
+{
+  "node": "PROGRAM",
+  "token": "<PROGRAM|KEYWORD tests/hw/test.easy:1:1>",
+  "scope": "@",
+  "name": "hw",
+  "segment": {
+    "node": "Segment",
+    "token": "<DECLARE|KEYWORD tests/hw/test.easy:2:1>",
+    "scope": "PROGRAM:hw",
+    "types": [],
+    "variables": [
+      {
+        "node": "DECLARE",
+        "token": "<DECLARE|KEYWORD tests/hw/test.easy:2:1>",
+        "scope": "PROGRAM:hw",
+        "names": [
+          "a"
+        ],
+        "type": {
+          "node": "IntegerType"
+        }
+      }
+    ],
+    "subroutines": [],
+    "statements": [
+      {
+        "node": "SET",
+        "token": "<SET|KEYWORD tests/hw/test.easy:3:1>",
+        "scope": "PROGRAM:hw",
+        "target": [
+          {
+            "node": "VariableReference",
+            "token": "<a|IDENT tests/hw/test.easy:3:5>",
+            "scope": "PROGRAM:hw",
+            "name": "a",
+            "parts": []
+          }
+        ],
+        "expression": {
+          "node": "IntegerLiteral",
+          "token": "<100|INTEGER tests/hw/test.easy:3:10>",
+          "scope": "PROGRAM:hw",
+          "type": {
+            "node": "IntegerType"
+          },
+          "value": 100
+        }
+      },
+      {
+        "node": "OUTPUT",
+        "token": "<OUTPUT|KEYWORD tests/hw/test.easy:4:1>",
+        "scope": "PROGRAM:hw",
+        "arguments": [
+          {
+            "node": "ConcatenationOperation",
+            "token": "<a|IDENT tests/hw/test.easy:4:18>",
+            "scope": "PROGRAM:hw",
+            "type": {
+              "node": "StringType",
+              "initial": ""
+            },
+            "parts": [
+              {
+                "node": "VariableReference",
+                "token": "<abc |STRING tests/hw/test.easy:4:8>",
+                "scope": "",
+                "name": "$0",
+                "parts": []
+              },
+              {
+                "node": "VariableReference",
+                "token": "<a|IDENT tests/hw/test.easy:4:18>",
+                "scope": "PROGRAM:hw",
+                "name": "a",
+                "parts": []
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "node": "FOR",
+        "token": "<FOR|KEYWORD tests/hw/test.easy:5:1>",
+        "scope": "PROGRAM:hw",
+        "variable": {
+          "node": "VariableReference",
+          "token": "<a|IDENT tests/hw/test.easy:5:5>",
+          "scope": "PROGRAM:hw",
+          "name": "a",
+          "parts": []
+        },
+        "init": {
+          "node": "IntegerLiteral",
+          "token": "<0|INTEGER tests/hw/test.easy:5:10>",
+          "scope": "PROGRAM:hw",
+          "type": {
+            "node": "IntegerType"
+          },
+          "value": 0
+        },
+        "segment": {
+          "node": "Segment",
+          "token": "<OUTPUT|KEYWORD tests/hw/test.easy:6:3>",
+          "scope": "PROGRAM:hw",
+          "types": [],
+          "variables": [],
+          "subroutines": [],
+          "statements": [
+            {
+              "node": "OUTPUT",
+              "token": "<OUTPUT|KEYWORD tests/hw/test.easy:6:3>",
+              "scope": "PROGRAM:hw",
+              "arguments": [
+                {
+                  "node": "VariableReference",
+                  "token": "<a|IDENT tests/hw/test.easy:6:10>",
+                  "scope": "PROGRAM:hw",
+                  "name": "a",
+                  "parts": []
+                }
+              ]
+            }
+          ]
+        },
+        "by": "",
+        "to": {
+          "node": "IntegerLiteral",
+          "token": "<10|INTEGER tests/hw/test.easy:5:15>",
+          "scope": "PROGRAM:hw",
+          "type": {
+            "node": "IntegerType"
+          },
+          "value": 10
+        },
+        "condition": ""
+      },
+      {
+        "node": "EXIT",
+        "token": "<EXIT|KEYWORD tests/hw/test.easy:8:1>",
+        "scope": "PROGRAM:hw"
+      }
+    ]
+  }
+}

@@ -4,6 +4,7 @@ __pycache__/
 tests/**/*.tokens
 tests/**/*.meta
 tests/**/*.yaml
+tests/**/*.json
 tests/**/*.c
 tests/**/*.s
 tests/**/*.exe
@@ -15,3 +16,4 @@ tests/**/*.output
 
 /life
 life.c
+node_modules

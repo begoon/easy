@@ -1,0 +1,164 @@
+[
+  {
+    "type": "program_segment",
+    "main": {
+      "type": "main_program",
+      "name": "AssignmentSubscript",
+      "body": {
+        "type": "segment_body",
+        "variable_declarations": [
+          {
+            "type": "variable_declaration",
+            "names": "p",
+            "t": {
+              "type": "type",
+              "structured_type": {
+                "type": "structured_type",
+                "fields": {
+                  "type": "field_list",
+                  "head": {
+                    "type": "field",
+                    "name": "x",
+                    "t": {
+                      "type": "type",
+                      "arrayed_type": {
+                        "type": "arrayed_type",
+                        "lo": "0",
+                        "hi": "1",
+                        "element_type": {
+                          "type": "type",
+                          "arrayed_type": {
+                            "type": "arrayed_type",
+                            "lo": "0",
+                            "hi": "1",
+                            "element_type": {
+                              "type": "type",
+                              "arrayed_type": {
+                                "type": "arrayed_type",
+                                "lo": "0",
+                                "hi": "100",
+                                "element_type": {
+                                  "type": "type",
+                                  "basic_type": "INTEGER"
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "tail": {
+                    "type": "field_list",
+                    "head": {
+                      "type": "field",
+                      "name": "y",
+                      "t": {
+                        "type": "type",
+                        "basic_type": "INTEGER"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        ],
+        "statements": [
+          {
+            "type": "assignment_statement",
+            "targets": [
+              {
+                "type": "target",
+                "var": {
+                  "type": "variable",
+                  "base": "p",
+                  "parts": [
+                    {
+                      "field": "y"
+                    }
+                  ]
+                }
+              }
+            ],
+            "expr": "123"
+          },
+          {
+            "type": "assignment_statement",
+            "targets": [
+              {
+                "type": "target",
+                "var": {
+                  "type": "variable",
+                  "base": "p",
+                  "parts": [
+                    {
+                      "field": "x"
+                    },
+                    {
+                      "index": "0"
+                    },
+                    {
+                      "index": "1"
+                    },
+                    {
+                      "index": "100"
+                    }
+                  ]
+                }
+              }
+            ],
+            "expr": {
+              "type": "add_expr",
+              "head": {
+                "type": "variable",
+                "base": "p",
+                "parts": [
+                  {
+                    "field": "y"
+                  }
+                ]
+              },
+              "op": "+",
+              "rhs": "321"
+            }
+          },
+          {
+            "type": "output_statement",
+            "list": [
+              {
+                "type": "variable",
+                "base": "p",
+                "parts": [
+                  {
+                    "field": "x"
+                  },
+                  {
+                    "index": "0"
+                  },
+                  {
+                    "index": "1"
+                  },
+                  {
+                    "index": "100"
+                  }
+                ]
+              },
+              "\" \"",
+              {
+                "type": "variable",
+                "base": "p",
+                "parts": [
+                  {
+                    "field": "y"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "end_name": "AssignmentSubscript"
+    }
+  }
+]

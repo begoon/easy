@@ -22,7 +22,7 @@ struct
 STR $0 = { .data = "..." };
 int main()
 {
-    *(typeof(b.data[0].a.data[0]) *)$ref(((typeof(b.data[0]) *)$ref(b.data, 1, 0, 25, sizeof(typeof(b.data[0])), "<1|INTEGER|tests/array1/test.easy:15:9"))->a.data, 2, 0, 80, sizeof(typeof(b.data[0].a.data[0])), "<2|INTEGER|tests/array1/test.easy:15:14") = *(typeof(b.data[0].a.data[0]) *)$ref(((typeof(b.data[0]) *)$ref(b.data, 2, 0, 25, sizeof(typeof(b.data[0])), "<2|INTEGER|tests/array1/test.easy:15:22"))->a.data, 1, 0, 80, sizeof(typeof(b.data[0].a.data[0])), "<1|INTEGER|tests/array1/test.easy:15:27");
+    *(typeof(b.data[0].a.data[0]) *)$ref(((typeof(b.data[0]) *)$ref(b.data, 1, 0, 25, sizeof(typeof(b.data[0])), "<1|INTEGER|tests/array1/test.easy:15:9>"))->a.data, 2, 0, 80, sizeof(typeof(b.data[0].a.data[0])), "<2|INTEGER|tests/array1/test.easy:15:14>") = *(typeof(b.data[0].a.data[0]) *)$ref(((typeof(b.data[0]) *)$ref(b.data, 2, 0, 25, sizeof(typeof(b.data[0])), "<2|INTEGER|tests/array1/test.easy:15:22>"))->a.data, 1, 0, 80, sizeof(typeof(b.data[0].a.data[0])), "<1|INTEGER|tests/array1/test.easy:15:27>");
     $output("A", $0);
     exit(0);
 }

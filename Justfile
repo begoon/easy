@@ -1,5 +1,12 @@
 default: test-compiler
 
+ci:
+    just COMPILER=python
+    just COMPILER=python-ext
+    just COMPILER=ts
+
+export COMPILER := "python"
+
 quick:
     SKIP_RUN=1 just test-compiler
 
@@ -10,7 +17,7 @@ test-unit:
     uv run pytest
 
 test-compiler:
-    uv run python test.py
+    uv run python test.py --compiler {{ COMPILER }}
 
 one NAME:
     python3 easy.py tests/{{NAME}}/test.easy && cc -std=c23 tests/{{NAME}}/test.c -o tests/{{NAME}}/test.exe -I . && ./tests/{{NAME}}/test.exe

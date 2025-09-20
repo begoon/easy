@@ -1,5 +1,6 @@
 import itertools
 import os
+import re
 import subprocess
 import sys
 import traceback
@@ -7,7 +8,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 
 import easy
-from easy import arg
+from easy import arg, flag
 
 TESTS_FOLDER = Path("tests")
 
@@ -78,19 +79,33 @@ def process(test: Path) -> None:
 
         flags.append("-t")
 
-    expected_ast = x.with_suffix(".yaml")
+    expected_ast = x.with_suffix(".json")
     if expected_ast.exists():
-        created_ast = test.with_suffix(".yaml")
+        created_ast = test.with_suffix(".json")
         removals.append(created_ast)
 
         flags.append("-a")
 
-    expected_peg_ast = x.with_suffix(".peg.yaml")
-    if expected_peg_ast.exists():
-        created_peg_ast = test.with_suffix(".peg.yaml")
-        removals.append(created_peg_ast)
+    compiler = arg(sys.argv, "--compiler") or os.getenv("COMPILER")
+    if not compiler:
+        raise Exception("COMPILER not set")
 
-        flags.append("-e")
+    if compiler != "ts":
+        expected_peg_ast = x.with_suffix(".peg.json")
+        if expected_peg_ast.exists():
+            created_peg_ast = test.with_suffix(".peg.json")
+            removals.append(created_peg_ast)
+
+            flags.append("-e")
+
+    if compiler == "python":
+        easy.run(["easy.py", str(program), *flags])
+    elif compiler == "python-ext":
+        run(["python", "easy.py", program, *flags])
+    elif compiler == "ts":
+        run(["bun", "easyc.ts", str(program), *flags])
+    else:
+        raise Exception(f"unknown compiler: {compiler}")
 
     expected_c = x.with_suffix(".c")
     if expected_c.exists():
@@ -106,17 +121,15 @@ def process(test: Path) -> None:
 
         flags.extend(["-s", str(created_s)])
 
-    # run(["python", "easy.py", program, *flags])
-    easy.run(["easy.py", str(program), *flags])
-
     if expected_tokens.exists():
         diff(expected_tokens, created_tokens)
 
     if expected_ast.exists():
-        diff(expected_ast, created_ast)
+        diff(expected_ast, created_ast, yaml=True)
 
-    if expected_peg_ast.exists():
-        diff(expected_peg_ast, created_peg_ast)
+    if "-e" in flags:
+        if expected_peg_ast.exists():
+            diff(expected_peg_ast, created_peg_ast)
 
     if expected_c.exists():
         diff(expected_c, created_c)
@@ -168,7 +181,7 @@ RED = "\033[91m"
 NC = "\033[0m"
 
 
-def diff(expected_file: Path, created_file: Path) -> None:
+def diff(expected_file: Path, created_file: Path, yaml: bool = False) -> None:
     expected_lines = expected_file.read_text().splitlines()
     created_lines = created_file.read_text().splitlines()
 
@@ -200,18 +213,18 @@ def diff(expected_file: Path, created_file: Path) -> None:
             exit(1)
 
 
-verbose = (v := os.getenv("VERBOSE", arg(sys.argv, "--verbose"))) and int(v) or 0
+verbose = (v := os.getenv("VERBOSE", flag(sys.argv, "--verbose"))) and int(v) or 0
 
 update = "--update" in sys.argv or "-U" in sys.argv or os.getenv("UPDATE")
 
 
-def flag(argv: list[str], name: str) -> int | None:
-    return argv.index(name) if name in argv else None
+# def flag(argv: list[str], name: str) -> int | None:
+#     return argv.index(name) if name in argv else None
 
 
-def arg(argv: list[str], name: str) -> str | None:
-    i = flag(argv, name)
-    return argv[i + 1] if i is not None and i + 1 < len(argv) else None
+# def arg(argv: list[str], name: str) -> str | None:
+#     i = flag(argv, name)
+#     return argv[i + 1] if i is not None and i + 1 < len(argv) else None
 
 
 if __name__ == "__main__":

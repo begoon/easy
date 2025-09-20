@@ -1,0 +1,1340 @@
+{
+  "node": "PROGRAM",
+  "token": "<PROGRAM|KEYWORD tests/rule_110/test.easy:1:1>",
+  "scope": "@",
+  "name": "Rule110",
+  "segment": {
+    "node": "Segment",
+    "token": "<TYPE|KEYWORD tests/rule_110/test.easy:2:3>",
+    "scope": "PROGRAM:Rule110",
+    "types": [
+      {
+        "node": "TYPEIS",
+        "token": "<TYPE|KEYWORD tests/rule_110/test.easy:2:3>",
+        "scope": "PROGRAM:Rule110",
+        "name": "Row",
+        "definition": {
+          "node": "ArrayType",
+          "type": {
+            "node": "IntegerType"
+          },
+          "hi": {
+            "node": "IntegerLiteral",
+            "token": "<32|INTEGER tests/rule_110/test.easy:2:24>",
+            "scope": "PROGRAM:Rule110",
+            "type": {
+              "node": "IntegerType"
+            },
+            "value": 32
+          },
+          "lo": {
+            "node": "IntegerLiteral",
+            "token": "<1|INTEGER tests/rule_110/test.easy:2:22>",
+            "scope": "PROGRAM:Rule110",
+            "type": {
+              "node": "IntegerType"
+            },
+            "value": 1
+          },
+          "dynamic": false
+        }
+      }
+    ],
+    "variables": [
+      {
+        "node": "DECLARE",
+        "token": "<DECLARE|KEYWORD tests/rule_110/test.easy:4:3>",
+        "scope": "PROGRAM:Rule110",
+        "names": [
+          "row"
+        ],
+        "type": {
+          "node": "AliasType",
+          "reference_name": "Row",
+          "reference_type": {
+            "node": "ArrayType",
+            "type": {
+              "node": "IntegerType"
+            },
+            "hi": {
+              "node": "IntegerLiteral",
+              "token": "<32|INTEGER tests/rule_110/test.easy:2:24>",
+              "scope": "PROGRAM:Rule110",
+              "type": {
+                "node": "IntegerType"
+              },
+              "value": 32
+            },
+            "lo": {
+              "node": "IntegerLiteral",
+              "token": "<1|INTEGER tests/rule_110/test.easy:2:22>",
+              "scope": "PROGRAM:Rule110",
+              "type": {
+                "node": "IntegerType"
+              },
+              "value": 1
+            },
+            "dynamic": false
+          }
+        }
+      },
+      {
+        "node": "DECLARE",
+        "token": "<DECLARE|KEYWORD tests/rule_110/test.easy:5:3>",
+        "scope": "PROGRAM:Rule110",
+        "names": [
+          "N",
+          "n",
+          "i"
+        ],
+        "type": {
+          "node": "IntegerType"
+        }
+      }
+    ],
+    "subroutines": [
+      {
+        "node": "PROCEDURE",
+        "token": "<PROCEDURE|KEYWORD tests/rule_110/test.easy:7:3>",
+        "scope": "PROGRAM:Rule110.PROCEDURE:step",
+        "name": "step",
+        "arguments": [],
+        "segment": {
+          "node": "Segment",
+          "token": "<DECLARE|KEYWORD tests/rule_110/test.easy:8:5>",
+          "scope": "PROGRAM:Rule110.PROCEDURE:step",
+          "types": [],
+          "variables": [
+            {
+              "node": "DECLARE",
+              "token": "<DECLARE|KEYWORD tests/rule_110/test.easy:8:5>",
+              "scope": "PROGRAM:Rule110.PROCEDURE:step",
+              "names": [
+                "i"
+              ],
+              "type": {
+                "node": "IntegerType"
+              }
+            },
+            {
+              "node": "DECLARE",
+              "token": "<DECLARE|KEYWORD tests/rule_110/test.easy:9:5>",
+              "scope": "PROGRAM:Rule110.PROCEDURE:step",
+              "names": [
+                "next"
+              ],
+              "type": {
+                "node": "AliasType",
+                "reference_name": "Row",
+                "reference_type": {
+                  "node": "ArrayType",
+                  "type": {
+                    "node": "IntegerType"
+                  },
+                  "hi": {
+                    "node": "IntegerLiteral",
+                    "token": "<32|INTEGER tests/rule_110/test.easy:2:24>",
+                    "scope": "PROGRAM:Rule110",
+                    "type": {
+                      "node": "IntegerType"
+                    },
+                    "value": 32
+                  },
+                  "lo": {
+                    "node": "IntegerLiteral",
+                    "token": "<1|INTEGER tests/rule_110/test.easy:2:22>",
+                    "scope": "PROGRAM:Rule110",
+                    "type": {
+                      "node": "IntegerType"
+                    },
+                    "value": 1
+                  },
+                  "dynamic": false
+                }
+              }
+            }
+          ],
+          "subroutines": [],
+          "statements": [
+            {
+              "node": "FOR",
+              "token": "<FOR|KEYWORD tests/rule_110/test.easy:11:5>",
+              "scope": "PROGRAM:Rule110.PROCEDURE:step",
+              "variable": {
+                "node": "VariableReference",
+                "token": "<i|IDENT tests/rule_110/test.easy:11:9>",
+                "scope": "PROGRAM:Rule110.PROCEDURE:step",
+                "name": "i",
+                "parts": []
+              },
+              "init": {
+                "node": "IntegerLiteral",
+                "token": "<1|INTEGER tests/rule_110/test.easy:11:14>",
+                "scope": "PROGRAM:Rule110.PROCEDURE:step",
+                "type": {
+                  "node": "IntegerType"
+                },
+                "value": 1
+              },
+              "segment": {
+                "node": "Segment",
+                "token": "<SET|KEYWORD tests/rule_110/test.easy:11:24>",
+                "scope": "PROGRAM:Rule110.PROCEDURE:step",
+                "types": [],
+                "variables": [],
+                "subroutines": [],
+                "statements": [
+                  {
+                    "node": "SET",
+                    "token": "<SET|KEYWORD tests/rule_110/test.easy:11:24>",
+                    "scope": "PROGRAM:Rule110.PROCEDURE:step",
+                    "target": [
+                      {
+                        "node": "VariableReference",
+                        "token": "<next|IDENT tests/rule_110/test.easy:11:28>",
+                        "scope": "PROGRAM:Rule110.PROCEDURE:step",
+                        "name": "next",
+                        "parts": [
+                          {
+                            "node": "VariableSubscript",
+                            "token": "<i|IDENT tests/rule_110/test.easy:11:33>",
+                            "value": {
+                              "node": "VariableReference",
+                              "token": "<i|IDENT tests/rule_110/test.easy:11:33>",
+                              "scope": "PROGRAM:Rule110.PROCEDURE:step",
+                              "name": "i",
+                              "parts": []
+                            }
+                          }
+                        ]
+                      }
+                    ],
+                    "expression": {
+                      "node": "IntegerLiteral",
+                      "token": "<0|INTEGER tests/rule_110/test.easy:11:39>",
+                      "scope": "PROGRAM:Rule110.PROCEDURE:step",
+                      "type": {
+                        "node": "IntegerType"
+                      },
+                      "value": 0
+                    }
+                  }
+                ]
+              },
+              "by": "",
+              "to": {
+                "node": "VariableReference",
+                "token": "<N|IDENT tests/rule_110/test.easy:11:19>",
+                "scope": "PROGRAM:Rule110.PROCEDURE:step",
+                "name": "N",
+                "parts": []
+              },
+              "condition": ""
+            },
+            {
+              "node": "FOR",
+              "token": "<FOR|KEYWORD tests/rule_110/test.easy:13:5>",
+              "scope": "PROGRAM:Rule110.PROCEDURE:step",
+              "variable": {
+                "node": "VariableReference",
+                "token": "<i|IDENT tests/rule_110/test.easy:13:9>",
+                "scope": "PROGRAM:Rule110.PROCEDURE:step",
+                "name": "i",
+                "parts": []
+              },
+              "init": {
+                "node": "IntegerLiteral",
+                "token": "<1|INTEGER tests/rule_110/test.easy:13:14>",
+                "scope": "PROGRAM:Rule110.PROCEDURE:step",
+                "type": {
+                  "node": "IntegerType"
+                },
+                "value": 1
+              },
+              "segment": {
+                "node": "Segment",
+                "token": "<DECLARE|KEYWORD tests/rule_110/test.easy:14:7>",
+                "scope": "PROGRAM:Rule110.PROCEDURE:step",
+                "types": [],
+                "variables": [
+                  {
+                    "node": "DECLARE",
+                    "token": "<DECLARE|KEYWORD tests/rule_110/test.easy:14:7>",
+                    "scope": "PROGRAM:Rule110.PROCEDURE:step",
+                    "names": [
+                      "left",
+                      "c",
+                      "right"
+                    ],
+                    "type": {
+                      "node": "IntegerType"
+                    }
+                  },
+                  {
+                    "node": "DECLARE",
+                    "token": "<DECLARE|KEYWORD tests/rule_110/test.easy:15:7>",
+                    "scope": "PROGRAM:Rule110.PROCEDURE:step",
+                    "names": [
+                      "s"
+                    ],
+                    "type": {
+                      "node": "IntegerType"
+                    }
+                  },
+                  {
+                    "node": "DECLARE",
+                    "token": "<DECLARE|KEYWORD tests/rule_110/test.easy:16:7>",
+                    "scope": "PROGRAM:Rule110.PROCEDURE:step",
+                    "names": [
+                      "j"
+                    ],
+                    "type": {
+                      "node": "IntegerType"
+                    }
+                  }
+                ],
+                "subroutines": [],
+                "statements": [
+                  {
+                    "node": "SET",
+                    "token": "<SET|KEYWORD tests/rule_110/test.easy:18:7>",
+                    "scope": "PROGRAM:Rule110.PROCEDURE:step",
+                    "target": [
+                      {
+                        "node": "VariableReference",
+                        "token": "<j|IDENT tests/rule_110/test.easy:18:11>",
+                        "scope": "PROGRAM:Rule110.PROCEDURE:step",
+                        "name": "j",
+                        "parts": []
+                      }
+                    ],
+                    "expression": {
+                      "node": "BinaryOperation",
+                      "token": "<-|SYMBOL tests/rule_110/test.easy:18:18>",
+                      "scope": "PROGRAM:Rule110.PROCEDURE:step",
+                      "type": {
+                        "node": "IntegerType"
+                      },
+                      "operation": "-",
+                      "left": {
+                        "node": "VariableReference",
+                        "token": "<i|IDENT tests/rule_110/test.easy:18:16>",
+                        "scope": "PROGRAM:Rule110.PROCEDURE:step",
+                        "name": "i",
+                        "parts": []
+                      },
+                      "right": {
+                        "node": "IntegerLiteral",
+                        "token": "<1|INTEGER tests/rule_110/test.easy:18:20>",
+                        "scope": "PROGRAM:Rule110.PROCEDURE:step",
+                        "type": {
+                          "node": "IntegerType"
+                        },
+                        "value": 1
+                      }
+                    }
+                  },
+                  {
+                    "node": "IF",
+                    "token": "<IF|KEYWORD tests/rule_110/test.easy:19:7>",
+                    "scope": "PROGRAM:Rule110.PROCEDURE:step",
+                    "cond": {
+                      "node": "BinaryOperation",
+                      "token": "<j|IDENT tests/rule_110/test.easy:19:10>",
+                      "scope": "PROGRAM:Rule110.PROCEDURE:step",
+                      "type": {
+                        "node": "BooleanType"
+                      },
+                      "operation": "<",
+                      "left": {
+                        "node": "VariableReference",
+                        "token": "<j|IDENT tests/rule_110/test.easy:19:10>",
+                        "scope": "PROGRAM:Rule110.PROCEDURE:step",
+                        "name": "j",
+                        "parts": []
+                      },
+                      "right": {
+                        "node": "IntegerLiteral",
+                        "token": "<1|INTEGER tests/rule_110/test.easy:19:14>",
+                        "scope": "PROGRAM:Rule110.PROCEDURE:step",
+                        "type": {
+                          "node": "IntegerType"
+                        },
+                        "value": 1
+                      }
+                    },
+                    "then_branch": {
+                      "node": "Segment",
+                      "token": "<SET|KEYWORD tests/rule_110/test.easy:19:21>",
+                      "scope": "PROGRAM:Rule110.PROCEDURE:step",
+                      "types": [],
+                      "variables": [],
+                      "subroutines": [],
+                      "statements": [
+                        {
+                          "node": "SET",
+                          "token": "<SET|KEYWORD tests/rule_110/test.easy:19:21>",
+                          "scope": "PROGRAM:Rule110.PROCEDURE:step",
+                          "target": [
+                            {
+                              "node": "VariableReference",
+                              "token": "<j|IDENT tests/rule_110/test.easy:19:25>",
+                              "scope": "PROGRAM:Rule110.PROCEDURE:step",
+                              "name": "j",
+                              "parts": []
+                            }
+                          ],
+                          "expression": {
+                            "node": "VariableReference",
+                            "token": "<N|IDENT tests/rule_110/test.easy:19:30>",
+                            "scope": "PROGRAM:Rule110.PROCEDURE:step",
+                            "name": "N",
+                            "parts": []
+                          }
+                        }
+                      ]
+                    },
+                    "else_branch": ""
+                  },
+                  {
+                    "node": "SET",
+                    "token": "<SET|KEYWORD tests/rule_110/test.easy:20:7>",
+                    "scope": "PROGRAM:Rule110.PROCEDURE:step",
+                    "target": [
+                      {
+                        "node": "VariableReference",
+                        "token": "<left|IDENT tests/rule_110/test.easy:20:11>",
+                        "scope": "PROGRAM:Rule110.PROCEDURE:step",
+                        "name": "left",
+                        "parts": []
+                      }
+                    ],
+                    "expression": {
+                      "node": "VariableReference",
+                      "token": "<row|IDENT tests/rule_110/test.easy:20:19>",
+                      "scope": "PROGRAM:Rule110.PROCEDURE:step",
+                      "name": "row",
+                      "parts": [
+                        {
+                          "node": "VariableSubscript",
+                          "token": "<j|IDENT tests/rule_110/test.easy:20:23>",
+                          "value": {
+                            "node": "VariableReference",
+                            "token": "<j|IDENT tests/rule_110/test.easy:20:23>",
+                            "scope": "PROGRAM:Rule110.PROCEDURE:step",
+                            "name": "j",
+                            "parts": []
+                          }
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "node": "SET",
+                    "token": "<SET|KEYWORD tests/rule_110/test.easy:22:7>",
+                    "scope": "PROGRAM:Rule110.PROCEDURE:step",
+                    "target": [
+                      {
+                        "node": "VariableReference",
+                        "token": "<c|IDENT tests/rule_110/test.easy:22:11>",
+                        "scope": "PROGRAM:Rule110.PROCEDURE:step",
+                        "name": "c",
+                        "parts": []
+                      }
+                    ],
+                    "expression": {
+                      "node": "VariableReference",
+                      "token": "<row|IDENT tests/rule_110/test.easy:22:16>",
+                      "scope": "PROGRAM:Rule110.PROCEDURE:step",
+                      "name": "row",
+                      "parts": [
+                        {
+                          "node": "VariableSubscript",
+                          "token": "<i|IDENT tests/rule_110/test.easy:22:20>",
+                          "value": {
+                            "node": "VariableReference",
+                            "token": "<i|IDENT tests/rule_110/test.easy:22:20>",
+                            "scope": "PROGRAM:Rule110.PROCEDURE:step",
+                            "name": "i",
+                            "parts": []
+                          }
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "node": "SET",
+                    "token": "<SET|KEYWORD tests/rule_110/test.easy:24:7>",
+                    "scope": "PROGRAM:Rule110.PROCEDURE:step",
+                    "target": [
+                      {
+                        "node": "VariableReference",
+                        "token": "<j|IDENT tests/rule_110/test.easy:24:11>",
+                        "scope": "PROGRAM:Rule110.PROCEDURE:step",
+                        "name": "j",
+                        "parts": []
+                      }
+                    ],
+                    "expression": {
+                      "node": "BinaryOperation",
+                      "token": "<+|SYMBOL tests/rule_110/test.easy:24:18>",
+                      "scope": "PROGRAM:Rule110.PROCEDURE:step",
+                      "type": {
+                        "node": "IntegerType"
+                      },
+                      "operation": "+",
+                      "left": {
+                        "node": "VariableReference",
+                        "token": "<i|IDENT tests/rule_110/test.easy:24:16>",
+                        "scope": "PROGRAM:Rule110.PROCEDURE:step",
+                        "name": "i",
+                        "parts": []
+                      },
+                      "right": {
+                        "node": "IntegerLiteral",
+                        "token": "<1|INTEGER tests/rule_110/test.easy:24:20>",
+                        "scope": "PROGRAM:Rule110.PROCEDURE:step",
+                        "type": {
+                          "node": "IntegerType"
+                        },
+                        "value": 1
+                      }
+                    }
+                  },
+                  {
+                    "node": "IF",
+                    "token": "<IF|KEYWORD tests/rule_110/test.easy:25:7>",
+                    "scope": "PROGRAM:Rule110.PROCEDURE:step",
+                    "cond": {
+                      "node": "BinaryOperation",
+                      "token": "<j|IDENT tests/rule_110/test.easy:25:10>",
+                      "scope": "PROGRAM:Rule110.PROCEDURE:step",
+                      "type": {
+                        "node": "BooleanType"
+                      },
+                      "operation": ">",
+                      "left": {
+                        "node": "VariableReference",
+                        "token": "<j|IDENT tests/rule_110/test.easy:25:10>",
+                        "scope": "PROGRAM:Rule110.PROCEDURE:step",
+                        "name": "j",
+                        "parts": []
+                      },
+                      "right": {
+                        "node": "VariableReference",
+                        "token": "<N|IDENT tests/rule_110/test.easy:25:14>",
+                        "scope": "PROGRAM:Rule110.PROCEDURE:step",
+                        "name": "N",
+                        "parts": []
+                      }
+                    },
+                    "then_branch": {
+                      "node": "Segment",
+                      "token": "<SET|KEYWORD tests/rule_110/test.easy:25:21>",
+                      "scope": "PROGRAM:Rule110.PROCEDURE:step",
+                      "types": [],
+                      "variables": [],
+                      "subroutines": [],
+                      "statements": [
+                        {
+                          "node": "SET",
+                          "token": "<SET|KEYWORD tests/rule_110/test.easy:25:21>",
+                          "scope": "PROGRAM:Rule110.PROCEDURE:step",
+                          "target": [
+                            {
+                              "node": "VariableReference",
+                              "token": "<j|IDENT tests/rule_110/test.easy:25:25>",
+                              "scope": "PROGRAM:Rule110.PROCEDURE:step",
+                              "name": "j",
+                              "parts": []
+                            }
+                          ],
+                          "expression": {
+                            "node": "IntegerLiteral",
+                            "token": "<1|INTEGER tests/rule_110/test.easy:25:30>",
+                            "scope": "PROGRAM:Rule110.PROCEDURE:step",
+                            "type": {
+                              "node": "IntegerType"
+                            },
+                            "value": 1
+                          }
+                        }
+                      ]
+                    },
+                    "else_branch": ""
+                  },
+                  {
+                    "node": "SET",
+                    "token": "<SET|KEYWORD tests/rule_110/test.easy:26:7>",
+                    "scope": "PROGRAM:Rule110.PROCEDURE:step",
+                    "target": [
+                      {
+                        "node": "VariableReference",
+                        "token": "<right|IDENT tests/rule_110/test.easy:26:11>",
+                        "scope": "PROGRAM:Rule110.PROCEDURE:step",
+                        "name": "right",
+                        "parts": []
+                      }
+                    ],
+                    "expression": {
+                      "node": "VariableReference",
+                      "token": "<row|IDENT tests/rule_110/test.easy:26:20>",
+                      "scope": "PROGRAM:Rule110.PROCEDURE:step",
+                      "name": "row",
+                      "parts": [
+                        {
+                          "node": "VariableSubscript",
+                          "token": "<j|IDENT tests/rule_110/test.easy:26:24>",
+                          "value": {
+                            "node": "VariableReference",
+                            "token": "<j|IDENT tests/rule_110/test.easy:26:24>",
+                            "scope": "PROGRAM:Rule110.PROCEDURE:step",
+                            "name": "j",
+                            "parts": []
+                          }
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "node": "SET",
+                    "token": "<SET|KEYWORD tests/rule_110/test.easy:28:7>",
+                    "scope": "PROGRAM:Rule110.PROCEDURE:step",
+                    "target": [
+                      {
+                        "node": "VariableReference",
+                        "token": "<s|IDENT tests/rule_110/test.easy:28:11>",
+                        "scope": "PROGRAM:Rule110.PROCEDURE:step",
+                        "name": "s",
+                        "parts": []
+                      }
+                    ],
+                    "expression": {
+                      "node": "BinaryOperation",
+                      "token": "<+|SYMBOL tests/rule_110/test.easy:28:25>",
+                      "scope": "PROGRAM:Rule110.PROCEDURE:step",
+                      "type": {
+                        "node": "IntegerType"
+                      },
+                      "operation": "+",
+                      "left": {
+                        "node": "BinaryOperation",
+                        "token": "<+|SYMBOL tests/rule_110/test.easy:28:21>",
+                        "scope": "PROGRAM:Rule110.PROCEDURE:step",
+                        "type": {
+                          "node": "IntegerType"
+                        },
+                        "operation": "+",
+                        "left": {
+                          "node": "VariableReference",
+                          "token": "<left|IDENT tests/rule_110/test.easy:28:16>",
+                          "scope": "PROGRAM:Rule110.PROCEDURE:step",
+                          "name": "left",
+                          "parts": []
+                        },
+                        "right": {
+                          "node": "VariableReference",
+                          "token": "<c|IDENT tests/rule_110/test.easy:28:23>",
+                          "scope": "PROGRAM:Rule110.PROCEDURE:step",
+                          "name": "c",
+                          "parts": []
+                        }
+                      },
+                      "right": {
+                        "node": "VariableReference",
+                        "token": "<right|IDENT tests/rule_110/test.easy:28:27>",
+                        "scope": "PROGRAM:Rule110.PROCEDURE:step",
+                        "name": "right",
+                        "parts": []
+                      }
+                    }
+                  },
+                  {
+                    "node": "SELECT",
+                    "token": "<SELECT|KEYWORD tests/rule_110/test.easy:30:7>",
+                    "scope": "PROGRAM:Rule110.PROCEDURE:step",
+                    "expr": {
+                      "node": "BoolLiteral",
+                      "token": "<TRUE|KEYWORD tests/rule_110/test.easy:30:14>",
+                      "scope": "PROGRAM:Rule110.PROCEDURE:step",
+                      "type": {
+                        "node": "BooleanType"
+                      },
+                      "value": true
+                    },
+                    "cases": [
+                      [
+                        {
+                          "node": "BinaryOperation",
+                          "token": "<s|IDENT tests/rule_110/test.easy:31:15>",
+                          "scope": "PROGRAM:Rule110.PROCEDURE:step",
+                          "type": {
+                            "node": "BooleanType"
+                          },
+                          "operation": "=",
+                          "left": {
+                            "node": "VariableReference",
+                            "token": "<s|IDENT tests/rule_110/test.easy:31:15>",
+                            "scope": "PROGRAM:Rule110.PROCEDURE:step",
+                            "name": "s",
+                            "parts": []
+                          },
+                          "right": {
+                            "node": "IntegerLiteral",
+                            "token": "<2|INTEGER tests/rule_110/test.easy:31:19>",
+                            "scope": "PROGRAM:Rule110.PROCEDURE:step",
+                            "type": {
+                              "node": "IntegerType"
+                            },
+                            "value": 2
+                          }
+                        },
+                        {
+                          "node": "Segment",
+                          "token": "<SET|KEYWORD tests/rule_110/test.easy:31:23>",
+                          "scope": "PROGRAM:Rule110.PROCEDURE:step",
+                          "types": [],
+                          "variables": [],
+                          "subroutines": [],
+                          "statements": [
+                            {
+                              "node": "SET",
+                              "token": "<SET|KEYWORD tests/rule_110/test.easy:31:23>",
+                              "scope": "PROGRAM:Rule110.PROCEDURE:step",
+                              "target": [
+                                {
+                                  "node": "VariableReference",
+                                  "token": "<next|IDENT tests/rule_110/test.easy:31:27>",
+                                  "scope": "PROGRAM:Rule110.PROCEDURE:step",
+                                  "name": "next",
+                                  "parts": [
+                                    {
+                                      "node": "VariableSubscript",
+                                      "token": "<i|IDENT tests/rule_110/test.easy:31:32>",
+                                      "value": {
+                                        "node": "VariableReference",
+                                        "token": "<i|IDENT tests/rule_110/test.easy:31:32>",
+                                        "scope": "PROGRAM:Rule110.PROCEDURE:step",
+                                        "name": "i",
+                                        "parts": []
+                                      }
+                                    }
+                                  ]
+                                }
+                              ],
+                              "expression": {
+                                "node": "IntegerLiteral",
+                                "token": "<1|INTEGER tests/rule_110/test.easy:31:38>",
+                                "scope": "PROGRAM:Rule110.PROCEDURE:step",
+                                "type": {
+                                  "node": "IntegerType"
+                                },
+                                "value": 1
+                              }
+                            }
+                          ]
+                        }
+                      ],
+                      [
+                        {
+                          "node": "BinaryOperation",
+                          "token": "<||SYMBOL tests/rule_110/test.easy:32:21>",
+                          "scope": "PROGRAM:Rule110.PROCEDURE:step",
+                          "type": {
+                            "node": "BooleanType"
+                          },
+                          "operation": "|",
+                          "left": {
+                            "node": "BinaryOperation",
+                            "token": "<s|IDENT tests/rule_110/test.easy:32:15>",
+                            "scope": "PROGRAM:Rule110.PROCEDURE:step",
+                            "type": {
+                              "node": "BooleanType"
+                            },
+                            "operation": "=",
+                            "left": {
+                              "node": "VariableReference",
+                              "token": "<s|IDENT tests/rule_110/test.easy:32:15>",
+                              "scope": "PROGRAM:Rule110.PROCEDURE:step",
+                              "name": "s",
+                              "parts": []
+                            },
+                            "right": {
+                              "node": "IntegerLiteral",
+                              "token": "<0|INTEGER tests/rule_110/test.easy:32:19>",
+                              "scope": "PROGRAM:Rule110.PROCEDURE:step",
+                              "type": {
+                                "node": "IntegerType"
+                              },
+                              "value": 0
+                            }
+                          },
+                          "right": {
+                            "node": "BinaryOperation",
+                            "token": "<s|IDENT tests/rule_110/test.easy:32:23>",
+                            "scope": "PROGRAM:Rule110.PROCEDURE:step",
+                            "type": {
+                              "node": "BooleanType"
+                            },
+                            "operation": "=",
+                            "left": {
+                              "node": "VariableReference",
+                              "token": "<s|IDENT tests/rule_110/test.easy:32:23>",
+                              "scope": "PROGRAM:Rule110.PROCEDURE:step",
+                              "name": "s",
+                              "parts": []
+                            },
+                            "right": {
+                              "node": "IntegerLiteral",
+                              "token": "<3|INTEGER tests/rule_110/test.easy:32:27>",
+                              "scope": "PROGRAM:Rule110.PROCEDURE:step",
+                              "type": {
+                                "node": "IntegerType"
+                              },
+                              "value": 3
+                            }
+                          }
+                        },
+                        {
+                          "node": "Segment",
+                          "token": "<SET|KEYWORD tests/rule_110/test.easy:32:31>",
+                          "scope": "PROGRAM:Rule110.PROCEDURE:step",
+                          "types": [],
+                          "variables": [],
+                          "subroutines": [],
+                          "statements": [
+                            {
+                              "node": "SET",
+                              "token": "<SET|KEYWORD tests/rule_110/test.easy:32:31>",
+                              "scope": "PROGRAM:Rule110.PROCEDURE:step",
+                              "target": [
+                                {
+                                  "node": "VariableReference",
+                                  "token": "<next|IDENT tests/rule_110/test.easy:32:35>",
+                                  "scope": "PROGRAM:Rule110.PROCEDURE:step",
+                                  "name": "next",
+                                  "parts": [
+                                    {
+                                      "node": "VariableSubscript",
+                                      "token": "<i|IDENT tests/rule_110/test.easy:32:40>",
+                                      "value": {
+                                        "node": "VariableReference",
+                                        "token": "<i|IDENT tests/rule_110/test.easy:32:40>",
+                                        "scope": "PROGRAM:Rule110.PROCEDURE:step",
+                                        "name": "i",
+                                        "parts": []
+                                      }
+                                    }
+                                  ]
+                                }
+                              ],
+                              "expression": {
+                                "node": "IntegerLiteral",
+                                "token": "<0|INTEGER tests/rule_110/test.easy:32:46>",
+                                "scope": "PROGRAM:Rule110.PROCEDURE:step",
+                                "type": {
+                                  "node": "IntegerType"
+                                },
+                                "value": 0
+                              }
+                            }
+                          ]
+                        }
+                      ],
+                      [
+                        "",
+                        {
+                          "node": "Segment",
+                          "token": "<IF|KEYWORD tests/rule_110/test.easy:33:20>",
+                          "scope": "PROGRAM:Rule110.PROCEDURE:step",
+                          "types": [],
+                          "variables": [],
+                          "subroutines": [],
+                          "statements": [
+                            {
+                              "node": "IF",
+                              "token": "<IF|KEYWORD tests/rule_110/test.easy:33:20>",
+                              "scope": "PROGRAM:Rule110.PROCEDURE:step",
+                              "cond": {
+                                "node": "BinaryOperation",
+                                "token": "<c|IDENT tests/rule_110/test.easy:33:23>",
+                                "scope": "PROGRAM:Rule110.PROCEDURE:step",
+                                "type": {
+                                  "node": "BooleanType"
+                                },
+                                "operation": "=",
+                                "left": {
+                                  "node": "VariableReference",
+                                  "token": "<c|IDENT tests/rule_110/test.easy:33:23>",
+                                  "scope": "PROGRAM:Rule110.PROCEDURE:step",
+                                  "name": "c",
+                                  "parts": []
+                                },
+                                "right": {
+                                  "node": "IntegerLiteral",
+                                  "token": "<1|INTEGER tests/rule_110/test.easy:33:27>",
+                                  "scope": "PROGRAM:Rule110.PROCEDURE:step",
+                                  "type": {
+                                    "node": "IntegerType"
+                                  },
+                                  "value": 1
+                                }
+                              },
+                              "then_branch": {
+                                "node": "Segment",
+                                "token": "<SET|KEYWORD tests/rule_110/test.easy:33:34>",
+                                "scope": "PROGRAM:Rule110.PROCEDURE:step",
+                                "types": [],
+                                "variables": [],
+                                "subroutines": [],
+                                "statements": [
+                                  {
+                                    "node": "SET",
+                                    "token": "<SET|KEYWORD tests/rule_110/test.easy:33:34>",
+                                    "scope": "PROGRAM:Rule110.PROCEDURE:step",
+                                    "target": [
+                                      {
+                                        "node": "VariableReference",
+                                        "token": "<next|IDENT tests/rule_110/test.easy:33:38>",
+                                        "scope": "PROGRAM:Rule110.PROCEDURE:step",
+                                        "name": "next",
+                                        "parts": [
+                                          {
+                                            "node": "VariableSubscript",
+                                            "token": "<i|IDENT tests/rule_110/test.easy:33:43>",
+                                            "value": {
+                                              "node": "VariableReference",
+                                              "token": "<i|IDENT tests/rule_110/test.easy:33:43>",
+                                              "scope": "PROGRAM:Rule110.PROCEDURE:step",
+                                              "name": "i",
+                                              "parts": []
+                                            }
+                                          }
+                                        ]
+                                      }
+                                    ],
+                                    "expression": {
+                                      "node": "IntegerLiteral",
+                                      "token": "<1|INTEGER tests/rule_110/test.easy:33:49>",
+                                      "scope": "PROGRAM:Rule110.PROCEDURE:step",
+                                      "type": {
+                                        "node": "IntegerType"
+                                      },
+                                      "value": 1
+                                    }
+                                  }
+                                ]
+                              },
+                              "else_branch": {
+                                "node": "Segment",
+                                "token": "<SET|KEYWORD tests/rule_110/test.easy:33:57>",
+                                "scope": "PROGRAM:Rule110.PROCEDURE:step",
+                                "types": [],
+                                "variables": [],
+                                "subroutines": [],
+                                "statements": [
+                                  {
+                                    "node": "SET",
+                                    "token": "<SET|KEYWORD tests/rule_110/test.easy:33:57>",
+                                    "scope": "PROGRAM:Rule110.PROCEDURE:step",
+                                    "target": [
+                                      {
+                                        "node": "VariableReference",
+                                        "token": "<next|IDENT tests/rule_110/test.easy:33:61>",
+                                        "scope": "PROGRAM:Rule110.PROCEDURE:step",
+                                        "name": "next",
+                                        "parts": [
+                                          {
+                                            "node": "VariableSubscript",
+                                            "token": "<i|IDENT tests/rule_110/test.easy:33:66>",
+                                            "value": {
+                                              "node": "VariableReference",
+                                              "token": "<i|IDENT tests/rule_110/test.easy:33:66>",
+                                              "scope": "PROGRAM:Rule110.PROCEDURE:step",
+                                              "name": "i",
+                                              "parts": []
+                                            }
+                                          }
+                                        ]
+                                      }
+                                    ],
+                                    "expression": {
+                                      "node": "VariableReference",
+                                      "token": "<right|IDENT tests/rule_110/test.easy:33:72>",
+                                      "scope": "PROGRAM:Rule110.PROCEDURE:step",
+                                      "name": "right",
+                                      "parts": []
+                                    }
+                                  }
+                                ]
+                              }
+                            }
+                          ]
+                        }
+                      ]
+                    ]
+                  }
+                ]
+              },
+              "by": "",
+              "to": {
+                "node": "VariableReference",
+                "token": "<N|IDENT tests/rule_110/test.easy:13:19>",
+                "scope": "PROGRAM:Rule110.PROCEDURE:step",
+                "name": "N",
+                "parts": []
+              },
+              "condition": ""
+            },
+            {
+              "node": "SET",
+              "token": "<SET|KEYWORD tests/rule_110/test.easy:37:5>",
+              "scope": "PROGRAM:Rule110.PROCEDURE:step",
+              "target": [
+                {
+                  "node": "VariableReference",
+                  "token": "<row|IDENT tests/rule_110/test.easy:37:9>",
+                  "scope": "PROGRAM:Rule110.PROCEDURE:step",
+                  "name": "row",
+                  "parts": []
+                }
+              ],
+              "expression": {
+                "node": "VariableReference",
+                "token": "<next|IDENT tests/rule_110/test.easy:37:16>",
+                "scope": "PROGRAM:Rule110.PROCEDURE:step",
+                "name": "next",
+                "parts": []
+              }
+            }
+          ]
+        }
+      },
+      {
+        "node": "PROCEDURE",
+        "token": "<PROCEDURE|KEYWORD tests/rule_110/test.easy:40:3>",
+        "scope": "PROGRAM:Rule110.PROCEDURE:print",
+        "name": "print",
+        "arguments": [],
+        "segment": {
+          "node": "Segment",
+          "token": "<DECLARE|KEYWORD tests/rule_110/test.easy:41:5>",
+          "scope": "PROGRAM:Rule110.PROCEDURE:print",
+          "types": [],
+          "variables": [
+            {
+              "node": "DECLARE",
+              "token": "<DECLARE|KEYWORD tests/rule_110/test.easy:41:5>",
+              "scope": "PROGRAM:Rule110.PROCEDURE:print",
+              "names": [
+                "i"
+              ],
+              "type": {
+                "node": "IntegerType"
+              }
+            }
+          ],
+          "subroutines": [],
+          "statements": [
+            {
+              "node": "FOR",
+              "token": "<FOR|KEYWORD tests/rule_110/test.easy:42:5>",
+              "scope": "PROGRAM:Rule110.PROCEDURE:print",
+              "variable": {
+                "node": "VariableReference",
+                "token": "<i|IDENT tests/rule_110/test.easy:42:9>",
+                "scope": "PROGRAM:Rule110.PROCEDURE:print",
+                "name": "i",
+                "parts": []
+              },
+              "init": {
+                "node": "IntegerLiteral",
+                "token": "<1|INTEGER tests/rule_110/test.easy:42:14>",
+                "scope": "PROGRAM:Rule110.PROCEDURE:print",
+                "type": {
+                  "node": "IntegerType"
+                },
+                "value": 1
+              },
+              "segment": {
+                "node": "Segment",
+                "token": "<IF|KEYWORD tests/rule_110/test.easy:43:7>",
+                "scope": "PROGRAM:Rule110.PROCEDURE:print",
+                "types": [],
+                "variables": [],
+                "subroutines": [],
+                "statements": [
+                  {
+                    "node": "IF",
+                    "token": "<IF|KEYWORD tests/rule_110/test.easy:43:7>",
+                    "scope": "PROGRAM:Rule110.PROCEDURE:print",
+                    "cond": {
+                      "node": "BinaryOperation",
+                      "token": "<row|IDENT tests/rule_110/test.easy:43:10>",
+                      "scope": "PROGRAM:Rule110.PROCEDURE:print",
+                      "type": {
+                        "node": "BooleanType"
+                      },
+                      "operation": "=",
+                      "left": {
+                        "node": "VariableReference",
+                        "token": "<row|IDENT tests/rule_110/test.easy:43:10>",
+                        "scope": "PROGRAM:Rule110.PROCEDURE:print",
+                        "name": "row",
+                        "parts": [
+                          {
+                            "node": "VariableSubscript",
+                            "token": "<i|IDENT tests/rule_110/test.easy:43:14>",
+                            "value": {
+                              "node": "VariableReference",
+                              "token": "<i|IDENT tests/rule_110/test.easy:43:14>",
+                              "scope": "PROGRAM:Rule110.PROCEDURE:print",
+                              "name": "i",
+                              "parts": []
+                            }
+                          }
+                        ]
+                      },
+                      "right": {
+                        "node": "IntegerLiteral",
+                        "token": "<1|INTEGER tests/rule_110/test.easy:43:19>",
+                        "scope": "PROGRAM:Rule110.PROCEDURE:print",
+                        "type": {
+                          "node": "IntegerType"
+                        },
+                        "value": 1
+                      }
+                    },
+                    "then_branch": {
+                      "node": "Segment",
+                      "token": "<OUTPUT|KEYWORD tests/rule_110/test.easy:43:26>",
+                      "scope": "PROGRAM:Rule110.PROCEDURE:print",
+                      "types": [],
+                      "variables": [],
+                      "subroutines": [],
+                      "statements": [
+                        {
+                          "node": "OUTPUT",
+                          "token": "<OUTPUT|KEYWORD tests/rule_110/test.easy:43:26>",
+                          "scope": "PROGRAM:Rule110.PROCEDURE:print",
+                          "arguments": [
+                            {
+                              "node": "VariableReference",
+                              "token": "<X|STRING tests/rule_110/test.easy:43:33>",
+                              "scope": "",
+                              "name": "$0",
+                              "parts": []
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    "else_branch": {
+                      "node": "Segment",
+                      "token": "<OUTPUT|KEYWORD tests/rule_110/test.easy:43:43>",
+                      "scope": "PROGRAM:Rule110.PROCEDURE:print",
+                      "types": [],
+                      "variables": [],
+                      "subroutines": [],
+                      "statements": [
+                        {
+                          "node": "OUTPUT",
+                          "token": "<OUTPUT|KEYWORD tests/rule_110/test.easy:43:43>",
+                          "scope": "PROGRAM:Rule110.PROCEDURE:print",
+                          "arguments": [
+                            {
+                              "node": "VariableReference",
+                              "token": "<.|STRING tests/rule_110/test.easy:43:50>",
+                              "scope": "",
+                              "name": "$1",
+                              "parts": []
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  }
+                ]
+              },
+              "by": "",
+              "to": {
+                "node": "VariableReference",
+                "token": "<N|IDENT tests/rule_110/test.easy:42:19>",
+                "scope": "PROGRAM:Rule110.PROCEDURE:print",
+                "name": "N",
+                "parts": []
+              },
+              "condition": ""
+            },
+            {
+              "node": "OUTPUT",
+              "token": "<OUTPUT|KEYWORD tests/rule_110/test.easy:45:5>",
+              "scope": "PROGRAM:Rule110.PROCEDURE:print",
+              "arguments": [
+                {
+                  "node": "VariableReference",
+                  "token": "<  |STRING tests/rule_110/test.easy:45:12>",
+                  "scope": "",
+                  "name": "$2",
+                  "parts": []
+                }
+              ]
+            }
+          ]
+        }
+      }
+    ],
+    "statements": [
+      {
+        "node": "SET",
+        "token": "<SET|KEYWORD tests/rule_110/test.easy:48:3>",
+        "scope": "PROGRAM:Rule110",
+        "target": [
+          {
+            "node": "VariableReference",
+            "token": "<N|IDENT tests/rule_110/test.easy:48:7>",
+            "scope": "PROGRAM:Rule110",
+            "name": "N",
+            "parts": []
+          }
+        ],
+        "expression": {
+          "node": "IntegerLiteral",
+          "token": "<32|INTEGER tests/rule_110/test.easy:48:12>",
+          "scope": "PROGRAM:Rule110",
+          "type": {
+            "node": "IntegerType"
+          },
+          "value": 32
+        }
+      },
+      {
+        "node": "SET",
+        "token": "<SET|KEYWORD tests/rule_110/test.easy:51:3>",
+        "scope": "PROGRAM:Rule110",
+        "target": [
+          {
+            "node": "VariableReference",
+            "token": "<row|IDENT tests/rule_110/test.easy:51:7>",
+            "scope": "PROGRAM:Rule110",
+            "name": "row",
+            "parts": [
+              {
+                "node": "VariableSubscript",
+                "token": "<FIX|IDENT tests/rule_110/test.easy:51:11>",
+                "value": {
+                  "node": "FunctionCall",
+                  "token": "<FIX|IDENT tests/rule_110/test.easy:51:11>",
+                  "scope": "PROGRAM:Rule110",
+                  "type": {
+                    "node": "IntegerType"
+                  },
+                  "name": "FIX",
+                  "arguments": [
+                    {
+                      "node": "BinaryOperation",
+                      "token": "<N|IDENT tests/rule_110/test.easy:51:15>",
+                      "scope": "PROGRAM:Rule110",
+                      "type": {
+                        "node": "IntegerType"
+                      },
+                      "operation": "/",
+                      "left": {
+                        "node": "VariableReference",
+                        "token": "<N|IDENT tests/rule_110/test.easy:51:15>",
+                        "scope": "PROGRAM:Rule110",
+                        "name": "N",
+                        "parts": []
+                      },
+                      "right": {
+                        "node": "IntegerLiteral",
+                        "token": "<2|INTEGER tests/rule_110/test.easy:51:17>",
+                        "scope": "PROGRAM:Rule110",
+                        "type": {
+                          "node": "IntegerType"
+                        },
+                        "value": 2
+                      }
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ],
+        "expression": {
+          "node": "IntegerLiteral",
+          "token": "<1|INTEGER tests/rule_110/test.easy:51:24>",
+          "scope": "PROGRAM:Rule110",
+          "type": {
+            "node": "IntegerType"
+          },
+          "value": 1
+        }
+      },
+      {
+        "node": "CALL",
+        "token": "<CALL|KEYWORD tests/rule_110/test.easy:53:3>",
+        "scope": "PROGRAM:Rule110",
+        "name": "print",
+        "arguments": []
+      },
+      {
+        "node": "FOR",
+        "token": "<FOR|KEYWORD tests/rule_110/test.easy:55:3>",
+        "scope": "PROGRAM:Rule110",
+        "variable": {
+          "node": "VariableReference",
+          "token": "<n|IDENT tests/rule_110/test.easy:55:7>",
+          "scope": "PROGRAM:Rule110",
+          "name": "n",
+          "parts": []
+        },
+        "init": {
+          "node": "IntegerLiteral",
+          "token": "<1|INTEGER tests/rule_110/test.easy:55:12>",
+          "scope": "PROGRAM:Rule110",
+          "type": {
+            "node": "IntegerType"
+          },
+          "value": 1
+        },
+        "segment": {
+          "node": "Segment",
+          "token": "<CALL|KEYWORD tests/rule_110/test.easy:56:5>",
+          "scope": "PROGRAM:Rule110",
+          "types": [],
+          "variables": [],
+          "subroutines": [],
+          "statements": [
+            {
+              "node": "CALL",
+              "token": "<CALL|KEYWORD tests/rule_110/test.easy:56:5>",
+              "scope": "PROGRAM:Rule110",
+              "name": "step",
+              "arguments": []
+            },
+            {
+              "node": "CALL",
+              "token": "<CALL|KEYWORD tests/rule_110/test.easy:57:5>",
+              "scope": "PROGRAM:Rule110",
+              "name": "print",
+              "arguments": []
+            }
+          ]
+        },
+        "by": "",
+        "to": {
+          "node": "IntegerLiteral",
+          "token": "<10|INTEGER tests/rule_110/test.easy:55:17>",
+          "scope": "PROGRAM:Rule110",
+          "type": {
+            "node": "IntegerType"
+          },
+          "value": 10
+        },
+        "condition": ""
+      }
+    ]
+  }
+}

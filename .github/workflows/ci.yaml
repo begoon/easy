@@ -14,5 +14,6 @@ jobs:
               with:
                   python-version: "3.13"
             - run: uv sync
+            - uses: oven-sh/setup-bun@v2
             - uses: extractions/setup-just@v3
-            - run: just
+            - run: just ci
