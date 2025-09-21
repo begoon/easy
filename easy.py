@@ -6,15 +6,8 @@ from dataclasses import dataclass, fields, is_dataclass
 from pathlib import Path
 from typing import Any, Mapping, Optional, Tuple, Union, cast
 
-from peg.parser import PEGParser
 
-# from ruamel.yaml import YAML
-
-
-#
-
-
-def yamlizer(root: Any) -> str:
+def printer(root: Any) -> str:
 
     def walker(obj: Node, *, seen: set[int] | None = None) -> Node:
         if seen is None:
@@ -66,12 +59,7 @@ def yamlizer(root: Any) -> str:
 
     data = walker(cast(None, root))
 
-    # yaml = YAML()
-    # yaml.default_flow_style = False
-    # yaml.width = 256
-    # yaml.indent(mapping=2, sequence=4, offset=2)
     stream = io.StringIO()
-    # yaml.dump(data, stream)
     json.dump(data, stream, indent=2)
     return stream.getvalue()
 
@@ -206,6 +194,8 @@ class Context:
     functions: dict[str, "BuiltinFunction | FUNCTION"]
     procedures: dict[str, "PROCEDURE"]
     variables: dict[str, "Variable"]
+
+    r: int = 1
 
 
 class CompilerError(Exception):
@@ -381,7 +371,7 @@ class Node:
         raise GenerateError(f"c() not implemented for {self.__class__.__name__} at {self.token}")
 
     def __str__(self) -> str:
-        return yamlizer(self)
+        return printer(self)
 
 
 @dataclass
@@ -677,8 +667,9 @@ class SET(Statement):
 
         for target in self.target:
             variable = discover_variable(target)
-            _, reference = expand_variable_reference(variable, target)
-            v.append(f"{reference} = {self.expression.c()};")
+            _, reference = expand_variable_reference(variable, target, v)
+            result = C(self.expression.c(), v)
+            v.append(f"{reference} = {result};")
         return emit(v)
 
 
@@ -689,10 +680,11 @@ class IF(Statement):
     else_branch: Optional[Segment]
 
     def c(self) -> str:
-        cond = self.cond.c()
+        v = []
+        cond = C(self.cond.c(), v)
         if cond.startswith("(") and cond.endswith(")"):
             cond = cond[1:-1]
-        v = [f"if ({cond})", "{", indent(self.then_branch.c(), 1), "}"]
+        v.extend([f"if ({cond})", "{", indent(self.then_branch.c(), 1), "}"])
         if self.else_branch:
             v.append("else")
             v.append("{")
@@ -711,24 +703,39 @@ class FOR(Statement):
     condition: Optional[Expression] = None
 
     def c(self) -> str:
-        v = [
-            f"for ({self.variable.c()} = {self.init.c()}; {self.format_condition()}; {self.step()})",
-            "{",
-            indent(self.segment.c(), 1),
-            "}",
-        ]
+        v = []
+        init = C(self.init.c(), v)
+        v.append(f"{self.variable.c()} = {init};")
+
+        inner_v = []
+        condition = C(self.format_condition(inner_v), inner_v)
+        step = C(self.step(inner_v), inner_v)
+        v.extend(
+            [
+                "while (1)",
+                "{",
+                indent(emit(inner_v), 1),
+                indent(f"if (!({condition})) break;", 1),
+                indent(self.segment.c(), 1),
+                indent(step, 1),
+                "}",
+            ]
+        )
         return emit(v)
 
-    def format_condition(self) -> str:
+    def format_condition(self, pre: list[str]) -> str:
         conditions = []
         if self.condition:
-            conditions.append(self.condition.c())
+            condition = C(self.condition.c(), pre)
+            conditions.append(condition)
         if self.to:
-            conditions.append(f"{self.variable.c()} <= {self.to.c()}")
+            to = C(self.to.c(), pre)
+            conditions.append(f"{self.variable.c()} <= {to}")
         return "".join(conditions)
 
-    def step(self) -> str:
-        return f"{self.variable.c()} += " + ("1" if not self.by else self.by.c())
+    def step(self, pre: list[str]) -> str:
+        by = C(self.by.c(), pre) if self.by else "1"
+        return f"{self.variable.c()} += {by};"
 
 
 @dataclass
@@ -738,15 +745,18 @@ class SELECT(Statement):
 
     def c(self) -> str:
         v = []
+        pre = []
         for i, [condition, body] in enumerate(self.cases, 0):
             if condition is not None:
                 condition = condition.c()
-                v.append(("else " if i > 0 else "") + "if " + condition)
+                condition = C(condition, pre)
+                v.append(("else " if i > 0 else "") + f"if ({condition})")
             else:
                 v.append("else")
             v.append("{")
             v.append(indent(body.c(), 1))
             v.append("}")
+        v = pre + v
         return emit(v)
 
 
@@ -758,7 +768,7 @@ class INPUT(Statement):
         inputs = []
         for variable_reference in self.variables:
             variable = discover_variable(variable_reference)
-            type, reference = expand_variable_reference(variable, variable_reference)
+            type, reference = expand_variable_reference(variable, variable_reference, inputs)
 
             if isinstance(type, StringType):
                 inputs.append(f'scanf("%s", {reference}.data);')
@@ -778,7 +788,7 @@ class OUTPUT(Statement):
     def c(self) -> str:
         output = []
         format: list[str] = []
-        arguments = ", ".join(expression_stringer(argument, format, "OUTPUT") for argument in self.arguments)
+        arguments = ", ".join(expression_stringer(argument, format, "OUTPUT", output) for argument in self.arguments)
         output.append(f'$output("{"".join(format)}", {arguments});')
         return emit(output)
 
@@ -817,8 +827,10 @@ class CALL(Statement):
     arguments: list[Expression]
 
     def c(self) -> str:
-        arguments = ", ".join(arg.c() for arg in self.arguments)
-        return f"{self.name}({arguments});"
+        v = []
+        arguments = ", ".join(C(arg.c(), v) for arg in self.arguments)
+        v.append(f"{self.name}({arguments});")
+        return emit(v)
 
 
 @dataclass
@@ -828,8 +840,10 @@ class RETURN(Statement):
     def c(self) -> str:
         if self.value is None:
             return "return;"
-        value = self.value.c()
-        return "return" + f" {value}" + ";"
+        v = []
+        value = C(self.value.c(), v)
+        v.append("return" + f" {value}" + ";")
+        return emit(v)
 
 
 @dataclass
@@ -841,7 +855,19 @@ class EXIT(Statement):
 @dataclass
 class EMPTY(Statement):
     def c(self) -> str:
-        return ";"
+        return "while (0);"
+
+
+def C(c: str, pre: list[str]) -> str:
+    reference = None
+    if m := re.search(r"( \/\* (\$r\d+) \*\/)", c):
+        capture = m.group(1)
+        reference = m.group(2)
+        c = c.replace(capture, "")
+    if not reference:
+        return c
+    pre.append(c)
+    return reference
 
 
 @dataclass
@@ -850,7 +876,13 @@ class FunctionCall(Expression):
     arguments: list[Expression]
 
     def c(self) -> str:
-        return f"{self.name}({', '.join(a.c() for a in self.arguments)})"
+        context = self.context()
+        r = f"$r{context.r}"
+        context.r += 1
+
+        v = []
+        v.append(f"auto {r} = {self.name}({', '.join(C(a.c(), v) for a in self.arguments)}); /* {r} */")
+        return emit(v)
 
 
 OPERATIONS = {"|": "||", "&": "&&", "=": "==", "<>": "!=", "MOD": "%", "XOR": "^"}
@@ -866,7 +898,17 @@ class BinaryOperation(Expression):
         operation = OPERATIONS.get(self.operation, self.operation)
         if v := string_compare(self.left, self.right, operation):
             return v
-        return f"({self.left.c()} {operation} {self.right.c()})"
+
+        context = self.context()
+        r = f"$r{context.r}"
+        context.r += 1
+
+        v = []
+        left_value = C(self.left.c(), v)
+        right_value = C(self.right.c(), v)
+
+        v.append(f"auto {r} = ({left_value} {operation} {right_value}); /* {r} */")
+        return emit(v)
 
 
 def string_compare(left: Expression, right: Expression, operation: str) -> str | None:
@@ -878,7 +920,7 @@ def string_compare(left: Expression, right: Expression, operation: str) -> str |
             return False, None
 
         variable = discover_variable(e)
-        type, reference = expand_variable_reference(variable, e)
+        type, reference = expand_variable_reference(variable, e, [])
         return isinstance(type, StringType), reference
 
     is_left, left = is_string_type(left)
@@ -894,21 +936,35 @@ class ConcatenationOperation(Expression):
     parts: list[Expression]
 
     def c(self) -> str:
+        context = self.context()
+        r = f"$r{context.r}"
+        context.r += 1
+
         output = []
+
         format: list[str] = []
-        arguments = ", ".join(expression_stringer(argument, format, "||") for argument in self.parts)
-        output.append(f'$concat("{"".join(format)}", {arguments})')
+        arguments = ", ".join(expression_stringer(argument, format, "||", output) for argument in self.parts)
+        output.append(f'auto {r} = $concat("{"".join(format)}", {arguments}); /* {r} */')
         return emit(output)
 
 
 @dataclass
 class UnaryOperation(Expression):
     operation: str
-    expr: Expression
+    expression: Expression
 
     def c(self) -> str:
+        context = self.context()
+        r = f"$r{context.r}"
+        context.r += 1
+
         operation = "!" if self.operation == "NOT" else self.operation
-        return f"({operation}{self.expr.c()})"
+
+        v = []
+        value = C(self.expression.c(), v)
+
+        v.append(f"auto {r} = ({operation}{value}); /* {r} */")
+        return emit(v)
 
 
 @dataclass
@@ -938,14 +994,14 @@ class VariableReference(Entity):
 
     def c(self) -> str:
         variable = discover_variable(self)
-
-        _, reference = expand_variable_reference(variable, self)
+        v = []
+        _, reference = expand_variable_reference(variable, self, v)
         return reference
 
     @property
     def type(self) -> Type:
         variable = discover_variable(self)
-        type, _ = expand_variable_reference(variable, self)
+        type, _ = expand_variable_reference(variable, self, [])
         return type
 
 
@@ -1047,15 +1103,17 @@ def indent(s: str, n: int) -> str:
 
 
 def emit(lines: list[str]) -> str:
-    return "\n".join(lines)
+    v = [line for line in lines if line.strip()]
+    return "\n".join(v)
 
 
 def is_number(name: str) -> bool:
     return name in ("INTEGER", "REAL")
 
 
-def expression_stringer(v: Expression, format: list[str], callee: str) -> str:
-    c = v.c()
+def expression_stringer(v: Expression, format: list[str], callee: str, pre: list[str]) -> str:
+    c = C(v.c(), pre)
+
     if isinstance(v, BuiltinLiteral):
         convert = v.format()
         format.append(convert)
@@ -1064,7 +1122,7 @@ def expression_stringer(v: Expression, format: list[str], callee: str) -> str:
     if isinstance(v, VariableReference):
         variable = discover_variable(v)
 
-        type, reference = expand_variable_reference(variable, v)
+        type, reference = expand_variable_reference(variable, v, pre)
         if isinstance(type, AliasType):
             type = type.reference_type
 
@@ -1111,11 +1169,12 @@ class ParseError(CompilerError):
 
     def __str__(self) -> str:
         token = self.token
-        error_line = token.input.text.splitlines()[token.line - 1]
+        text = token.context.text
+        error_line = text.text.splitlines()[token.line - 1]
         return (
             f"{self.message}\n"
             "at "
-            f"{token.input.filename}:{token.line}:{token.character}\n"
+            f"{text.filename}:{token.line}:{token.character}\n"
             f"{error_line}\n{' ' * (token.character - 1)}^"
         )
 
@@ -1669,112 +1728,11 @@ class Parser:
         )
 
 
-def expand_variable_reference(variable: Variable, variable_reference: VariableReference) -> tuple[Type, str]:
-    context = variable.token.context
-    if context.flags.get("index_check") == "0":
-        return expand_variable_reference_direct(variable, variable_reference)
-    return expand_variable_reference_bound_checked(variable, variable_reference)
-
-
-def expand_variable_reference_bound_checked(
+def expand_variable_reference(
     variable: Variable,
     variable_reference: VariableReference,
+    pre: list[str],
 ) -> tuple[Type, str]:
-    variable_type: Type = variable.type
-
-    # expression for current object (or a *pointer* to it after a subscript)
-    reference_expression = variable.name
-
-    # for clean typeof(...) chains like typeof(m.data[0].data[0])
-    probe_expression = variable.name
-
-    # True iff reference_expression currently denotes a pointer to an aggregate we're indexing into.
-    is_pointer = False
-
-    parts = list(variable_reference.parts)
-    if not parts:
-        return variable_type, reference_expression
-
-    result_reference: str | None = None
-
-    for i, part in enumerate(parts):
-        if isinstance(part, VariableSubscript):
-            # resolve AliasType if needed
-            subscript_type = variable_type.reference_type if isinstance(variable_type, AliasType) else variable_type
-
-            if not isinstance(subscript_type, ArrayType):
-                raise GenerateError(
-                    f"expect ArrayType in reference type of subscript, not {subscript_type} at {part.token}"
-                )
-            array_type: ArrayType = subscript_type
-
-            lo = array_type.lo.c()
-            hi = array_type.hi.c()
-            index = part.index()
-
-            # clean element typeof/sizeof
-            element_typeof = f"typeof({probe_expression}.data[0])"
-            element_sizeof = f"sizeof({element_typeof})"
-
-            # "data" part for $ref at the current level
-            data_expression = f"({reference_expression})->data" if is_pointer else f"{reference_expression}.data"
-
-            location = '"' + str(part.token).replace('"', r"\"") + '"'
-            current_reference = (
-                f"({element_typeof} *)$ref({data_expression}, {index}, {lo}, {hi}, {element_sizeof}, {location})"
-            )
-
-            is_last = i == len(parts) - 1
-            if is_last:
-                # final dimension: return an lvalue via *cast($ref(...))
-                result_reference = f"*{current_reference}"
-            else:
-                # keep a *pointer* to the selected element for chaining
-                reference_expression = current_reference
-                is_pointer = True
-                probe_expression = f"{probe_expression}.data[0]"
-
-            variable_type = array_type.type  # step into element type
-
-        elif isinstance(part, VariableField):
-            # resolve AliasType if needed
-            field_type = variable_type.reference_type if isinstance(variable_type, AliasType) else variable_type
-
-            if not isinstance(field_type, StructType):
-                raise GenerateError(f"expect StructType in reference type of field, not {field_type}, at {part.token}")
-            struct_type: StructType = field_type
-
-            field = next((f for f in struct_type.fields if f.name == part.name), None)
-            if field is None:
-                raise GenerateError(f"field '{part.name}' not found in {struct_type} at {part.token}")
-
-            # Choose '.' vs '->' based on whether reference_expression is currently a pointer.
-            accessor = f"->{part.name}" if is_pointer else f".{part.name}"
-            # Parenthesize before '->' to bind correctly.
-            reference_expression = (
-                f"({reference_expression}){accessor}" if is_pointer else f"{reference_expression}{accessor}"
-            )
-            # probe_expression is a value-style chain (always uses '.')
-            probe_expression = f"{probe_expression}.{part.name}"
-
-            variable_type = field.type
-
-            # After selecting a field, the expression is an lvalue (not a pointer) unless the type system
-            # models pointer fields explicitly. If yes, we can set is_pointer = isinstance(t, PointerType).
-            # In C, thought, it is always an lvalue.
-            is_pointer = False
-
-        else:
-            raise GenerateError(f"unexpected variable '{part=}' at {variable.token}")
-
-    # If no subscript or field ever occurred, just return the plain field chain lvalue.
-    if result_reference is None:
-        result_reference = reference_expression
-
-    return variable_type, result_reference
-
-
-def expand_variable_reference_direct(variable: Variable, variable_reference: VariableReference) -> tuple[Type, str]:
     type = variable.type
     reference = variable.name
     for part in variable_reference.parts:
@@ -1785,8 +1743,18 @@ def expand_variable_reference_direct(variable: Variable, variable_reference: Var
             if not isinstance(type, ArrayType):
                 raise GenerateError(f"expect ArrayType in reference type of subscript, not {type} at {part.token}")
 
-            lo = type.lo.c()
-            index = f"({part.index()}) - ({lo})"
+            filename = part.token.context.text.filename
+            line = part.token.line
+            character = part.token.character
+            enlist_variable(Variable(part.token, "$F", StringType(), f"{filename}"), "")
+
+            lo = C(type.lo.c(), pre)
+            hi = C(type.hi.c(), pre)
+            index = C(part.index(), pre)
+
+            pre.append(f"$index({index}, {lo}, {hi}, &$F, {line}, {character});")
+
+            index = f"({index}) - ({lo})"
             type = type.type
             reference += ".data[" + index + "]"
         elif isinstance(part, VariableField):
@@ -1865,56 +1833,6 @@ class Compiler:
         program = self.parser.program()
         return program
 
-    def generate(self, program: PROGRAM) -> str:
-        lines = [
-            "#include <stdio.h>",
-            "#include <stdlib.h>",
-            "#include <string.h>",
-            "#include <stdbool.h>",
-            '#include "runtime.h"',
-            "",
-        ]
-
-        if self.context.common:
-            lines.append("// Common declarations")
-            for declaration in self.context.common:
-                lines.append(declaration.c())
-            lines.append("")
-
-        if self.context.types:
-            lines.append("// Type definitions")
-            for type in self.context.types.values():
-                if isinstance(type, AliasType):
-                    continue
-                lines.append(type.c())
-            lines.append("")
-
-        if self.context.variables:
-            lines.append("// Global variables")
-            for variable in self.context.variables.values():
-                if variable.is_const():
-                    lines.append(variable.const() + ";")
-                else:
-                    lines.append(variable.c() + ";")
-            lines.append("")
-
-        if self.context.procedures:
-            lines.append("// Procedures")
-            for procedure in self.context.procedures.values():
-                lines.append(procedure.c())
-                lines.append("")
-
-        if self.context.functions:
-            lines.append("// Functions")
-            for function in self.context.functions.values():
-                lines.append(function.c())
-                lines.append("")
-
-        lines.append("// Main program")
-        lines.append(program.c())
-
-        return emit(lines)
-
 
 #
 
@@ -1926,7 +1844,6 @@ def run(args: list[str]) -> None:
         print("  -c <output.c>  - specify output C file (default: input.c)")
         print("  -t             - generate tokens file (default: input.tokens)")
         print("  -a             - generate JSON AST file (default: input.json)")
-        print("  -e             - generate PEG JSON AST file (default: input.peg.json)")
         print("  -s <output.s>  - generate symbols file (default: input.s)")
         sys.exit(1)
 
@@ -1955,14 +1872,7 @@ def run(args: list[str]) -> None:
 
     if "-a" in args:
         ast_file = input_file.with_suffix(".json")
-        ast_file.write_text(yamlizer(program))
-
-    if "-e" in args:
-        grammar = Path("peg/easy.peg").read_text()
-        peg_ast = PEGParser(grammar, start="compilation").parse(source)
-
-        peg_ast_file = input_file.with_suffix(".peg.json")
-        peg_ast_file.write_text(yamlizer(peg_ast))
+        ast_file.write_text(printer(program))
 
     output_s = Path(arg(args, "-s") or input_file.with_suffix(".s"))
     with open(output_s, "w") as f:

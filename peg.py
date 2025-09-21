@@ -2,9 +2,12 @@
 # Includes: TRACE, whitespace handling fixes, list-merge, and AST simplifier that
 # preserves variable suffixes as fields/indexes and flattens comma lists.
 
+import json
 import os
 import re
+import sys
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Any, Dict, List, Optional, Set, Tuple
 
 # ---------- TRACE CONFIG ----------
@@ -749,11 +752,25 @@ class PEGParser:
         return _simplify_ast(ast)
 
 
+TRIVIA = """
+PROGRAM Test:
+  OUTPUT CHARACTER (48);
+END PROGRAM Test;
+"""
+
 if __name__ == "__main__":
-    peg = r"""
-        Start <- 'hello'i name:Identifier '!'?
-        Identifier <- !Keyword [A-Za-z_] [A-Za-z0-9_]*
-        Keyword <- 'HELLO'i
-    """
-    p = PEGParser(peg, start="Start")
-    print(p.parse("Hello world!"))
+    grammar = (Path(__file__).parent / "easy.peg").read_text()
+    parser = PEGParser(grammar, start="compilation")
+
+    self_test = len(sys.argv) < 2
+
+    code = Path(sys.argv[1]).read_text() if not self_test else TRIVIA
+    ast = parser.parse(code)
+
+    ast_text = json.dumps(ast, indent=2)
+
+    if self_test:
+        print(ast_text)
+    else:
+        output = Path(sys.argv[1]).with_suffix(".peg.json")
+        output.write_text(ast_text)

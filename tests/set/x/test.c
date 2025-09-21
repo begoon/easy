@@ -18,9 +18,17 @@ struct
     int y;
 } p = {0};
 STR $0 = { .data = " " };
+STR $F = { .data = "tests/set/test.easy" };
 int main()
 {
     p.y = 123;
-    *(typeof(p.x.data[0].data[0].data[0]) *)$ref(((typeof(p.x.data[0].data[0]) *)$ref(((typeof(p.x.data[0]) *)$ref(p.x.data, 0, 0, 1, sizeof(typeof(p.x.data[0])), "<0|INTEGER|tests/set/test.easy:7:11>"))->data, 1, 0, 1, sizeof(typeof(p.x.data[0].data[0])), "<1|INTEGER|tests/set/test.easy:7:14>"))->data, 100, 0, 100, sizeof(typeof(p.x.data[0].data[0].data[0])), "<100|INTEGER|tests/set/test.easy:7:17>") = (p.y + 321);
-    $output("iAi", *(typeof(p.x.data[0].data[0].data[0]) *)$ref(((typeof(p.x.data[0].data[0]) *)$ref(((typeof(p.x.data[0]) *)$ref(p.x.data, 0, 0, 1, sizeof(typeof(p.x.data[0])), "<0|INTEGER|tests/set/test.easy:8:14>"))->data, 1, 0, 1, sizeof(typeof(p.x.data[0].data[0])), "<1|INTEGER|tests/set/test.easy:8:17>"))->data, 100, 0, 100, sizeof(typeof(p.x.data[0].data[0].data[0])), "<100|INTEGER|tests/set/test.easy:8:20>"), $0, p.y);
+    $index(0, 0, 1, &$F, 7, 11);
+    $index(1, 0, 1, &$F, 7, 14);
+    $index(100, 0, 100, &$F, 7, 17);
+    auto $r1 = (p.y + 321);
+    p.x.data[(0) - (0)].data[(1) - (0)].data[(100) - (0)] = $r1;
+    $index(0, 0, 1, &$F, 8, 14);
+    $index(1, 0, 1, &$F, 8, 17);
+    $index(100, 0, 100, &$F, 8, 20);
+    $output("iAi", p.x.data[(0) - (0)].data[(1) - (0)].data[(100) - (0)], $0, p.y);
 }

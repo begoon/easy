@@ -9,11 +9,14 @@ STR $1 = { .data = "Prime[" };
 STR $2 = { .data = "] = " };
 STR $3 = { .data = "Input value " };
 STR $4 = { .data = " non-positive." };
+STR $F = { .data = "tests/sieve/test.easy" };
 double abs(double x)
 {
-    if (x < 0)
+    auto $r9 = (x < 0);
+    if ($r9)
     {
-        return (-x);
+        auto $r10 = (-x);
+        return $r10;
     }
     else
     {
@@ -22,30 +25,55 @@ double abs(double x)
 }
 int integersqrt(int a)
 {
-    if (a < 0)
+    auto $r11 = (a < 0);
+    auto $r12 = (a == 0);
+    auto $r13 = (a > 0);
+    if ($r11)
     {
         $output("A", $0);
         exit(0);
     }
-    else if (a == 0)
+    else if ($r12)
     {
         return 0;
     }
-    else if (a > 0)
+    else if ($r13)
     {
         double x = 0.0;
         double ra = 0.0;
         double epsilon = 0.0;
         int sqrt = 0;
-        ra = FLOAT(a);
-        epsilon = (1e-7 * ra);
-        for (x = (ra / 2.0); (abs((ra - (x * x))) > epsilon); x += (((ra / x) - x) / 2.0))
+        auto $r14 = FLOAT(a);
+        ra = $r14;
+        auto $r15 = (1e-7 * ra);
+        epsilon = $r15;
+        auto $r16 = (ra / 2.0);
+        x = $r16;
+        while (1)
         {
-            ;
+            auto $r20 = (x * x);
+            auto $r19 = (ra - $r20);
+            auto $r18 = abs($r19);
+            auto $r17 = ($r18 > epsilon);
+            auto $r23 = (ra / x);
+            auto $r22 = ($r23 - x);
+            auto $r21 = ($r22 / 2.0);
+            if (!($r17)) break;
+            while (0);
+            x += $r21;
         }
-        for (sqrt = (FIX(x) - 1); (((sqrt + 1) * (sqrt + 1)) <= a); sqrt += 1)
+        auto $r25 = FIX(x);
+        auto $r24 = ($r25 - 1);
+        sqrt = $r24;
+        while (1)
         {
-            ;
+            auto $r28 = (sqrt + 1);
+            auto $r29 = (sqrt + 1);
+            auto $r27 = ($r28 * $r29);
+            auto $r26 = ($r27 <= a);
+            if (!($r26)) break;
+            while (0);
+            sqrt += 1;
         }
         return sqrt;
     }
@@ -53,7 +81,8 @@ int integersqrt(int a)
 int main()
 {
     scanf("%d", &topnum);
-    if (topnum > 0)
+    auto $r1 = (topnum > 0);
+    if ($r1)
     {
         struct
         {
@@ -62,36 +91,57 @@ int main()
         int i = 0;
         int limit = 0;
         int count = 0;
-        topnum = (topnum + 1);
-        for (i = 1; i <= topnum; i += 1)
+        auto $r2 = (topnum + 1);
+        topnum = $r2;
+        i = 1;
+        while (1)
         {
-            *(typeof(sieve.data[0]) *)$ref(sieve.data, i, 1, topnum, sizeof(typeof(sieve.data[0])), "<i|IDENT|tests/sieve/test.easy:34:39>") = TRUE;
+            if (!(i <= topnum)) break;
+            $index(i, 1, topnum, &$F, 34, 39);
+            sieve.data[(i) - (1)] = TRUE;
+            i += 1;
         }
-        limit = (integersqrt(topnum) + 1);
-        for (i = 2; i <= limit; i += 1)
+        auto $r4 = integersqrt(topnum);
+        auto $r3 = ($r4 + 1);
+        limit = $r3;
+        i = 2;
+        while (1)
         {
-            if (*(typeof(sieve.data[0]) *)$ref(sieve.data, i, 1, topnum, sizeof(typeof(sieve.data[0])), "<i|IDENT|tests/sieve/test.easy:37:16>"))
+            if (!(i <= limit)) break;
+            if (sieve.data[(i) - (1)])
             {
                 int j = 0;
-                for (j = (2 * i); j <= topnum; j += i)
+                auto $r5 = (2 * i);
+                j = $r5;
+                while (1)
                 {
-                    *(typeof(sieve.data[0]) *)$ref(sieve.data, j, 1, topnum, sizeof(typeof(sieve.data[0])), "<j|IDENT|tests/sieve/test.easy:39:50>") = FALSE;
+                    if (!(j <= topnum)) break;
+                    $index(j, 1, topnum, &$F, 39, 50);
+                    sieve.data[(j) - (1)] = FALSE;
+                    j += i;
                 }
             }
+            i += 1;
         }
         count = 0;
-        for (i = 1; i <= topnum; i += 1)
+        i = 1;
+        while (1)
         {
-            if (*(typeof(sieve.data[0]) *)$ref(sieve.data, i, 1, topnum, sizeof(typeof(sieve.data[0])), "<i|IDENT|tests/sieve/test.easy:44:16>"))
+            if (!(i <= topnum)) break;
+            if (sieve.data[(i) - (1)])
             {
-                count = (count + 1);
-                $output("A", $concat("AiAi", $1, count, $2, i));
+                auto $r6 = (count + 1);
+                count = $r6;
+                auto $r7 = $concat("AiAi", $1, count, $2, i);
+                $output("A", $r7);
             }
+            i += 1;
         }
     }
     else
     {
-        $output("A", $concat("AiA", $3, topnum, $4));
+        auto $r8 = $concat("AiA", $3, topnum, $4);
+        $output("A", $r8);
     }
     exit(0);
 }

@@ -1,6 +1,5 @@
 import itertools
 import os
-import re
 import subprocess
 import sys
 import traceback
@@ -8,7 +7,9 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 
 import easy
-from easy import arg, flag
+import peg
+from easy import arg, flag, printer
+from peg import PEGParser
 
 TESTS_FOLDER = Path("tests")
 
@@ -24,6 +25,10 @@ def run(cmd, *args, **kwargs) -> None:
 
 
 def run_tests(filter: str | None) -> None:
+    compiler = arg(sys.argv, "--compiler") or os.getenv("COMPILER")
+    if not compiler:
+        raise Exception("COMPILER not set")
+
     names = [f.strip() for f in filter.split(",")] if filter else []
     include = set([name for name in names if not name.startswith("-")])
     exclude = set([name[1:] for name in names if name.startswith("-")])
@@ -90,13 +95,19 @@ def process(test: Path) -> None:
     if not compiler:
         raise Exception("COMPILER not set")
 
-    if compiler != "ts":
-        expected_peg_ast = x.with_suffix(".peg.json")
-        if expected_peg_ast.exists():
-            created_peg_ast = test.with_suffix(".peg.json")
-            removals.append(created_peg_ast)
+    expected_peg_ast = x.with_suffix(".peg.json")
+    if expected_peg_ast.exists():
+        created_peg_ast = test.with_suffix(".peg.json")
+        removals.append(created_peg_ast)
 
-            flags.append("-e")
+        if compiler == "python":
+            peg_grammar = Path("easy.peg").read_text()
+            peg_ast = PEGParser(peg_grammar, start="compilation").parse(program.read_text())
+            created_peg_ast.write_text(printer(peg_ast) + "\n")
+        elif compiler == "python-ext":
+            run(["python", "peg.py", program])
+        else:
+            run(["bun", "peg.ts", program])
 
     if compiler == "python":
         easy.run(["easy.py", str(program), *flags])
@@ -125,11 +136,10 @@ def process(test: Path) -> None:
         diff(expected_tokens, created_tokens)
 
     if expected_ast.exists():
-        diff(expected_ast, created_ast, yaml=True)
+        diff(expected_ast, created_ast)
 
-    if "-e" in flags:
-        if expected_peg_ast.exists():
-            diff(expected_peg_ast, created_peg_ast)
+    if expected_peg_ast.exists():
+        diff(expected_peg_ast, created_peg_ast)
 
     if expected_c.exists():
         diff(expected_c, created_c)
@@ -181,7 +191,7 @@ RED = "\033[91m"
 NC = "\033[0m"
 
 
-def diff(expected_file: Path, created_file: Path, yaml: bool = False) -> None:
+def diff(expected_file: Path, created_file: Path) -> None:
     expected_lines = expected_file.read_text().splitlines()
     created_lines = created_file.read_text().splitlines()
 
@@ -216,15 +226,6 @@ def diff(expected_file: Path, created_file: Path, yaml: bool = False) -> None:
 verbose = (v := os.getenv("VERBOSE", flag(sys.argv, "--verbose"))) and int(v) or 0
 
 update = "--update" in sys.argv or "-U" in sys.argv or os.getenv("UPDATE")
-
-
-# def flag(argv: list[str], name: str) -> int | None:
-#     return argv.index(name) if name in argv else None
-
-
-# def arg(argv: list[str], name: str) -> str | None:
-#     i = flag(argv, name)
-#     return argv[i + 1] if i is not None and i + 1 < len(argv) else None
 
 
 if __name__ == "__main__":

@@ -48,16 +48,37 @@ struct
         } data[4 - 1 + 1];
     } data[2 - 1 + 1];
 } y = {0};
+STR $F = { .data = "tests/array_checked/test.easy" };
 int main()
 {
-    *(typeof(b.data[0]) *)$ref(b.data, 1, 1, 2, sizeof(typeof(b.data[0])), "<1|INTEGER|tests/array_checked/test.easy:8:9>") = 42;
-    $output("i", *(typeof(b.data[0]) *)$ref(b.data, 1, 1, 2, sizeof(typeof(b.data[0])), "<1|INTEGER|tests/array_checked/test.easy:9:12>"));
-    *(typeof(m.data[0].data[0]) *)$ref(((typeof(m.data[0]) *)$ref(m.data, 2, 1, 2, sizeof(typeof(m.data[0])), "<2|INTEGER|tests/array_checked/test.easy:11:9>"))->data, 3, 1, 4, sizeof(typeof(m.data[0].data[0])), "<3|INTEGER|tests/array_checked/test.easy:11:12>") = 99;
-    $output("i", *(typeof(m.data[0].data[0]) *)$ref(((typeof(m.data[0]) *)$ref(m.data, 2, 1, 2, sizeof(typeof(m.data[0])), "<2|INTEGER|tests/array_checked/test.easy:12:12>"))->data, 3, 1, 4, sizeof(typeof(m.data[0].data[0])), "<3|INTEGER|tests/array_checked/test.easy:12:15>"));
-    *(typeof(c.data[0].data[0].data[0]) *)$ref(((typeof(c.data[0].data[0]) *)$ref(((typeof(c.data[0]) *)$ref(c.data, 1, 1, 2, sizeof(typeof(c.data[0])), "<1|INTEGER|tests/array_checked/test.easy:14:9>"))->data, 2, 1, 4, sizeof(typeof(c.data[0].data[0])), "<2|INTEGER|tests/array_checked/test.easy:14:12>"))->data, 3, 1, 8, sizeof(typeof(c.data[0].data[0].data[0])), "<3|INTEGER|tests/array_checked/test.easy:14:15>") = 123;
-    $output("i", *(typeof(c.data[0].data[0].data[0]) *)$ref(((typeof(c.data[0].data[0]) *)$ref(((typeof(c.data[0]) *)$ref(c.data, 1, 1, 2, sizeof(typeof(c.data[0])), "<1|INTEGER|tests/array_checked/test.easy:15:12>"))->data, 2, 1, 4, sizeof(typeof(c.data[0].data[0])), "<2|INTEGER|tests/array_checked/test.easy:15:15>"))->data, 3, 1, 8, sizeof(typeof(c.data[0].data[0].data[0])), "<3|INTEGER|tests/array_checked/test.easy:15:18>"));
-    ((typeof(x.data[0].data[0]) *)$ref(((typeof(x.data[0]) *)$ref(x.data, 1, 1, 2, sizeof(typeof(x.data[0])), "<1|INTEGER|tests/array_checked/test.easy:17:9>"))->data, 2, 1, 4, sizeof(typeof(x.data[0].data[0])), "<2|INTEGER|tests/array_checked/test.easy:17:12>"))->i = 456;
-    $output("i", ((typeof(x.data[0].data[0]) *)$ref(((typeof(x.data[0]) *)$ref(x.data, 1, 1, 2, sizeof(typeof(x.data[0])), "<1|INTEGER|tests/array_checked/test.easy:18:12>"))->data, 2, 1, 4, sizeof(typeof(x.data[0].data[0])), "<2|INTEGER|tests/array_checked/test.easy:18:15>"))->i);
-    ((typeof(y.data[0].data[0]) *)$ref(((typeof(y.data[0]) *)$ref(y.data, 2, 1, 2, sizeof(typeof(y.data[0])), "<2|INTEGER|tests/array_checked/test.easy:20:9>"))->data, 3, 1, 4, sizeof(typeof(y.data[0].data[0])), "<3|INTEGER|tests/array_checked/test.easy:20:12>"))->i = 789;
-    $output("i", ((typeof(y.data[0].data[0]) *)$ref(((typeof(y.data[0]) *)$ref(y.data, 2, 1, 2, sizeof(typeof(y.data[0])), "<2|INTEGER|tests/array_checked/test.easy:21:12>"))->data, 3, 1, 4, sizeof(typeof(y.data[0].data[0])), "<3|INTEGER|tests/array_checked/test.easy:21:15>"))->i);
+    $index(1, 1, 2, &$F, 8, 9);
+    b.data[(1) - (1)] = 42;
+    $index(1, 1, 2, &$F, 9, 12);
+    $output("i", b.data[(1) - (1)]);
+    $index(2, 1, 2, &$F, 11, 9);
+    $index(3, 1, 4, &$F, 11, 12);
+    m.data[(2) - (1)].data[(3) - (1)] = 99;
+    $index(2, 1, 2, &$F, 12, 12);
+    $index(3, 1, 4, &$F, 12, 15);
+    $output("i", m.data[(2) - (1)].data[(3) - (1)]);
+    $index(1, 1, 2, &$F, 14, 9);
+    $index(2, 1, 4, &$F, 14, 12);
+    $index(3, 1, 8, &$F, 14, 15);
+    c.data[(1) - (1)].data[(2) - (1)].data[(3) - (1)] = 123;
+    $index(1, 1, 2, &$F, 15, 12);
+    $index(2, 1, 4, &$F, 15, 15);
+    $index(3, 1, 8, &$F, 15, 18);
+    $output("i", c.data[(1) - (1)].data[(2) - (1)].data[(3) - (1)]);
+    $index(1, 1, 2, &$F, 17, 9);
+    $index(2, 1, 4, &$F, 17, 12);
+    x.data[(1) - (1)].data[(2) - (1)].i = 456;
+    $index(1, 1, 2, &$F, 18, 12);
+    $index(2, 1, 4, &$F, 18, 15);
+    $output("i", x.data[(1) - (1)].data[(2) - (1)].i);
+    $index(2, 1, 2, &$F, 20, 9);
+    $index(3, 1, 4, &$F, 20, 12);
+    y.data[(2) - (1)].data[(3) - (1)].i = 789;
+    $index(2, 1, 2, &$F, 21, 12);
+    $index(3, 1, 4, &$F, 21, 15);
+    $output("i", y.data[(2) - (1)].data[(3) - (1)].i);
 }

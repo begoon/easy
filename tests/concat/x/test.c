@@ -41,14 +41,27 @@ STR fs()
 }
 int main()
 {
-    $output("A", $concat("iArAbAb", 0, $1, 0.001, $2, TRUE, $3, FALSE));
+    auto $r1 = $concat("iArAbAb", 0, $1, 0.001, $2, TRUE, $3, FALSE);
+    $output("A", $r1);
     a = 321;
     r = 1.003;
     b = TRUE;
     s = $4;
-    $output("A", $concat("AiArAbAAA", $5, a, $6, r, $7, b, $8, s, $9));
-    $output("A", $concat("AAiAiAr", CHARACTER(50), $10, LENGTH($11), $10, FIX(23.56), $10, FLOAT(543)));
-    $output("A", $concat("AA", $11, $12));
-    $output("A", $concat("AiArAbAAA", $5, fa(), $6, fr(), $7, fb(), $8, fs(), $13));
+    auto $r2 = $concat("AiArAbAAA", $5, a, $6, r, $7, b, $8, s, $9);
+    $output("A", $r2);
+    auto $r4 = CHARACTER(50);
+    auto $r5 = LENGTH($11);
+    auto $r6 = FIX(23.56);
+    auto $r7 = FLOAT(543);
+    auto $r3 = $concat("AAiAiAr", $r4, $10, $r5, $10, $r6, $10, $r7);
+    $output("A", $r3);
+    auto $r8 = $concat("AA", $11, $12);
+    $output("A", $r8);
+    auto $r10 = fa();
+    auto $r11 = fr();
+    auto $r12 = fb();
+    auto $r13 = fs();
+    auto $r9 = $concat("AiArAbAAA", $5, $r10, $6, $r11, $7, $r12, $8, $r13, $13);
+    $output("A", $r9);
     exit(0);
 }

@@ -14,63 +14,89 @@ int i = 0;
 STR $0 = { .data = "X" };
 STR $1 = { .data = "." };
 STR $2 = { .data = "  " };
+STR $F = { .data = "tests/rule_110/test.easy" };
 void step()
 {
     int i = 0;
     Row next = {0};
-    for (i = 1; i <= N; i += 1)
+    i = 1;
+    while (1)
     {
-        *(typeof(next.data[0]) *)$ref(next.data, i, 1, 32, sizeof(typeof(next.data[0])), "<i|IDENT|tests/rule_110/test.easy:11:33>") = 0;
+        if (!(i <= N)) break;
+        $index(i, 1, 32, &$F, 11, 33);
+        next.data[(i) - (1)] = 0;
+        i += 1;
     }
-    for (i = 1; i <= N; i += 1)
+    i = 1;
+    while (1)
     {
+        if (!(i <= N)) break;
         int left = 0;
         int c = 0;
         int right = 0;
         int s = 0;
         int j = 0;
-        j = (i - 1);
-        if (j < 1)
+        auto $r3 = (i - 1);
+        j = $r3;
+        auto $r4 = (j < 1);
+        if ($r4)
         {
             j = N;
         }
-        left = *(typeof(row.data[0]) *)$ref(row.data, j, 1, 32, sizeof(typeof(row.data[0])), "<j|IDENT|tests/rule_110/test.easy:20:23>");
-        c = *(typeof(row.data[0]) *)$ref(row.data, i, 1, 32, sizeof(typeof(row.data[0])), "<i|IDENT|tests/rule_110/test.easy:22:20>");
-        j = (i + 1);
-        if (j > N)
+        left = row.data[(j) - (1)];
+        c = row.data[(i) - (1)];
+        auto $r5 = (i + 1);
+        j = $r5;
+        auto $r6 = (j > N);
+        if ($r6)
         {
             j = 1;
         }
-        right = *(typeof(row.data[0]) *)$ref(row.data, j, 1, 32, sizeof(typeof(row.data[0])), "<j|IDENT|tests/rule_110/test.easy:26:24>");
-        s = ((left + c) + right);
-        if (s == 2)
+        right = row.data[(j) - (1)];
+        auto $r8 = (left + c);
+        auto $r7 = ($r8 + right);
+        s = $r7;
+        auto $r9 = (s == 2);
+        auto $r11 = (s == 0);
+        auto $r12 = (s == 3);
+        auto $r10 = ($r11 || $r12);
+        if ($r9)
         {
-            *(typeof(next.data[0]) *)$ref(next.data, i, 1, 32, sizeof(typeof(next.data[0])), "<i|IDENT|tests/rule_110/test.easy:31:32>") = 1;
+            $index(i, 1, 32, &$F, 31, 32);
+            next.data[(i) - (1)] = 1;
         }
-        else if ((s == 0) || (s == 3))
+        else if ($r10)
         {
-            *(typeof(next.data[0]) *)$ref(next.data, i, 1, 32, sizeof(typeof(next.data[0])), "<i|IDENT|tests/rule_110/test.easy:32:40>") = 0;
+            $index(i, 1, 32, &$F, 32, 40);
+            next.data[(i) - (1)] = 0;
         }
         else
         {
-            if (c == 1)
+            auto $r13 = (c == 1);
+            if ($r13)
             {
-                *(typeof(next.data[0]) *)$ref(next.data, i, 1, 32, sizeof(typeof(next.data[0])), "<i|IDENT|tests/rule_110/test.easy:33:43>") = 1;
+                $index(i, 1, 32, &$F, 33, 43);
+                next.data[(i) - (1)] = 1;
             }
             else
             {
-                *(typeof(next.data[0]) *)$ref(next.data, i, 1, 32, sizeof(typeof(next.data[0])), "<i|IDENT|tests/rule_110/test.easy:33:66>") = right;
+                $index(i, 1, 32, &$F, 33, 66);
+                next.data[(i) - (1)] = right;
             }
         }
+        i += 1;
     }
     row = next;
 }
 void print()
 {
     int i = 0;
-    for (i = 1; i <= N; i += 1)
+    i = 1;
+    while (1)
     {
-        if (*(typeof(row.data[0]) *)$ref(row.data, i, 1, 32, sizeof(typeof(row.data[0])), "<i|IDENT|tests/rule_110/test.easy:43:14>") == 1)
+        if (!(i <= N)) break;
+        auto $r14 = (row.data[(i) - (1)] == 1);
+        if ($r14)
         {
             $output("A", $0);
         }
@@ -78,17 +104,24 @@ void print()
         {
             $output("A", $1);
         }
+        i += 1;
     }
     $output("A", $2);
 }
 int main()
 {
     N = 32;
-    *(typeof(row.data[0]) *)$ref(row.data, FIX((N / 2)), 1, 32, sizeof(typeof(row.data[0])), "<FIX|IDENT|tests/rule_110/test.easy:51:11>") = 1;
+    auto $r2 = (N / 2);
+    auto $r1 = FIX($r2);
+    $index($r1, 1, 32, &$F, 50, 11);
+    row.data[($r1) - (1)] = 1;
     print();
-    for (n = 1; n <= 10; n += 1)
+    n = 1;
+    while (1)
     {
+        if (!(n <= 10)) break;
         step();
         print();
+        n += 1;
     }
 }

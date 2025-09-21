@@ -15,8 +15,11 @@ int main()
     scanf("%d", &i);
     scanf("%lf", &f);
     scanf("%s", s.data);
-    $output("A", $concat("AiA", $0, i, $1));
-    $output("A", $concat("ArA", $2, f, $1));
-    $output("A", $concat("AAA", $3, s, $1));
+    auto $r1 = $concat("AiA", $0, i, $1);
+    $output("A", $r1);
+    auto $r2 = $concat("ArA", $2, f, $1);
+    $output("A", $r2);
+    auto $r3 = $concat("AAA", $3, s, $1);
+    $output("A", $r3);
     exit(0);
 }

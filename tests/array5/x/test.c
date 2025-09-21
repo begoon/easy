@@ -17,18 +17,32 @@ STR $1 = { .data = " " };
 STR $2 = { .data = "xyz" };
 STR $3 = { .data = "abc" };
 STR $4 = { .data = "AFTER: " };
+STR $F = { .data = "tests/array5/test.easy" };
 Field a(Field f)
 {
-    $output("A", $concat("AiAA", $0, ((typeof(f.data[0]) *)$ref(f.data, 10, 1, 100, sizeof(typeof(f.data[0])), "<10|INTEGER|tests/array5/test.easy:10:28>"))->score, $1, ((typeof(f.data[0]) *)$ref(f.data, 10, 1, 100, sizeof(typeof(f.data[0])), "<10|INTEGER|tests/array5/test.easy:10:50>"))->name));
-    ((typeof(f.data[0]) *)$ref(f.data, 10, 1, 100, sizeof(typeof(f.data[0])), "<10|INTEGER|tests/array5/test.easy:11:11>"))->score = 123;
-    ((typeof(f.data[0]) *)$ref(f.data, 10, 1, 100, sizeof(typeof(f.data[0])), "<10|INTEGER|tests/array5/test.easy:12:11>"))->name = $concat("AA", ((typeof(f.data[0]) *)$ref(f.data, 10, 1, 100, sizeof(typeof(f.data[0])), "<10|INTEGER|tests/array5/test.easy:12:25>"))->name, $2);
+    $index(10, 1, 100, &$F, 10, 28);
+    $index(10, 1, 100, &$F, 10, 50);
+    auto $r3 = $concat("AiAA", $0, f.data[(10) - (1)].score, $1, f.data[(10) - (1)].name);
+    $output("A", $r3);
+    $index(10, 1, 100, &$F, 11, 11);
+    f.data[(10) - (1)].score = 123;
+    $index(10, 1, 100, &$F, 12, 11);
+    $index(10, 1, 100, &$F, 12, 25);
+    auto $r4 = $concat("AA", f.data[(10) - (1)].name, $2);
+    f.data[(10) - (1)].name = $r4;
     return f;
 }
 int main()
 {
-    ((typeof(f.data[0]) *)$ref(f.data, 10, 1, 100, sizeof(typeof(f.data[0])), "<10|INTEGER|tests/array5/test.easy:16:9>"))->score = 321;
-    ((typeof(f.data[0]) *)$ref(f.data, 10, 1, 100, sizeof(typeof(f.data[0])), "<10|INTEGER|tests/array5/test.easy:17:9>"))->name = $3;
-    f = a(f);
-    $output("A", $concat("AiAA", $4, ((typeof(f.data[0]) *)$ref(f.data, 10, 1, 100, sizeof(typeof(f.data[0])), "<10|INTEGER|tests/array5/test.easy:19:25>"))->score, $1, ((typeof(f.data[0]) *)$ref(f.data, 10, 1, 100, sizeof(typeof(f.data[0])), "<10|INTEGER|tests/array5/test.easy:19:47>"))->name));
+    $index(10, 1, 100, &$F, 16, 9);
+    f.data[(10) - (1)].score = 321;
+    $index(10, 1, 100, &$F, 17, 9);
+    f.data[(10) - (1)].name = $3;
+    auto $r1 = a(f);
+    f = $r1;
+    $index(10, 1, 100, &$F, 19, 25);
+    $index(10, 1, 100, &$F, 19, 47);
+    auto $r2 = $concat("AiAA", $4, f.data[(10) - (1)].score, $1, f.data[(10) - (1)].name);
+    $output("A", $r2);
     exit(0);
 }

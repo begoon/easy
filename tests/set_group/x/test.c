@@ -11,5 +11,6 @@ int main()
 {
     a = 123;
     b = 123;
-    $output("A", $concat("AiAi", $0, a, $1, b));
+    auto $r1 = $concat("AiAi", $0, a, $1, b);
+    $output("A", $r1);
 }

@@ -10,17 +10,28 @@ STR $2 = { .data = "Buzz" };
 void FizzBuzz(int n)
 {
     int i = 0;
-    for (i = 1; i <= n; i += 1)
+    i = 1;
+    while (1)
     {
-        if (((i % 3) == 0) && ((i % 5) == 0))
+        if (!(i <= n)) break;
+        auto $r3 = (i % 3);
+        auto $r2 = ($r3 == 0);
+        auto $r5 = (i % 5);
+        auto $r4 = ($r5 == 0);
+        auto $r1 = ($r2 && $r4);
+        auto $r7 = (i % 3);
+        auto $r6 = ($r7 == 0);
+        auto $r9 = (i % 5);
+        auto $r8 = ($r9 == 0);
+        if ($r1)
         {
             $output("A", $0);
         }
-        else if ((i % 3) == 0)
+        else if ($r6)
         {
             $output("A", $1);
         }
-        else if ((i % 5) == 0)
+        else if ($r8)
         {
             $output("A", $2);
         }
@@ -28,6 +39,7 @@ void FizzBuzz(int n)
         {
             $output("i", i);
         }
+        i += 1;
     }
 }
 int main()

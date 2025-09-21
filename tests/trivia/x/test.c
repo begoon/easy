@@ -9,6 +9,9 @@ STR b = {0};
 STR $0 = { .data = "abc" };
 int main()
 {
-    x = $concat("AA", a, $concat("AA", b, SUBSTR($0, 0, 2)));
+    auto $r3 = SUBSTR($0, 0, 2);
+    auto $r2 = $concat("AA", b, $r3);
+    auto $r1 = $concat("AA", a, $r2);
+    x = $r1;
     exit(0);
 }
