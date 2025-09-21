@@ -8,10 +8,14 @@ STR $0 = { .data = "abc " };
 int main()
 {
     a = 100;
-    $output("A", $concat("Ai", $0, a));
-    for (a = 0; a <= 10; a += 1)
+    auto $r1 = $concat("Ai", $0, a);
+    $output("A", $r1);
+    a = 0;
+    while (1)
     {
+        if (!(a <= 10)) break;
         $output("i", a);
+        a += 1;
     }
     exit(0);
 }

@@ -10,11 +10,13 @@ STR $2 = { .data = "otherwise" };
 int main()
 {
     a = 100;
-    if (a < 0)
+    auto $r1 = (a < 0);
+    auto $r2 = (a == 0);
+    if ($r1)
     {
         $output("A", $0);
     }
-    else if (a == 0)
+    else if ($r2)
     {
         $output("A", $1);
     }

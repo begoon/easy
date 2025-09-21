@@ -1,14 +1,11 @@
 #!/usr/bin/env ts-node
 
-// easyc.ts — TypeScript rewrite of the “Easy” single-file compiler
-//
 // Usage:
 //   bun easyc.ts <input.easy> [-c <output.c>] [-t] [-a] [-e] [-s <output.s>]
 
-import * as fs from "fs";
-import * as path from "path";
-import { YAML } from "bun";
-// -------------------------- Utilities --------------------------
+import * as fs from "node:fs";
+import * as path from "node:path";
+import process from "node:process";
 
 function indent(s: string, n: number): string {
     const pad = "    ".repeat(n);
@@ -19,7 +16,8 @@ function indent(s: string, n: number): string {
 }
 
 function emit(lines: string[]): string {
-    return lines.join("\n");
+    const v = lines.filter((line) => line.trim() !== "");
+    return v.join("\n");
 }
 
 function table(rows: string[][]): string {
@@ -47,7 +45,7 @@ function arg(argv: string[], name: string): string | null {
 class InputText {
     filename: string;
     text: string;
-    constructor(opts: { text?: string; filename?: string | path.ParsedPath | null }) {
+    constructor(opts: { text?: string; filename?: string | null }) {
         const { text = "", filename = null } = opts;
         if (text) {
             this.text = text;
@@ -148,6 +146,7 @@ class Context {
     functions: Record<string, BuiltinFunction | FUNCTION>;
     procedures: Record<string, PROCEDURE>;
     variables: Record<string, Variable>;
+    r: number;
 
     constructor(init: {
         flags?: Flags;
@@ -167,7 +166,19 @@ class Context {
         this.functions = init.functions ?? {};
         this.procedures = init.procedures ?? {};
         this.variables = init.variables ?? {};
+        this.r = 1;
     }
+}
+
+function C(c: string, pre: string[]): string {
+    // looks for: /* $rN */ at the end (or anywhere) of the string
+    const m = c.match(/\/\*\s*(\$r\d+)\s*\*\//);
+    if (!m) return c;
+    const ref = m[1];
+    // remove the comment and any trailing whitespace/newlines from the stmt
+    const stmt = c.replace(/\s*\/\*\s*\$r\d+\s*\*\/\s*$/, "");
+    pre.push(stmt);
+    return ref;
 }
 
 class Token {
@@ -194,11 +205,7 @@ class Token {
     }
 }
 
-// -------------------------- YAML-izer --------------------------
-
-// -------------------------- YAML-izer --------------------------
-
-function yamlizer(root: any): string {
+function printer(root: any): string {
     const seen = new Set<any>();
 
     function isPlainObject(o: any) {
@@ -222,7 +229,6 @@ function yamlizer(root: any): string {
             }
             seen.add(obj);
 
-            // Token special display
             if (obj instanceof Token) {
                 const token = obj as Token;
                 const data = `<${token.value}|${token.type} ${token.context.text.filename}:${token.line}:${token.character}>`;
@@ -230,14 +236,12 @@ function yamlizer(root: any): string {
                 return data;
             }
 
-            // ✅ Arrays first
             if (Array.isArray(obj)) {
                 const seq = obj.map((x) => walker(x));
                 seen.delete(obj);
                 return seq;
             }
 
-            // ✅ "Node-like" = non-plain class instances (not arrays, not {})
             if (!isPlainObject(obj)) {
                 const data: any = { node: obj.constructor?.name ?? "Object" };
                 for (const k of Object.keys(obj)) {
@@ -248,10 +252,9 @@ function yamlizer(root: any): string {
                 return data;
             }
 
-            // Plain object mapping
             const out: any = {};
             for (const [k, v] of Object.entries(obj)) {
-                out[k] = walker(v); // keys from Object.entries are strings already
+                out[k] = walker(v);
             }
             seen.delete(obj);
             return out;
@@ -261,14 +264,7 @@ function yamlizer(root: any): string {
     }
 
     const data = walker(root);
-    // return YAML.stringify(data, {
-    //     singleQuote: true,
-    //     indent: 2,
-    //     nullStr: "",
-    //     defaultKeyType: "PLAIN",
-    // }).replaceAll(`initial: ''`, `initial:`);
     return JSON.stringify(data, null, 2);
-    return YAML.stringify(data, null, 2);
 }
 
 // -------------------------- Type System --------------------------
@@ -457,7 +453,7 @@ abstract class Node {
         throw new GenerateError(`c() not implemented for ${this.constructor.name} at ${this.token}`);
     }
     toString() {
-        return yamlizer(this);
+        return printer(this);
     }
 }
 abstract class Statement extends Node {}
@@ -684,15 +680,15 @@ class VariableReference extends Entity {
         this.parts = parts;
     }
     get type(): Type {
-        return discover_variable(this).type;
+        const variable = discover_variable(this);
+        const [t] = expand_variable_reference(variable, this, []);
+        return t;
     }
-    // override set type(_t: Type) {
-    //     /* not used directly */
-    // }
     c(): string {
         const variable = discover_variable(this);
-        const [, reference] = expand_variable_reference(variable, this);
-        return reference;
+        const pre: string[] = [];
+        const [, ref] = expand_variable_reference(variable, this, pre);
+        return ref; // ignore pre here (call sites that care pass their own pre)
     }
 }
 
@@ -767,13 +763,15 @@ class SET extends Statement {
         this.expression = expr;
     }
     c(): string {
-        const v: string[] = [];
-        for (const t of this.target) {
-            const variable = discover_variable(t);
-            const [, ref] = expand_variable_reference(variable, t);
-            v.push(`${ref} = ${this.expression.c()};`);
+        const out: string[] = [];
+        for (const target of this.target) {
+            const variable = discover_variable(target);
+            const pre: string[] = [];
+            const [, ref] = expand_variable_reference(variable, target, pre);
+            const rhs = C(this.expression.c(), pre);
+            out.push(...pre, `${ref} = ${rhs};`);
         }
-        return emit(v);
+        return emit(out);
     }
 }
 
@@ -788,9 +786,11 @@ class IF extends Statement {
         this.else_branch = eb ?? null;
     }
     c(): string {
-        let cond = this.cond.c();
+        const pre: string[] = [];
+        let cond = C(this.cond.c(), pre);
         if (cond.startsWith("(") && cond.endsWith(")")) cond = cond.slice(1, -1);
-        const v = [`if (${cond})`, "{", indent(this.then_branch.c(), 1), "}"];
+
+        const v = [...pre, `if (${cond})`, "{", indent(this.then_branch.c(), 1), "}"];
         if (this.else_branch) v.push("else", "{", indent(this.else_branch.c(), 1), "}");
         return emit(v);
     }
@@ -822,17 +822,36 @@ class FOR extends Statement {
         this.condition = cond ?? null;
     }
     c(): string {
-        const header = `for (${this.variable.c()} = ${this.init.c()}; ${this.format_condition()}; ${this.step()})`;
-        return emit([header, "{", indent(this.segment.c(), 1), "}"]);
+        const v: string[] = [];
+        const initPre: string[] = [];
+        const init = C(this.init.c(), initPre);
+        v.push(...initPre, `${this.variable.c()} = ${init};`);
+
+        const inner: string[] = [];
+        const cond = C(this.format_condition(inner), inner);
+        const step = C(this.step(inner), inner);
+
+        v.push(
+            "while (1)",
+            "{",
+            indent(emit(inner), 1),
+            indent(`if (!(${cond})) break;`, 1),
+            indent(this.segment.c(), 1),
+            indent(step, 1),
+            "}"
+        );
+        return emit(v);
     }
-    format_condition(): string {
-        const conditions: string[] = [];
-        if (this.condition) conditions.push(this.condition.c());
-        if (this.to) conditions.push(`${this.variable.c()} <= ${this.to.c()}`);
-        return conditions.join("");
+    format_condition(pre: string[]): string {
+        const parts: string[] = [];
+        if (this.condition) parts.push(C(this.condition.c(), pre));
+        if (this.to) parts.push(`${this.variable.c()} <= ${C(this.to.c(), pre)}`);
+        return parts.join("");
     }
-    step(): string {
-        return `${this.variable.c()} += ${this.by ? this.by.c() : "1"}`;
+
+    step(pre: string[]): string {
+        const by = this.by ? C(this.by.c(), pre) : "1";
+        return `${this.variable.c()} += ${by};`;
     }
 }
 
@@ -846,13 +865,18 @@ class SELECT extends Statement {
     }
     c(): string {
         const v: string[] = [];
+        const pre: string[] = [];
         for (let i = 0; i < this.cases.length; i++) {
-            const [cond, body] = this.cases[i];
-            if (cond) v.push((i > 0 ? "else " : "") + "if " + cond.c());
-            else v.push("else");
+            const [condExpr, body] = this.cases[i];
+            if (condExpr) {
+                const cond = C(condExpr.c(), pre);
+                v.push((i > 0 ? "else " : "") + `if (${cond})`);
+            } else {
+                v.push("else");
+            }
             v.push("{", indent(body.c(), 1), "}");
         }
-        return emit(v);
+        return emit([...pre, ...v]);
     }
 }
 
@@ -863,19 +887,16 @@ class INPUT extends Statement {
         this.vars = variables;
     }
     c(): string {
-        const inputs: string[] = [];
+        const out: string[] = [];
         for (const vr of this.vars) {
             const variable = discover_variable(vr);
-            const [type, reference] = expand_variable_reference(variable, vr);
-            if (type instanceof StringType) inputs.push(`scanf("%s", ${reference}.data);`);
-            else if (type instanceof IntegerType) inputs.push(`scanf("%d", &${reference});`);
-            else if (type instanceof RealType) inputs.push(`scanf("%lf", &${reference});`);
-            else
-                throw new GenerateError(
-                    `unsupported variable '${variable.name}' type in INPUT at ${String(variable.token)}`
-                );
+            const [type, ref] = expand_variable_reference(variable, vr, out);
+            if (type instanceof StringType) out.push(`scanf("%s", ${ref}.data);`);
+            else if (type instanceof IntegerType) out.push(`scanf("%d", &${ref});`);
+            else if (type instanceof RealType) out.push(`scanf("%lf", &${ref});`);
+            else throw new GenerateError(/* ...same as before... */);
         }
-        return emit(inputs);
+        return emit(out);
     }
 }
 
@@ -886,9 +907,11 @@ class OUTPUT extends Statement {
         this.arguments = args;
     }
     c(): string {
+        const pre: string[] = [];
         const fmt: string[] = [];
-        const params = this.arguments.map((a) => expression_stringer(a, fmt, "OUTPUT")).join(", ");
-        return `$output("${fmt.join("")}", ${params});`;
+        const params = this.arguments.map((a) => expression_stringer(a, fmt, "OUTPUT", pre)).join(", ");
+        pre.push(`$output("${fmt.join("")}", ${params});`);
+        return emit(pre);
     }
 }
 
@@ -937,7 +960,10 @@ class CALL extends Statement {
         this.arguments = args;
     }
     c(): string {
-        return `${this.name}(${this.arguments.map((a) => a.c()).join(", ")});`;
+        const pre: string[] = [];
+        const args = this.arguments.map((a) => C(a.c(), pre)).join(", ");
+        pre.push(`${this.name}(${args});`);
+        return emit(pre);
     }
 }
 
@@ -948,7 +974,11 @@ class RETURN extends Statement {
         this.value = v ?? null;
     }
     c(): string {
-        return this.value ? `return ${this.value.c()};` : "return;";
+        if (!this.value) return "return;";
+        const pre: string[] = [];
+        const v = C(this.value.c(), pre);
+        pre.push(`return ${v};`);
+        return emit(pre);
     }
 }
 class EXIT extends Statement {
@@ -958,7 +988,7 @@ class EXIT extends Statement {
 }
 class EMPTY extends Statement {
     c() {
-        return ";";
+        return "while (0);";
     }
 }
 
@@ -973,7 +1003,12 @@ class FunctionCall extends Expression {
         this.arguments = args;
     }
     c(): string {
-        return `${this.name}(${this.arguments.map((a) => a.c()).join(", ")})`;
+        const ctx = this.context();
+        const r = `$r${ctx.r++}`;
+        const pre: string[] = [];
+        const args = this.arguments.map((a) => C(a.c(), pre)).join(", ");
+        pre.push(`auto ${r} = ${this.name}(${args}); /* ${r} */`);
+        return emit(pre);
     }
 }
 
@@ -989,22 +1024,35 @@ class BinaryOperation extends Expression {
     }
     c(): string {
         const op = OPERATIONS[this.operation] ?? this.operation;
-        const st = string_compare(this.left, this.right, op);
-        if (st) return st;
-        return `(${this.left.c()} ${op} ${this.right.c()})`;
+        const const_ = string_compare(this.left, this.right, op);
+        if (const_) return const_;
+
+        const ctx = this.context();
+        const r = `$r${ctx.r++}`;
+
+        const pre: string[] = [];
+        const L = C(this.left.c(), pre);
+        const R = C(this.right.c(), pre);
+        pre.push(`auto ${r} = (${L} ${op} ${R}); /* ${r} */`);
+        return emit(pre);
     }
 }
 class UnaryOperation extends Expression {
     operation: string;
     expr: Expression;
-    constructor(t: Token, s: string, op: string, val: string, expr: Expression) {
+    constructor(t: Token, s: string, _type: string, value: string, expr: Expression) {
         super(t, s, expr.type);
-        this.operation = op === "NOT" ? "!" : val;
+        this.operation = value;
         this.expr = expr;
     }
     c(): string {
-        const operation = this.operation === "NOT" ? "!" : this.operation;
-        return `(${operation}${this.expr.c()})`;
+        const ctx = this.context();
+        const r = `$r${ctx.r++}`;
+        const op = this.operation === "NOT" ? "!" : this.operation;
+        const pre: string[] = [];
+        const v = C(this.expr.c(), pre);
+        pre.push(`auto ${r} = (${op}${v}); /* ${r} */`);
+        return emit(pre);
     }
 }
 
@@ -1013,7 +1061,7 @@ function string_compare(left: Expression, right: Expression, operation: string):
     function is_string_type(e: Expression): [boolean, string | null] {
         if (!(e instanceof VariableReference)) return [false, null];
         const variable = discover_variable(e);
-        const [type, reference] = expand_variable_reference(variable, e);
+        const [type, reference] = expand_variable_reference(variable, e, []);
         return [type instanceof StringType, reference];
     }
     const [lIs, lRef] = is_string_type(left);
@@ -1117,29 +1165,28 @@ class Lexer {
     }
 
     ident_or_keyword(): Token {
-        const line = this.line,
-            character = this.character;
-        let v = "";
-        let ch = this.current();
-        if (/[A-Za-z_]/.test(ch)) {
-            v += ch;
+        const line = this.line;
+        const character = this.character;
+        const c = this.current();
+        let value = "";
+        if (/[A-Za-z_]/.test(c)) {
+            value += c;
             this.advance();
             while (/[A-Za-z0-9_]/.test(this.current())) {
-                v += this.current();
+                value += this.current();
                 this.advance();
             }
         }
-        const value = v;
-        if (KEYWORDS.has(value)) return new Token("KEYWORD", value, line, character, this.context); // match Python: token.type="KEYWORD" but usando value como tipo aquí
-        return new Token("IDENT", v, line, character, this.context);
+        if (KEYWORDS.has(value)) return new Token("KEYWORD", value, line, character, this.context);
+        return new Token("IDENT", value, line, character, this.context);
     }
 
     string(): Token {
-        const line = this.line,
-            character = this.character;
+        const line = this.line;
+        const character = this.character;
         const quote = this.current();
         this.advance();
-        let v = "";
+        let value = "";
         while (true) {
             const c = this.current();
             if (!c) {
@@ -1149,16 +1196,16 @@ class Lexer {
             if (c === quote) {
                 this.advance();
                 if (this.current() === quote) {
-                    v += quote;
+                    value += quote;
                     this.advance();
                     continue;
                 }
                 break;
             }
-            v += c;
+            value += c;
             this.advance();
         }
-        return new Token("STRING", v, line, character, this.context);
+        return new Token("STRING", value, line, character, this.context);
     }
 
     symbol(): Token {
@@ -1202,15 +1249,17 @@ function is_number_name(name: string): boolean {
     return name === "INTEGER" || name === "REAL";
 }
 
-function expression_stringer(v: Expression, fmt: string[], callee: string): string {
-    const c = v.c();
+function expression_stringer(v: Expression, fmt: string[], callee: string, pre: string[]): string {
+    const c = C(v.c(), pre);
+
     if (v instanceof BuiltinLiteral) {
         fmt.push(v.format());
         return c;
     }
+
     if (v instanceof VariableReference) {
         const variable = discover_variable(v);
-        let [t, reference] = expand_variable_reference(variable, v);
+        let [t, ref] = expand_variable_reference(variable, v, pre);
         if (t instanceof AliasType) t = t.reference_type;
         if (!(t instanceof BuiltinType))
             throw new GenerateError(
@@ -1218,9 +1267,16 @@ function expression_stringer(v: Expression, fmt: string[], callee: string): stri
                     v.token
                 )}`
             );
+
         fmt.push(t.format());
-        return reference;
+        return ref;
     }
+
+    if (v instanceof ConcatenationOperation) {
+        fmt.push("A");
+        return c;
+    }
+
     if (v instanceof FunctionCall) {
         const fn = v.context().functions[v.name];
         const t = fn instanceof BuiltinFunction ? fn.type : fn.type;
@@ -1230,126 +1286,57 @@ function expression_stringer(v: Expression, fmt: string[], callee: string): stri
                     v.token
                 )}`
             );
+
         fmt.push(t.format());
         return c;
     }
-    if (v instanceof ConcatenationOperation) {
-        fmt.push("A");
-        return c;
-    }
+
     throw new GenerateError(`unsupported ${callee} argument '${String(v)}' at ${String(v.token)}`);
 }
 
 // -------------------------- Expand variable refs --------------------------
 
-function expand_variable_reference(variable: Variable, variable_reference: VariableReference): [Type, string] {
-    const context = variable.token.context;
-    if (context.flags["index_check"] === "0") return expand_variable_reference_direct(variable, variable_reference);
-    return expand_variable_reference_bound_checked(variable, variable_reference);
-}
-
-function expand_variable_reference_bound_checked(
+function expand_variable_reference(
     variable: Variable,
-    variable_reference: VariableReference
+    variable_reference: VariableReference,
+    pre: string[]
 ): [Type, string] {
-    let variable_type: Type = variable.type;
-    let reference_expression = variable.name; // lvalue or pointer to aggregate
-    let probe_expression = variable.name;
-    let is_pointer = false;
-    const parts = [...variable_reference.parts];
-    if (!parts.length) return [variable_type, reference_expression];
-
-    let result_reference: string | null = null;
-
-    for (let i = 0; i < parts.length; i++) {
-        const part = parts[i];
-        if (part instanceof VariableSubscript) {
-            const subscript_type = variable_type instanceof AliasType ? variable_type.reference_type : variable_type;
-            if (!(subscript_type instanceof ArrayType))
-                throw new GenerateError(
-                    `expect ArrayType in reference type of subscript, not ${
-                        subscript_type.constructor.name
-                    } at ${String(part.token)}`
-                );
-            const array_type = subscript_type;
-            const lo = array_type.lo.c();
-            const hi = array_type.hi.c();
-            const index = part.index();
-
-            const element_typeof = `typeof(${probe_expression}.data[0])`;
-            const element_sizeof = `sizeof(${element_typeof})`;
-            const data_expression = is_pointer ? `(${reference_expression})->data` : `${reference_expression}.data`;
-            const location = '"' + String(part.token).replace(/"/g, '\\"') + '"';
-            const current_reference = `(${element_typeof} *)$ref(${data_expression}, ${index}, ${lo}, ${hi}, ${element_sizeof}, ${location})`;
-
-            const is_last = i === parts.length - 1;
-            if (is_last) {
-                result_reference = `*${current_reference}`;
-            } else {
-                reference_expression = current_reference;
-                is_pointer = true;
-                probe_expression = `${probe_expression}.data[0]`;
-            }
-            variable_type = array_type.type;
-        } else if (part instanceof VariableField) {
-            const field_type = variable_type instanceof AliasType ? variable_type.reference_type : variable_type;
-            if (!(field_type instanceof StructType))
-                throw new GenerateError(
-                    `expect StructType in reference type of field, not ${field_type.constructor.name}, at ${String(
-                        part.token
-                    )}`
-                );
-            const struct_type = field_type;
-            const field = struct_type.fields.find((f) => f.name === part.name);
-            if (!field) throw new GenerateError(`field '${part.name}' not found in struct at ${String(part.token)}`);
-            const accessor = is_pointer ? `->${part.name}` : `.${part.name}`;
-            reference_expression = is_pointer
-                ? `(${reference_expression})${accessor}`
-                : `${reference_expression}${accessor}`;
-            probe_expression = `${probe_expression}.${part.name}`;
-            variable_type = field.type;
-            is_pointer = false;
-        } else {
-            throw new GenerateError(`unexpected variable part at ${String(variable.token)}`);
-        }
-    }
-    if (result_reference === null) result_reference = reference_expression;
-    return [variable_type, result_reference];
-}
-
-function expand_variable_reference_direct(variable: Variable, variable_reference: VariableReference): [Type, string] {
     let type: Type = variable.type;
-    let reference = variable.name;
+    let ref = variable.name;
+
     for (const part of variable_reference.parts) {
         if (part instanceof VariableSubscript) {
             if (type instanceof AliasType) type = type.reference_type;
-            if (!(type instanceof ArrayType))
-                throw new GenerateError(
-                    `expect ArrayType in reference type of subscript, not ${type.constructor.name} at ${String(
-                        part.token
-                    )}`
-                );
-            const lo = type.lo.c();
-            const index = `(${part.index()}) - (${lo})`;
+            if (!(type instanceof ArrayType)) throw new GenerateError(/* ... */);
+
+            const filename = part.token.context.text.filename;
+            const line = part.token.line;
+            const character = part.token.character;
+
+            // ensure $F exists (filename string const)
+            enlist_variable(new Variable(part.token, "$F", new StringType(), filename), "");
+
+            const lo = C(type.lo.c(), pre);
+            const hi = C(type.hi.c(), pre);
+            const idx = C(part.index(), pre);
+
+            pre.push(`$index(${idx}, ${lo}, ${hi}, &$F, ${line}, ${character});`);
+
+            const indexExpr = `(${idx}) - (${lo})`;
             type = type.type;
-            reference += `.data[${index}]`;
+            ref += `.data[${indexExpr}]`;
         } else if (part instanceof VariableField) {
             if (type instanceof AliasType) type = type.reference_type;
-            if (!(type instanceof StructType))
-                throw new GenerateError(
-                    `expect StructType in reference type of field, not ${type.constructor.name} at ${String(
-                        part.token
-                    )}`
-                );
+            if (!(type instanceof StructType)) throw new GenerateError(/* ... */);
             const field = type.fields.find((f) => f.name === part.name);
-            if (!field) throw new GenerateError(`field '${part.name}' not found in struct at ${String(part.token)}`);
+            if (!field) throw new GenerateError(/* ... */);
             type = field.type;
-            reference += part.c();
+            ref += part.c();
         } else {
-            throw new GenerateError(`unexpected part at ${String(variable.token)}`);
+            throw new GenerateError(/* ... */);
         }
     }
-    return [type, reference];
+    return [type, ref];
 }
 
 function discover_variable(v: VariableReference): Variable {
@@ -1858,8 +1845,8 @@ class Parser {
         return left;
     }
     expression_NOT(): Expression {
-        const token = this.accept("NOT");
-        if (token) return new UnaryOperation(token, this.scope(), token.type, token.value, this.expression_NOT());
+        const tok = this.accept("NOT");
+        if (tok) return new UnaryOperation(tok, this.scope(), "NOT", tok.value, this.expression_NOT());
         return this.expression_RELATION();
     }
     expression_RELATION(): Expression {
@@ -1979,9 +1966,14 @@ class ConcatenationOperation extends Expression {
         this.parts = parts;
     }
     c(): string {
+        const ctx = this.context();
+        const r = `$r${ctx.r++}`;
+
+        const pre: string[] = [];
         const fmt: string[] = [];
-        const args = this.parts.map((p) => expression_stringer(p, fmt, "||")).join(", ");
-        return `$concat("${fmt.join("")}", ${args})`;
+        const args = this.parts.map((p) => expression_stringer(p, fmt, "||", pre)).join(", ");
+        pre.push(`auto ${r} = $concat("${fmt.join("")}", ${args}); /* ${r} */`);
+        return emit(pre);
     }
 }
 
@@ -2131,7 +2123,7 @@ function run(argv: string[]) {
 
     if (argv.includes("-a")) {
         const astFile = inputFile.replace(/\.[^.]+$/, "") + ".json";
-        fs.writeFileSync(astFile, yamlizer(program), "utf-8");
+        fs.writeFileSync(astFile, printer(program), "utf-8");
     }
 
     const outputS = arg(argv, "-s") ?? inputFile.replace(/\.[^.]+$/, "") + ".s";

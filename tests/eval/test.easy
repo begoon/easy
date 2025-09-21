@@ -1,6 +1,59 @@
 PROGRAM Eval:
   DECLARE a INTEGER;
+  DECLARE m ARRAY [1:4] OF ARRAY [1:2] OF INTEGER;
+  DECLARE r ARRAY [1:100] OF INTEGER;
+  DECLARE s STRING;
+  DECLARE t 
+    ARRAY [1:2] OF 
+      ARRAY [1:4] OF 
+        STRUCTURE
+          FIELD a IS INTEGER, 
+          FIELD b IS REAL, 
+          FIELD c IS STRING, 
+          FIELD d IS ARRAY [1:2] OF INTEGER
+        END STRUCTURE;
 
-  SET a := 1 + 42*3;
-  OUTPUT a;
+  FUNCTION F1(x INTEGER, s STRING) STRING:
+    RETURN s || "=" || LENGTH(s) || "=" || x;
+  END FUNCTION F1;
+
+  PROCEDURE P1(i INTEGER, s STRING, v STRING):
+    OUTPUT "i=", i, " ", "s=", s, " ", "v=[", v, "]";
+  END PROCEDURE P1;
+
+  SET t[1][2].d[1] := 42;
+  OUTPUT t[1][2].d[1];
+
+  SET s := F1(456, "456");
+
+  CALL P1(123, "123", F1(456, "456"));
+
+  SET a := 2;
+  SET r[FIX(a/2)] := 1;
+
+  SET a := 0;
+  SET m[a+1][a+2] := 42;
+  OUTPUT m[a+1][a+2];
+
+  SET a := a + 1 + 42*3 MOD 3 - 7/2 + 2 + 3 + 69;
+  OUTPUT a, 123;
+
+  FOR a := 1+2 BY 1*2*10/3 TO 10*2/2 DO
+    OUTPUT a;
+  END FOR;
+
+  SET a := NOT (a | 7) & 3;
+
+  SET a := NOT(NOT 2);
+
+  IF (a < a + 123) THEN SET a := 0; FI;
+
+  IF a > 100 + (3 MOD 2) THEN
+    OUTPUT "X";
+  ELSE IF  a > 50 THEN
+    OUTPUT "M";
+  ELSE
+    OUTPUT "S";
+  FI; FI;
+
 END PROGRAM Eval;

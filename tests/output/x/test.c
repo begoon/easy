@@ -47,8 +47,17 @@ int main()
     b = TRUE;
     s = $4;
     $output("AiArAbAAA", $5, a, $6, r, $7, b, $8, s, $9);
-    $output("AAiAiAr", CHARACTER(50), $10, LENGTH($11), $10, FIX(23.56), $10, FLOAT(543));
-    $output("A", $concat("AA", $11, $12));
-    $output("AiArAbAAA", $5, fa(), $6, fr(), $7, fb(), $8, fs(), $13);
+    auto $r1 = CHARACTER(50);
+    auto $r2 = LENGTH($11);
+    auto $r3 = FIX(23.56);
+    auto $r4 = FLOAT(543);
+    $output("AAiAiAr", $r1, $10, $r2, $10, $r3, $10, $r4);
+    auto $r5 = $concat("AA", $11, $12);
+    $output("A", $r5);
+    auto $r6 = fa();
+    auto $r7 = fr();
+    auto $r8 = fb();
+    auto $r9 = fs();
+    $output("AiArAbAAA", $5, $r6, $6, $r7, $7, $r8, $8, $r9, $13);
     exit(0);
 }

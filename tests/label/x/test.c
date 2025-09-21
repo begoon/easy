@@ -22,13 +22,17 @@ int main()
         $output("A", $0);
     }
     for_label:
-    for (i = 0; i <= 0; i += 1)
+    i = 0;
+    while (1)
     {
+        if (!(i <= 0)) break;
         $output("A", $1);
+        i += 1;
     }
     i = 0;
     select_label:
-    if (i == 0)
+    auto $r1 = (i == 0);
+    if ($r1)
     {
         $output("A", $2);
     }

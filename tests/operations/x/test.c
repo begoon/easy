@@ -13,8 +13,11 @@ int main()
 {
     a = 1;
     b = 2;
-    c = ((a + 0) + b);
+    auto $r2 = (a + 0);
+    auto $r1 = ($r2 + b);
+    c = $r1;
     $output("iA", c, $0);
-    s = $concat("AA", s, $1);
+    auto $r3 = $concat("AA", s, $1);
+    s = $r3;
     $output("A", s);
 }

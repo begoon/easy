@@ -98,17 +98,26 @@ void pause(double seconds)
 {
     usleep(seconds * 1e6);
 }
-void *$ref(void *ptr, int index, int lo, int hi, int element_size, const char *location)
+void *$ref(void *ptr, int index, int lo, int hi, int element_size, const STR *filename, int line, int character)
 {
     if (index < lo || index > hi)
     {
-        fprintf(stderr, "array index out of bounds: %d not in [%d..%d] (%s)\n", index, lo, hi, location);
+        fprintf(stderr, "array index out of bounds: %d not in [%d..%d] (%s:%d:%d)\n", index, lo, hi, filename->data, line, character);
         exit(1);
     }
     index -= lo;
     return (void *)((unsigned char *)ptr + index * element_size);
 }
+void $index(int index, int lo, int hi, const STR *filename, int line, int character)
+{
+    if (index < lo || index > hi)
+    {
+        fprintf(stderr, "array index out of bounds: %d not in [%d..%d] (%s:%d:%d)\n", index, lo, hi, filename->data, line, character);
+        exit(1);
+    }
+}
 #pragma clang diagnostic ignored "-Wincompatible-library-redeclaration"
 #pragma clang diagnostic ignored "-Wunused-label"
 #pragma clang diagnostic ignored "-Wunused-variable"
 #pragma clang diagnostic ignored "-Wreturn-type"
+#pragma clang diagnostic ignored "-Wconstant-logical-operand"

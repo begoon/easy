@@ -1210,21 +1210,21 @@
       },
       {
         "node": "SET",
-        "token": "<SET|KEYWORD tests/rule_110/test.easy:51:3>",
+        "token": "<SET|KEYWORD tests/rule_110/test.easy:50:3>",
         "scope": "PROGRAM:Rule110",
         "target": [
           {
             "node": "VariableReference",
-            "token": "<row|IDENT tests/rule_110/test.easy:51:7>",
+            "token": "<row|IDENT tests/rule_110/test.easy:50:7>",
             "scope": "PROGRAM:Rule110",
             "name": "row",
             "parts": [
               {
                 "node": "VariableSubscript",
-                "token": "<FIX|IDENT tests/rule_110/test.easy:51:11>",
+                "token": "<FIX|IDENT tests/rule_110/test.easy:50:11>",
                 "value": {
                   "node": "FunctionCall",
-                  "token": "<FIX|IDENT tests/rule_110/test.easy:51:11>",
+                  "token": "<FIX|IDENT tests/rule_110/test.easy:50:11>",
                   "scope": "PROGRAM:Rule110",
                   "type": {
                     "node": "IntegerType"
@@ -1233,7 +1233,7 @@
                   "arguments": [
                     {
                       "node": "BinaryOperation",
-                      "token": "<N|IDENT tests/rule_110/test.easy:51:15>",
+                      "token": "<N|IDENT tests/rule_110/test.easy:50:15>",
                       "scope": "PROGRAM:Rule110",
                       "type": {
                         "node": "IntegerType"
@@ -1241,14 +1241,14 @@
                       "operation": "/",
                       "left": {
                         "node": "VariableReference",
-                        "token": "<N|IDENT tests/rule_110/test.easy:51:15>",
+                        "token": "<N|IDENT tests/rule_110/test.easy:50:15>",
                         "scope": "PROGRAM:Rule110",
                         "name": "N",
                         "parts": []
                       },
                       "right": {
                         "node": "IntegerLiteral",
-                        "token": "<2|INTEGER tests/rule_110/test.easy:51:17>",
+                        "token": "<2|INTEGER tests/rule_110/test.easy:50:17>",
                         "scope": "PROGRAM:Rule110",
                         "type": {
                           "node": "IntegerType"
@@ -1264,7 +1264,7 @@
         ],
         "expression": {
           "node": "IntegerLiteral",
-          "token": "<1|INTEGER tests/rule_110/test.easy:51:24>",
+          "token": "<1|INTEGER tests/rule_110/test.easy:50:24>",
           "scope": "PROGRAM:Rule110",
           "type": {
             "node": "IntegerType"
@@ -1274,25 +1274,25 @@
       },
       {
         "node": "CALL",
-        "token": "<CALL|KEYWORD tests/rule_110/test.easy:53:3>",
+        "token": "<CALL|KEYWORD tests/rule_110/test.easy:52:3>",
         "scope": "PROGRAM:Rule110",
         "name": "print",
         "arguments": []
       },
       {
         "node": "FOR",
-        "token": "<FOR|KEYWORD tests/rule_110/test.easy:55:3>",
+        "token": "<FOR|KEYWORD tests/rule_110/test.easy:54:3>",
         "scope": "PROGRAM:Rule110",
         "variable": {
           "node": "VariableReference",
-          "token": "<n|IDENT tests/rule_110/test.easy:55:7>",
+          "token": "<n|IDENT tests/rule_110/test.easy:54:7>",
           "scope": "PROGRAM:Rule110",
           "name": "n",
           "parts": []
         },
         "init": {
           "node": "IntegerLiteral",
-          "token": "<1|INTEGER tests/rule_110/test.easy:55:12>",
+          "token": "<1|INTEGER tests/rule_110/test.easy:54:12>",
           "scope": "PROGRAM:Rule110",
           "type": {
             "node": "IntegerType"
@@ -1301,7 +1301,7 @@
         },
         "segment": {
           "node": "Segment",
-          "token": "<CALL|KEYWORD tests/rule_110/test.easy:56:5>",
+          "token": "<CALL|KEYWORD tests/rule_110/test.easy:55:5>",
           "scope": "PROGRAM:Rule110",
           "types": [],
           "variables": [],
@@ -1309,14 +1309,14 @@
           "statements": [
             {
               "node": "CALL",
-              "token": "<CALL|KEYWORD tests/rule_110/test.easy:56:5>",
+              "token": "<CALL|KEYWORD tests/rule_110/test.easy:55:5>",
               "scope": "PROGRAM:Rule110",
               "name": "step",
               "arguments": []
             },
             {
               "node": "CALL",
-              "token": "<CALL|KEYWORD tests/rule_110/test.easy:57:5>",
+              "token": "<CALL|KEYWORD tests/rule_110/test.easy:56:5>",
               "scope": "PROGRAM:Rule110",
               "name": "print",
               "arguments": []
@@ -1326,7 +1326,7 @@
         "by": "",
         "to": {
           "node": "IntegerLiteral",
-          "token": "<10|INTEGER tests/rule_110/test.easy:55:17>",
+          "token": "<10|INTEGER tests/rule_110/test.easy:54:17>",
           "scope": "PROGRAM:Rule110",
           "type": {
             "node": "IntegerType"

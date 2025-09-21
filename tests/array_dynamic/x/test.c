@@ -8,6 +8,7 @@ struct
     int data[99 - 0 + 1];
 } a = {0};
 int sz = 0;
+STR $F = { .data = "tests/array_dynamic/test.easy" };
 int main()
 {
     sz = 1024;
@@ -16,7 +17,9 @@ int main()
         {
             int *data;
         } b = { .data = malloc(sizeof(int) * (sz - 1 + 1)) };
-        *(typeof(b.data[0]) *)$ref(b.data, 1, 1, sz, sizeof(typeof(b.data[0])), "<1|INTEGER|tests/array_dynamic/test.easy:9:11>") = 42;
-        $output("i", *(typeof(b.data[0]) *)$ref(b.data, 1, 1, sz, sizeof(typeof(b.data[0])), "<1|INTEGER|tests/array_dynamic/test.easy:10:14>"));
+        $index(1, 1, sz, &$F, 9, 11);
+        b.data[(1) - (1)] = 42;
+        $index(1, 1, sz, &$F, 10, 14);
+        $output("i", b.data[(1) - (1)]);
     }
 }

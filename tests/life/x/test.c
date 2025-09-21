@@ -21,9 +21,18 @@ STR $1 = { .data = " " };
 STR $2 = { .data = "*" };
 STR $3 = { .data = "x" };
 STR $4 = { .data = "GENERATION: " };
+STR $F = { .data = "tests/life/test.easy" };
 int valid(int x, int y)
 {
-    return (!((((x < 0) || (x >= w)) || (y < 0)) || (y >= h)));
+    auto $r10 = (x < 0);
+    auto $r11 = (x >= w);
+    auto $r9 = ($r10 || $r11);
+    auto $r12 = (y < 0);
+    auto $r8 = ($r9 || $r12);
+    auto $r13 = (y >= h);
+    auto $r7 = ($r8 || $r13);
+    auto $r6 = (!$r7);
+    return $r6;
 }
 int neighbours(int x, int y)
 {
@@ -31,21 +40,36 @@ int neighbours(int x, int y)
     int xx = 0;
     int yy = 0;
     n = 0;
-    for (xx = (x - 1); xx <= (x + 1); xx += 1)
+    auto $r14 = (x - 1);
+    xx = $r14;
+    while (1)
     {
-        for (yy = (y - 1); yy <= (y + 1); yy += 1)
+        auto $r15 = (x + 1);
+        if (!(xx <= $r15)) break;
+        auto $r16 = (y - 1);
+        yy = $r16;
+        while (1)
         {
-            if ((xx != x) || (yy != y))
+            auto $r17 = (y + 1);
+            if (!(yy <= $r17)) break;
+            auto $r19 = (xx != x);
+            auto $r20 = (yy != y);
+            auto $r18 = ($r19 || $r20);
+            if ($r18)
             {
-                if (valid(xx, yy))
+                auto $r21 = valid(xx, yy);
+                if ($r21)
                 {
-                    if (*(typeof(field.data[0].data[0]) *)$ref(((typeof(field.data[0]) *)$ref(field.data, yy, 0, 25, sizeof(typeof(field.data[0])), "<yy|IDENT|tests/life/test.easy:23:22>"))->data, xx, 0, 80, sizeof(typeof(field.data[0].data[0])), "<xx|IDENT|tests/life/test.easy:23:26>"))
+                    if (field.data[(yy) - (0)].data[(xx) - (0)])
                     {
-                        n = (n + 1);
+                        auto $r22 = (n + 1);
+                        n = $r22;
                     }
                 }
             }
+            yy += 1;
         }
+        xx += 1;
     }
     return n;
 }
@@ -54,17 +78,31 @@ void print()
     int x = 0;
     int y = 0;
     $output("AA", $0, $1);
-    for (x = 0; x <= ((w + 1) - 17); x += 1)
+    x = 0;
+    while (1)
     {
+        auto $r24 = (w + 1);
+        auto $r23 = ($r24 - 17);
+        if (!(x <= $r23)) break;
         $output("A", $2);
+        x += 1;
     }
-    $output("A", $concat("AA", $1, CHARACTER(13)));
-    for (y = 0; y <= (h - 1); y += 1)
+    auto $r26 = CHARACTER(13);
+    auto $r25 = $concat("AA", $1, $r26);
+    $output("A", $r25);
+    y = 0;
+    while (1)
     {
+        auto $r27 = (h - 1);
+        if (!(y <= $r27)) break;
         $output("A", $2);
-        for (x = 0; x <= (w - 1); x += 1)
+        x = 0;
+        while (1)
         {
-            if (*(typeof(field.data[0].data[0]) *)$ref(((typeof(field.data[0]) *)$ref(field.data, y, 0, 25, sizeof(typeof(field.data[0])), "<y|IDENT|tests/life/test.easy:40:18>"))->data, x, 0, 80, sizeof(typeof(field.data[0].data[0])), "<x|IDENT|tests/life/test.easy:40:21>") == TRUE)
+            auto $r28 = (w - 1);
+            if (!(x <= $r28)) break;
+            auto $r29 = (field.data[(y) - (0)].data[(x) - (0)] == TRUE);
+            if ($r29)
             {
                 $output("A", $3);
             }
@@ -72,52 +110,93 @@ void print()
             {
                 $output("A", $1);
             }
+            x += 1;
         }
-        $output("A", $concat("AA", $2, CHARACTER(13)));
+        auto $r31 = CHARACTER(13);
+        auto $r30 = $concat("AA", $2, $r31);
+        $output("A", $r30);
+        y += 1;
     }
-    for (x = 0; x <= (w + 1); x += 1)
+    x = 0;
+    while (1)
     {
+        auto $r32 = (w + 1);
+        if (!(x <= $r32)) break;
         $output("A", $2);
+        x += 1;
     }
-    $output("A", $concat("AA", $1, CHARACTER(13)));
+    auto $r34 = CHARACTER(13);
+    auto $r33 = $concat("AA", $1, $r34);
+    $output("A", $r33);
 }
 void glider(int x, int y)
 {
-    *(typeof(field.data[0].data[0]) *)$ref(((typeof(field.data[0]) *)$ref(field.data, y, 0, 25, sizeof(typeof(field.data[0])), "<y|IDENT|tests/life/test.easy:52:15>"))->data, x, 0, 80, sizeof(typeof(field.data[0].data[0])), "<x|IDENT|tests/life/test.easy:52:18>") = TRUE;
-    *(typeof(field.data[0].data[0]) *)$ref(((typeof(field.data[0]) *)$ref(field.data, y, 0, 25, sizeof(typeof(field.data[0])), "<y|IDENT|tests/life/test.easy:53:15>"))->data, (x + 1), 0, 80, sizeof(typeof(field.data[0].data[0])), "<x|IDENT|tests/life/test.easy:53:18>") = TRUE;
-    *(typeof(field.data[0].data[0]) *)$ref(((typeof(field.data[0]) *)$ref(field.data, y, 0, 25, sizeof(typeof(field.data[0])), "<y|IDENT|tests/life/test.easy:54:15>"))->data, (x + 2), 0, 80, sizeof(typeof(field.data[0].data[0])), "<x|IDENT|tests/life/test.easy:54:18>") = TRUE;
-    *(typeof(field.data[0].data[0]) *)$ref(((typeof(field.data[0]) *)$ref(field.data, (y + 1), 0, 25, sizeof(typeof(field.data[0])), "<y|IDENT|tests/life/test.easy:55:15>"))->data, x, 0, 80, sizeof(typeof(field.data[0].data[0])), "<x|IDENT|tests/life/test.easy:55:20>") = TRUE;
-    *(typeof(field.data[0].data[0]) *)$ref(((typeof(field.data[0]) *)$ref(field.data, (y + 2), 0, 25, sizeof(typeof(field.data[0])), "<y|IDENT|tests/life/test.easy:56:15>"))->data, (x + 1), 0, 80, sizeof(typeof(field.data[0].data[0])), "<x|IDENT|tests/life/test.easy:56:20>") = TRUE;
+    $index(y, 0, 25, &$F, 52, 15);
+    $index(x, 0, 80, &$F, 52, 18);
+    field.data[(y) - (0)].data[(x) - (0)] = TRUE;
+    $index(y, 0, 25, &$F, 53, 15);
+    auto $r35 = (x + 1);
+    $index($r35, 0, 80, &$F, 53, 18);
+    field.data[(y) - (0)].data[($r35) - (0)] = TRUE;
+    $index(y, 0, 25, &$F, 54, 15);
+    auto $r36 = (x + 2);
+    $index($r36, 0, 80, &$F, 54, 18);
+    field.data[(y) - (0)].data[($r36) - (0)] = TRUE;
+    auto $r37 = (y + 1);
+    $index($r37, 0, 25, &$F, 55, 15);
+    $index(x, 0, 80, &$F, 55, 20);
+    field.data[($r37) - (0)].data[(x) - (0)] = TRUE;
+    auto $r38 = (y + 2);
+    $index($r38, 0, 25, &$F, 56, 15);
+    auto $r39 = (x + 1);
+    $index($r39, 0, 80, &$F, 56, 20);
+    field.data[($r38) - (0)].data[($r39) - (0)] = TRUE;
 }
 void evolution()
 {
     int x = 0;
     int y = 0;
     Field next = {0};
-    for (y = 0; y <= (h - 1); y += 1)
+    y = 0;
+    while (1)
     {
-        for (x = 0; x <= (w - 1); x += 1)
+        auto $r40 = (h - 1);
+        if (!(y <= $r40)) break;
+        x = 0;
+        while (1)
         {
+            auto $r41 = (w - 1);
+            if (!(x <= $r41)) break;
             int alive = 0;
             int n = 0;
-            alive = *(typeof(field.data[0].data[0]) *)$ref(((typeof(field.data[0]) *)$ref(field.data, y, 0, 25, sizeof(typeof(field.data[0])), "<y|IDENT|tests/life/test.easy:68:28>"))->data, x, 0, 80, sizeof(typeof(field.data[0].data[0])), "<x|IDENT|tests/life/test.easy:68:31>");
-            n = neighbours(x, y);
-            if (alive == TRUE)
+            alive = field.data[(y) - (0)].data[(x) - (0)];
+            auto $r42 = neighbours(x, y);
+            n = $r42;
+            auto $r43 = (alive == TRUE);
+            if ($r43)
             {
-                if ((n < 2) || (n > 3))
+                auto $r45 = (n < 2);
+                auto $r46 = (n > 3);
+                auto $r44 = ($r45 || $r46);
+                if ($r44)
                 {
                     alive = FALSE;
                 }
             }
             else
             {
-                if (n == 3)
+                auto $r47 = (n == 3);
+                if ($r47)
                 {
                     alive = TRUE;
                 }
             }
-            *(typeof(next.data[0].data[0]) *)$ref(((typeof(next.data[0]) *)$ref(next.data, y, 0, 25, sizeof(typeof(next.data[0])), "<y|IDENT|tests/life/test.easy:77:18>"))->data, x, 0, 80, sizeof(typeof(next.data[0].data[0])), "<x|IDENT|tests/life/test.easy:77:21>") = alive;
+            $index(y, 0, 25, &$F, 77, 18);
+            $index(x, 0, 80, &$F, 77, 21);
+            next.data[(y) - (0)].data[(x) - (0)] = alive;
+            x += 1;
         }
+        y += 1;
     }
     field = next;
 }
@@ -125,26 +204,42 @@ int main()
 {
     w = 80;
     h = 25;
-    for (y = 0; y <= (h - 1); y += 1)
+    y = 0;
+    while (1)
     {
-        for (x = 0; x <= (w - 1); x += 1)
+        auto $r1 = (h - 1);
+        if (!(y <= $r1)) break;
+        x = 0;
+        while (1)
         {
-            *(typeof(field.data[0].data[0]) *)$ref(((typeof(field.data[0]) *)$ref(field.data, y, 0, 25, sizeof(typeof(field.data[0])), "<y|IDENT|tests/life/test.easy:89:17>"))->data, x, 0, 80, sizeof(typeof(field.data[0].data[0])), "<x|IDENT|tests/life/test.easy:89:20>") = FALSE;
+            auto $r2 = (w - 1);
+            if (!(x <= $r2)) break;
+            $index(y, 0, 25, &$F, 89, 17);
+            $index(x, 0, 80, &$F, 89, 20);
+            field.data[(y) - (0)].data[(x) - (0)] = FALSE;
+            x += 1;
         }
+        y += 1;
     }
     glider(30, 15);
     glider(40, 10);
     glider(50, 20);
-    for (i = 1; i <= 12; i += 1)
+    i = 1;
+    while (1)
     {
+        if (!(i <= 12)) break;
         print();
-        $output("A", $concat("Ai", $4, i));
+        auto $r3 = $concat("Ai", $4, i);
+        $output("A", $r3);
         evolution();
-        if ((i % 10) == 0)
+        auto $r5 = (i % 10);
+        auto $r4 = ($r5 == 0);
+        if ($r4)
         {
             glider(40, 10);
             glider(30, 15);
         }
+        i += 1;
     }
     exit(0);
 }

@@ -12,11 +12,12 @@ STR $0 = { .data = "" };
 STR $1 = { .data = ">" };
 STR $2 = { .data = "<" };
 STR $3 = { .data = "+" };
-STR $4 = { .data = "-" };
-STR $5 = { .data = "." };
-STR $6 = { .data = "[" };
-STR $7 = { .data = "]" };
-STR $8 = { .data = "+++++++++++[>+++++>+++<<-]>++++++++++++++ .---- .++++++++++++++++++ .++++++ .>." };
+STR $F = { .data = "tests/bf/test.easy" };
+STR $5 = { .data = "-" };
+STR $6 = { .data = "." };
+STR $7 = { .data = "[" };
+STR $8 = { .data = "]" };
+STR $9 = { .data = "+++++++++++[>+++++>+++<<-]>++++++++++++++ .---- .++++++++++++++++++ .++++++ .>." };
 STR bf(STR program)
 {
     Tape tape = {0};
@@ -25,75 +26,109 @@ STR bf(STR program)
     int ptr = 0;
     STR ch = {0};
     int depth = 0;
-    *(typeof(tape.data[0]) *)$ref(tape.data, 0, 0, 299, sizeof(typeof(tape.data[0])), "<0|INTEGER|tests/bf/test.easy:16:14>") = 0;
+    $index(0, 0, 299, &$F, 16, 14);
+    tape.data[(0) - (0)] = 0;
     ptr = 0;
     out = $0;
-    for (pc = 0; pc <= (LENGTH(program) - 1); pc += 1)
+    pc = 0;
+    while (1)
     {
-        ch = SUBSTR(program, pc, 1);
+        auto $r3 = LENGTH(program);
+        auto $r2 = ($r3 - 1);
+        if (!(pc <= $r2)) break;
+        auto $r4 = SUBSTR(program, pc, 1);
+        ch = $r4;
         if (strcmp(ch.data, $1.data) == 0)
         {
-            ptr = (ptr + 1);
+            auto $r5 = (ptr + 1);
+            ptr = $r5;
         }
         if (strcmp(ch.data, $2.data) == 0)
         {
-            ptr = (ptr - 1);
+            auto $r6 = (ptr - 1);
+            ptr = $r6;
         }
         if (strcmp(ch.data, $3.data) == 0)
         {
-            *(typeof(tape.data[0]) *)$ref(tape.data, ptr, 0, 299, sizeof(typeof(tape.data[0])), "<ptr|IDENT|tests/bf/test.easy:26:33>") = (*(typeof(tape.data[0]) *)$ref(tape.data, ptr, 0, 299, sizeof(typeof(tape.data[0])), "<ptr|IDENT|tests/bf/test.easy:26:46>") + 1);
-        }
-        if (strcmp(ch.data, $4.data) == 0)
-        {
-            *(typeof(tape.data[0]) *)$ref(tape.data, ptr, 0, 299, sizeof(typeof(tape.data[0])), "<ptr|IDENT|tests/bf/test.easy:27:33>") = (*(typeof(tape.data[0]) *)$ref(tape.data, ptr, 0, 299, sizeof(typeof(tape.data[0])), "<ptr|IDENT|tests/bf/test.easy:27:46>") - 1);
+            $index(ptr, 0, 299, &$F, 26, 33);
+            auto $r7 = (tape.data[(ptr) - (0)] + 1);
+            tape.data[(ptr) - (0)] = $r7;
         }
         if (strcmp(ch.data, $5.data) == 0)
         {
-            out = $concat("AA", out, CHARACTER(*(typeof(tape.data[0]) *)$ref(tape.data, ptr, 0, 299, sizeof(typeof(tape.data[0])), "<ptr|IDENT|tests/bf/test.easy:28:57>")));
+            $index(ptr, 0, 299, &$F, 27, 33);
+            auto $r8 = (tape.data[(ptr) - (0)] - 1);
+            tape.data[(ptr) - (0)] = $r8;
         }
         if (strcmp(ch.data, $6.data) == 0)
         {
-            if (*(typeof(tape.data[0]) *)$ref(tape.data, ptr, 0, 299, sizeof(typeof(tape.data[0])), "<ptr|IDENT|tests/bf/test.easy:30:17>") == 0)
-            {
-                for (depth = 1; (depth > 0); depth += 0)
-                {
-                    pc = (pc + 1);
-                    ch = SUBSTR(program, pc, 1);
-                    if (strcmp(ch.data, $6.data) == 0)
-                    {
-                        depth = (depth + 1);
-                    }
-                    if (strcmp(ch.data, $7.data) == 0)
-                    {
-                        depth = (depth - 1);
-                    }
-                }
-            }
+            auto $r10 = CHARACTER(tape.data[(ptr) - (0)]);
+            auto $r9 = $concat("AA", out, $r10);
+            out = $r9;
         }
         if (strcmp(ch.data, $7.data) == 0)
         {
-            if (*(typeof(tape.data[0]) *)$ref(tape.data, ptr, 0, 299, sizeof(typeof(tape.data[0])), "<ptr|IDENT|tests/bf/test.easy:40:17>") != 0)
+            auto $r11 = (tape.data[(ptr) - (0)] == 0);
+            if ($r11)
             {
-                for (depth = 1; (depth > 0); depth += 0)
+                depth = 1;
+                while (1)
                 {
-                    pc = (pc - 1);
-                    ch = SUBSTR(program, pc, 1);
+                    auto $r12 = (depth > 0);
+                    if (!($r12)) break;
+                    auto $r13 = (pc + 1);
+                    pc = $r13;
+                    auto $r14 = SUBSTR(program, pc, 1);
+                    ch = $r14;
                     if (strcmp(ch.data, $7.data) == 0)
                     {
-                        depth = (depth + 1);
+                        auto $r15 = (depth + 1);
+                        depth = $r15;
                     }
-                    if (strcmp(ch.data, $6.data) == 0)
+                    if (strcmp(ch.data, $8.data) == 0)
                     {
-                        depth = (depth - 1);
+                        auto $r16 = (depth - 1);
+                        depth = $r16;
                     }
+                    depth += 0;
                 }
             }
         }
+        if (strcmp(ch.data, $8.data) == 0)
+        {
+            auto $r17 = (tape.data[(ptr) - (0)] != 0);
+            if ($r17)
+            {
+                depth = 1;
+                while (1)
+                {
+                    auto $r18 = (depth > 0);
+                    if (!($r18)) break;
+                    auto $r19 = (pc - 1);
+                    pc = $r19;
+                    auto $r20 = SUBSTR(program, pc, 1);
+                    ch = $r20;
+                    if (strcmp(ch.data, $8.data) == 0)
+                    {
+                        auto $r21 = (depth + 1);
+                        depth = $r21;
+                    }
+                    if (strcmp(ch.data, $7.data) == 0)
+                    {
+                        auto $r22 = (depth - 1);
+                        depth = $r22;
+                    }
+                    depth += 0;
+                }
+            }
+        }
+        pc += 1;
     }
     return out;
 }
 int main()
 {
-    program = $8;
-    $output("A", bf(program));
+    program = $9;
+    auto $r1 = bf(program);
+    $output("A", $r1);
 }
