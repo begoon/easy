@@ -206,7 +206,7 @@ async function processOne(testDir: string, compiler: string) {
     }
 
     if (compiler === "python" || compiler === "python-ext") {
-        await run(["python", "easy.py", program, ...flags]);
+        await run(["python", "easyc.py", program, ...flags]);
     } else if (compiler === "ts") {
         await run(["bun", "easyc.ts", program, ...flags]);
     } else {

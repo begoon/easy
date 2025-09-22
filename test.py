@@ -6,9 +6,9 @@ import traceback
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 
-import easy
+import easyc
 import peg
-from easy import arg, flag, printer
+from easyc import arg, flag, printer
 from peg import PEGParser
 
 TESTS_FOLDER = Path("tests")
@@ -110,9 +110,9 @@ def process(test: Path) -> None:
             run(["bun", "peg.ts", program])
 
     if compiler == "python":
-        easy.run(["easy.py", str(program), *flags])
+        easyc.run(["easyc.py", str(program), *flags])
     elif compiler == "python-ext":
-        run(["python", "easy.py", program, *flags])
+        run(["python", "easyc.py", program, *flags])
     elif compiler == "ts":
         run(["bun", "easyc.ts", str(program), *flags])
     else:
