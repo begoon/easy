@@ -8,7 +8,7 @@ STR $0 = { .data = "abc " };
 int main()
 {
     a = 100;
-    auto $r1 = $concat("Ai", $0, a);
+    const auto $r1 = $concat("Ai", $0, a);
     $output("A", $r1);
     a = 0;
     while (1)

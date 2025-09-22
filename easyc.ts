@@ -1007,7 +1007,7 @@ class FunctionCall extends Expression {
         const r = `$r${ctx.r++}`;
         const pre: string[] = [];
         const args = this.arguments.map((a) => C(a.c(), pre)).join(", ");
-        pre.push(`auto ${r} = ${this.name}(${args}); /* ${r} */`);
+        pre.push(`const auto ${r} = ${this.name}(${args}); /* ${r} */`);
         return emit(pre);
     }
 }
@@ -1033,7 +1033,7 @@ class BinaryOperation extends Expression {
         const pre: string[] = [];
         const L = C(this.left.c(), pre);
         const R = C(this.right.c(), pre);
-        pre.push(`auto ${r} = (${L} ${op} ${R}); /* ${r} */`);
+        pre.push(`const auto ${r} = (${L} ${op} ${R}); /* ${r} */`);
         return emit(pre);
     }
 }
@@ -1051,7 +1051,7 @@ class UnaryOperation extends Expression {
         const op = this.operation === "NOT" ? "!" : this.operation;
         const pre: string[] = [];
         const v = C(this.expr.c(), pre);
-        pre.push(`auto ${r} = (${op}${v}); /* ${r} */`);
+        pre.push(`const auto ${r} = (${op}${v}); /* ${r} */`);
         return emit(pre);
     }
 }
@@ -1972,7 +1972,7 @@ class ConcatenationOperation extends Expression {
         const pre: string[] = [];
         const fmt: string[] = [];
         const args = this.parts.map((p) => expression_stringer(p, fmt, "||", pre)).join(", ");
-        pre.push(`auto ${r} = $concat("${fmt.join("")}", ${args}); /* ${r} */`);
+        pre.push(`const auto ${r} = $concat("${fmt.join("")}", ${args}); /* ${r} */`);
         return emit(pre);
     }
 }

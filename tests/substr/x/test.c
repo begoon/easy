@@ -10,12 +10,12 @@ STR $2 = { .data = "abc" };
 int main()
 {
     s = $0;
-    auto $r1 = SUBSTR($1, 1, 2);
+    const auto $r1 = SUBSTR($1, 1, 2);
     $output("A", $r1);
-    auto $r2 = SUBSTR(s, 1, 2);
+    const auto $r2 = SUBSTR(s, 1, 2);
     $output("A", $r2);
-    auto $r4 = SUBSTR(s, 3, 2);
-    auto $r3 = $concat("AA", $2, $r4);
+    const auto $r4 = SUBSTR(s, 3, 2);
+    const auto $r3 = $concat("AA", $2, $r4);
     $output("A", $r3);
     exit(0);
 }

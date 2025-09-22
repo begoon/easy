@@ -57,7 +57,7 @@ int main()
     $index(1, 0, 8, &$F, 13, 35);
     $index(2, 0, 2, &$F, 13, 38);
     $index(3, 0, 4, &$F, 13, 41);
-    auto $r1 = $concat("AAA", a.data[(1) - (0)].data[(2) - (0)].data[(3) - (0)].s, $1, b.data[(1) - (0)].data[(2) - (0)].data[(3) - (0)].s);
+    const auto $r1 = $concat("AAA", a.data[(1) - (0)].data[(2) - (0)].data[(3) - (0)].s, $1, b.data[(1) - (0)].data[(2) - (0)].data[(3) - (0)].s);
     $output("A", $r1);
     exit(0);
 }

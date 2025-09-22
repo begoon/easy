@@ -12,10 +12,10 @@ STR $4 = { .data = " non-positive." };
 STR $F = { .data = "tests/sieve/test.easy" };
 double abs(double x)
 {
-    auto $r9 = (x < 0);
+    const auto $r9 = (x < 0);
     if ($r9)
     {
-        auto $r10 = (-x);
+        const auto $r10 = (-x);
         return $r10;
     }
     else
@@ -25,9 +25,9 @@ double abs(double x)
 }
 int integersqrt(int a)
 {
-    auto $r11 = (a < 0);
-    auto $r12 = (a == 0);
-    auto $r13 = (a > 0);
+    const auto $r11 = (a < 0);
+    const auto $r12 = (a == 0);
+    const auto $r13 = (a > 0);
     if ($r11)
     {
         $output("A", $0);
@@ -43,34 +43,34 @@ int integersqrt(int a)
         double ra = 0.0;
         double epsilon = 0.0;
         int sqrt = 0;
-        auto $r14 = FLOAT(a);
+        const auto $r14 = FLOAT(a);
         ra = $r14;
-        auto $r15 = (1e-7 * ra);
+        const auto $r15 = (1e-7 * ra);
         epsilon = $r15;
-        auto $r16 = (ra / 2.0);
+        const auto $r16 = (ra / 2.0);
         x = $r16;
         while (1)
         {
-            auto $r20 = (x * x);
-            auto $r19 = (ra - $r20);
-            auto $r18 = abs($r19);
-            auto $r17 = ($r18 > epsilon);
-            auto $r23 = (ra / x);
-            auto $r22 = ($r23 - x);
-            auto $r21 = ($r22 / 2.0);
+            const auto $r20 = (x * x);
+            const auto $r19 = (ra - $r20);
+            const auto $r18 = abs($r19);
+            const auto $r17 = ($r18 > epsilon);
+            const auto $r23 = (ra / x);
+            const auto $r22 = ($r23 - x);
+            const auto $r21 = ($r22 / 2.0);
             if (!($r17)) break;
             while (0);
             x += $r21;
         }
-        auto $r25 = FIX(x);
-        auto $r24 = ($r25 - 1);
+        const auto $r25 = FIX(x);
+        const auto $r24 = ($r25 - 1);
         sqrt = $r24;
         while (1)
         {
-            auto $r28 = (sqrt + 1);
-            auto $r29 = (sqrt + 1);
-            auto $r27 = ($r28 * $r29);
-            auto $r26 = ($r27 <= a);
+            const auto $r28 = (sqrt + 1);
+            const auto $r29 = (sqrt + 1);
+            const auto $r27 = ($r28 * $r29);
+            const auto $r26 = ($r27 <= a);
             if (!($r26)) break;
             while (0);
             sqrt += 1;
@@ -81,7 +81,7 @@ int integersqrt(int a)
 int main()
 {
     scanf("%d", &topnum);
-    auto $r1 = (topnum > 0);
+    const auto $r1 = (topnum > 0);
     if ($r1)
     {
         struct
@@ -91,7 +91,7 @@ int main()
         int i = 0;
         int limit = 0;
         int count = 0;
-        auto $r2 = (topnum + 1);
+        const auto $r2 = (topnum + 1);
         topnum = $r2;
         i = 1;
         while (1)
@@ -101,8 +101,8 @@ int main()
             sieve.data[(i) - (1)] = TRUE;
             i += 1;
         }
-        auto $r4 = integersqrt(topnum);
-        auto $r3 = ($r4 + 1);
+        const auto $r4 = integersqrt(topnum);
+        const auto $r3 = ($r4 + 1);
         limit = $r3;
         i = 2;
         while (1)
@@ -111,7 +111,7 @@ int main()
             if (sieve.data[(i) - (1)])
             {
                 int j = 0;
-                auto $r5 = (2 * i);
+                const auto $r5 = (2 * i);
                 j = $r5;
                 while (1)
                 {
@@ -130,9 +130,9 @@ int main()
             if (!(i <= topnum)) break;
             if (sieve.data[(i) - (1)])
             {
-                auto $r6 = (count + 1);
+                const auto $r6 = (count + 1);
                 count = $r6;
-                auto $r7 = $concat("AiAi", $1, count, $2, i);
+                const auto $r7 = $concat("AiAi", $1, count, $2, i);
                 $output("A", $r7);
             }
             i += 1;
@@ -140,7 +140,7 @@ int main()
     }
     else
     {
-        auto $r8 = $concat("AiA", $3, topnum, $4);
+        const auto $r8 = $concat("AiA", $3, topnum, $4);
         $output("A", $r8);
     }
     exit(0);

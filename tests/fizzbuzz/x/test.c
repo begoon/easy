@@ -14,15 +14,15 @@ void FizzBuzz(int n)
     while (1)
     {
         if (!(i <= n)) break;
-        auto $r3 = (i % 3);
-        auto $r2 = ($r3 == 0);
-        auto $r5 = (i % 5);
-        auto $r4 = ($r5 == 0);
-        auto $r1 = ($r2 && $r4);
-        auto $r7 = (i % 3);
-        auto $r6 = ($r7 == 0);
-        auto $r9 = (i % 5);
-        auto $r8 = ($r9 == 0);
+        const auto $r3 = (i % 3);
+        const auto $r2 = ($r3 == 0);
+        const auto $r5 = (i % 5);
+        const auto $r4 = ($r5 == 0);
+        const auto $r1 = ($r2 && $r4);
+        const auto $r7 = (i % 3);
+        const auto $r6 = ($r7 == 0);
+        const auto $r9 = (i % 5);
+        const auto $r8 = ($r9 == 0);
         if ($r1)
         {
             $output("A", $0);

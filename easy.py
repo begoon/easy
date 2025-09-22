@@ -881,7 +881,7 @@ class FunctionCall(Expression):
         context.r += 1
 
         v = []
-        v.append(f"auto {r} = {self.name}({', '.join(C(a.c(), v) for a in self.arguments)}); /* {r} */")
+        v.append(f"const auto {r} = {self.name}({', '.join(C(a.c(), v) for a in self.arguments)}); /* {r} */")
         return emit(v)
 
 
@@ -907,7 +907,7 @@ class BinaryOperation(Expression):
         left_value = C(self.left.c(), v)
         right_value = C(self.right.c(), v)
 
-        v.append(f"auto {r} = ({left_value} {operation} {right_value}); /* {r} */")
+        v.append(f"const auto {r} = ({left_value} {operation} {right_value}); /* {r} */")
         return emit(v)
 
 
@@ -944,7 +944,7 @@ class ConcatenationOperation(Expression):
 
         format: list[str] = []
         arguments = ", ".join(expression_stringer(argument, format, "||", output) for argument in self.parts)
-        output.append(f'auto {r} = $concat("{"".join(format)}", {arguments}); /* {r} */')
+        output.append(f'const auto {r} = $concat("{"".join(format)}", {arguments}); /* {r} */')
         return emit(output)
 
 
@@ -963,7 +963,7 @@ class UnaryOperation(Expression):
         v = []
         value = C(self.expression.c(), v)
 
-        v.append(f"auto {r} = ({operation}{value}); /* {r} */")
+        v.append(f"const auto {r} = ({operation}{value}); /* {r} */")
         return emit(v)
 
 

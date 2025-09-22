@@ -41,27 +41,27 @@ STR fs()
 }
 int main()
 {
-    auto $r1 = $concat("iArAbAb", 0, $1, 0.001, $2, TRUE, $3, FALSE);
+    const auto $r1 = $concat("iArAbAb", 0, $1, 0.001, $2, TRUE, $3, FALSE);
     $output("A", $r1);
     a = 321;
     r = 1.003;
     b = TRUE;
     s = $4;
-    auto $r2 = $concat("AiArAbAAA", $5, a, $6, r, $7, b, $8, s, $9);
+    const auto $r2 = $concat("AiArAbAAA", $5, a, $6, r, $7, b, $8, s, $9);
     $output("A", $r2);
-    auto $r4 = CHARACTER(50);
-    auto $r5 = LENGTH($11);
-    auto $r6 = FIX(23.56);
-    auto $r7 = FLOAT(543);
-    auto $r3 = $concat("AAiAiAr", $r4, $10, $r5, $10, $r6, $10, $r7);
+    const auto $r4 = CHARACTER(50);
+    const auto $r5 = LENGTH($11);
+    const auto $r6 = FIX(23.56);
+    const auto $r7 = FLOAT(543);
+    const auto $r3 = $concat("AAiAiAr", $r4, $10, $r5, $10, $r6, $10, $r7);
     $output("A", $r3);
-    auto $r8 = $concat("AA", $11, $12);
+    const auto $r8 = $concat("AA", $11, $12);
     $output("A", $r8);
-    auto $r10 = fa();
-    auto $r11 = fr();
-    auto $r12 = fb();
-    auto $r13 = fs();
-    auto $r9 = $concat("AiArAbAAA", $5, $r10, $6, $r11, $7, $r12, $8, $r13, $13);
+    const auto $r10 = fa();
+    const auto $r11 = fr();
+    const auto $r12 = fb();
+    const auto $r13 = fs();
+    const auto $r9 = $concat("AiArAbAAA", $5, $r10, $6, $r11, $7, $r12, $8, $r13, $13);
     $output("A", $r9);
     exit(0);
 }

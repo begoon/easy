@@ -33,61 +33,61 @@ STR bf(STR program)
     pc = 0;
     while (1)
     {
-        auto $r3 = LENGTH(program);
-        auto $r2 = ($r3 - 1);
+        const auto $r3 = LENGTH(program);
+        const auto $r2 = ($r3 - 1);
         if (!(pc <= $r2)) break;
-        auto $r4 = SUBSTR(program, pc, 1);
+        const auto $r4 = SUBSTR(program, pc, 1);
         ch = $r4;
         if (strcmp(ch.data, $1.data) == 0)
         {
-            auto $r5 = (ptr + 1);
+            const auto $r5 = (ptr + 1);
             ptr = $r5;
         }
         if (strcmp(ch.data, $2.data) == 0)
         {
-            auto $r6 = (ptr - 1);
+            const auto $r6 = (ptr - 1);
             ptr = $r6;
         }
         if (strcmp(ch.data, $3.data) == 0)
         {
             $index(ptr, 0, 299, &$F, 26, 33);
-            auto $r7 = (tape.data[(ptr) - (0)] + 1);
+            const auto $r7 = (tape.data[(ptr) - (0)] + 1);
             tape.data[(ptr) - (0)] = $r7;
         }
         if (strcmp(ch.data, $5.data) == 0)
         {
             $index(ptr, 0, 299, &$F, 27, 33);
-            auto $r8 = (tape.data[(ptr) - (0)] - 1);
+            const auto $r8 = (tape.data[(ptr) - (0)] - 1);
             tape.data[(ptr) - (0)] = $r8;
         }
         if (strcmp(ch.data, $6.data) == 0)
         {
-            auto $r10 = CHARACTER(tape.data[(ptr) - (0)]);
-            auto $r9 = $concat("AA", out, $r10);
+            const auto $r10 = CHARACTER(tape.data[(ptr) - (0)]);
+            const auto $r9 = $concat("AA", out, $r10);
             out = $r9;
         }
         if (strcmp(ch.data, $7.data) == 0)
         {
-            auto $r11 = (tape.data[(ptr) - (0)] == 0);
+            const auto $r11 = (tape.data[(ptr) - (0)] == 0);
             if ($r11)
             {
                 depth = 1;
                 while (1)
                 {
-                    auto $r12 = (depth > 0);
+                    const auto $r12 = (depth > 0);
                     if (!($r12)) break;
-                    auto $r13 = (pc + 1);
+                    const auto $r13 = (pc + 1);
                     pc = $r13;
-                    auto $r14 = SUBSTR(program, pc, 1);
+                    const auto $r14 = SUBSTR(program, pc, 1);
                     ch = $r14;
                     if (strcmp(ch.data, $7.data) == 0)
                     {
-                        auto $r15 = (depth + 1);
+                        const auto $r15 = (depth + 1);
                         depth = $r15;
                     }
                     if (strcmp(ch.data, $8.data) == 0)
                     {
-                        auto $r16 = (depth - 1);
+                        const auto $r16 = (depth - 1);
                         depth = $r16;
                     }
                     depth += 0;
@@ -96,26 +96,26 @@ STR bf(STR program)
         }
         if (strcmp(ch.data, $8.data) == 0)
         {
-            auto $r17 = (tape.data[(ptr) - (0)] != 0);
+            const auto $r17 = (tape.data[(ptr) - (0)] != 0);
             if ($r17)
             {
                 depth = 1;
                 while (1)
                 {
-                    auto $r18 = (depth > 0);
+                    const auto $r18 = (depth > 0);
                     if (!($r18)) break;
-                    auto $r19 = (pc - 1);
+                    const auto $r19 = (pc - 1);
                     pc = $r19;
-                    auto $r20 = SUBSTR(program, pc, 1);
+                    const auto $r20 = SUBSTR(program, pc, 1);
                     ch = $r20;
                     if (strcmp(ch.data, $8.data) == 0)
                     {
-                        auto $r21 = (depth + 1);
+                        const auto $r21 = (depth + 1);
                         depth = $r21;
                     }
                     if (strcmp(ch.data, $7.data) == 0)
                     {
-                        auto $r22 = (depth - 1);
+                        const auto $r22 = (depth - 1);
                         depth = $r22;
                     }
                     depth += 0;
@@ -129,6 +129,6 @@ STR bf(STR program)
 int main()
 {
     program = $9;
-    auto $r1 = bf(program);
+    const auto $r1 = bf(program);
     $output("A", $r1);
 }

@@ -31,7 +31,7 @@ int main()
     }
     i = 0;
     select_label:
-    auto $r1 = (i == 0);
+    const auto $r1 = (i == 0);
     if ($r1)
     {
         $output("A", $2);

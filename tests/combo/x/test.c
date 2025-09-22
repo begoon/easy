@@ -47,27 +47,27 @@ STR $4 = { .data = "XYZ" };
 STR $F = { .data = "tests/combo/test.easy" };
 STR F1(int x, STR s)
 {
-    auto $r6 = LENGTH(s);
-    auto $r5 = $concat("Aii", s, $r6, x);
+    const auto $r6 = LENGTH(s);
+    const auto $r5 = $concat("Aii", s, $r6, x);
     return $r5;
 }
 void P1(int xx, STR s, STR xx2)
 {
     int x = 0;
     x = 1;
-    auto $r8 = LENGTH(s);
-    auto $r7 = $concat("iAiiAA", x, s, $r8, xx, xx2, $0);
+    const auto $r8 = LENGTH(s);
+    const auto $r7 = $concat("iAiiAA", x, s, $r8, xx, xx2, $0);
     $output("A", $r7);
 }
 int main()
 {
-    auto $r1 = F1(456, $2);
+    const auto $r1 = F1(456, $2);
     P1(123, $1, $r1);
     s.a.s = $3;
     $index(1, 1, 8, &$F, 48, 14);
     $index(1, 1, 256, &$F, 48, 17);
     $output("iA", s.m.data[(1) - (1)].data[(1) - (1)], s.a.s);
-    auto $r2 = $concat("AA", s.a.s, $4);
+    const auto $r2 = $concat("AA", s.a.s, $4);
     s.a.s = $r2;
     s.m = m1;
     i = 0;
@@ -92,8 +92,8 @@ int main()
             if (!(j <= 256)) break;
             $index(i, 1, 8, &$F, 63, 13);
             $index(j, 1, 256, &$F, 63, 16);
-            auto $r4 = (i * 100);
-            auto $r3 = ($r4 + j);
+            const auto $r4 = (i * 100);
+            const auto $r3 = ($r4 + j);
             m.data[(i) - (1)].data[(j) - (1)] = $r3;
             j += 1;
         }

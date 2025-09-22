@@ -36,30 +36,30 @@ void step()
         int right = 0;
         int s = 0;
         int j = 0;
-        auto $r3 = (i - 1);
+        const auto $r3 = (i - 1);
         j = $r3;
-        auto $r4 = (j < 1);
+        const auto $r4 = (j < 1);
         if ($r4)
         {
             j = N;
         }
         left = row.data[(j) - (1)];
         c = row.data[(i) - (1)];
-        auto $r5 = (i + 1);
+        const auto $r5 = (i + 1);
         j = $r5;
-        auto $r6 = (j > N);
+        const auto $r6 = (j > N);
         if ($r6)
         {
             j = 1;
         }
         right = row.data[(j) - (1)];
-        auto $r8 = (left + c);
-        auto $r7 = ($r8 + right);
+        const auto $r8 = (left + c);
+        const auto $r7 = ($r8 + right);
         s = $r7;
-        auto $r9 = (s == 2);
-        auto $r11 = (s == 0);
-        auto $r12 = (s == 3);
-        auto $r10 = ($r11 || $r12);
+        const auto $r9 = (s == 2);
+        const auto $r11 = (s == 0);
+        const auto $r12 = (s == 3);
+        const auto $r10 = ($r11 || $r12);
         if ($r9)
         {
             $index(i, 1, 32, &$F, 31, 32);
@@ -72,7 +72,7 @@ void step()
         }
         else
         {
-            auto $r13 = (c == 1);
+            const auto $r13 = (c == 1);
             if ($r13)
             {
                 $index(i, 1, 32, &$F, 33, 43);
@@ -95,7 +95,7 @@ void print()
     while (1)
     {
         if (!(i <= N)) break;
-        auto $r14 = (row.data[(i) - (1)] == 1);
+        const auto $r14 = (row.data[(i) - (1)] == 1);
         if ($r14)
         {
             $output("A", $0);
@@ -111,8 +111,8 @@ void print()
 int main()
 {
     N = 32;
-    auto $r2 = (N / 2);
-    auto $r1 = FIX($r2);
+    const auto $r2 = (N / 2);
+    const auto $r1 = FIX($r2);
     $index($r1, 1, 32, &$F, 50, 11);
     row.data[($r1) - (1)] = 1;
     print();
