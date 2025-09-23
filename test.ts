@@ -1,9 +1,3 @@
-#!/usr/bin/env bun
-/**
- * TS rewrite of the Python test harness.
- * Concurrency via Promises (no threads). Assumes Bun/Node + clang available.
- */
-
 import { exec as _exec } from "node:child_process";
 import * as fs from "node:fs";
 import * as os from "node:os";
@@ -84,9 +78,6 @@ function listTestDirs(filterSpec: string | null): string[] {
 }
 
 async function runTests(filterSpec: string | null) {
-    const compiler = arg(process.argv, "--compiler") ?? process.env.COMPILER;
-    if (!compiler) throw new Error("COMPILER not set");
-
     const testDirs = listTestDirs(filterSpec);
     const maxWorkers = filterSpec ? 1 : os.cpus()?.length || 1;
 
@@ -97,7 +88,7 @@ async function runTests(filterSpec: string | null) {
         while (queue.length) {
             const dir = queue.shift()!;
             try {
-                await processOne(dir, compiler);
+                await processOne(dir);
             } catch (e: any) {
                 failed.push(dir);
                 console.error(`[${path.basename(dir)}] failed: ${e?.message || e}`);
@@ -128,7 +119,6 @@ function diff(expectedFile: string, createdFile: string) {
     const expectedLines = fs.readFileSync(expectedFile, "utf-8").split(/\r?\n/);
     const createdLines = fs.readFileSync(createdFile, "utf-8").split(/\r?\n/);
 
-    // normalize trailing newline behavior (Python test writes newline at end)
     if (expectedLines.length && expectedLines[expectedLines.length - 1] === "") expectedLines.pop();
     if (createdLines.length && createdLines[createdLines.length - 1] === "") createdLines.pop();
 
@@ -172,7 +162,7 @@ function diff(expectedFile: string, createdFile: string) {
     }
 }
 
-async function processOne(testDir: string, compiler: string) {
+async function processOne(testDir: string) {
     const testStem = path.join(testDir, "test");
     if (verbose) console.log("[TEST]", path.basename(testDir));
     else process.stdout.write(path.basename(testDir) + " ");
@@ -201,23 +191,15 @@ async function processOne(testDir: string, compiler: string) {
     const created_peg_ast = testStem + ".peg.json";
     if (p(expected_peg_ast)) {
         removals.push(created_peg_ast);
-        if (compiler === "python" || compiler === "python-ext") await run(["python", "peg.py", program]);
-        else await run(["bun", "peg.ts", program]);
+        await run(["bun", "peg.ts", program]);
     }
 
-    if (compiler === "python" || compiler === "python-ext") {
-        await run(["python", "easyc.py", program, ...flags]);
-    } else if (compiler === "ts") {
-        await run(["bun", "easyc.ts", program, ...flags]);
-    } else {
-        throw new Error(`unknown compiler: ${compiler}`);
-    }
+    await run(["bun", "easyc.ts", program, ...flags]);
 
     const expected_c = xStem + ".c";
     const created_c = testStem + ".c";
     if (p(expected_c)) {
         removals.push(created_c);
-        // flags for -c/-s in Python script were not used further; mimic behavior:
         flags.push("-c", created_c);
     }
 
@@ -257,7 +239,6 @@ async function processOne(testDir: string, compiler: string) {
             await run(cmd);
             diff(expected_output, created_output);
 
-            // delete output after successful diff (like Python)
             if (p(created_output)) fs.unlinkSync(created_output);
         }
     } else {

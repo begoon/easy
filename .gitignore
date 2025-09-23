@@ -1,8 +1,4 @@
-__pycache__/
-*.py[cod]
-
 tests/**/*.tokens
-tests/**/*.meta
 tests/**/*.json
 tests/**/*.c
 tests/**/*.s
@@ -15,4 +11,5 @@ tests/**/*.output
 
 /life
 life.c
+
 node_modules
