@@ -946,10 +946,10 @@ class UnaryOperation extends Expression {
     c(): string {
         const ctx = this.context();
         const r = `$r${ctx.r++}`;
-        const op = this.operation === "NOT" ? "!" : this.operation;
+        const operation = this.operation === "NOT" ? "!" : this.operation;
         const pre: string[] = [];
         const v = extract_value(this.expr.c(), pre);
-        pre.push(`const auto ${r} = (${op}${v}); /* ${r} */`);
+        pre.push(`const auto ${r} = (${operation}${v}); /* ${r} */`);
         return emit(pre);
     }
 }
