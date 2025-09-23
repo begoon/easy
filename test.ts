@@ -1,11 +1,12 @@
-import { exec as _exec } from "node:child_process";
 import * as fs from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
+
+import child_process from "node:child_process";
 import process from "node:process";
 import { promisify } from "node:util";
 
-const exec = promisify(_exec);
+const exec = promisify(child_process.exec);
 
 const TESTS_FOLDER = "tests";
 
@@ -17,31 +18,28 @@ function flag(argv: string[], name: string): number | null {
     const i = argv.indexOf(name);
     return i >= 0 ? i : null;
 }
+
 function arg(argv: string[], name: string): string | null {
     const i = flag(argv, name);
     return i !== null && i + 1 < argv.length ? argv[i + 1] : null;
 }
 
 const verbose: number = (() => {
-    const envV = process.env.VERBOSE;
-    const cliIdx = flag(process.argv, "--verbose");
-    const v = envV ?? (cliIdx !== null ? "1" : undefined);
-    const asNum = v ? Number(v) : 0;
-    return Number.isFinite(asNum) ? asNum : 0;
+    const { VERBOSE } = process.env;
+    const i = flag(process.argv, "--verbose");
+    const n = VERBOSE ?? (i !== null ? "1" : undefined);
+    const value = n ? Number(n) : 0;
+    return Number.isFinite(value) ? value : 0;
 })();
 
 const update: boolean = process.argv.includes("--update") || process.argv.includes("-U") || Boolean(process.env.UPDATE);
 
-/** run a command string or argv vector using the shell (so redirections work). */
-async function run(cmd: string | string[], opts: { cwd?: string; env?: NodeJS.ProcessEnv } = {}): Promise<void> {
+async function run(cmd: string | string[], opts: { env?: Record<string, string> } = {}) {
     const command = Array.isArray(cmd) ? cmd.join(" ") : String(cmd);
     if (verbose) console.log("[RUN]", command);
     try {
         await exec(command, {
-            shell: true,
-            cwd: opts.cwd,
             env: { ...process.env, ...(opts.env || {}) },
-            maxBuffer: 10 * 1024 * 1024, // 10MB
         });
     } catch (e: any) {
         const code = typeof e?.code === "number" ? e.code : 1;
@@ -52,24 +50,24 @@ async function run(cmd: string | string[], opts: { cwd?: string; env?: NodeJS.Pr
     }
 }
 
-function listTestDirs(filterSpec: string | null): string[] {
-    const names = filterSpec
-        ? filterSpec
+function listTests(filter: string | null): string[] {
+    const names = filter
+        ? filter
               .split(",")
               .map((s) => s.trim())
               .filter(Boolean)
         : [];
     const include = new Set(names.filter((n) => !n.startsWith("-")));
     const exclude = new Set(names.filter((n) => n.startsWith("-")).map((n) => n.slice(1)));
-    const substringMode = !!(filterSpec && filterSpec.startsWith("@"));
-    const substring = substringMode ? filterSpec!.slice(1) : "";
+    const contain = Boolean(filter && filter.startsWith("@"));
+    const substring = contain ? filter!.slice(1) : "";
 
-    const ents = fs.readdirSync(TESTS_FOLDER, { withFileTypes: true });
-    return ents
-        .filter((d) => d.isDirectory())
-        .map((d) => d.name)
+    const entires = fs.readdirSync(TESTS_FOLDER, { withFileTypes: true });
+    return entires
+        .filter((dir) => dir.isDirectory())
+        .map((dir) => dir.name)
         .filter((name) => {
-            if (substringMode && name.includes(substring)) return true;
+            if (contain && name.includes(substring)) return true;
             if (include.size && !include.has(name)) return false;
             if (exclude.size && exclude.has(name)) return false;
             return true;
@@ -77,9 +75,9 @@ function listTestDirs(filterSpec: string | null): string[] {
         .map((name) => path.join(TESTS_FOLDER, name));
 }
 
-async function runTests(filterSpec: string | null) {
-    const testDirs = listTestDirs(filterSpec);
-    const maxWorkers = filterSpec ? 1 : os.cpus()?.length || 1;
+async function runTests(filter: string | null) {
+    const testDirs = listTests(filter);
+    const maxWorkers = filter ? 1 : os.cpus()?.length || 1;
 
     const queue = [...testDirs];
     const failed: string[] = [];
@@ -88,11 +86,12 @@ async function runTests(filterSpec: string | null) {
         while (queue.length) {
             const dir = queue.shift()!;
             try {
-                await processOne(dir);
-            } catch (e: any) {
+                await runTest(dir);
+            } catch (e) {
+                const error = e as Error;
                 failed.push(dir);
-                console.error(`[${path.basename(dir)}] failed: ${e?.message || e}`);
-                console.error(e?.stack || "");
+                console.error(`[${path.basename(dir)}] failed: ${error?.message || error}`);
+                console.error(error?.stack || "");
             }
         }
     }
@@ -107,7 +106,7 @@ async function runTests(filterSpec: string | null) {
     }
 }
 
-function p(file: string): boolean {
+function exists(file: string): boolean {
     try {
         return fs.statSync(file).isFile();
     } catch {
@@ -162,102 +161,96 @@ function diff(expectedFile: string, createdFile: string) {
     }
 }
 
-async function processOne(testDir: string) {
+async function runTest(testDir: string) {
     const testStem = path.join(testDir, "test");
     if (verbose) console.log("[TEST]", path.basename(testDir));
     else process.stdout.write(path.basename(testDir) + " ");
 
     const program = testStem + ".easy";
-    const xStem = path.join(testDir, "x", "test");
+    const x = path.join(testDir, "x", "test");
 
     const removals: string[] = [];
     const flags: string[] = [];
 
-    const expected_tokens = xStem + ".tokens";
+    const expected_tokens = x + ".tokens";
     let created_tokens = testStem + ".tokens";
-    if (p(expected_tokens)) {
+    if (exists(expected_tokens)) {
         removals.push(created_tokens);
         flags.push("-t");
     }
 
-    const expected_ast = xStem + ".json";
+    const expected_ast = x + ".json";
     const created_ast = testStem + ".json";
-    if (p(expected_ast)) {
+    if (exists(expected_ast)) {
         removals.push(created_ast);
         flags.push("-a");
     }
 
-    const expected_peg_ast = xStem + ".peg.json";
+    const expected_peg_ast = x + ".peg.json";
     const created_peg_ast = testStem + ".peg.json";
-    if (p(expected_peg_ast)) {
+    if (exists(expected_peg_ast)) {
         removals.push(created_peg_ast);
         await run(["bun", "peg.ts", program]);
     }
 
     await run(["bun", "easyc.ts", program, ...flags]);
 
-    const expected_c = xStem + ".c";
+    const expected_c = x + ".c";
     const created_c = testStem + ".c";
-    if (p(expected_c)) {
+    if (exists(expected_c)) {
         removals.push(created_c);
         flags.push("-c", created_c);
     }
 
-    const expected_s = xStem + ".s";
+    const expected_s = x + ".s";
     const created_s = testStem + ".s";
-    if (p(expected_s)) {
+    if (exists(expected_s)) {
         removals.push(created_s);
         flags.push("-s", created_s);
     }
 
-    if (p(expected_tokens)) diff(expected_tokens, created_tokens);
-    if (p(expected_ast)) diff(expected_ast, created_ast);
-    if (p(expected_peg_ast)) diff(expected_peg_ast, created_peg_ast);
-    if (p(expected_c)) diff(expected_c, created_c);
-    if (p(expected_s)) diff(expected_s, created_s);
+    if (exists(expected_tokens)) diff(expected_tokens, created_tokens);
+    if (exists(expected_ast)) diff(expected_ast, created_ast);
+    if (exists(expected_peg_ast)) diff(expected_peg_ast, created_peg_ast);
+    if (exists(expected_c)) diff(expected_c, created_c);
+    if (exists(expected_s)) diff(expected_s, created_s);
 
-    const skip_run = p(expected_c) && Boolean(process.env.SKIP_RUN);
+    const skip_run = exists(expected_c) && Boolean(process.env.SKIP_RUN);
 
     const cc_flags = ["-Wall", "-Wextra", "-Werror", "-std=c23"];
 
-    const expected_output = xStem + ".output";
-    if (p(expected_output) && !skip_run) {
+    const expected_output = x + ".output";
+    if (exists(expected_output) && !skip_run) {
         const created_output = testStem + ".output";
         removals.push(created_output);
 
-        if (p(expected_c)) {
+        if (exists(expected_c)) {
             const exe = testStem + ".exe";
             removals.push(exe);
 
             await run(["clang", ...cc_flags, created_c, "-I", ".", "-o", exe]);
 
-            // Build shell command with redirections (we use exec with shell=true)
             const cmd: string[] = [exe, ">" + JSON.stringify(created_output)];
-            const input_file = xStem + ".input";
-            if (p(input_file)) cmd.push("<" + JSON.stringify(input_file));
+            const input_file = x + ".input";
+            if (exists(input_file)) cmd.push("<" + JSON.stringify(input_file));
 
             await run(cmd);
             diff(expected_output, created_output);
 
-            if (p(created_output)) fs.unlinkSync(created_output);
+            if (exists(created_output)) fs.unlinkSync(created_output);
         }
     } else {
-        if (p(expected_c)) {
+        if (exists(expected_c)) {
             const obj = testStem + ".o";
             removals.push(obj);
             await run(["clang", ...cc_flags, created_c, "-I", ".", "-c", "-o", obj]);
         }
     }
 
-    // cleanup
     for (const f of removals) {
-        if (p(f)) {
+        if (exists(f)) {
             if (verbose > 1) console.log(`[DEL] ${f}`);
-            try {
-                fs.unlinkSync(f);
-            } catch {
-                /* ignore */
-            }
+            fs.unlinkSync(f);
         }
     }
 }
