@@ -1,29 +1,22 @@
-#!/usr/bin/env ts-node
-
-// Usage:
-//   bun easyc.ts <input.easy> [-c <output.c>] [-t] [-a] [-e] [-s <output.s>]
-
 import * as fs from "node:fs";
 import * as path from "node:path";
 import process from "node:process";
 
-function indent(s: string, n: number): string {
-    const pad = "    ".repeat(n);
-    return s
+function indent(str: string, n: number): string {
+    return str
         .split(/\r?\n/)
-        .map((line) => pad + line)
+        .map((line) => "    ".repeat(n) + line)
         .join("\n");
 }
 
 function emit(lines: string[]): string {
-    const v = lines.filter((line) => line.trim() !== "");
-    return v.join("\n");
+    return lines.filter((line) => line.trim() !== "").join("\n");
 }
 
 function table(rows: string[][]): string {
     if (!rows.length) return "";
-    const nCols = Math.max(...rows.map((r) => r.length));
-    const widths = Array(nCols).fill(0);
+    const columnsNumber = Math.max(...rows.map((r) => r.length));
+    const widths = Array(columnsNumber).fill(0);
     for (const row of rows) {
         row.forEach((cell, i) => (widths[i] = Math.max(widths[i], cell.length)));
     }
@@ -35,25 +28,23 @@ function flag(argv: string[], name: string): number | null {
     const i = argv.indexOf(name);
     return i >= 0 ? i : null;
 }
+
 function arg(argv: string[], name: string): string | null {
     const i = flag(argv, name);
     return i !== null && i + 1 < argv.length ? argv[i + 1] : null;
 }
 
-// -------------------------- Input & Token --------------------------
-
 class InputText {
     filename: string;
     text: string;
-    constructor(opts: { text?: string; filename?: string | null }) {
-        const { text = "", filename = null } = opts;
+    constructor(options: { text?: string; filename?: string }) {
+        const { text = "", filename = null } = options;
         if (text) {
             this.text = text;
             this.filename = "";
         } else if (filename) {
-            const fname = typeof filename === "string" ? filename : (filename as any).toString();
-            this.text = fs.readFileSync(fname, "utf-8");
-            this.filename = fname;
+            this.text = fs.readFileSync(filename, "utf-8");
+            this.filename = filename;
         } else {
             this.text = "";
             this.filename = "";
@@ -65,6 +56,7 @@ type Flags = Record<string, string>;
 
 class CompilerError extends Error {}
 class LexerError extends CompilerError {}
+
 class ParseError extends CompilerError {
     token: Token;
     constructor(message: string, token: Token) {
@@ -72,14 +64,14 @@ class ParseError extends CompilerError {
         this.token = token;
     }
     override toString(): string {
-        const t = this.token;
-        const lines = t.context.text.text.split(/\r?\n/);
-        const errorLine = lines[t.line - 1] || "";
+        const token = this.token;
+        const lines = token.context.text.text.split(/\r?\n/);
+        const errorLine = lines[token.line - 1] || "";
         return (
             `${this.message}\n` +
-            `at ${t.context.text.filename}:${t.line}:${t.character}\n` +
+            `at ${token.context.text.filename}:${token.line}:${token.character}\n` +
             `${errorLine}\n` +
-            `${" ".repeat(Math.max(0, t.character - 1))}^`
+            `${" ".repeat(Math.max(0, token.character - 1))}^`
         );
     }
 }
@@ -125,7 +117,7 @@ const KEYWORDS = new Set([
     //
     "TRUE",
     "FALSE",
-
+    //
     // "ARRAY",
     // "OF",
     // "STRUCTURE",
@@ -170,14 +162,19 @@ class Context {
     }
 }
 
-function C(c: string, pre: string[]): string {
+// This function looks for a comment like /* $rN */, which represents a name
+// of a temporary variable, which, in turn, represents a value that has been.
+// If found, the comment is removed from the string, the of the string without
+// the comment is pushed to `pre` (to be emitted before the current line),
+// and the name of the temporary variable is returned.
+function extract_value(c: string, pre: string[]): string {
     // looks for: /* $rN */ at the end (or anywhere) of the string
     const m = c.match(/\/\*\s*(\$r\d+)\s*\*\//);
     if (!m) return c;
     const ref = m[1];
-    // remove the comment and any trailing whitespace/newlines from the stmt
-    const stmt = c.replace(/\s*\/\*\s*\$r\d+\s*\*\/\s*$/, "");
-    pre.push(stmt);
+    // remove the comment and any trailing whitespace/newlines from the string
+    const str = c.replace(/\s*\/\*\s*\$r\d+\s*\*\/\s*$/, "");
+    pre.push(str);
     return ref;
 }
 
@@ -208,25 +205,19 @@ class Token {
 function printer(root: any): string {
     const seen = new Set<any>();
 
-    function isPlainObject(o: any) {
-        if (o === null || typeof o !== "object") return false;
-        const proto = Object.getPrototypeOf(o);
-        return proto === Object.prototype || proto === null;
-    }
+    // function isPlainObject(obj: any) {
+    //     if (obj === null || typeof obj !== "object") return false;
+    //     const proto = Object.getPrototypeOf(obj);
+    //     return proto === Object.prototype || proto === null;
+    // }
 
     function walker(obj: any): any {
-        if (obj == null) {
-            return "";
-        }
+        if (obj == null) return "";
 
-        if (typeof obj === "boolean" || typeof obj === "number" || typeof obj === "string") {
-            return obj;
-        }
+        if (typeof obj === "boolean" || typeof obj === "number" || typeof obj === "string") return obj;
 
         if (typeof obj === "object") {
-            if (seen.has(obj)) {
-                throw new Error("cycle detected in AST: serialization would recurse forever");
-            }
+            if (seen.has(obj)) throw new Error("cycle detected in AST: serialization would recurse forever");
             seen.add(obj);
 
             if (obj instanceof Token) {
@@ -237,27 +228,19 @@ function printer(root: any): string {
             }
 
             if (Array.isArray(obj)) {
-                const seq = obj.map((x) => walker(x));
+                const sequence = obj.map((x) => walker(x));
                 seen.delete(obj);
-                return seq;
+                return sequence;
             }
 
-            if (!isPlainObject(obj)) {
-                const data: any = { node: obj.constructor?.name ?? "Object" };
-                for (const k of Object.keys(obj)) {
-                    if (k.startsWith("_")) continue;
-                    data[k] = walker((obj as any)[k]);
-                }
-                seen.delete(obj);
-                return data;
-            }
-
-            const out: any = {};
-            for (const [k, v] of Object.entries(obj)) {
-                out[k] = walker(v);
+            const data: Record<string, unknown> = { node: obj.constructor?.name ?? "[node]" };
+            for (const [name, value] of Object.entries(obj)) {
+                if (name.startsWith("_")) continue;
+                if (typeof value === "function") continue;
+                data[name] = walker(value);
             }
             seen.delete(obj);
-            return out;
+            return data;
         }
 
         return String(obj);
@@ -267,8 +250,6 @@ function printer(root: any): string {
     return JSON.stringify(data, null, 2);
 }
 
-// -------------------------- Type System --------------------------
-
 abstract class Type {
     c(): string {
         throw new GenerateError(`c() not implemented for ${this.constructor.name}`);
@@ -276,76 +257,45 @@ abstract class Type {
     zero(): string {
         throw new GenerateError(`zero() not implemented for ${this.constructor.name}`);
     }
-    typedef(_alias: string): string {
+    typedef(alias: string): string {
         throw new GenerateError(`typedef() not implemented for ${this.constructor.name}`);
     }
-    format(): string {
-        return "";
-    }
+    format = () => "";
 }
 
 abstract class BuiltinType extends Type {}
 
 class IntegerType extends BuiltinType {
-    c() {
-        return "int";
-    }
-    zero() {
-        return "0";
-    }
-    typedef(alias: string) {
-        return `typedef int ${alias}`;
-    }
-    format() {
-        return "i";
-    }
+    c = () => "int";
+    zero = () => "0";
+    typedef = (alias: string) => `typedef int ${alias}`;
+    format = () => "i";
 }
+
 class RealType extends BuiltinType {
-    c() {
-        return "double";
-    }
-    zero() {
-        return "0.0";
-    }
-    typedef(alias: string) {
-        return `typedef double ${alias}`;
-    }
-    format() {
-        return "r";
-    }
+    c = () => "double";
+    zero = () => "0.0";
+    typedef = (alias: string) => `typedef double ${alias}`;
+    format = () => "r";
 }
+
 class BooleanType extends BuiltinType {
-    c() {
-        return "int";
-    }
-    zero() {
-        return "0";
-    }
-    typedef(alias: string) {
-        return `typedef int ${alias}`;
-    }
-    format() {
-        return "b";
-    }
+    c = () => "int";
+    zero = () => "0";
+    typedef = (alias: string) => `typedef int ${alias}`;
+    format = () => "b";
 }
+
 class StringType extends BuiltinType {
     initial?: string;
     constructor(initial?: string) {
         super();
-        this.initial = initial || "";
+        this.initial = initial;
     }
-    c() {
-        return "STR";
-    }
-    zero() {
-        return this.initial ? `{ .data = "${this.initial}" }` : "{0}";
-    }
-    typedef(alias: string) {
-        return `typedef STR ${alias}`;
-    }
-    format() {
-        return "A";
-    }
+    zero = () => (this.initial ? `{ .data = "${this.initial}" }` : "{0}");
+    c = () => "STR";
+    typedef = (alias: string) => `typedef STR ${alias}`;
+    format = () => "A";
 }
 
 class ArrayType extends Type {
@@ -361,24 +311,15 @@ class ArrayType extends Type {
         this.dynamic = dynamic;
     }
     c(): string {
-        if (this.dynamic) {
-            return ["struct", "{", indent(`${this.type.c()} *data;`, 1), "}"].join("\n");
-        } else {
-            return ["struct", "{", indent(`${this.type.c()} data[${this.sz()}];`, 1), "}"].join("\n");
-        }
+        const data = this.dynamic ? `*data` : `data[${this.sz()}]`;
+        return emit(["struct", "{", indent(`${this.type.c()} ${data};`, 1), "}"]);
     }
-    sz(): string {
-        return `${this.hi.c()} - ${this.lo.c()} + 1`;
-    }
+    sz = () => `${this.hi.c()} - ${this.lo.c()} + 1`;
     zero(): string {
-        if (this.dynamic) {
-            return `{ .data = malloc(sizeof(${this.type.c()}) * (${this.sz()})) }`;
-        }
-        return "{0}";
+        if (!this.dynamic) return "{0}";
+        return `{ .data = malloc(sizeof(${this.type.c()}) * (${this.sz()})) }`;
     }
-    typedef(to: string): string {
-        return `typedef ${this.c()} ${to}`;
-    }
+    typedef = (alias: string) => `typedef ${this.c()} ${alias}`;
 }
 
 class StructField {
@@ -392,9 +333,7 @@ class StructField {
         this.name = name;
         this.type = type;
     }
-    c(): string {
-        return `${this.type.c()} ${this.name}`;
-    }
+    c = () => `${this.type.c()} ${this.name}`;
 }
 
 class StructType extends Type {
@@ -407,15 +346,9 @@ class StructType extends Type {
         const v = ["struct", "{", ...this.fields.map((f) => indent(f.c() + ";", 1)), "}"];
         return emit(v);
     }
-    init(): string {
-        return "{0}";
-    }
-    zero(): string {
-        return "{0}";
-    }
-    typedef(name: string): string {
-        return `typedef ${this.c()} ${name}`;
-    }
+    init = () => "{0}";
+    zero = () => "{0}";
+    typedef = (alias: string): string => `typedef ${this.c()} ${alias}`;
 }
 
 class AliasType extends Type {
@@ -426,18 +359,10 @@ class AliasType extends Type {
         this.reference_name = name;
         this.reference_type = ref;
     }
-    c() {
-        return this.reference_name;
-    }
-    zero() {
-        return this.reference_type.zero();
-    }
-    typedef(alias: string) {
-        return `typedef ${this.reference_name} ${alias}`;
-    }
+    c = () => this.reference_name;
+    zero = () => this.reference_type.zero();
+    typedef = (alias: string) => `typedef ${this.c()} ${alias}`;
 }
-
-// -------------------------- AST --------------------------
 
 abstract class Node {
     token: Token;
@@ -446,21 +371,18 @@ abstract class Node {
         this.token = token;
         this.scope = scope;
     }
-    context(): Context {
-        return this.token.context;
-    }
+    context = () => this.token.context;
     c(): string {
         throw new GenerateError(`c() not implemented for ${this.constructor.name} at ${this.token}`);
     }
-    toString() {
-        return printer(this);
-    }
+    toString = () => printer(this);
 }
+
 abstract class Statement extends Node {}
 abstract class Expression extends Node {
     type: Type;
-    constructor(t: Token, s: string, type: Type) {
-        super(t, s);
+    constructor(token: Token, scope: string, type: Type) {
+        super(token, scope);
         this.type = type;
     }
 }
@@ -473,18 +395,18 @@ abstract class Entity {
 class TYPEIS extends Node {
     name: string;
     definition: Type;
-    constructor(t: Token, s: string, n: string, d: Type) {
-        super(t, s);
-        this.name = n;
-        this.definition = d;
+    constructor(token: Token, scope: string, name: string, definition: Type) {
+        super(token, scope);
+        this.name = name;
+        this.definition = definition;
     }
 }
 
 class DECLARE extends Node {
     names: string[];
     type: Type;
-    constructor(t: Token, s: string, names: string[], type: Type) {
-        super(t, s);
+    constructor(token: Token, scope: string, names: string[], type: Type) {
+        super(token, scope);
         this.names = names;
         this.type = type;
     }
@@ -499,14 +421,14 @@ class Segment extends Node {
     subroutines: (FUNCTION | PROCEDURE)[];
     statements: Statement[];
     constructor(
-        t: Token,
-        s: string,
+        token: Token,
+        scope: string,
         types: TYPEIS[],
         variables: DECLARE[],
         subs: (FUNCTION | PROCEDURE)[],
         statements: Statement[]
     ) {
-        super(t, s);
+        super(token, scope);
         this.types = types;
         this.variables = variables;
         this.subroutines = subs;
@@ -522,31 +444,9 @@ class Segment extends Node {
             }
         }
         if (this.statements) {
-            for (const s of this.statements) v.push(s.c());
+            for (const statement of this.statements) v.push(statement.c());
         }
         return emit(v);
-    }
-}
-
-class FIELD extends Entity {
-    name: string;
-    type: Type;
-
-    constructor(token: Token, name: string, type: Type) {
-        super(token);
-        this.name = name;
-        this.type = type;
-    }
-}
-
-class STRUCTURE extends Node {
-    fields: FIELD[];
-    constructor(t: Token, s: string, fields: FIELD[]) {
-        super(t, s);
-        this.fields = fields;
-    }
-    c(): string {
-        return `struct { ${this.fields.map((f) => f.c() + ";").join(" ")} }`;
     }
 }
 
@@ -568,14 +468,14 @@ class PROCEDURE extends Node {
     name: string;
     arguments: Argument[];
     segment: Segment;
-    constructor(t: Token, s: string, name: string, args: Argument[], seg: Segment) {
-        super(t, s);
+    constructor(token: Token, scope: string, name: string, args: Argument[], seg: Segment) {
+        super(token, scope);
         this.name = name;
         this.arguments = args;
         this.segment = seg;
     }
     c(): string {
-        const args = this.arguments.map((a) => a.c()).join(", ");
+        const args = this.arguments.map((v) => v.c()).join(", ");
         return emit([`void ${this.name}(${args})`, "{", indent(this.segment.c(), 1), "}"]);
     }
 }
@@ -585,30 +485,28 @@ class FUNCTION extends Node {
     type: Type;
     arguments: Argument[];
     segment: Segment;
-    constructor(t: Token, s: string, name: string, type: Type, args: Argument[], seg: Segment) {
-        super(t, s);
+    constructor(token: Token, scope: string, name: string, type: Type, args: Argument[], seg: Segment) {
+        super(token, scope);
         this.name = name;
         this.type = type;
         this.arguments = args;
         this.segment = seg;
     }
     c(): string {
-        const fn = this.context().functions[this.name] as BuiltinFunction | FUNCTION;
-        const ret = (fn instanceof BuiltinFunction ? fn.type : fn.type).c();
+        const func = this.context().functions[this.name] as BuiltinFunction | FUNCTION;
+        const type = (func instanceof BuiltinFunction ? func.type : func.type).c();
         const args = this.arguments.map((a) => a.c()).join(", ");
-        return emit([`${ret} ${this.name}(${args})`, "{", indent(this.segment.c(), 1), "}"]);
+        return emit([`${type} ${this.name}(${args})`, "{", indent(this.segment.c(), 1), "}"]);
     }
 }
 
 class Label extends Node {
     name: string;
-    constructor(t: Token, s: string, name: string) {
-        super(t, s);
+    constructor(token: Token, scope: string, name: string) {
+        super(token, scope);
         this.name = name;
     }
-    c() {
-        return `${this.name}:`;
-    }
+    c = () => `${this.name}:`;
 }
 
 class Variable {
@@ -681,14 +579,14 @@ class VariableReference extends Entity {
     }
     get type(): Type {
         const variable = discover_variable(this);
-        const [t] = expand_variable_reference(variable, this, []);
-        return t;
+        const { type } = expand_variable_reference(variable, this, []);
+        return type;
     }
     c(): string {
         const variable = discover_variable(this);
         const pre: string[] = [];
-        const [, ref] = expand_variable_reference(variable, this, pre);
-        return ref; // ignore pre here (call sites that care pass their own pre)
+        const { reference } = expand_variable_reference(variable, this, pre);
+        return reference;
     }
 }
 
@@ -697,38 +595,35 @@ class BuiltinLiteral extends Expression {
         throw new GenerateError(`format() not implemented for ${this.constructor.name} at ${this.token}`);
     }
 }
+
 class IntegerLiteral extends BuiltinLiteral {
     value: number;
-    constructor(t: Token, s: string, v: number) {
-        super(t, s, new IntegerType());
-        this.value = v;
+    constructor(token: Token, scope: string, value: number) {
+        super(token, scope, new IntegerType());
+        this.value = value;
     }
-    c() {
-        return String(this.value);
-    }
-    format() {
-        return "i";
-    }
+    c = () => String(this.value);
+    format = () => "i";
 }
+
 class RealLiteral extends BuiltinLiteral {
     value: number;
-    constructor(t: Token, s: string, v: number) {
-        super(t, s, new RealType());
-        this.value = v;
+    constructor(token: Token, scope: string, value: number) {
+        super(token, scope, new RealType());
+        this.value = value;
     }
     c() {
         const v = String(this.value);
         return v.includes(".") || v.includes("e") ? v : v + ".0";
     }
-    format() {
-        return "r";
-    }
+    format = () => "r";
 }
+
 class StringLiteral extends BuiltinLiteral {
     value: string;
-    constructor(t: Token, s: string, v: string) {
-        super(t, s, new StringType());
-        this.value = v;
+    constructor(token: Token, scope: string, value: string) {
+        super(token, scope, new StringType());
+        this.value = value;
     }
     c() {
         return `from_cstring("${this.value.replace(/"/g, '\\"')}")`;
@@ -740,11 +635,12 @@ class StringLiteral extends BuiltinLiteral {
         return "A";
     }
 }
+
 class BoolLiteral extends BuiltinLiteral {
     value: boolean;
-    constructor(t: Token, s: string, v: boolean) {
-        super(t, s, new BooleanType());
-        this.value = v;
+    constructor(token: Token, scope: string, value: boolean) {
+        super(token, scope, new BooleanType());
+        this.value = value;
     }
     c() {
         return this.value ? "TRUE" : "FALSE";
@@ -757,8 +653,8 @@ class BoolLiteral extends BuiltinLiteral {
 class SET extends Statement {
     target: VariableReference[];
     expression: Expression;
-    constructor(t: Token, s: string, target: VariableReference[], expr: Expression) {
-        super(t, s);
+    constructor(token: Token, scope: string, target: VariableReference[], expr: Expression) {
+        super(token, scope);
         this.target = target;
         this.expression = expr;
     }
@@ -767,9 +663,9 @@ class SET extends Statement {
         for (const target of this.target) {
             const variable = discover_variable(target);
             const pre: string[] = [];
-            const [, ref] = expand_variable_reference(variable, target, pre);
-            const rhs = C(this.expression.c(), pre);
-            out.push(...pre, `${ref} = ${rhs};`);
+            const { reference } = expand_variable_reference(variable, target, pre);
+            const rhs = extract_value(this.expression.c(), pre);
+            out.push(...pre, `${reference} = ${rhs};`);
         }
         return emit(out);
     }
@@ -779,15 +675,15 @@ class IF extends Statement {
     cond: Expression;
     then_branch: Segment;
     else_branch?: Segment | null;
-    constructor(t: Token, s: string, cond: Expression, tb: Segment, eb?: Segment | null) {
-        super(t, s);
+    constructor(token: Token, scope: string, cond: Expression, then_: Segment, else_?: Segment | null) {
+        super(token, scope);
         this.cond = cond;
-        this.then_branch = tb;
-        this.else_branch = eb ?? null;
+        this.then_branch = then_;
+        this.else_branch = else_ ?? null;
     }
     c(): string {
         const pre: string[] = [];
-        let cond = C(this.cond.c(), pre);
+        let cond = extract_value(this.cond.c(), pre);
         if (cond.startsWith("(") && cond.endsWith(")")) cond = cond.slice(1, -1);
 
         const v = [...pre, `if (${cond})`, "{", indent(this.then_branch.c(), 1), "}"];
@@ -804,8 +700,8 @@ class FOR extends Statement {
     to?: Expression | null;
     condition?: Expression | null;
     constructor(
-        t: Token,
-        s: string,
+        token: Token,
+        scope: string,
         variable: VariableReference,
         init: Expression,
         doX: Segment,
@@ -813,7 +709,7 @@ class FOR extends Statement {
         to?: Expression | null,
         cond?: Expression | null
     ) {
-        super(t, s);
+        super(token, scope);
         this.variable = variable;
         this.init = init;
         this.segment = doX;
@@ -823,19 +719,19 @@ class FOR extends Statement {
     }
     c(): string {
         const v: string[] = [];
-        const initPre: string[] = [];
-        const init = C(this.init.c(), initPre);
-        v.push(...initPre, `${this.variable.c()} = ${init};`);
+        const preInit: string[] = [];
+        const init = extract_value(this.init.c(), preInit);
+        v.push(...preInit, `${this.variable.c()} = ${init};`);
 
         const inner: string[] = [];
-        const cond = C(this.format_condition(inner), inner);
-        const step = C(this.step(inner), inner);
+        const condition = extract_value(this.format_condition(inner), inner);
+        const step = extract_value(this.step(inner), inner);
 
         v.push(
             "while (1)",
             "{",
             indent(emit(inner), 1),
-            indent(`if (!(${cond})) break;`, 1),
+            indent(`if (!(${condition})) break;`, 1),
             indent(this.segment.c(), 1),
             indent(step, 1),
             "}"
@@ -844,13 +740,13 @@ class FOR extends Statement {
     }
     format_condition(pre: string[]): string {
         const parts: string[] = [];
-        if (this.condition) parts.push(C(this.condition.c(), pre));
-        if (this.to) parts.push(`${this.variable.c()} <= ${C(this.to.c(), pre)}`);
+        if (this.condition) parts.push(extract_value(this.condition.c(), pre));
+        if (this.to) parts.push(`${this.variable.c()} <= ${extract_value(this.to.c(), pre)}`);
         return parts.join("");
     }
 
     step(pre: string[]): string {
-        const by = this.by ? C(this.by.c(), pre) : "1";
+        const by = this.by ? extract_value(this.by.c(), pre) : "1";
         return `${this.variable.c()} += ${by};`;
     }
 }
@@ -858,9 +754,9 @@ class FOR extends Statement {
 class SELECT extends Statement {
     expr: Expression;
     cases: Array<[Expression | null, Segment]>;
-    constructor(t: Token, s: string, expr: Expression, cases: Array<[Expression | null, Segment]>) {
-        super(t, s);
-        this.expr = expr;
+    constructor(token: Token, scope: string, expression: Expression, cases: Array<[Expression | null, Segment]>) {
+        super(token, scope);
+        this.expr = expression;
         this.cases = cases;
     }
     c(): string {
@@ -869,7 +765,7 @@ class SELECT extends Statement {
         for (let i = 0; i < this.cases.length; i++) {
             const [condExpr, body] = this.cases[i];
             if (condExpr) {
-                const cond = C(condExpr.c(), pre);
+                const cond = extract_value(condExpr.c(), pre);
                 v.push((i > 0 ? "else " : "") + `if (${cond})`);
             } else {
                 v.push("else");
@@ -881,29 +777,29 @@ class SELECT extends Statement {
 }
 
 class INPUT extends Statement {
-    vars: VariableReference[];
-    constructor(t: Token, s: string, variables: VariableReference[]) {
-        super(t, s);
-        this.vars = variables;
+    variables: VariableReference[];
+    constructor(token: Token, scope: string, variables: VariableReference[]) {
+        super(token, scope);
+        this.variables = variables;
     }
     c(): string {
-        const out: string[] = [];
-        for (const vr of this.vars) {
+        const pre: string[] = [];
+        for (const vr of this.variables) {
             const variable = discover_variable(vr);
-            const [type, ref] = expand_variable_reference(variable, vr, out);
-            if (type instanceof StringType) out.push(`scanf("%s", ${ref}.data);`);
-            else if (type instanceof IntegerType) out.push(`scanf("%d", &${ref});`);
-            else if (type instanceof RealType) out.push(`scanf("%lf", &${ref});`);
-            else throw new GenerateError(/* ...same as before... */);
+            const { type, reference } = expand_variable_reference(variable, vr, pre);
+            if (type instanceof StringType) pre.push(`scanf("%s", ${reference}.data);`);
+            else if (type instanceof IntegerType) pre.push(`scanf("%d", &${reference});`);
+            else if (type instanceof RealType) pre.push(`scanf("%lf", &${reference});`);
+            else throw new GenerateError(`unsupported variable '${variable}' type in INPUT at ${variable.token}`);
         }
-        return emit(out);
+        return emit(pre);
     }
 }
 
 class OUTPUT extends Statement {
     arguments: Expression[];
-    constructor(t: Token, s: string, args: Expression[]) {
-        super(t, s);
+    constructor(token: Token, scope: string, args: Expression[]) {
+        super(token, scope);
         this.arguments = args;
     }
     c(): string {
@@ -917,8 +813,8 @@ class OUTPUT extends Statement {
 
 class REPEAT extends Statement {
     label: string;
-    constructor(t: Token, s: string, label: string) {
-        super(t, s);
+    constructor(token: Token, scope: string, label: string) {
+        super(token, scope);
         this.label = label;
     }
     c() {
@@ -927,8 +823,8 @@ class REPEAT extends Statement {
 }
 class REPENT extends Statement {
     label: string;
-    constructor(t: Token, s: string, label: string) {
-        super(t, s);
+    constructor(token: Token, scope: string, label: string) {
+        super(token, scope);
         this.label = label;
     }
     c() {
@@ -939,9 +835,9 @@ class REPENT extends Statement {
 class BEGIN extends Statement {
     body: Segment;
     label?: string | null;
-    constructor(t: Token, s: string, body: Segment, label?: string | null) {
-        super(t, s);
-        this.body = body;
+    constructor(token: Token, scope: string, segment: Segment, label?: string | null) {
+        super(token, scope);
+        this.body = segment;
         this.label = label ?? null;
     }
     c(): string {
@@ -954,14 +850,14 @@ class BEGIN extends Statement {
 class CALL extends Statement {
     name: string;
     arguments: Expression[];
-    constructor(t: Token, s: string, name: string, args: Expression[]) {
-        super(t, s);
+    constructor(token: Token, scope: string, name: string, args: Expression[]) {
+        super(token, scope);
         this.name = name;
         this.arguments = args;
     }
     c(): string {
         const pre: string[] = [];
-        const args = this.arguments.map((a) => C(a.c(), pre)).join(", ");
+        const args = this.arguments.map((a) => extract_value(a.c(), pre)).join(", ");
         pre.push(`${this.name}(${args});`);
         return emit(pre);
     }
@@ -969,23 +865,25 @@ class CALL extends Statement {
 
 class RETURN extends Statement {
     value?: Expression | null;
-    constructor(t: Token, s: string, v?: Expression | null) {
-        super(t, s);
-        this.value = v ?? null;
+    constructor(token: Token, scope: string, value?: Expression | null) {
+        super(token, scope);
+        this.value = value ?? null;
     }
     c(): string {
         if (!this.value) return "return;";
         const pre: string[] = [];
-        const v = C(this.value.c(), pre);
+        const v = extract_value(this.value.c(), pre);
         pre.push(`return ${v};`);
         return emit(pre);
     }
 }
+
 class EXIT extends Statement {
     c() {
         return "exit(0);";
     }
 }
+
 class EMPTY extends Statement {
     c() {
         return "while (0);";
@@ -997,8 +895,8 @@ const OPERATIONS: Record<string, string> = { "|": "||", "&": "&&", "=": "==", "<
 class FunctionCall extends Expression {
     name: string;
     arguments: Expression[];
-    constructor(t: Token, s: string, type: Type, name: string, args: Expression[]) {
-        super(t, s, type);
+    constructor(token: Token, scope: string, type: Type, name: string, args: Expression[]) {
+        super(token, scope, type);
         this.name = name;
         this.arguments = args;
     }
@@ -1006,7 +904,7 @@ class FunctionCall extends Expression {
         const ctx = this.context();
         const r = `$r${ctx.r++}`;
         const pre: string[] = [];
-        const args = this.arguments.map((a) => C(a.c(), pre)).join(", ");
+        const args = this.arguments.map((a) => extract_value(a.c(), pre)).join(", ");
         pre.push(`const auto ${r} = ${this.name}(${args}); /* ${r} */`);
         return emit(pre);
     }
@@ -1016,33 +914,33 @@ class BinaryOperation extends Expression {
     operation: string;
     left: Expression;
     right: Expression;
-    constructor(t: Token, s: string, type: Type, op: string, left: Expression, right: Expression) {
-        super(t, s, type);
-        this.operation = op;
+    constructor(token: Token, scope: string, type: Type, operation: string, left: Expression, right: Expression) {
+        super(token, scope, type);
+        this.operation = operation;
         this.left = left;
         this.right = right;
     }
     c(): string {
-        const op = OPERATIONS[this.operation] ?? this.operation;
-        const const_ = string_compare(this.left, this.right, op);
-        if (const_) return const_;
+        const operation = OPERATIONS[this.operation] ?? this.operation;
+        const is_string = string_compare(this.left, this.right, operation);
+        if (is_string) return is_string;
 
         const ctx = this.context();
         const r = `$r${ctx.r++}`;
 
         const pre: string[] = [];
-        const L = C(this.left.c(), pre);
-        const R = C(this.right.c(), pre);
-        pre.push(`const auto ${r} = (${L} ${op} ${R}); /* ${r} */`);
+        const L = extract_value(this.left.c(), pre);
+        const R = extract_value(this.right.c(), pre);
+        pre.push(`const auto ${r} = (${L} ${operation} ${R}); /* ${r} */`);
         return emit(pre);
     }
 }
 class UnaryOperation extends Expression {
     operation: string;
     expr: Expression;
-    constructor(t: Token, s: string, _type: string, value: string, expr: Expression) {
-        super(t, s, expr.type);
-        this.operation = value;
+    constructor(token: Token, scope: string, operation: string, expr: Expression) {
+        super(token, scope, expr.type);
+        this.operation = operation;
         this.expr = expr;
     }
     c(): string {
@@ -1050,7 +948,7 @@ class UnaryOperation extends Expression {
         const r = `$r${ctx.r++}`;
         const op = this.operation === "NOT" ? "!" : this.operation;
         const pre: string[] = [];
-        const v = C(this.expr.c(), pre);
+        const v = extract_value(this.expr.c(), pre);
         pre.push(`const auto ${r} = (${op}${v}); /* ${r} */`);
         return emit(pre);
     }
@@ -1058,22 +956,23 @@ class UnaryOperation extends Expression {
 
 function string_compare(left: Expression, right: Expression, operation: string): string | null {
     if (operation !== "==" && operation !== "!=") return null;
+
     function is_string_type(e: Expression): [boolean, string | null] {
         if (!(e instanceof VariableReference)) return [false, null];
         const variable = discover_variable(e);
-        const [type, reference] = expand_variable_reference(variable, e, []);
+        const { type, reference } = expand_variable_reference(variable, e, []);
         return [type instanceof StringType, reference];
     }
-    const [lIs, lRef] = is_string_type(left);
-    const [rIs, rRef] = is_string_type(right);
-    if (lIs || rIs) {
+
+    const [left_string, left_reference] = is_string_type(left);
+    const [right_string, right_reference] = is_string_type(right);
+
+    if (left_string || right_string) {
         const cmp = operation === "!=" ? "!=" : "==";
-        return `strcmp(${lRef}.data, ${rRef}.data) ${cmp} 0`;
+        return `strcmp(${left_reference}.data, ${right_reference}.data) ${cmp} 0`;
     }
     return null;
 }
-
-// -------------------------- Lexer --------------------------
 
 class Lexer {
     context: Context;
@@ -1095,18 +994,16 @@ class Lexer {
         const j = this.position + k;
         return j < this.n ? this.text[j] : "";
     }
-    current(): string {
-        return this.position < this.n ? this.text[this.position] : "";
-    }
+    current = () => (this.position < this.n ? this.text[this.position] : "");
 
     advance(k = 1) {
         for (let i = 0; i < k; i++) {
             if (this.position < this.n) {
-                const ch = this.text[this.position++];
-                if (ch === "\n") {
-                    this.line++;
+                const c = this.text[this.position++];
+                if (c === "\n") {
+                    this.line += 1;
                     this.character = 1;
-                } else this.character++;
+                } else this.character += 1;
             }
         }
     }
@@ -1145,28 +1042,26 @@ class Lexer {
     }
 
     number(): Token {
-        const line = this.line,
-            character = this.character;
-        let v = "";
+        const { line, character } = this;
+        let value = "";
         while (/\d/.test(this.current())) {
-            v += this.current();
+            value += this.current();
             this.advance();
         }
         if (this.current() === "." || this.current().toLowerCase() === "e") {
-            v += this.current();
+            value += this.current();
             this.advance();
             while (/\d/.test(this.current()) || /[+\-eE]/.test(this.current())) {
-                v += this.current();
+                value += this.current();
                 this.advance();
             }
-            return new Token("REAL", v, line, character, this.context);
+            return new Token("REAL", value, line, character, this.context);
         }
-        return new Token("INTEGER", v, line, character, this.context);
+        return new Token("INTEGER", value, line, character, this.context);
     }
 
     ident_or_keyword(): Token {
-        const line = this.line;
-        const character = this.character;
+        const { line, character } = this;
         const c = this.current();
         let value = "";
         if (/[A-Za-z_]/.test(c)) {
@@ -1182,16 +1077,15 @@ class Lexer {
     }
 
     string(): Token {
-        const line = this.line;
-        const character = this.character;
+        const { line, character } = this;
         const quote = this.current();
         this.advance();
         let value = "";
         while (true) {
             const c = this.current();
             if (!c) {
-                const loc = `${this.input.filename}:${line}:${character}`;
-                throw new LexerError(`unterminated string at ${loc}`);
+                const location = `${this.input.filename}:${line}:${character}`;
+                throw new LexerError(`unterminated string at ${location}`);
             }
             if (c === quote) {
                 this.advance();
@@ -1209,39 +1103,36 @@ class Lexer {
     }
 
     symbol(): Token {
-        const start = this.line,
-            character = this.character;
+        const { line, character } = this;
         const two = this.current() + this.peek();
         if (SYMBOLS.has(two)) {
             this.advance(2);
-            return new Token("SYMBOL", two, start, character, this.context);
+            return new Token("SYMBOL", two, line, character, this.context);
         }
         const one = this.current();
         if (SYMBOLS.has(one)) {
             this.advance();
-            return new Token("SYMBOL", one, start, character, this.context);
+            return new Token("SYMBOL", one, line, character, this.context);
         }
-        const location = `${this.input.filename}:${start}:${character}`;
+        const location = `${this.input.filename}:${line}:${character}`;
         throw new LexerError(`unknown symbol '${one}' at ${location}`);
     }
 
     tokenize(): Token[] {
-        const v: Token[] = [];
+        const tokens: Token[] = [];
         while (true) {
             this.skip_whitespace_and_comments();
             if (this.position >= this.n) break;
-            const ch = this.current();
-            if (/\d/.test(ch)) v.push(this.number());
-            else if (/[A-Za-z_]/.test(ch)) v.push(this.ident_or_keyword());
-            else if (ch === '"') v.push(this.string());
-            else v.push(this.symbol());
+            const c = this.current();
+            if (/\d/.test(c)) tokens.push(this.number());
+            else if (/[A-Za-z_]/.test(c)) tokens.push(this.ident_or_keyword());
+            else if (c === '"') tokens.push(this.string());
+            else tokens.push(this.symbol());
         }
-        v.push(new Token("EOF", "", this.line, this.character, this.context));
-        return v;
+        tokens.push(new Token("EOF", "", this.line, this.character, this.context));
+        return tokens;
     }
 }
-
-// -------------------------- Parser helpers --------------------------
 
 class GenerateError extends Error {}
 
@@ -1249,109 +1140,107 @@ function is_number_name(name: string): boolean {
     return name === "INTEGER" || name === "REAL";
 }
 
-function expression_stringer(v: Expression, fmt: string[], callee: string, pre: string[]): string {
-    const c = C(v.c(), pre);
+function expression_stringer(e: Expression, fmt: string[], callee: string, pre: string[]): string {
+    const c = extract_value(e.c(), pre);
 
-    if (v instanceof BuiltinLiteral) {
-        fmt.push(v.format());
+    if (e instanceof BuiltinLiteral) {
+        fmt.push(e.format());
         return c;
     }
 
-    if (v instanceof VariableReference) {
-        const variable = discover_variable(v);
-        let [t, ref] = expand_variable_reference(variable, v, pre);
-        if (t instanceof AliasType) t = t.reference_type;
-        if (!(t instanceof BuiltinType))
+    if (e instanceof VariableReference) {
+        const variable = discover_variable(e);
+        let { type, reference } = expand_variable_reference(variable, e, pre);
+        if (type instanceof AliasType) type = type.reference_type;
+        if (!(type instanceof BuiltinType))
             throw new GenerateError(
-                `unsupported ${callee} variable argument '${String(v)}' of type '${t.constructor.name}' at ${String(
-                    v.token
-                )}`
+                `unsupported ${callee} variable argument '${e}' of type '${type.constructor.name}' at ${e.token}`
             );
 
-        fmt.push(t.format());
-        return ref;
+        fmt.push(type.format());
+        return reference;
     }
 
-    if (v instanceof ConcatenationOperation) {
+    if (e instanceof ConcatenationOperation) {
         fmt.push("A");
         return c;
     }
 
-    if (v instanceof FunctionCall) {
-        const fn = v.context().functions[v.name];
-        const t = fn instanceof BuiltinFunction ? fn.type : fn.type;
-        if (!(t instanceof BuiltinType))
+    if (e instanceof FunctionCall) {
+        const func = e.context().functions[e.name];
+        const type = func instanceof BuiltinFunction ? func.type : func.type;
+        if (!(type instanceof BuiltinType))
             throw new GenerateError(
-                `unsupported ${callee} function argument ${String(v)} of type ${t.constructor.name} at ${String(
-                    v.token
-                )}`
+                `unsupported ${callee} function argument ${e} of type ${type.constructor.name} at ${e.token}`
             );
 
-        fmt.push(t.format());
+        fmt.push(type.format());
         return c;
     }
 
-    throw new GenerateError(`unsupported ${callee} argument '${String(v)}' at ${String(v.token)}`);
+    throw new GenerateError(`unsupported ${callee} argument '${e}' at ${e.token}`);
 }
 
-// -------------------------- Expand variable refs --------------------------
-
-function expand_variable_reference(
-    variable: Variable,
-    variable_reference: VariableReference,
-    pre: string[]
-): [Type, string] {
+function expand_variable_reference(variable: Variable, variable_reference: VariableReference, pre: string[]) {
     let type: Type = variable.type;
-    let ref = variable.name;
+    let reference = variable.name;
 
     for (const part of variable_reference.parts) {
         if (part instanceof VariableSubscript) {
             if (type instanceof AliasType) type = type.reference_type;
-            if (!(type instanceof ArrayType)) throw new GenerateError(/* ... */);
 
-            const filename = part.token.context.text.filename;
-            const line = part.token.line;
-            const character = part.token.character;
+            if (!(type instanceof ArrayType))
+                throw new GenerateError(
+                    `expect ArrayType in reference type of subscript, not ${type.constructor.name} at ${part.token}`
+                );
 
-            // ensure $F exists (filename string const)
+            const { filename } = part.token.context.text;
+            const { line, character } = part.token;
+
             enlist_variable(new Variable(part.token, "$F", new StringType(), filename), "");
 
-            const lo = C(type.lo.c(), pre);
-            const hi = C(type.hi.c(), pre);
-            const idx = C(part.index(), pre);
+            const lo = extract_value(type.lo.c(), pre);
+            const hi = extract_value(type.hi.c(), pre);
+            const index = extract_value(part.index(), pre);
 
-            pre.push(`$index(${idx}, ${lo}, ${hi}, &$F, ${line}, ${character});`);
+            pre.push(`$index(${index}, ${lo}, ${hi}, &$F, ${line}, ${character});`);
 
-            const indexExpr = `(${idx}) - (${lo})`;
+            const indexExpr = `(${index}) - (${lo})`;
             type = type.type;
-            ref += `.data[${indexExpr}]`;
+            reference += `.data[${indexExpr}]`;
         } else if (part instanceof VariableField) {
             if (type instanceof AliasType) type = type.reference_type;
-            if (!(type instanceof StructType)) throw new GenerateError(/* ... */);
+
+            if (!(type instanceof StructType))
+                throw new GenerateError(
+                    `expect StructType in reference type of field, not ${type.constructor.name} at ${part.token}`
+                );
+
             const field = type.fields.find((f) => f.name === part.name);
-            if (!field) throw new GenerateError(/* ... */);
+            if (!field) throw new GenerateError(`field '${part.name}' not found in ${type} at ${part.token}`);
+
             type = field.type;
-            ref += part.c();
+            reference += part.c();
         } else {
-            throw new GenerateError(/* ... */);
+            throw new GenerateError(`unexpected variable reference part '${part}' at ${variable.token}`);
         }
     }
-    return [type, ref];
+    return { type, reference };
 }
 
 function discover_variable(v: VariableReference): Variable {
-    const context = v.token.context;
+    const { context } = v.token;
+
     const parts = v.scope.split(".");
-    let scopeParts = [...parts];
+
     let variable: Variable | undefined;
-    while (scopeParts.length) {
-        const fqn = scopeParts.join(".") + "|" + v.name;
+    while (parts.length) {
+        const fqn = parts.join(".") + "|" + v.name;
         variable = context.variables[fqn];
         if (variable) break;
-        scopeParts.pop();
+        parts.pop();
     }
-    if (!variable)
-        throw new GenerateError(`undefined variable '${v.name}' in scope '${v.scope}' at ${String(v.token)}`);
+    if (!variable) throw new GenerateError(`undefined variable '${v.name}' in scope '${v.scope}' at ${v.token}`);
     return variable;
 }
 
@@ -1359,57 +1248,53 @@ function enlist_type(name: string, type: Type, context: Context) {
     if (context.types[name]) throw new GenerateError(`type '${name}' already defined at ${name}`);
     context.types[name] = type;
 }
-function enlist_variable(variable: Variable, scope: string) {
-    const fqn = scope + "|" + variable.name;
-    variable.token.context.variables[fqn] = variable;
-}
 
-// -------------------------- Parser --------------------------
+function enlist_variable(variable: Variable, scope: string) {
+    const scopedName = scope + "|" + variable.name;
+    variable.token.context.variables[scopedName] = variable;
+}
 
 class Parser {
     context: Context;
     tokens: Token[];
     i = 0;
     scopes: string[] = [];
+
     constructor(context: Context) {
         this.context = context;
         this.tokens = context.tokens;
     }
 
-    scope(): string {
-        return this.scopes.length ? this.scopes.join(".") : "@";
-    }
-    enter_scope(name: string) {
-        this.scopes.push(name);
-    }
-    leave_scope() {
-        this.scopes.pop();
-    }
-    current(): Token {
-        return this.tokens[this.i];
-    }
+    scope = () => (this.scopes.length ? this.scopes.join(".") : "@");
+
+    enter_scope = (name: string) => this.scopes.push(name);
+    leave_scope = () => this.scopes.pop();
+
+    current = () => this.tokens[this.i];
+
     peek(): Token {
-        const cur = this.current();
+        const current = this.current();
         return this.i + 1 < this.tokens.length
             ? this.tokens[this.i + 1]
-            : new Token("EOF", "", cur.line, cur.character, this.context);
+            : new Token("EOF", "", current.line, current.character, this.context);
     }
 
     eat(kind: string | string[]): Token {
         const kinds = Array.isArray(kind) ? kind : [kind];
         const token = this.current();
         if (kinds.includes(token.type) || kinds.includes(token.value)) {
-            this.i++;
+            this.i += 1;
             return token;
         }
         const expected = kinds.join("/");
         throw new ParseError(`expected '${expected}', found '${token.value}'`, token);
     }
+
     accept(kind: string | string[]): Token | null {
         const kinds = Array.isArray(kind) ? kind : [kind];
         const token = this.current();
         if (kinds.includes(token.type) || kinds.includes(token.value)) {
-            this.i++;
+            this.i += 1;
             return token;
         }
         return null;
@@ -1455,19 +1340,21 @@ class Parser {
     }
 
     variables_section(): DECLARE[] {
-        const decls: DECLARE[] = [];
+        const declarations: DECLARE[] = [];
         while (true) {
             const declareToken = this.accept("DECLARE");
             if (!declareToken) break;
+
             const token = this.current();
             if (token.type === "IDENT") {
                 const name = this.eat("IDENT").value;
                 const type = this.parse_type();
                 this.eat(";");
-                decls.push(new DECLARE(declareToken, this.scope(), [name], type));
+                declarations.push(new DECLARE(declareToken, this.scope(), [name], type));
                 enlist_variable(new Variable(token, name, type), this.scope());
                 continue;
             }
+
             if (token.value === "(") {
                 this.eat("(");
                 const names: string[] = [];
@@ -1478,13 +1365,13 @@ class Parser {
                 this.eat(")");
                 const type = this.parse_type();
                 this.eat(";");
-                decls.push(new DECLARE(declareToken, this.scope(), names, type));
+                declarations.push(new DECLARE(declareToken, this.scope(), names, type));
                 for (const name of names) enlist_variable(new Variable(token, name, type), this.scope());
                 continue;
             }
-            throw new ParseError("expected a variable or '(' variable, ... ')'", token);
+            throw new ParseError("expected a variable or '(' variable')'", token);
         }
-        return decls;
+        return declarations;
     }
 
     parse_type(): Type {
@@ -1527,15 +1414,15 @@ class Parser {
             this.eat("STRUCTURE");
             return new StructType(fields);
         }
-        const tok = this.eat("IDENT");
-        const aliasName = tok.value;
+        const typeAliasToken = this.eat("IDENT");
+        const aliasName = typeAliasToken.value;
         const aliasType = this.context.types[aliasName];
-        if (!aliasType) throw new ParseError(`unknown type alias '${aliasName}'`, tok);
+        if (!aliasType) throw new ParseError(`unknown type alias '${aliasName}'`, typeAliasToken);
         return new AliasType(aliasName, aliasType);
     }
 
     procedures_and_functions_section(): (PROCEDURE | FUNCTION)[] {
-        const subs: (PROCEDURE | FUNCTION)[] = [];
+        const subroutines: (PROCEDURE | FUNCTION)[] = [];
         while (true) {
             const token = this.accept(["FUNCTION", "PROCEDURE"]);
             if (!token) break;
@@ -1558,33 +1445,33 @@ class Parser {
             this.eat(name);
             this.eat(";");
             if (token.value === "PROCEDURE") {
-                const args = parameters.map((p) => new Argument(p.token, p.name, p.type));
-                const sub = new PROCEDURE(token, this.scope(), name, args, segment);
-                this.context.procedures[name] = sub;
-                subs.push(sub);
+                const args = parameters.map((v) => new Argument(v.token, v.name, v.type));
+                const procedure = new PROCEDURE(token, this.scope(), name, args, segment);
+                this.context.procedures[name] = procedure;
+                subroutines.push(procedure);
             } else {
-                const args = parameters.map((p) => new Argument(p.token, p.name, p.type));
-                const sub = new FUNCTION(token, this.scope(), name, type!, args, segment);
-                this.context.functions[name] = sub;
-                subs.push(sub);
+                const args = parameters.map((v) => new Argument(v.token, v.name, v.type));
+                const func = new FUNCTION(token, this.scope(), name, type!, args, segment);
+                this.context.functions[name] = func;
+                subroutines.push(func);
             }
             this.leave_scope();
         }
-        return subs;
+        return subroutines;
     }
 
     parameters(): Variable[] {
-        const params: Variable[] = [];
+        const parameters: Variable[] = [];
         while (true) {
             const token = this.eat("IDENT");
             const name = token.value;
             const type = this.parse_type();
             const variable = new Variable(token, name, type);
-            params.push(variable);
+            parameters.push(variable);
             enlist_variable(variable, this.scope());
             if (!this.accept(",")) break;
         }
-        return params;
+        return parameters;
     }
 
     statements_section(): Statement[] {
@@ -1605,15 +1492,15 @@ class Parser {
             ";",
         ]);
         const is_label = () => {
-            const cur = this.current();
-            return cur.type === "IDENT" && cur.value !== "OTHERWISE" && this.peek().value === ":";
+            const current = this.current();
+            return current.type === "IDENT" && current.value !== "OTHERWISE" && this.peek().value === ":";
         };
         while (STATEMENTS.has(this.current().value) || is_label()) {
             if (is_label()) {
-                const labelToken = this.eat("IDENT");
-                const label = labelToken.value;
+                const token = this.eat("IDENT");
+                const label = token.value;
                 this.eat(":");
-                statements.push(new Label(labelToken, this.scope(), label));
+                statements.push(new Label(token, this.scope(), label));
             } else {
                 statements.push(this.statement());
             }
@@ -1664,13 +1551,13 @@ class Parser {
 
     if_statement(): IF {
         const token = this.eat("IF");
-        const cond = this.expression();
+        const condition = this.expression();
         this.eat("THEN");
-        const thenb = this.segment();
-        const elseb = this.accept("ELSE") ? this.segment() : null;
+        const then_ = this.segment();
+        const else_ = this.accept("ELSE") ? this.segment() : null;
         this.eat("FI");
         this.eat(";");
-        return new IF(token, this.scope(), cond, thenb, elseb);
+        return new IF(token, this.scope(), condition, then_, else_);
     }
 
     for_statement(): FOR {
@@ -1682,16 +1569,16 @@ class Parser {
         const to = this.accept("TO") ? this.expression() : null;
         const cond = this.accept("WHILE") ? this.expression() : null;
         this.eat("DO");
-        const doX = this.segment();
+        const segment = this.segment();
         this.eat("END");
         this.eat("FOR");
         this.eat(";");
-        return new FOR(token, this.scope(), variable, init, doX, by, to, cond);
+        return new FOR(token, this.scope(), variable, init, segment, by, to, cond);
     }
 
     select_statement(): SELECT {
         const token = this.eat("SELECT");
-        const expr = this.expression();
+        const expression = this.expression();
         this.eat("OF");
         const cases: Array<[Expression | null, Segment]> = [];
         while (this.accept("CASE")) {
@@ -1704,13 +1591,13 @@ class Parser {
         }
         if (this.accept("OTHERWISE")) {
             this.eat(":");
-            const body = this.segment();
-            cases.push([null, body]);
+            const segment = this.segment();
+            cases.push([null, segment]);
         }
         this.eat("END");
         this.eat("SELECT");
         this.eat(";");
-        return new SELECT(token, this.scope(), expr, cases);
+        return new SELECT(token, this.scope(), expression, cases);
     }
 
     return_statement(): RETURN {
@@ -1721,17 +1608,17 @@ class Parser {
         return new RETURN(token, this.scope(), value);
     }
     exit_statement(): EXIT {
-        const t = this.eat("EXIT");
+        const token = this.eat("EXIT");
         this.eat(";");
-        return new EXIT(t, this.scope());
+        return new EXIT(token, this.scope());
     }
 
     input_statement(): INPUT {
         const token = this.eat("INPUT");
-        const vars = [this.variable_reference()];
-        while (this.accept(",")) vars.push(this.variable_reference());
+        const variable_references = [this.variable_reference()];
+        while (this.accept(",")) variable_references.push(this.variable_reference());
         this.eat(";");
-        return new INPUT(token, this.scope(), vars);
+        return new INPUT(token, this.scope(), variable_references);
     }
 
     output_statement(): OUTPUT {
@@ -1743,38 +1630,39 @@ class Parser {
     }
 
     repeat_statement(): REPEAT {
-        const t = this.eat("REPEAT");
+        const token = this.eat("REPEAT");
         const label = this.eat("IDENT").value;
         this.eat(";");
-        return new REPEAT(t, this.scope(), label);
+        return new REPEAT(token, this.scope(), label);
     }
+
     repent_statement(): REPENT {
-        const t = this.eat("REPENT");
+        const token = this.eat("REPENT");
         const label = this.eat("IDENT").value;
         this.eat(";");
-        return new REPENT(t, this.scope(), label);
+        return new REPENT(token, this.scope(), label);
     }
 
     begin_statement(): BEGIN {
-        const t = this.eat("BEGIN");
-        const body = this.segment();
+        const token = this.eat("BEGIN");
+        const segment = this.segment();
         this.eat("END");
-        const lbl = this.accept("IDENT");
+        const label = this.accept("IDENT");
         this.eat(";");
-        return new BEGIN(t, this.scope(), body, lbl ? lbl.value : null);
+        return new BEGIN(token, this.scope(), segment, label ? label.value : null);
     }
 
     assignment_statement(): SET {
         const token = this.eat("SET");
-        let variable = this.variable_reference();
+        const variable = this.variable_reference();
         this.eat(":=");
         const targets = [variable];
         while (true) {
-            const save = this.i;
+            const position = this.i;
             if (this.current().type !== "IDENT") break;
-            variable = this.variable_reference();
+            const variable = this.variable_reference();
             if (this.current().value !== ":=") {
-                this.i = save;
+                this.i = position;
                 break;
             }
             this.eat(":=");
@@ -1833,55 +1721,55 @@ class Parser {
         }
         return left;
     }
+
     expression_AND(): Expression {
         const token = this.current();
         let left = this.expression_NOT();
         while (true) {
-            const op = this.accept("&");
-            if (!op) break;
+            const operation = this.accept("&");
+            if (!operation) break;
             const right = this.expression_NOT();
-            left = new BinaryOperation(token, this.scope(), new BooleanType(), op.value, left, right);
+            left = new BinaryOperation(token, this.scope(), new BooleanType(), operation.value, left, right);
         }
         return left;
     }
+
     expression_NOT(): Expression {
-        const tok = this.accept("NOT");
-        if (tok) return new UnaryOperation(tok, this.scope(), "NOT", tok.value, this.expression_NOT());
+        const token = this.accept("NOT");
+        if (token) return new UnaryOperation(token, this.scope(), token.value, this.expression_NOT());
         return this.expression_RELATION();
     }
+
     expression_RELATION(): Expression {
         const token = this.current();
         let left = this.expression_CONCATENATION();
         while (true) {
-            const op = this.accept(["<", ">", "=", "<=", ">=", "<>"]);
-            if (!op) break;
+            const operation = this.accept(["<", ">", "=", "<=", ">=", "<>"]);
+            if (!operation) break;
             const right = this.expression_CONCATENATION();
-            left = new BinaryOperation(token, this.scope(), new BooleanType(), op.value, left, right);
+            left = new BinaryOperation(token, this.scope(), new BooleanType(), operation.value, left, right);
         }
         return left;
     }
 
     expression_CONCATENATION(): Expression {
         const parts: Expression[] = [this.expression_ADDING()];
-        let opSeen = false;
         let token: Token = this.current();
         while (this.accept("||")) {
             token = this.current();
             parts.push(this.expression_ADDING());
-            opSeen = true;
         }
-        if (!opSeen) return parts[0];
-        const t = parts[0].token;
+        if (parts.length === 1) return parts[0];
         return new ConcatenationOperation(token, this.scope(), new StringType(), parts);
     }
 
     expression_ADDING(): Expression {
         let left = this.expression_MULTIPLYING();
         while (true) {
-            const op = this.accept(["+", "-"]);
-            if (!op) break;
+            const operation = this.accept(["+", "-"]);
+            if (!operation) break;
             const right = this.expression_MULTIPLYING();
-            left = new BinaryOperation(op, this.scope(), left.type, op.value, left, right);
+            left = new BinaryOperation(operation, this.scope(), left.type, operation.value, left, right);
         }
         return left;
     }
@@ -1890,10 +1778,10 @@ class Parser {
         const token = this.current();
         let left = this.expression_FUNCTION_CALL();
         while (true) {
-            const op = this.accept(["*", "/", "MOD"]);
-            if (!op) break;
+            const operation = this.accept(["*", "/", "MOD"]);
+            if (!operation) break;
             const right = this.expression_FUNCTION_CALL();
-            left = new BinaryOperation(token, this.scope(), left.type, op.value, left, right);
+            left = new BinaryOperation(token, this.scope(), left.type, operation.value, left, right);
         }
         return left;
     }
@@ -1916,28 +1804,29 @@ class Parser {
     factor(): Expression {
         const token = this.current();
         if (token.type === "INTEGER") {
-            const t = this.eat("INTEGER");
-            return new IntegerLiteral(t, this.scope(), parseInt(t.value, 10));
+            const token = this.eat("INTEGER");
+            return new IntegerLiteral(token, this.scope(), parseInt(token.value, 10));
         }
         if (token.type === "REAL") {
-            const t = this.eat("REAL");
-            return new RealLiteral(t, this.scope(), parseFloat(t.value));
+            const token = this.eat("REAL");
+            return new RealLiteral(token, this.scope(), parseFloat(token.value));
         }
         if (token.type === "STRING") {
-            const t = this.eat("STRING");
+            const token = this.eat("STRING");
             const context = this.context;
-            const existing = Object.values(context.variables).find((v) => v.isConst() && v.zeroValue === t.value);
-            if (existing) return new VariableReference(t, "", existing.name, []);
+            const existing = Object.values(context.variables).find((v) => v.isConst() && v.zeroValue === token.value);
+            if (existing) return new VariableReference(token, "", existing.name, []);
+
             const const_i = Object.values(context.variables).filter((v) => v.isConst()).length;
             const name = `$${const_i}`;
-            const variable = new Variable(t, name, new StringType(), t.value);
+            const variable = new Variable(token, name, new StringType(), token.value);
             enlist_variable(variable, "");
-            return new VariableReference(t, "", name, []);
+            return new VariableReference(token, "", name, []);
         }
         if (token.value === "+" || token.value === "-") {
-            const t = this.eat(token.value);
-            const f = this.factor();
-            return new UnaryOperation(t, this.scope(), t.type, t.value, f);
+            const unaryToken = this.eat(token.value);
+            const factor = this.factor();
+            return new UnaryOperation(unaryToken, this.scope(), unaryToken.value, factor);
         }
         if (token.value === "(") {
             this.eat("(");
@@ -1946,8 +1835,8 @@ class Parser {
             return e;
         }
         if (token.value === "TRUE" || token.value === "FALSE") {
-            const t = this.eat(token.value);
-            return new BoolLiteral(t, this.scope(), t.value === "TRUE");
+            const valueToken = this.eat(token.value);
+            return new BoolLiteral(valueToken, this.scope(), valueToken.value === "TRUE");
         }
         if (token.type === "IDENT") {
             return this.variable_reference();
@@ -1961,13 +1850,13 @@ class Parser {
 
 class ConcatenationOperation extends Expression {
     parts: Expression[];
-    constructor(t: Token, s: string, type: Type, parts: Expression[]) {
-        super(t, s, type);
+    constructor(token: Token, scope: string, type: Type, parts: Expression[]) {
+        super(token, scope, type);
         this.parts = parts;
     }
     c(): string {
-        const ctx = this.context();
-        const r = `$r${ctx.r++}`;
+        const context = this.context();
+        const r = `$r${context.r++}`;
 
         const pre: string[] = [];
         const fmt: string[] = [];
@@ -1980,17 +1869,15 @@ class ConcatenationOperation extends Expression {
 class PROGRAM extends Node {
     name: string;
     segment: Segment;
-    constructor(t: Token, s: string, name: string, seg: Segment) {
-        super(t, s);
+    constructor(token: Token, scope: string, name: string, segment: Segment) {
+        super(token, scope);
         this.name = name;
-        this.segment = seg;
+        this.segment = segment;
     }
     c(): string {
         return emit(["int main()", "{", indent(this.segment.c(true), 1), "}"]);
     }
 }
-
-// -------------------------- Compiler --------------------------
 
 class Compiler {
     context: Context;
@@ -2027,64 +1914,7 @@ class Compiler {
         this.parser = new Parser(this.context);
         return this.parser.program();
     }
-
-    generate(program: PROGRAM): string {
-        const lines: string[] = [
-            "#include <stdio.h>",
-            "#include <stdlib.h>",
-            "#include <string.h>",
-            "#include <stdbool.h>",
-            '#include "runtime.h"',
-            "",
-        ];
-
-        if (this.context.common.length) {
-            lines.push("// Common declarations");
-            for (const declaration of this.context.common) lines.push(declaration);
-            lines.push("");
-        }
-
-        if (Object.keys(this.context.types).length) {
-            lines.push("// Type definitions");
-            for (const ty of Object.values(this.context.types)) {
-                if (ty instanceof AliasType) continue;
-                lines.push(ty.c());
-            }
-            lines.push("");
-        }
-
-        if (Object.keys(this.context.variables).length) {
-            lines.push("// Global variables");
-            for (const v of Object.values(this.context.variables)) {
-                if (v.isConst()) lines.push(v.const() + ";");
-                else lines.push(v.c() + ";");
-            }
-            lines.push("");
-        }
-
-        if (Object.keys(this.context.procedures).length) {
-            lines.push("// Procedures");
-            for (const p of Object.values(this.context.procedures)) {
-                lines.push(p.c(), "");
-            }
-        }
-
-        if (Object.keys(this.context.functions).length) {
-            lines.push("// Functions");
-            for (const f of Object.values(this.context.functions)) {
-                if (f instanceof BuiltinFunction) continue; // don't emit builtins
-                lines.push((f as FUNCTION).c(), "");
-            }
-        }
-
-        lines.push("// Main program");
-        lines.push(program.c());
-
-        return emit(lines);
-    }
 }
-
-// -------------------------- CLI --------------------------
 
 function run(argv: string[]) {
     if (argv.length < 3) {
@@ -2104,9 +1934,9 @@ function run(argv: string[]) {
 
     const source = fs.readFileSync(inputFile, "utf-8");
     const firstLine = source.split(/\r?\n/)[0]?.trim() ?? "";
-    if (firstLine.startsWith("//easy:flags ")) {
-        const pairs = firstLine.split(/\s+/).slice(1);
-        const flags = Object.fromEntries(pairs.map((p) => p.split("=")));
+    if (firstLine.startsWith("//flags ")) {
+        const pairs: string[] = firstLine.split(/\s+/).slice(1);
+        const flags = Object.fromEntries(pairs.map((v) => v.split("=")));
         Object.assign(context.flags, flags);
     }
 
@@ -2114,9 +1944,9 @@ function run(argv: string[]) {
 
     if (argv.includes("-t")) {
         const tokensFile = inputFile.replace(/\.[^.]+$/, "") + ".tokens";
-        const lines = context.tokens.map((t) => {
-            const input = t.context.text;
-            return `${input.filename}:${t.line}:${t.character}\t ${t.value} / ${t.type}`;
+        const lines = context.tokens.map((token) => {
+            const input = token.context.text;
+            return `${input.filename}:${token.line}:${token.character}\t ${token.value} / ${token.type}`;
         });
         fs.writeFileSync(tokensFile, lines.join("\n") + "\n", "utf-8");
     }
@@ -2126,49 +1956,52 @@ function run(argv: string[]) {
         fs.writeFileSync(astFile, printer(program), "utf-8");
     }
 
-    const outputS = arg(argv, "-s") ?? inputFile.replace(/\.[^.]+$/, "") + ".s";
-    {
-        const rowsVars: string[][] = [];
-        for (const [name, variable] of Object.entries(context.variables)) rowsVars.push(variable.s(name));
-        const rowsTypes: string[][] = [];
-        for (const [name, type] of Object.entries(context.types)) rowsTypes.push([name, type.c().replace(/\s+/g, " ")]);
-        const rowsFns: string[][] = [];
-        for (const [name, fun] of Object.entries(context.functions)) {
-            if (fun instanceof BuiltinFunction) {
-                rowsFns.push([fun.name, "->", fun.type.c(), "built-in"]);
-            } else {
-                const args = fun.arguments.map((a) => `${a.name} ${a.type.c()}`).join(", ");
-                rowsFns.push([fun.name, "->", fun.type.c(), fun.constructor.name, `(${args})`, String(fun.token)]);
-            }
+    const symbolsFile = arg(argv, "-s") ?? inputFile.replace(/\.[^.]+$/, "") + ".s";
+
+    const variables: string[][] = [];
+    for (const [name, variable] of Object.entries(context.variables)) variables.push(variable.s(name));
+
+    const types: string[][] = [];
+    for (const [name, type] of Object.entries(context.types)) types.push([name, type.c().replace(/\s+/g, " ")]);
+
+    const functions: string[][] = [];
+    for (const [name, fun] of Object.entries(context.functions)) {
+        if (fun instanceof BuiltinFunction) {
+            functions.push([fun.name, "->", fun.type.c(), "built-in"]);
+        } else {
+            const args = fun.arguments.map((a) => `${a.name} ${a.type.c()}`).join(", ");
+            functions.push([fun.name, "->", fun.type.c(), fun.constructor.name, `(${args})`, String(fun.token)]);
         }
-        const rowsProcs: string[][] = [];
-        for (const [, proc] of Object.entries(context.procedures)) {
-            const args = proc.arguments.map((a) => `${a.name} ${a.type.c()}`).join(", ");
-            rowsProcs.push([proc.name, proc.constructor.name, `(${args})`, String(proc.token)]);
-        }
-        const sOut = table(rowsVars) + "\n" + table(rowsTypes) + "\n" + table(rowsFns) + "\n" + table(rowsProcs);
-        fs.writeFileSync(outputS, sOut + "\n", "utf-8");
     }
 
-    const outputC = arg(argv, "-c") ?? inputFile.replace(/\.[^.]+$/, "") + ".c";
-    const codeC = program.c().trim();
+    const procedures: string[][] = [];
+    for (const [, proc] of Object.entries(context.procedures)) {
+        const args = proc.arguments.map((a) => `${a.name} ${a.type.c()}`).join(", ");
+        procedures.push([proc.name, proc.constructor.name, `(${args})`, String(proc.token)]);
+    }
 
-    const chunks: string[] = [];
-    chunks.push('#include "runtime.c"\n');
-    for (const [name, def] of Object.entries(context.types)) chunks.push(def.typedef(name) + ";\n");
-    if (context.common.length) chunks.push(emit(context.common) + "\n");
-    for (const v of Object.values(context.variables)) if (v.isConst()) chunks.push(v.const() + ";\n");
+    const sOut = table(variables) + "\n" + table(types) + "\n" + table(functions) + "\n" + table(procedures);
+    fs.writeFileSync(symbolsFile, sOut + "\n", "utf-8");
+
+    const outputFile = arg(argv, "-c") ?? inputFile.replace(/\.[^.]+$/, "") + ".c";
+    const compiledText = program.c().trim();
+
+    const output: string[] = [];
+    output.push('#include "runtime.c"\n');
+    for (const [name, def] of Object.entries(context.types)) output.push(def.typedef(name) + ";\n");
+    if (context.common.length) output.push(emit(context.common) + "\n");
+    for (const v of Object.values(context.variables)) if (v.isConst()) output.push(v.const() + ";\n");
     for (const f of Object.values(context.functions)) {
         if (f instanceof BuiltinFunction) continue;
-        chunks.push((f as FUNCTION).c() + "\n");
+        output.push((f as FUNCTION).c() + "\n");
     }
-    for (const p of Object.values(context.procedures)) chunks.push(p.c() + "\n");
-    chunks.push(codeC + "\n");
+    for (const v of Object.values(context.procedures)) output.push(v.c() + "\n");
+    output.push(compiledText + "\n");
 
-    fs.writeFileSync(outputC, chunks.join(""), "utf-8");
+    fs.writeFileSync(outputFile, output.join(""), "utf-8");
 }
 
-if (require.main === module) {
+if (import.meta.main) {
     try {
         run(process.argv);
     } catch (e: any) {

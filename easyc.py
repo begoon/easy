@@ -598,21 +598,6 @@ class Entity:
 
 
 @dataclass
-class FIELD(Entity):
-    name: str
-    type: Type
-
-
-@dataclass
-class STRUCTURE(Node):
-    fields: list[FIELD]
-
-    def c(self) -> str:
-        v = ["struct {", " ".join(f"{field.c()};" for field in self.fields), "}"]
-        return " ".join(v)
-
-
-@dataclass
 class Argument(Entity):
     name: str
     type: Type
@@ -1853,7 +1838,7 @@ def run(args: list[str]) -> None:
 
     source = input_file.read_text()
     flags_comment = source.splitlines()[0].strip()
-    if flags_comment.startswith("//easy:flags "):
+    if flags_comment.startswith("//flags "):
         flags_pairs = flags_comment.split()[1:]
         flags = {k: v for k, v in (pair.split("=") for pair in flags_pairs)}
         context.flags.update(flags)
