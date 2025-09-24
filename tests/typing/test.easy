@@ -1,23 +1,25 @@
 PROGRAM Typing:
   DECLARE s STRING;
-  DECLARE (i, j, v) INTEGER;
+  DECLARE (i, j) INTEGER;
   DECLARE r REAL;
+  DECLARE b BOOLEAN;
+
   FUNCTION S() STRING: RETURN "abc"; END FUNCTION S;
   FUNCTION I() INTEGER: RETURN 123; END FUNCTION I;
   FUNCTION R() REAL: RETURN 567.89; END FUNCTION R;
   FUNCTION B() BOOLEAN: RETURN TRUE; END FUNCTION B;
 
-  OUTPUT S();
-  OUTPUT I();
-  OUTPUT R();
-  OUTPUT B();
+  OUTPUT S(), " - ", I(), " - ", R(), " - ", B();
 
   SET s := S() || "xzy";
   OUTPUT s;
 
-  SET v := i + j;
-  OUTPUT v;
+  SET i := i + j;
+  SET i := 100 + FIX(R()) * 2 / 7;
+  SET r := R() + FLOAT(200);
+  SET j := FLOOR(r) + i;
+  SET i := r + 2.1;
+  SET b := (i < j) & B() | NOT (i >= j);
 
-  SET v := 1 + 2.1;
-  OUTPUT v;
+  OUTPUT i, " - ", j, " - ", r, " - ", b;
 END PROGRAM Typing;

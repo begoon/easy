@@ -15,11 +15,11 @@ int main()
     scanf("%d", &i);
     scanf("%lf", &f);
     scanf("%s", s.data);
-    const auto $r1 = $concat("AiA", $0, i, $1);
+    const STR $r1 = $concat("AiA", $0, i, $1);
     $output("A", $r1);
-    const auto $r2 = $concat("ArA", $2, f, $1);
+    const STR $r2 = $concat("ArA", $2, f, $1);
     $output("A", $r2);
-    const auto $r3 = $concat("AAA", $3, s, $1);
+    const STR $r3 = $concat("AAA", $3, s, $1);
     $output("A", $r3);
     exit(0);
 }

@@ -331,6 +331,12 @@
                           "node": "IntegerType"
                         },
                         "value": 1
+                      },
+                      "leftType": {
+                        "node": "IntegerType"
+                      },
+                      "rightType": {
+                        "node": "IntegerType"
                       }
                     }
                   },
@@ -340,7 +346,7 @@
                     "scope": "PROGRAM:Rule110.PROCEDURE:step",
                     "cond": {
                       "node": "BinaryOperation",
-                      "token": "<j|IDENT tests/rule_110/test.easy:19:10>",
+                      "token": "<<|SYMBOL tests/rule_110/test.easy:19:12>",
                       "scope": "PROGRAM:Rule110.PROCEDURE:step",
                       "type": {
                         "node": "BooleanType"
@@ -361,6 +367,12 @@
                           "node": "IntegerType"
                         },
                         "value": 1
+                      },
+                      "leftType": {
+                        "node": "IntegerType"
+                      },
+                      "rightType": {
+                        "node": "IntegerType"
                       }
                     },
                     "then_branch": {
@@ -498,6 +510,12 @@
                           "node": "IntegerType"
                         },
                         "value": 1
+                      },
+                      "leftType": {
+                        "node": "IntegerType"
+                      },
+                      "rightType": {
+                        "node": "IntegerType"
                       }
                     }
                   },
@@ -507,7 +525,7 @@
                     "scope": "PROGRAM:Rule110.PROCEDURE:step",
                     "cond": {
                       "node": "BinaryOperation",
-                      "token": "<j|IDENT tests/rule_110/test.easy:25:10>",
+                      "token": "<>|SYMBOL tests/rule_110/test.easy:25:12>",
                       "scope": "PROGRAM:Rule110.PROCEDURE:step",
                       "type": {
                         "node": "BooleanType"
@@ -526,6 +544,12 @@
                         "scope": "PROGRAM:Rule110.PROCEDURE:step",
                         "name": "N",
                         "parts": []
+                      },
+                      "leftType": {
+                        "node": "IntegerType"
+                      },
+                      "rightType": {
+                        "node": "IntegerType"
                       }
                     },
                     "then_branch": {
@@ -638,6 +662,12 @@
                           "scope": "PROGRAM:Rule110.PROCEDURE:step",
                           "name": "c",
                           "parts": []
+                        },
+                        "leftType": {
+                          "node": "IntegerType"
+                        },
+                        "rightType": {
+                          "node": "IntegerType"
                         }
                       },
                       "right": {
@@ -646,6 +676,12 @@
                         "scope": "PROGRAM:Rule110.PROCEDURE:step",
                         "name": "right",
                         "parts": []
+                      },
+                      "leftType": {
+                        "node": "IntegerType"
+                      },
+                      "rightType": {
+                        "node": "IntegerType"
                       }
                     }
                   },
@@ -666,7 +702,7 @@
                       [
                         {
                           "node": "BinaryOperation",
-                          "token": "<s|IDENT tests/rule_110/test.easy:31:15>",
+                          "token": "<=|SYMBOL tests/rule_110/test.easy:31:17>",
                           "scope": "PROGRAM:Rule110.PROCEDURE:step",
                           "type": {
                             "node": "BooleanType"
@@ -687,6 +723,12 @@
                               "node": "IntegerType"
                             },
                             "value": 2
+                          },
+                          "leftType": {
+                            "node": "IntegerType"
+                          },
+                          "rightType": {
+                            "node": "IntegerType"
                           }
                         },
                         {
@@ -746,7 +788,7 @@
                           "operation": "|",
                           "left": {
                             "node": "BinaryOperation",
-                            "token": "<s|IDENT tests/rule_110/test.easy:32:15>",
+                            "token": "<=|SYMBOL tests/rule_110/test.easy:32:17>",
                             "scope": "PROGRAM:Rule110.PROCEDURE:step",
                             "type": {
                               "node": "BooleanType"
@@ -767,11 +809,17 @@
                                 "node": "IntegerType"
                               },
                               "value": 0
+                            },
+                            "leftType": {
+                              "node": "IntegerType"
+                            },
+                            "rightType": {
+                              "node": "IntegerType"
                             }
                           },
                           "right": {
                             "node": "BinaryOperation",
-                            "token": "<s|IDENT tests/rule_110/test.easy:32:23>",
+                            "token": "<=|SYMBOL tests/rule_110/test.easy:32:25>",
                             "scope": "PROGRAM:Rule110.PROCEDURE:step",
                             "type": {
                               "node": "BooleanType"
@@ -792,7 +840,19 @@
                                 "node": "IntegerType"
                               },
                               "value": 3
+                            },
+                            "leftType": {
+                              "node": "IntegerType"
+                            },
+                            "rightType": {
+                              "node": "IntegerType"
                             }
+                          },
+                          "leftType": {
+                            "node": "BooleanType"
+                          },
+                          "rightType": {
+                            "node": "BooleanType"
                           }
                         },
                         {
@@ -857,7 +917,7 @@
                               "scope": "PROGRAM:Rule110.PROCEDURE:step",
                               "cond": {
                                 "node": "BinaryOperation",
-                                "token": "<c|IDENT tests/rule_110/test.easy:33:23>",
+                                "token": "<=|SYMBOL tests/rule_110/test.easy:33:25>",
                                 "scope": "PROGRAM:Rule110.PROCEDURE:step",
                                 "type": {
                                   "node": "BooleanType"
@@ -878,6 +938,12 @@
                                     "node": "IntegerType"
                                   },
                                   "value": 1
+                                },
+                                "leftType": {
+                                  "node": "IntegerType"
+                                },
+                                "rightType": {
+                                  "node": "IntegerType"
                                 }
                               },
                               "then_branch": {
@@ -1070,7 +1136,7 @@
                     "scope": "PROGRAM:Rule110.PROCEDURE:print",
                     "cond": {
                       "node": "BinaryOperation",
-                      "token": "<row|IDENT tests/rule_110/test.easy:43:10>",
+                      "token": "<=|SYMBOL tests/rule_110/test.easy:43:17>",
                       "scope": "PROGRAM:Rule110.PROCEDURE:print",
                       "type": {
                         "node": "BooleanType"
@@ -1103,6 +1169,12 @@
                           "node": "IntegerType"
                         },
                         "value": 1
+                      },
+                      "leftType": {
+                        "node": "IntegerType"
+                      },
+                      "rightType": {
+                        "node": "IntegerType"
                       }
                     },
                     "then_branch": {
@@ -1122,7 +1194,7 @@
                               "node": "VariableReference",
                               "token": "<X|STRING tests/rule_110/test.easy:43:33>",
                               "scope": "",
-                              "name": "$0",
+                              "name": "$1",
                               "parts": []
                             }
                           ]
@@ -1146,7 +1218,7 @@
                               "node": "VariableReference",
                               "token": "<.|STRING tests/rule_110/test.easy:43:50>",
                               "scope": "",
-                              "name": "$1",
+                              "name": "$2",
                               "parts": []
                             }
                           ]
@@ -1175,7 +1247,7 @@
                   "node": "VariableReference",
                   "token": "<  |STRING tests/rule_110/test.easy:45:12>",
                   "scope": "",
-                  "name": "$2",
+                  "name": "$3",
                   "parts": []
                 }
               ]
@@ -1233,7 +1305,7 @@
                   "arguments": [
                     {
                       "node": "BinaryOperation",
-                      "token": "<N|IDENT tests/rule_110/test.easy:50:15>",
+                      "token": "</|SYMBOL tests/rule_110/test.easy:50:16>",
                       "scope": "PROGRAM:Rule110",
                       "type": {
                         "node": "IntegerType"
@@ -1254,6 +1326,12 @@
                           "node": "IntegerType"
                         },
                         "value": 2
+                      },
+                      "leftType": {
+                        "node": "IntegerType"
+                      },
+                      "rightType": {
+                        "node": "IntegerType"
                       }
                     }
                   ]

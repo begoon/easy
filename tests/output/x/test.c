@@ -47,17 +47,17 @@ int main()
     b = TRUE;
     s = $4;
     $output("AiArAbAAA", $5, a, $6, r, $7, b, $8, s, $9);
-    const auto $r1 = CHARACTER(50);
-    const auto $r2 = LENGTH($11);
-    const auto $r3 = FIX(23.56);
-    const auto $r4 = FLOAT(543);
+    const STR $r1 = CHARACTER(50);
+    const int $r2 = LENGTH($11);
+    const int $r3 = FIX(23.56);
+    const double $r4 = FLOAT(543);
     $output("AAiAiAr", $r1, $10, $r2, $10, $r3, $10, $r4);
-    const auto $r5 = $concat("AA", $11, $12);
+    const STR $r5 = $concat("AA", $11, $12);
     $output("A", $r5);
-    const auto $r6 = fa();
-    const auto $r7 = fr();
-    const auto $r8 = fb();
-    const auto $r9 = fs();
+    const int $r6 = fa();
+    const double $r7 = fr();
+    const int $r8 = fb();
+    const STR $r9 = fs();
     $output("AiArAbAAA", $5, $r6, $6, $r7, $7, $r8, $8, $r9, $13);
     exit(0);
 }

@@ -10,8 +10,8 @@ STR $2 = { .data = "otherwise" };
 int main()
 {
     a = 100;
-    const auto $r1 = (a < 0);
-    const auto $r2 = (a == 0);
+    const int $r1 = (a < 0);
+    const int $r2 = (a == 0);
     if ($r1)
     {
         $output("A", $0);

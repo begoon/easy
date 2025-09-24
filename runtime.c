@@ -12,6 +12,7 @@ typedef struct
 } STR;
 int FIX(double v) { return (int)v; }
 double FLOAT(int v) { return (double)v; }
+double FLOOR(double v) { return (double)((int)v); }
 int LENGTH(STR s) { return strlen(s.data); }
 STR CHARACTER(int c)
 {
@@ -25,12 +26,6 @@ STR SUBSTR(STR str, int start, int length)
     STR v = {0};
     strncpy(v.data, str.data + start, length);
     v.data[length] = '\0';
-    return v;
-}
-STR from_cstring(const char *s)
-{
-    STR v = {0};
-    strncpy(v.data, s, sizeof(v.data) - 1);
     return v;
 }
 // i - INTEGER (int)

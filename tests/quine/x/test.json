@@ -205,6 +205,12 @@
                         "node": "IntegerType"
                       },
                       "value": 38
+                    },
+                    "leftType": {
+                      "node": "IntegerType"
+                    },
+                    "rightType": {
+                      "node": "IntegerType"
                     }
                   }
                 ]

@@ -1,50 +1,50 @@
-tests/select/test.easy:1:1	 PROGRAM / KEYWORD
-tests/select/test.easy:1:9	 Test / IDENT
-tests/select/test.easy:1:13	 : / SYMBOL
-tests/select/test.easy:2:3	 DECLARE / KEYWORD
-tests/select/test.easy:2:11	 a / IDENT
-tests/select/test.easy:2:13	 INTEGER / KEYWORD
-tests/select/test.easy:2:20	 ; / SYMBOL
-tests/select/test.easy:3:3	 SET / KEYWORD
-tests/select/test.easy:3:7	 a / IDENT
-tests/select/test.easy:3:9	 := / SYMBOL
-tests/select/test.easy:3:12	 100 / INTEGER
-tests/select/test.easy:3:15	 ; / SYMBOL
-tests/select/test.easy:4:3	 SELECT / KEYWORD
-tests/select/test.easy:4:10	 TRUE / KEYWORD
-tests/select/test.easy:4:15	 OF / IDENT
-tests/select/test.easy:5:5	 CASE / KEYWORD
-tests/select/test.easy:5:10	 ( / SYMBOL
-tests/select/test.easy:5:11	 a / IDENT
-tests/select/test.easy:5:13	 < / SYMBOL
-tests/select/test.easy:5:15	 0 / INTEGER
-tests/select/test.easy:5:16	 ) / SYMBOL
-tests/select/test.easy:5:17	 : / SYMBOL
-tests/select/test.easy:5:19	 OUTPUT / KEYWORD
-tests/select/test.easy:5:26	 a < 0 / STRING
-tests/select/test.easy:5:33	 ; / SYMBOL
-tests/select/test.easy:6:5	 CASE / KEYWORD
-tests/select/test.easy:6:10	 ( / SYMBOL
-tests/select/test.easy:6:11	 a / IDENT
-tests/select/test.easy:6:13	 = / SYMBOL
-tests/select/test.easy:6:15	 0 / INTEGER
-tests/select/test.easy:6:16	 ) / SYMBOL
-tests/select/test.easy:6:17	 : / SYMBOL
-tests/select/test.easy:6:19	 OUTPUT / KEYWORD
-tests/select/test.easy:6:26	 a = 0 / STRING
-tests/select/test.easy:6:33	 ; / SYMBOL
-tests/select/test.easy:7:5	 OTHERWISE / KEYWORD
-tests/select/test.easy:7:14	 : / SYMBOL
-tests/select/test.easy:7:16	 OUTPUT / KEYWORD
-tests/select/test.easy:7:23	 otherwise / STRING
-tests/select/test.easy:7:34	 ; / SYMBOL
-tests/select/test.easy:8:3	 END / KEYWORD
-tests/select/test.easy:8:7	 SELECT / KEYWORD
-tests/select/test.easy:8:13	 ; / SYMBOL
-tests/select/test.easy:9:3	 EXIT / KEYWORD
-tests/select/test.easy:9:7	 ; / SYMBOL
-tests/select/test.easy:11:1	 END / KEYWORD
-tests/select/test.easy:11:5	 PROGRAM / KEYWORD
-tests/select/test.easy:11:13	 Test / IDENT
-tests/select/test.easy:11:17	 ; / SYMBOL
-tests/select/test.easy:12:1	  / EOF
+tests/select/test.easy:1:1    KEYWORD  PROGRAM  
+tests/select/test.easy:1:9    IDENT    Test     
+tests/select/test.easy:1:13   SYMBOL   :        
+tests/select/test.easy:2:3    KEYWORD  DECLARE  
+tests/select/test.easy:2:11   IDENT    a        
+tests/select/test.easy:2:13   KEYWORD  INTEGER  
+tests/select/test.easy:2:20   SYMBOL   ;        
+tests/select/test.easy:3:3    KEYWORD  SET      
+tests/select/test.easy:3:7    IDENT    a        
+tests/select/test.easy:3:9    SYMBOL   :=       
+tests/select/test.easy:3:12   INTEGER  100      
+tests/select/test.easy:3:15   SYMBOL   ;        
+tests/select/test.easy:4:3    KEYWORD  SELECT   
+tests/select/test.easy:4:10   KEYWORD  TRUE     
+tests/select/test.easy:4:15   IDENT    OF       
+tests/select/test.easy:5:5    KEYWORD  CASE     
+tests/select/test.easy:5:10   SYMBOL   (        
+tests/select/test.easy:5:11   IDENT    a        
+tests/select/test.easy:5:13   SYMBOL   <        
+tests/select/test.easy:5:15   INTEGER  0        
+tests/select/test.easy:5:16   SYMBOL   )        
+tests/select/test.easy:5:17   SYMBOL   :        
+tests/select/test.easy:5:19   KEYWORD  OUTPUT   
+tests/select/test.easy:5:26   STRING   a < 0    
+tests/select/test.easy:5:33   SYMBOL   ;        
+tests/select/test.easy:6:5    KEYWORD  CASE     
+tests/select/test.easy:6:10   SYMBOL   (        
+tests/select/test.easy:6:11   IDENT    a        
+tests/select/test.easy:6:13   SYMBOL   =        
+tests/select/test.easy:6:15   INTEGER  0        
+tests/select/test.easy:6:16   SYMBOL   )        
+tests/select/test.easy:6:17   SYMBOL   :        
+tests/select/test.easy:6:19   KEYWORD  OUTPUT   
+tests/select/test.easy:6:26   STRING   a = 0    
+tests/select/test.easy:6:33   SYMBOL   ;        
+tests/select/test.easy:7:5    KEYWORD  OTHERWISE
+tests/select/test.easy:7:14   SYMBOL   :        
+tests/select/test.easy:7:16   KEYWORD  OUTPUT   
+tests/select/test.easy:7:23   STRING   otherwise
+tests/select/test.easy:7:34   SYMBOL   ;        
+tests/select/test.easy:8:3    KEYWORD  END      
+tests/select/test.easy:8:7    KEYWORD  SELECT   
+tests/select/test.easy:8:13   SYMBOL   ;        
+tests/select/test.easy:9:3    KEYWORD  EXIT     
+tests/select/test.easy:9:7    SYMBOL   ;        
+tests/select/test.easy:11:1   KEYWORD  END      
+tests/select/test.easy:11:5   KEYWORD  PROGRAM  
+tests/select/test.easy:11:13  IDENT    Test     
+tests/select/test.easy:11:17  SYMBOL   ;        
+tests/select/test.easy:12:1   EOF               

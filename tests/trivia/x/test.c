@@ -9,9 +9,9 @@ STR b = {0};
 STR $0 = { .data = "abc" };
 int main()
 {
-    const auto $r3 = SUBSTR($0, 0, 2);
-    const auto $r2 = $concat("AA", b, $r3);
-    const auto $r1 = $concat("AA", a, $r2);
+    const STR $r3 = SUBSTR($0, 0, 2);
+    const STR $r2 = $concat("AA", b, $r3);
+    const STR $r1 = $concat("AA", a, $r2);
     x = $r1;
     exit(0);
 }

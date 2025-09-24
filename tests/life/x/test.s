@@ -16,7 +16,8 @@ y      PROGRAM:Life.PROCEDURE:print|y          IntegerType  <'('|SYMBOL|tests/li
 $0     |$0                                     StringType   <'** [ EASY LIFE ]'|STRING|tests/life/test.easy:35:12>
 $1     |$1                                     StringType   <' '|STRING|tests/life/test.easy:35:32>               
 $2     |$2                                     StringType   <'*'|STRING|tests/life/test.easy:36:38>               
-$3     |$3                                     StringType   <'x'|STRING|tests/life/test.easy:41:18>               
+$F     |$F                                     StringType   <x|IDENT|tests/life/test.easy:40:21>                  
+$4     |$4                                     StringType   <'x'|STRING|tests/life/test.easy:41:18>               
 x      PROGRAM:Life.PROCEDURE:glider|x         IntegerType  <x|IDENT|tests/life/test.easy:51:20>                  
 y      PROGRAM:Life.PROCEDURE:glider|y         IntegerType  <y|IDENT|tests/life/test.easy:51:31>                  
 x      PROGRAM:Life.PROCEDURE:evolution|x      IntegerType  <'('|SYMBOL|tests/life/test.easy:60:13>               
@@ -24,7 +25,7 @@ y      PROGRAM:Life.PROCEDURE:evolution|y      IntegerType  <'('|SYMBOL|tests/li
 next   PROGRAM:Life.PROCEDURE:evolution|next   AliasType    <next|IDENT|tests/life/test.easy:61:13>               
 alive  PROGRAM:Life.PROCEDURE:evolution|alive  BooleanType  <alive|IDENT|tests/life/test.easy:65:17>              
 n      PROGRAM:Life.PROCEDURE:evolution|n      IntegerType  <n|IDENT|tests/life/test.easy:66:17>                  
-$4     |$4                                     StringType   <'GENERATION: '|STRING|tests/life/test.easy:99:12>    
+$5     |$5                                     StringType   <'GENERATION: '|STRING|tests/life/test.easy:99:12>    
 
 INTEGER  int                                                          
 REAL     double                                                       
@@ -37,6 +38,7 @@ CHARACTER   ->  STR     built-in
 SUBSTR      ->  STR     built-in
 FIX         ->  int     built-in
 FLOAT       ->  double  built-in
+FLOOR       ->  int     built-in
 valid       ->  int     FUNCTION  (x int, y int)  <FUNCTION|KEYWORD|tests/life/test.easy:10:3>
 neighbours  ->  int     FUNCTION  (x int, y int)  <FUNCTION|KEYWORD|tests/life/test.easy:14:3>
 

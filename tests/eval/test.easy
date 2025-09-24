@@ -12,6 +12,7 @@ PROGRAM Eval:
           FIELD c IS STRING, 
           FIELD d IS ARRAY [1:2] OF INTEGER
         END STRUCTURE;
+  DECLARE b BOOLEAN;
 
   FUNCTION F1(x INTEGER, s STRING) STRING:
     RETURN s || "=" || LENGTH(s) || "=" || x;
@@ -42,9 +43,9 @@ PROGRAM Eval:
     OUTPUT a;
   END FOR;
 
-  SET a := NOT (a | 7) & 3;
+  SET b := NOT (b | (a > 1)) & TRUE;
 
-  SET a := NOT(NOT 2);
+  SET b := NOT(NOT FALSE);
 
   IF (a < a + 123) THEN SET a := 0; FI;
 

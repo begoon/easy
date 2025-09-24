@@ -2,7 +2,7 @@ PROGRAM Eratosthenes:
   DECLARE topnum INTEGER;
 
   FUNCTION abs(x REAL) REAL:
-    IF x < 0 THEN RETURN -x; ELSE RETURN x; FI;
+    IF x < 0. THEN RETURN -x; ELSE RETURN x; FI;
   END FUNCTION abs;
 
   FUNCTION integersqrt(a INTEGER) INTEGER:

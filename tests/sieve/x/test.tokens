@@ -1,341 +1,341 @@
-tests/sieve/test.easy:1:1	 PROGRAM / KEYWORD
-tests/sieve/test.easy:1:9	 Eratosthenes / IDENT
-tests/sieve/test.easy:1:21	 : / SYMBOL
-tests/sieve/test.easy:2:3	 DECLARE / KEYWORD
-tests/sieve/test.easy:2:11	 topnum / IDENT
-tests/sieve/test.easy:2:18	 INTEGER / KEYWORD
-tests/sieve/test.easy:2:25	 ; / SYMBOL
-tests/sieve/test.easy:4:3	 FUNCTION / KEYWORD
-tests/sieve/test.easy:4:12	 abs / IDENT
-tests/sieve/test.easy:4:15	 ( / SYMBOL
-tests/sieve/test.easy:4:16	 x / IDENT
-tests/sieve/test.easy:4:18	 REAL / KEYWORD
-tests/sieve/test.easy:4:22	 ) / SYMBOL
-tests/sieve/test.easy:4:24	 REAL / KEYWORD
-tests/sieve/test.easy:4:28	 : / SYMBOL
-tests/sieve/test.easy:5:5	 IF / KEYWORD
-tests/sieve/test.easy:5:8	 x / IDENT
-tests/sieve/test.easy:5:10	 < / SYMBOL
-tests/sieve/test.easy:5:12	 0 / INTEGER
-tests/sieve/test.easy:5:14	 THEN / KEYWORD
-tests/sieve/test.easy:5:19	 RETURN / KEYWORD
-tests/sieve/test.easy:5:26	 - / SYMBOL
-tests/sieve/test.easy:5:27	 x / IDENT
-tests/sieve/test.easy:5:28	 ; / SYMBOL
-tests/sieve/test.easy:5:30	 ELSE / KEYWORD
-tests/sieve/test.easy:5:35	 RETURN / KEYWORD
-tests/sieve/test.easy:5:42	 x / IDENT
-tests/sieve/test.easy:5:43	 ; / SYMBOL
-tests/sieve/test.easy:5:45	 FI / KEYWORD
-tests/sieve/test.easy:5:47	 ; / SYMBOL
-tests/sieve/test.easy:6:3	 END / KEYWORD
-tests/sieve/test.easy:6:7	 FUNCTION / KEYWORD
-tests/sieve/test.easy:6:16	 abs / IDENT
-tests/sieve/test.easy:6:19	 ; / SYMBOL
-tests/sieve/test.easy:8:3	 FUNCTION / KEYWORD
-tests/sieve/test.easy:8:12	 integersqrt / IDENT
-tests/sieve/test.easy:8:23	 ( / SYMBOL
-tests/sieve/test.easy:8:24	 a / IDENT
-tests/sieve/test.easy:8:26	 INTEGER / KEYWORD
-tests/sieve/test.easy:8:33	 ) / SYMBOL
-tests/sieve/test.easy:8:35	 INTEGER / KEYWORD
-tests/sieve/test.easy:8:42	 : / SYMBOL
-tests/sieve/test.easy:9:5	 SELECT / KEYWORD
-tests/sieve/test.easy:9:12	 TRUE / KEYWORD
-tests/sieve/test.easy:9:17	 OF / IDENT
-tests/sieve/test.easy:10:7	 CASE / KEYWORD
-tests/sieve/test.easy:10:12	 ( / SYMBOL
-tests/sieve/test.easy:10:13	 a / IDENT
-tests/sieve/test.easy:10:15	 < / SYMBOL
-tests/sieve/test.easy:10:17	 0 / INTEGER
-tests/sieve/test.easy:10:18	 ) / SYMBOL
-tests/sieve/test.easy:10:19	 : / SYMBOL
-tests/sieve/test.easy:10:21	 OUTPUT / KEYWORD
-tests/sieve/test.easy:10:28	 a < 0 in FUNCTION integersqrt. / STRING
-tests/sieve/test.easy:10:60	 ; / SYMBOL
-tests/sieve/test.easy:10:62	 EXIT / KEYWORD
-tests/sieve/test.easy:10:66	 ; / SYMBOL
-tests/sieve/test.easy:11:7	 CASE / KEYWORD
-tests/sieve/test.easy:11:12	 ( / SYMBOL
-tests/sieve/test.easy:11:13	 a / IDENT
-tests/sieve/test.easy:11:15	 = / SYMBOL
-tests/sieve/test.easy:11:17	 0 / INTEGER
-tests/sieve/test.easy:11:18	 ) / SYMBOL
-tests/sieve/test.easy:11:19	 : / SYMBOL
-tests/sieve/test.easy:11:21	 RETURN / KEYWORD
-tests/sieve/test.easy:11:28	 0 / INTEGER
-tests/sieve/test.easy:11:29	 ; / SYMBOL
-tests/sieve/test.easy:12:7	 CASE / KEYWORD
-tests/sieve/test.easy:12:12	 ( / SYMBOL
-tests/sieve/test.easy:12:13	 a / IDENT
-tests/sieve/test.easy:12:15	 > / SYMBOL
-tests/sieve/test.easy:12:17	 0 / INTEGER
-tests/sieve/test.easy:12:18	 ) / SYMBOL
-tests/sieve/test.easy:12:19	 : / SYMBOL
-tests/sieve/test.easy:13:9	 DECLARE / KEYWORD
-tests/sieve/test.easy:13:17	 ( / SYMBOL
-tests/sieve/test.easy:13:18	 x / IDENT
-tests/sieve/test.easy:13:19	 , / SYMBOL
-tests/sieve/test.easy:13:21	 ra / IDENT
-tests/sieve/test.easy:13:23	 ) / SYMBOL
-tests/sieve/test.easy:13:25	 REAL / KEYWORD
-tests/sieve/test.easy:13:29	 ; / SYMBOL
-tests/sieve/test.easy:14:9	 DECLARE / KEYWORD
-tests/sieve/test.easy:14:17	 epsilon / IDENT
-tests/sieve/test.easy:14:25	 REAL / KEYWORD
-tests/sieve/test.easy:14:29	 ; / SYMBOL
-tests/sieve/test.easy:15:9	 DECLARE / KEYWORD
-tests/sieve/test.easy:15:17	 sqrt / IDENT
-tests/sieve/test.easy:15:22	 INTEGER / KEYWORD
-tests/sieve/test.easy:15:29	 ; / SYMBOL
-tests/sieve/test.easy:16:9	 SET / KEYWORD
-tests/sieve/test.easy:16:13	 ra / IDENT
-tests/sieve/test.easy:16:16	 := / SYMBOL
-tests/sieve/test.easy:16:19	 FLOAT / IDENT
-tests/sieve/test.easy:16:24	 ( / SYMBOL
-tests/sieve/test.easy:16:25	 a / IDENT
-tests/sieve/test.easy:16:26	 ) / SYMBOL
-tests/sieve/test.easy:16:27	 ; / SYMBOL
-tests/sieve/test.easy:17:9	 SET / KEYWORD
-tests/sieve/test.easy:17:13	 epsilon / IDENT
-tests/sieve/test.easy:17:21	 := / SYMBOL
-tests/sieve/test.easy:17:24	 0.0000001 / REAL
-tests/sieve/test.easy:17:33	 * / SYMBOL
-tests/sieve/test.easy:17:34	 ra / IDENT
-tests/sieve/test.easy:17:36	 ; / SYMBOL
-tests/sieve/test.easy:18:9	 FOR / KEYWORD
-tests/sieve/test.easy:18:13	 x / IDENT
-tests/sieve/test.easy:18:15	 := / SYMBOL
-tests/sieve/test.easy:18:18	 ra / IDENT
-tests/sieve/test.easy:18:20	 / / SYMBOL
-tests/sieve/test.easy:18:21	 2. / REAL
-tests/sieve/test.easy:18:24	 BY / KEYWORD
-tests/sieve/test.easy:18:27	 ( / SYMBOL
-tests/sieve/test.easy:18:28	 ra / IDENT
-tests/sieve/test.easy:18:30	 / / SYMBOL
-tests/sieve/test.easy:18:31	 x / IDENT
-tests/sieve/test.easy:18:32	 - / SYMBOL
-tests/sieve/test.easy:18:33	 x / IDENT
-tests/sieve/test.easy:18:34	 ) / SYMBOL
-tests/sieve/test.easy:18:35	 / / SYMBOL
-tests/sieve/test.easy:18:36	 2. / REAL
-tests/sieve/test.easy:19:11	 WHILE / KEYWORD
-tests/sieve/test.easy:19:17	 abs / IDENT
-tests/sieve/test.easy:19:20	 ( / SYMBOL
-tests/sieve/test.easy:19:21	 ra / IDENT
-tests/sieve/test.easy:19:23	 - / SYMBOL
-tests/sieve/test.easy:19:24	 x / IDENT
-tests/sieve/test.easy:19:25	 * / SYMBOL
-tests/sieve/test.easy:19:26	 x / IDENT
-tests/sieve/test.easy:19:27	 ) / SYMBOL
-tests/sieve/test.easy:19:29	 > / SYMBOL
-tests/sieve/test.easy:19:31	 epsilon / IDENT
-tests/sieve/test.easy:19:39	 DO / KEYWORD
-tests/sieve/test.easy:19:42	 ; / SYMBOL
-tests/sieve/test.easy:20:9	 END / KEYWORD
-tests/sieve/test.easy:20:13	 FOR / KEYWORD
-tests/sieve/test.easy:20:16	 ; / SYMBOL
-tests/sieve/test.easy:21:9	 FOR / KEYWORD
-tests/sieve/test.easy:21:13	 sqrt / IDENT
-tests/sieve/test.easy:21:18	 := / SYMBOL
-tests/sieve/test.easy:21:21	 FIX / IDENT
-tests/sieve/test.easy:21:24	 ( / SYMBOL
-tests/sieve/test.easy:21:25	 x / IDENT
-tests/sieve/test.easy:21:26	 ) / SYMBOL
-tests/sieve/test.easy:21:27	 - / SYMBOL
-tests/sieve/test.easy:21:28	 1 / INTEGER
-tests/sieve/test.easy:21:30	 BY / KEYWORD
-tests/sieve/test.easy:21:33	 1 / INTEGER
-tests/sieve/test.easy:22:11	 WHILE / KEYWORD
-tests/sieve/test.easy:22:17	 ( / SYMBOL
-tests/sieve/test.easy:22:18	 sqrt / IDENT
-tests/sieve/test.easy:22:22	 + / SYMBOL
-tests/sieve/test.easy:22:23	 1 / INTEGER
-tests/sieve/test.easy:22:24	 ) / SYMBOL
-tests/sieve/test.easy:22:26	 * / SYMBOL
-tests/sieve/test.easy:22:28	 ( / SYMBOL
-tests/sieve/test.easy:22:29	 sqrt / IDENT
-tests/sieve/test.easy:22:33	 + / SYMBOL
-tests/sieve/test.easy:22:34	 1 / INTEGER
-tests/sieve/test.easy:22:35	 ) / SYMBOL
-tests/sieve/test.easy:22:37	 <= / SYMBOL
-tests/sieve/test.easy:22:40	 a / IDENT
-tests/sieve/test.easy:22:42	 DO / KEYWORD
-tests/sieve/test.easy:22:45	 ; / SYMBOL
-tests/sieve/test.easy:23:9	 END / KEYWORD
-tests/sieve/test.easy:23:13	 FOR / KEYWORD
-tests/sieve/test.easy:23:16	 ; / SYMBOL
-tests/sieve/test.easy:24:9	 RETURN / KEYWORD
-tests/sieve/test.easy:24:16	 sqrt / IDENT
-tests/sieve/test.easy:24:20	 ; / SYMBOL
-tests/sieve/test.easy:25:5	 END / KEYWORD
-tests/sieve/test.easy:25:9	 SELECT / KEYWORD
-tests/sieve/test.easy:25:15	 ; / SYMBOL
-tests/sieve/test.easy:26:3	 END / KEYWORD
-tests/sieve/test.easy:26:7	 FUNCTION / KEYWORD
-tests/sieve/test.easy:26:16	 integersqrt / IDENT
-tests/sieve/test.easy:26:27	 ; / SYMBOL
-tests/sieve/test.easy:28:3	 INPUT / KEYWORD
-tests/sieve/test.easy:28:9	 topnum / IDENT
-tests/sieve/test.easy:28:15	 ; / SYMBOL
-tests/sieve/test.easy:30:3	 IF / KEYWORD
-tests/sieve/test.easy:30:6	 topnum / IDENT
-tests/sieve/test.easy:30:13	 > / SYMBOL
-tests/sieve/test.easy:30:15	 0 / INTEGER
-tests/sieve/test.easy:30:17	 THEN / KEYWORD
-tests/sieve/test.easy:31:5	 DECLARE / KEYWORD
-tests/sieve/test.easy:31:13	 sieve / IDENT
-tests/sieve/test.easy:31:19	 ARRAY / IDENT
-tests/sieve/test.easy:31:24	 [ / SYMBOL
-tests/sieve/test.easy:31:25	 1 / INTEGER
-tests/sieve/test.easy:31:26	 : / SYMBOL
-tests/sieve/test.easy:31:27	 topnum / IDENT
-tests/sieve/test.easy:31:33	 ] / SYMBOL
-tests/sieve/test.easy:31:35	 OF / IDENT
-tests/sieve/test.easy:31:38	 BOOLEAN / KEYWORD
-tests/sieve/test.easy:31:45	 ; / SYMBOL
-tests/sieve/test.easy:32:5	 DECLARE / KEYWORD
-tests/sieve/test.easy:32:13	 ( / SYMBOL
-tests/sieve/test.easy:32:14	 i / IDENT
-tests/sieve/test.easy:32:15	 , / SYMBOL
-tests/sieve/test.easy:32:17	 limit / IDENT
-tests/sieve/test.easy:32:22	 , / SYMBOL
-tests/sieve/test.easy:32:24	 count / IDENT
-tests/sieve/test.easy:32:29	 ) / SYMBOL
-tests/sieve/test.easy:32:31	 INTEGER / KEYWORD
-tests/sieve/test.easy:32:38	 ; / SYMBOL
-tests/sieve/test.easy:33:5	 SET / KEYWORD
-tests/sieve/test.easy:33:9	 topnum / IDENT
-tests/sieve/test.easy:33:16	 := / SYMBOL
-tests/sieve/test.easy:33:19	 topnum / IDENT
-tests/sieve/test.easy:33:26	 + / SYMBOL
-tests/sieve/test.easy:33:28	 1 / INTEGER
-tests/sieve/test.easy:33:29	 ; / SYMBOL
-tests/sieve/test.easy:34:5	 FOR / KEYWORD
-tests/sieve/test.easy:34:9	 i / IDENT
-tests/sieve/test.easy:34:11	 := / SYMBOL
-tests/sieve/test.easy:34:14	 1 / INTEGER
-tests/sieve/test.easy:34:16	 TO / IDENT
-tests/sieve/test.easy:34:19	 topnum / IDENT
-tests/sieve/test.easy:34:26	 DO / KEYWORD
-tests/sieve/test.easy:34:29	 SET / KEYWORD
-tests/sieve/test.easy:34:33	 sieve / IDENT
-tests/sieve/test.easy:34:38	 [ / SYMBOL
-tests/sieve/test.easy:34:39	 i / IDENT
-tests/sieve/test.easy:34:40	 ] / SYMBOL
-tests/sieve/test.easy:34:42	 := / SYMBOL
-tests/sieve/test.easy:34:45	 TRUE / KEYWORD
-tests/sieve/test.easy:34:49	 ; / SYMBOL
-tests/sieve/test.easy:34:51	 END / KEYWORD
-tests/sieve/test.easy:34:55	 FOR / KEYWORD
-tests/sieve/test.easy:34:58	 ; / SYMBOL
-tests/sieve/test.easy:35:5	 SET / KEYWORD
-tests/sieve/test.easy:35:9	 limit / IDENT
-tests/sieve/test.easy:35:15	 := / SYMBOL
-tests/sieve/test.easy:35:18	 integersqrt / IDENT
-tests/sieve/test.easy:35:29	 ( / SYMBOL
-tests/sieve/test.easy:35:30	 topnum / IDENT
-tests/sieve/test.easy:35:36	 ) / SYMBOL
-tests/sieve/test.easy:35:37	 + / SYMBOL
-tests/sieve/test.easy:35:38	 1 / INTEGER
-tests/sieve/test.easy:35:39	 ; / SYMBOL
-tests/sieve/test.easy:36:5	 FOR / KEYWORD
-tests/sieve/test.easy:36:9	 i / IDENT
-tests/sieve/test.easy:36:11	 := / SYMBOL
-tests/sieve/test.easy:36:14	 2 / INTEGER
-tests/sieve/test.easy:36:16	 TO / IDENT
-tests/sieve/test.easy:36:19	 limit / IDENT
-tests/sieve/test.easy:36:25	 DO / KEYWORD
-tests/sieve/test.easy:37:7	 IF / KEYWORD
-tests/sieve/test.easy:37:10	 sieve / IDENT
-tests/sieve/test.easy:37:15	 [ / SYMBOL
-tests/sieve/test.easy:37:16	 i / IDENT
-tests/sieve/test.easy:37:17	 ] / SYMBOL
-tests/sieve/test.easy:37:19	 THEN / KEYWORD
-tests/sieve/test.easy:38:9	 DECLARE / KEYWORD
-tests/sieve/test.easy:38:17	 j / IDENT
-tests/sieve/test.easy:38:19	 INTEGER / KEYWORD
-tests/sieve/test.easy:38:26	 ; / SYMBOL
-tests/sieve/test.easy:39:9	 FOR / KEYWORD
-tests/sieve/test.easy:39:13	 j / IDENT
-tests/sieve/test.easy:39:15	 := / SYMBOL
-tests/sieve/test.easy:39:18	 2 / INTEGER
-tests/sieve/test.easy:39:19	 * / SYMBOL
-tests/sieve/test.easy:39:20	 i / IDENT
-tests/sieve/test.easy:39:22	 BY / KEYWORD
-tests/sieve/test.easy:39:25	 i / IDENT
-tests/sieve/test.easy:39:27	 TO / IDENT
-tests/sieve/test.easy:39:30	 topnum / IDENT
-tests/sieve/test.easy:39:37	 DO / KEYWORD
-tests/sieve/test.easy:39:40	 SET / KEYWORD
-tests/sieve/test.easy:39:44	 sieve / IDENT
-tests/sieve/test.easy:39:49	 [ / SYMBOL
-tests/sieve/test.easy:39:50	 j / IDENT
-tests/sieve/test.easy:39:51	 ] / SYMBOL
-tests/sieve/test.easy:39:53	 := / SYMBOL
-tests/sieve/test.easy:39:56	 FALSE / KEYWORD
-tests/sieve/test.easy:39:61	 ; / SYMBOL
-tests/sieve/test.easy:39:63	 END / KEYWORD
-tests/sieve/test.easy:39:67	 FOR / KEYWORD
-tests/sieve/test.easy:39:70	 ; / SYMBOL
-tests/sieve/test.easy:40:7	 FI / KEYWORD
-tests/sieve/test.easy:40:9	 ; / SYMBOL
-tests/sieve/test.easy:41:5	 END / KEYWORD
-tests/sieve/test.easy:41:9	 FOR / KEYWORD
-tests/sieve/test.easy:41:12	 ; / SYMBOL
-tests/sieve/test.easy:42:5	 SET / KEYWORD
-tests/sieve/test.easy:42:9	 count / IDENT
-tests/sieve/test.easy:42:15	 := / SYMBOL
-tests/sieve/test.easy:42:18	 0 / INTEGER
-tests/sieve/test.easy:42:19	 ; / SYMBOL
-tests/sieve/test.easy:43:5	 FOR / KEYWORD
-tests/sieve/test.easy:43:9	 i / IDENT
-tests/sieve/test.easy:43:11	 := / SYMBOL
-tests/sieve/test.easy:43:14	 1 / INTEGER
-tests/sieve/test.easy:43:16	 TO / IDENT
-tests/sieve/test.easy:43:19	 topnum / IDENT
-tests/sieve/test.easy:43:26	 DO / KEYWORD
-tests/sieve/test.easy:44:7	 IF / KEYWORD
-tests/sieve/test.easy:44:10	 sieve / IDENT
-tests/sieve/test.easy:44:15	 [ / SYMBOL
-tests/sieve/test.easy:44:16	 i / IDENT
-tests/sieve/test.easy:44:17	 ] / SYMBOL
-tests/sieve/test.easy:44:19	 THEN / KEYWORD
-tests/sieve/test.easy:45:9	 SET / KEYWORD
-tests/sieve/test.easy:45:13	 count / IDENT
-tests/sieve/test.easy:45:19	 := / SYMBOL
-tests/sieve/test.easy:45:22	 count / IDENT
-tests/sieve/test.easy:45:28	 + / SYMBOL
-tests/sieve/test.easy:45:30	 1 / INTEGER
-tests/sieve/test.easy:45:31	 ; / SYMBOL
-tests/sieve/test.easy:46:9	 OUTPUT / KEYWORD
-tests/sieve/test.easy:46:16	 Prime[ / STRING
-tests/sieve/test.easy:46:25	 || / SYMBOL
-tests/sieve/test.easy:46:28	 count / IDENT
-tests/sieve/test.easy:46:34	 || / SYMBOL
-tests/sieve/test.easy:46:37	 ] =  / STRING
-tests/sieve/test.easy:46:44	 || / SYMBOL
-tests/sieve/test.easy:46:47	 i / IDENT
-tests/sieve/test.easy:46:48	 ; / SYMBOL
-tests/sieve/test.easy:47:7	 FI / KEYWORD
-tests/sieve/test.easy:47:9	 ; / SYMBOL
-tests/sieve/test.easy:48:5	 END / KEYWORD
-tests/sieve/test.easy:48:9	 FOR / KEYWORD
-tests/sieve/test.easy:48:12	 ; / SYMBOL
-tests/sieve/test.easy:49:3	 ELSE / KEYWORD
-tests/sieve/test.easy:50:5	 OUTPUT / KEYWORD
-tests/sieve/test.easy:50:12	 Input value  / STRING
-tests/sieve/test.easy:50:27	 || / SYMBOL
-tests/sieve/test.easy:50:30	 topnum / IDENT
-tests/sieve/test.easy:50:37	 || / SYMBOL
-tests/sieve/test.easy:50:40	  non-positive. / STRING
-tests/sieve/test.easy:50:56	 ; / SYMBOL
-tests/sieve/test.easy:51:3	 FI / KEYWORD
-tests/sieve/test.easy:51:5	 ; / SYMBOL
-tests/sieve/test.easy:53:3	 EXIT / KEYWORD
-tests/sieve/test.easy:53:7	 ; / SYMBOL
-tests/sieve/test.easy:55:1	 END / KEYWORD
-tests/sieve/test.easy:55:5	 PROGRAM / KEYWORD
-tests/sieve/test.easy:55:13	 Eratosthenes / IDENT
-tests/sieve/test.easy:55:25	 ; / SYMBOL
-tests/sieve/test.easy:56:1	  / EOF
+tests/sieve/test.easy:1:1    KEYWORD  PROGRAM                       
+tests/sieve/test.easy:1:9    IDENT    Eratosthenes                  
+tests/sieve/test.easy:1:21   SYMBOL   :                             
+tests/sieve/test.easy:2:3    KEYWORD  DECLARE                       
+tests/sieve/test.easy:2:11   IDENT    topnum                        
+tests/sieve/test.easy:2:18   KEYWORD  INTEGER                       
+tests/sieve/test.easy:2:25   SYMBOL   ;                             
+tests/sieve/test.easy:4:3    KEYWORD  FUNCTION                      
+tests/sieve/test.easy:4:12   IDENT    abs                           
+tests/sieve/test.easy:4:15   SYMBOL   (                             
+tests/sieve/test.easy:4:16   IDENT    x                             
+tests/sieve/test.easy:4:18   KEYWORD  REAL                          
+tests/sieve/test.easy:4:22   SYMBOL   )                             
+tests/sieve/test.easy:4:24   KEYWORD  REAL                          
+tests/sieve/test.easy:4:28   SYMBOL   :                             
+tests/sieve/test.easy:5:5    KEYWORD  IF                            
+tests/sieve/test.easy:5:8    IDENT    x                             
+tests/sieve/test.easy:5:10   SYMBOL   <                             
+tests/sieve/test.easy:5:12   REAL     0.                            
+tests/sieve/test.easy:5:15   KEYWORD  THEN                          
+tests/sieve/test.easy:5:20   KEYWORD  RETURN                        
+tests/sieve/test.easy:5:27   SYMBOL   -                             
+tests/sieve/test.easy:5:28   IDENT    x                             
+tests/sieve/test.easy:5:29   SYMBOL   ;                             
+tests/sieve/test.easy:5:31   KEYWORD  ELSE                          
+tests/sieve/test.easy:5:36   KEYWORD  RETURN                        
+tests/sieve/test.easy:5:43   IDENT    x                             
+tests/sieve/test.easy:5:44   SYMBOL   ;                             
+tests/sieve/test.easy:5:46   KEYWORD  FI                            
+tests/sieve/test.easy:5:48   SYMBOL   ;                             
+tests/sieve/test.easy:6:3    KEYWORD  END                           
+tests/sieve/test.easy:6:7    KEYWORD  FUNCTION                      
+tests/sieve/test.easy:6:16   IDENT    abs                           
+tests/sieve/test.easy:6:19   SYMBOL   ;                             
+tests/sieve/test.easy:8:3    KEYWORD  FUNCTION                      
+tests/sieve/test.easy:8:12   IDENT    integersqrt                   
+tests/sieve/test.easy:8:23   SYMBOL   (                             
+tests/sieve/test.easy:8:24   IDENT    a                             
+tests/sieve/test.easy:8:26   KEYWORD  INTEGER                       
+tests/sieve/test.easy:8:33   SYMBOL   )                             
+tests/sieve/test.easy:8:35   KEYWORD  INTEGER                       
+tests/sieve/test.easy:8:42   SYMBOL   :                             
+tests/sieve/test.easy:9:5    KEYWORD  SELECT                        
+tests/sieve/test.easy:9:12   KEYWORD  TRUE                          
+tests/sieve/test.easy:9:17   IDENT    OF                            
+tests/sieve/test.easy:10:7   KEYWORD  CASE                          
+tests/sieve/test.easy:10:12  SYMBOL   (                             
+tests/sieve/test.easy:10:13  IDENT    a                             
+tests/sieve/test.easy:10:15  SYMBOL   <                             
+tests/sieve/test.easy:10:17  INTEGER  0                             
+tests/sieve/test.easy:10:18  SYMBOL   )                             
+tests/sieve/test.easy:10:19  SYMBOL   :                             
+tests/sieve/test.easy:10:21  KEYWORD  OUTPUT                        
+tests/sieve/test.easy:10:28  STRING   a < 0 in FUNCTION integersqrt.
+tests/sieve/test.easy:10:60  SYMBOL   ;                             
+tests/sieve/test.easy:10:62  KEYWORD  EXIT                          
+tests/sieve/test.easy:10:66  SYMBOL   ;                             
+tests/sieve/test.easy:11:7   KEYWORD  CASE                          
+tests/sieve/test.easy:11:12  SYMBOL   (                             
+tests/sieve/test.easy:11:13  IDENT    a                             
+tests/sieve/test.easy:11:15  SYMBOL   =                             
+tests/sieve/test.easy:11:17  INTEGER  0                             
+tests/sieve/test.easy:11:18  SYMBOL   )                             
+tests/sieve/test.easy:11:19  SYMBOL   :                             
+tests/sieve/test.easy:11:21  KEYWORD  RETURN                        
+tests/sieve/test.easy:11:28  INTEGER  0                             
+tests/sieve/test.easy:11:29  SYMBOL   ;                             
+tests/sieve/test.easy:12:7   KEYWORD  CASE                          
+tests/sieve/test.easy:12:12  SYMBOL   (                             
+tests/sieve/test.easy:12:13  IDENT    a                             
+tests/sieve/test.easy:12:15  SYMBOL   >                             
+tests/sieve/test.easy:12:17  INTEGER  0                             
+tests/sieve/test.easy:12:18  SYMBOL   )                             
+tests/sieve/test.easy:12:19  SYMBOL   :                             
+tests/sieve/test.easy:13:9   KEYWORD  DECLARE                       
+tests/sieve/test.easy:13:17  SYMBOL   (                             
+tests/sieve/test.easy:13:18  IDENT    x                             
+tests/sieve/test.easy:13:19  SYMBOL   ,                             
+tests/sieve/test.easy:13:21  IDENT    ra                            
+tests/sieve/test.easy:13:23  SYMBOL   )                             
+tests/sieve/test.easy:13:25  KEYWORD  REAL                          
+tests/sieve/test.easy:13:29  SYMBOL   ;                             
+tests/sieve/test.easy:14:9   KEYWORD  DECLARE                       
+tests/sieve/test.easy:14:17  IDENT    epsilon                       
+tests/sieve/test.easy:14:25  KEYWORD  REAL                          
+tests/sieve/test.easy:14:29  SYMBOL   ;                             
+tests/sieve/test.easy:15:9   KEYWORD  DECLARE                       
+tests/sieve/test.easy:15:17  IDENT    sqrt                          
+tests/sieve/test.easy:15:22  KEYWORD  INTEGER                       
+tests/sieve/test.easy:15:29  SYMBOL   ;                             
+tests/sieve/test.easy:16:9   KEYWORD  SET                           
+tests/sieve/test.easy:16:13  IDENT    ra                            
+tests/sieve/test.easy:16:16  SYMBOL   :=                            
+tests/sieve/test.easy:16:19  IDENT    FLOAT                         
+tests/sieve/test.easy:16:24  SYMBOL   (                             
+tests/sieve/test.easy:16:25  IDENT    a                             
+tests/sieve/test.easy:16:26  SYMBOL   )                             
+tests/sieve/test.easy:16:27  SYMBOL   ;                             
+tests/sieve/test.easy:17:9   KEYWORD  SET                           
+tests/sieve/test.easy:17:13  IDENT    epsilon                       
+tests/sieve/test.easy:17:21  SYMBOL   :=                            
+tests/sieve/test.easy:17:24  REAL     0.0000001                     
+tests/sieve/test.easy:17:33  SYMBOL   *                             
+tests/sieve/test.easy:17:34  IDENT    ra                            
+tests/sieve/test.easy:17:36  SYMBOL   ;                             
+tests/sieve/test.easy:18:9   KEYWORD  FOR                           
+tests/sieve/test.easy:18:13  IDENT    x                             
+tests/sieve/test.easy:18:15  SYMBOL   :=                            
+tests/sieve/test.easy:18:18  IDENT    ra                            
+tests/sieve/test.easy:18:20  SYMBOL   /                             
+tests/sieve/test.easy:18:21  REAL     2.                            
+tests/sieve/test.easy:18:24  KEYWORD  BY                            
+tests/sieve/test.easy:18:27  SYMBOL   (                             
+tests/sieve/test.easy:18:28  IDENT    ra                            
+tests/sieve/test.easy:18:30  SYMBOL   /                             
+tests/sieve/test.easy:18:31  IDENT    x                             
+tests/sieve/test.easy:18:32  SYMBOL   -                             
+tests/sieve/test.easy:18:33  IDENT    x                             
+tests/sieve/test.easy:18:34  SYMBOL   )                             
+tests/sieve/test.easy:18:35  SYMBOL   /                             
+tests/sieve/test.easy:18:36  REAL     2.                            
+tests/sieve/test.easy:19:11  KEYWORD  WHILE                         
+tests/sieve/test.easy:19:17  IDENT    abs                           
+tests/sieve/test.easy:19:20  SYMBOL   (                             
+tests/sieve/test.easy:19:21  IDENT    ra                            
+tests/sieve/test.easy:19:23  SYMBOL   -                             
+tests/sieve/test.easy:19:24  IDENT    x                             
+tests/sieve/test.easy:19:25  SYMBOL   *                             
+tests/sieve/test.easy:19:26  IDENT    x                             
+tests/sieve/test.easy:19:27  SYMBOL   )                             
+tests/sieve/test.easy:19:29  SYMBOL   >                             
+tests/sieve/test.easy:19:31  IDENT    epsilon                       
+tests/sieve/test.easy:19:39  KEYWORD  DO                            
+tests/sieve/test.easy:19:42  SYMBOL   ;                             
+tests/sieve/test.easy:20:9   KEYWORD  END                           
+tests/sieve/test.easy:20:13  KEYWORD  FOR                           
+tests/sieve/test.easy:20:16  SYMBOL   ;                             
+tests/sieve/test.easy:21:9   KEYWORD  FOR                           
+tests/sieve/test.easy:21:13  IDENT    sqrt                          
+tests/sieve/test.easy:21:18  SYMBOL   :=                            
+tests/sieve/test.easy:21:21  IDENT    FIX                           
+tests/sieve/test.easy:21:24  SYMBOL   (                             
+tests/sieve/test.easy:21:25  IDENT    x                             
+tests/sieve/test.easy:21:26  SYMBOL   )                             
+tests/sieve/test.easy:21:27  SYMBOL   -                             
+tests/sieve/test.easy:21:28  INTEGER  1                             
+tests/sieve/test.easy:21:30  KEYWORD  BY                            
+tests/sieve/test.easy:21:33  INTEGER  1                             
+tests/sieve/test.easy:22:11  KEYWORD  WHILE                         
+tests/sieve/test.easy:22:17  SYMBOL   (                             
+tests/sieve/test.easy:22:18  IDENT    sqrt                          
+tests/sieve/test.easy:22:22  SYMBOL   +                             
+tests/sieve/test.easy:22:23  INTEGER  1                             
+tests/sieve/test.easy:22:24  SYMBOL   )                             
+tests/sieve/test.easy:22:26  SYMBOL   *                             
+tests/sieve/test.easy:22:28  SYMBOL   (                             
+tests/sieve/test.easy:22:29  IDENT    sqrt                          
+tests/sieve/test.easy:22:33  SYMBOL   +                             
+tests/sieve/test.easy:22:34  INTEGER  1                             
+tests/sieve/test.easy:22:35  SYMBOL   )                             
+tests/sieve/test.easy:22:37  SYMBOL   <=                            
+tests/sieve/test.easy:22:40  IDENT    a                             
+tests/sieve/test.easy:22:42  KEYWORD  DO                            
+tests/sieve/test.easy:22:45  SYMBOL   ;                             
+tests/sieve/test.easy:23:9   KEYWORD  END                           
+tests/sieve/test.easy:23:13  KEYWORD  FOR                           
+tests/sieve/test.easy:23:16  SYMBOL   ;                             
+tests/sieve/test.easy:24:9   KEYWORD  RETURN                        
+tests/sieve/test.easy:24:16  IDENT    sqrt                          
+tests/sieve/test.easy:24:20  SYMBOL   ;                             
+tests/sieve/test.easy:25:5   KEYWORD  END                           
+tests/sieve/test.easy:25:9   KEYWORD  SELECT                        
+tests/sieve/test.easy:25:15  SYMBOL   ;                             
+tests/sieve/test.easy:26:3   KEYWORD  END                           
+tests/sieve/test.easy:26:7   KEYWORD  FUNCTION                      
+tests/sieve/test.easy:26:16  IDENT    integersqrt                   
+tests/sieve/test.easy:26:27  SYMBOL   ;                             
+tests/sieve/test.easy:28:3   KEYWORD  INPUT                         
+tests/sieve/test.easy:28:9   IDENT    topnum                        
+tests/sieve/test.easy:28:15  SYMBOL   ;                             
+tests/sieve/test.easy:30:3   KEYWORD  IF                            
+tests/sieve/test.easy:30:6   IDENT    topnum                        
+tests/sieve/test.easy:30:13  SYMBOL   >                             
+tests/sieve/test.easy:30:15  INTEGER  0                             
+tests/sieve/test.easy:30:17  KEYWORD  THEN                          
+tests/sieve/test.easy:31:5   KEYWORD  DECLARE                       
+tests/sieve/test.easy:31:13  IDENT    sieve                         
+tests/sieve/test.easy:31:19  IDENT    ARRAY                         
+tests/sieve/test.easy:31:24  SYMBOL   [                             
+tests/sieve/test.easy:31:25  INTEGER  1                             
+tests/sieve/test.easy:31:26  SYMBOL   :                             
+tests/sieve/test.easy:31:27  IDENT    topnum                        
+tests/sieve/test.easy:31:33  SYMBOL   ]                             
+tests/sieve/test.easy:31:35  IDENT    OF                            
+tests/sieve/test.easy:31:38  KEYWORD  BOOLEAN                       
+tests/sieve/test.easy:31:45  SYMBOL   ;                             
+tests/sieve/test.easy:32:5   KEYWORD  DECLARE                       
+tests/sieve/test.easy:32:13  SYMBOL   (                             
+tests/sieve/test.easy:32:14  IDENT    i                             
+tests/sieve/test.easy:32:15  SYMBOL   ,                             
+tests/sieve/test.easy:32:17  IDENT    limit                         
+tests/sieve/test.easy:32:22  SYMBOL   ,                             
+tests/sieve/test.easy:32:24  IDENT    count                         
+tests/sieve/test.easy:32:29  SYMBOL   )                             
+tests/sieve/test.easy:32:31  KEYWORD  INTEGER                       
+tests/sieve/test.easy:32:38  SYMBOL   ;                             
+tests/sieve/test.easy:33:5   KEYWORD  SET                           
+tests/sieve/test.easy:33:9   IDENT    topnum                        
+tests/sieve/test.easy:33:16  SYMBOL   :=                            
+tests/sieve/test.easy:33:19  IDENT    topnum                        
+tests/sieve/test.easy:33:26  SYMBOL   +                             
+tests/sieve/test.easy:33:28  INTEGER  1                             
+tests/sieve/test.easy:33:29  SYMBOL   ;                             
+tests/sieve/test.easy:34:5   KEYWORD  FOR                           
+tests/sieve/test.easy:34:9   IDENT    i                             
+tests/sieve/test.easy:34:11  SYMBOL   :=                            
+tests/sieve/test.easy:34:14  INTEGER  1                             
+tests/sieve/test.easy:34:16  IDENT    TO                            
+tests/sieve/test.easy:34:19  IDENT    topnum                        
+tests/sieve/test.easy:34:26  KEYWORD  DO                            
+tests/sieve/test.easy:34:29  KEYWORD  SET                           
+tests/sieve/test.easy:34:33  IDENT    sieve                         
+tests/sieve/test.easy:34:38  SYMBOL   [                             
+tests/sieve/test.easy:34:39  IDENT    i                             
+tests/sieve/test.easy:34:40  SYMBOL   ]                             
+tests/sieve/test.easy:34:42  SYMBOL   :=                            
+tests/sieve/test.easy:34:45  KEYWORD  TRUE                          
+tests/sieve/test.easy:34:49  SYMBOL   ;                             
+tests/sieve/test.easy:34:51  KEYWORD  END                           
+tests/sieve/test.easy:34:55  KEYWORD  FOR                           
+tests/sieve/test.easy:34:58  SYMBOL   ;                             
+tests/sieve/test.easy:35:5   KEYWORD  SET                           
+tests/sieve/test.easy:35:9   IDENT    limit                         
+tests/sieve/test.easy:35:15  SYMBOL   :=                            
+tests/sieve/test.easy:35:18  IDENT    integersqrt                   
+tests/sieve/test.easy:35:29  SYMBOL   (                             
+tests/sieve/test.easy:35:30  IDENT    topnum                        
+tests/sieve/test.easy:35:36  SYMBOL   )                             
+tests/sieve/test.easy:35:37  SYMBOL   +                             
+tests/sieve/test.easy:35:38  INTEGER  1                             
+tests/sieve/test.easy:35:39  SYMBOL   ;                             
+tests/sieve/test.easy:36:5   KEYWORD  FOR                           
+tests/sieve/test.easy:36:9   IDENT    i                             
+tests/sieve/test.easy:36:11  SYMBOL   :=                            
+tests/sieve/test.easy:36:14  INTEGER  2                             
+tests/sieve/test.easy:36:16  IDENT    TO                            
+tests/sieve/test.easy:36:19  IDENT    limit                         
+tests/sieve/test.easy:36:25  KEYWORD  DO                            
+tests/sieve/test.easy:37:7   KEYWORD  IF                            
+tests/sieve/test.easy:37:10  IDENT    sieve                         
+tests/sieve/test.easy:37:15  SYMBOL   [                             
+tests/sieve/test.easy:37:16  IDENT    i                             
+tests/sieve/test.easy:37:17  SYMBOL   ]                             
+tests/sieve/test.easy:37:19  KEYWORD  THEN                          
+tests/sieve/test.easy:38:9   KEYWORD  DECLARE                       
+tests/sieve/test.easy:38:17  IDENT    j                             
+tests/sieve/test.easy:38:19  KEYWORD  INTEGER                       
+tests/sieve/test.easy:38:26  SYMBOL   ;                             
+tests/sieve/test.easy:39:9   KEYWORD  FOR                           
+tests/sieve/test.easy:39:13  IDENT    j                             
+tests/sieve/test.easy:39:15  SYMBOL   :=                            
+tests/sieve/test.easy:39:18  INTEGER  2                             
+tests/sieve/test.easy:39:19  SYMBOL   *                             
+tests/sieve/test.easy:39:20  IDENT    i                             
+tests/sieve/test.easy:39:22  KEYWORD  BY                            
+tests/sieve/test.easy:39:25  IDENT    i                             
+tests/sieve/test.easy:39:27  IDENT    TO                            
+tests/sieve/test.easy:39:30  IDENT    topnum                        
+tests/sieve/test.easy:39:37  KEYWORD  DO                            
+tests/sieve/test.easy:39:40  KEYWORD  SET                           
+tests/sieve/test.easy:39:44  IDENT    sieve                         
+tests/sieve/test.easy:39:49  SYMBOL   [                             
+tests/sieve/test.easy:39:50  IDENT    j                             
+tests/sieve/test.easy:39:51  SYMBOL   ]                             
+tests/sieve/test.easy:39:53  SYMBOL   :=                            
+tests/sieve/test.easy:39:56  KEYWORD  FALSE                         
+tests/sieve/test.easy:39:61  SYMBOL   ;                             
+tests/sieve/test.easy:39:63  KEYWORD  END                           
+tests/sieve/test.easy:39:67  KEYWORD  FOR                           
+tests/sieve/test.easy:39:70  SYMBOL   ;                             
+tests/sieve/test.easy:40:7   KEYWORD  FI                            
+tests/sieve/test.easy:40:9   SYMBOL   ;                             
+tests/sieve/test.easy:41:5   KEYWORD  END                           
+tests/sieve/test.easy:41:9   KEYWORD  FOR                           
+tests/sieve/test.easy:41:12  SYMBOL   ;                             
+tests/sieve/test.easy:42:5   KEYWORD  SET                           
+tests/sieve/test.easy:42:9   IDENT    count                         
+tests/sieve/test.easy:42:15  SYMBOL   :=                            
+tests/sieve/test.easy:42:18  INTEGER  0                             
+tests/sieve/test.easy:42:19  SYMBOL   ;                             
+tests/sieve/test.easy:43:5   KEYWORD  FOR                           
+tests/sieve/test.easy:43:9   IDENT    i                             
+tests/sieve/test.easy:43:11  SYMBOL   :=                            
+tests/sieve/test.easy:43:14  INTEGER  1                             
+tests/sieve/test.easy:43:16  IDENT    TO                            
+tests/sieve/test.easy:43:19  IDENT    topnum                        
+tests/sieve/test.easy:43:26  KEYWORD  DO                            
+tests/sieve/test.easy:44:7   KEYWORD  IF                            
+tests/sieve/test.easy:44:10  IDENT    sieve                         
+tests/sieve/test.easy:44:15  SYMBOL   [                             
+tests/sieve/test.easy:44:16  IDENT    i                             
+tests/sieve/test.easy:44:17  SYMBOL   ]                             
+tests/sieve/test.easy:44:19  KEYWORD  THEN                          
+tests/sieve/test.easy:45:9   KEYWORD  SET                           
+tests/sieve/test.easy:45:13  IDENT    count                         
+tests/sieve/test.easy:45:19  SYMBOL   :=                            
+tests/sieve/test.easy:45:22  IDENT    count                         
+tests/sieve/test.easy:45:28  SYMBOL   +                             
+tests/sieve/test.easy:45:30  INTEGER  1                             
+tests/sieve/test.easy:45:31  SYMBOL   ;                             
+tests/sieve/test.easy:46:9   KEYWORD  OUTPUT                        
+tests/sieve/test.easy:46:16  STRING   Prime[                        
+tests/sieve/test.easy:46:25  SYMBOL   ||                            
+tests/sieve/test.easy:46:28  IDENT    count                         
+tests/sieve/test.easy:46:34  SYMBOL   ||                            
+tests/sieve/test.easy:46:37  STRING   ] =                           
+tests/sieve/test.easy:46:44  SYMBOL   ||                            
+tests/sieve/test.easy:46:47  IDENT    i                             
+tests/sieve/test.easy:46:48  SYMBOL   ;                             
+tests/sieve/test.easy:47:7   KEYWORD  FI                            
+tests/sieve/test.easy:47:9   SYMBOL   ;                             
+tests/sieve/test.easy:48:5   KEYWORD  END                           
+tests/sieve/test.easy:48:9   KEYWORD  FOR                           
+tests/sieve/test.easy:48:12  SYMBOL   ;                             
+tests/sieve/test.easy:49:3   KEYWORD  ELSE                          
+tests/sieve/test.easy:50:5   KEYWORD  OUTPUT                        
+tests/sieve/test.easy:50:12  STRING   Input value                   
+tests/sieve/test.easy:50:27  SYMBOL   ||                            
+tests/sieve/test.easy:50:30  IDENT    topnum                        
+tests/sieve/test.easy:50:37  SYMBOL   ||                            
+tests/sieve/test.easy:50:40  STRING    non-positive.                
+tests/sieve/test.easy:50:56  SYMBOL   ;                             
+tests/sieve/test.easy:51:3   KEYWORD  FI                            
+tests/sieve/test.easy:51:5   SYMBOL   ;                             
+tests/sieve/test.easy:53:3   KEYWORD  EXIT                          
+tests/sieve/test.easy:53:7   SYMBOL   ;                             
+tests/sieve/test.easy:55:1   KEYWORD  END                           
+tests/sieve/test.easy:55:5   KEYWORD  PROGRAM                       
+tests/sieve/test.easy:55:13  IDENT    Eratosthenes                  
+tests/sieve/test.easy:55:25  SYMBOL   ;                             
+tests/sieve/test.easy:56:1   EOF                                    

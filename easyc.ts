@@ -140,6 +140,8 @@ class Context {
     variables: Record<string, Variable>;
     r: number;
 
+    R = () => `$r${this.r++}`;
+
     constructor(init: {
         flags?: Flags;
         text: InputText;
@@ -204,12 +206,6 @@ class Token {
 
 function printer(root: any): string {
     const seen = new Set<any>();
-
-    // function isPlainObject(obj: any) {
-    //     if (obj === null || typeof obj !== "object") return false;
-    //     const proto = Object.getPrototypeOf(obj);
-    //     return proto === Object.prototype || proto === null;
-    // }
 
     function walker(obj: any): any {
         if (obj == null) return "";
@@ -588,6 +584,9 @@ class VariableReference extends Entity {
         const { reference } = expand_variable_reference(variable, this, pre);
         return reference;
     }
+    context() {
+        return this.token.context;
+    }
 }
 
 class BuiltinLiteral extends Expression {
@@ -617,23 +616,6 @@ class RealLiteral extends BuiltinLiteral {
         return v.includes(".") || v.includes("e") ? v : v + ".0";
     }
     format = () => "r";
-}
-
-class StringLiteral extends BuiltinLiteral {
-    value: string;
-    constructor(token: Token, scope: string, value: string) {
-        super(token, scope, new StringType());
-        this.value = value;
-    }
-    c() {
-        return `from_cstring("${this.value.replace(/"/g, '\\"')}")`;
-    }
-    literal() {
-        return `"${this.value.replace(/"/g, '\\"')}"`;
-    }
-    format() {
-        return "A";
-    }
 }
 
 class BoolLiteral extends BuiltinLiteral {
@@ -738,6 +720,7 @@ class FOR extends Statement {
         );
         return emit(v);
     }
+
     format_condition(pre: string[]): string {
         const parts: string[] = [];
         if (this.condition) parts.push(extract_value(this.condition.c(), pre));
@@ -821,6 +804,7 @@ class REPEAT extends Statement {
         return `goto ${this.label};`;
     }
 }
+
 class REPENT extends Statement {
     label: string;
     constructor(token: Token, scope: string, label: string) {
@@ -872,8 +856,8 @@ class RETURN extends Statement {
     c(): string {
         if (!this.value) return "return;";
         const pre: string[] = [];
-        const v = extract_value(this.value.c(), pre);
-        pre.push(`return ${v};`);
+        const value = extract_value(this.value.c(), pre);
+        pre.push(`return ${value};`);
         return emit(pre);
     }
 }
@@ -901,11 +885,11 @@ class FunctionCall extends Expression {
         this.arguments = args;
     }
     c(): string {
-        const ctx = this.context();
-        const r = `$r${ctx.r++}`;
+        const r = this.context().R();
         const pre: string[] = [];
         const args = this.arguments.map((a) => extract_value(a.c(), pre)).join(", ");
-        pre.push(`const auto ${r} = ${this.name}(${args}); /* ${r} */`);
+        const type = this.type.c();
+        pre.push(`const ${type} ${r} = ${this.name}(${args}); /* ${r} */`);
         return emit(pre);
     }
 }
@@ -914,27 +898,55 @@ class BinaryOperation extends Expression {
     operation: string;
     left: Expression;
     right: Expression;
-    constructor(token: Token, scope: string, type: Type, operation: string, left: Expression, right: Expression) {
+    leftType: Type;
+    rightType: Type;
+    constructor(
+        token: Token,
+        scope: string,
+        type: Type,
+        leftType: Type,
+        rightType: Type,
+        operation: string,
+        left: Expression,
+        right: Expression
+    ) {
         super(token, scope, type);
         this.operation = operation;
         this.left = left;
         this.right = right;
+        this.leftType = leftType;
+        this.rightType = rightType;
     }
     c(): string {
         const operation = OPERATIONS[this.operation] ?? this.operation;
         const is_string = string_compare(this.left, this.right, operation);
         if (is_string) return is_string;
 
-        const ctx = this.context();
-        const r = `$r${ctx.r++}`;
+        const r = this.context().R();
 
         const pre: string[] = [];
-        const L = extract_value(this.left.c(), pre);
-        const R = extract_value(this.right.c(), pre);
-        pre.push(`const auto ${r} = (${L} ${operation} ${R}); /* ${r} */`);
+        const left = extract_value(this.left.c(), pre);
+        const right = extract_value(this.right.c(), pre);
+
+        function is_numeric_type(t: Type): boolean {
+            return t instanceof IntegerType || t instanceof RealType;
+        }
+
+        if (this.left.type.constructor !== this.right.type.constructor) {
+            throw new GenerateError(
+                `type mismatch in binary operation: ` +
+                    `${this.left.type.constructor.name} ` +
+                    `${operation} ` +
+                    `${this.right.type.constructor.name} at ${this.token}`
+            );
+        }
+
+        const resultType = this.left.type;
+        pre.push(`const ${resultType.c()} ${r} = (${left} ${operation} ${right}); /* ${r} */`);
         return emit(pre);
     }
 }
+
 class UnaryOperation extends Expression {
     operation: string;
     expr: Expression;
@@ -944,12 +956,11 @@ class UnaryOperation extends Expression {
         this.expr = expr;
     }
     c(): string {
-        const ctx = this.context();
-        const r = `$r${ctx.r++}`;
+        const r = this.context().R();
         const operation = this.operation === "NOT" ? "!" : this.operation;
         const pre: string[] = [];
         const v = extract_value(this.expr.c(), pre);
-        pre.push(`const auto ${r} = (${operation}${v}); /* ${r} */`);
+        pre.push(`const int ${r} = (${operation}${v}); /* ${r} */`);
         return emit(pre);
     }
 }
@@ -1714,10 +1725,19 @@ class Parser {
     expression_OR_XOR(): Expression {
         let left = this.expression_AND();
         while (true) {
-            const op = this.accept(["|", "XOR"]);
-            if (!op) break;
+            const token = this.accept(["|", "XOR"]);
+            if (!token) break;
             const right = this.expression_AND();
-            left = new BinaryOperation(op, this.scope(), new BooleanType(), op.value, left, right);
+            left = new BinaryOperation(
+                token,
+                this.scope(),
+                new BooleanType(),
+                left.type,
+                right.type,
+                token.value,
+                left,
+                right
+            );
         }
         return left;
     }
@@ -1726,10 +1746,19 @@ class Parser {
         const token = this.current();
         let left = this.expression_NOT();
         while (true) {
-            const operation = this.accept("&");
-            if (!operation) break;
+            const token = this.accept("&");
+            if (!token) break;
             const right = this.expression_NOT();
-            left = new BinaryOperation(token, this.scope(), new BooleanType(), operation.value, left, right);
+            left = new BinaryOperation(
+                token,
+                this.scope(),
+                new BooleanType(),
+                left.type,
+                right.type,
+                token.value,
+                left,
+                right
+            );
         }
         return left;
     }
@@ -1744,10 +1773,19 @@ class Parser {
         const token = this.current();
         let left = this.expression_CONCATENATION();
         while (true) {
-            const operation = this.accept(["<", ">", "=", "<=", ">=", "<>"]);
-            if (!operation) break;
+            const token = this.accept(["<", ">", "=", "<=", ">=", "<>"]);
+            if (!token) break;
             const right = this.expression_CONCATENATION();
-            left = new BinaryOperation(token, this.scope(), new BooleanType(), operation.value, left, right);
+            left = new BinaryOperation(
+                token,
+                this.scope(),
+                new BooleanType(),
+                left.type,
+                right.type,
+                token.value,
+                left,
+                right
+            );
         }
         return left;
     }
@@ -1766,10 +1804,10 @@ class Parser {
     expression_ADDING(): Expression {
         let left = this.expression_MULTIPLYING();
         while (true) {
-            const operation = this.accept(["+", "-"]);
-            if (!operation) break;
+            const token = this.accept(["+", "-"]);
+            if (!token) break;
             const right = this.expression_MULTIPLYING();
-            left = new BinaryOperation(operation, this.scope(), left.type, operation.value, left, right);
+            left = new BinaryOperation(token, this.scope(), left.type, left.type, right.type, token.value, left, right);
         }
         return left;
     }
@@ -1778,10 +1816,10 @@ class Parser {
         const token = this.current();
         let left = this.expression_FUNCTION_CALL();
         while (true) {
-            const operation = this.accept(["*", "/", "MOD"]);
-            if (!operation) break;
+            const token = this.accept(["*", "/", "MOD"]);
+            if (!token) break;
             const right = this.expression_FUNCTION_CALL();
-            left = new BinaryOperation(token, this.scope(), left.type, operation.value, left, right);
+            left = new BinaryOperation(token, this.scope(), left.type, left.type, right.type, token.value, left, right);
         }
         return left;
     }
@@ -1855,13 +1893,11 @@ class ConcatenationOperation extends Expression {
         this.parts = parts;
     }
     c(): string {
-        const context = this.context();
-        const r = `$r${context.r++}`;
-
+        const r = this.context().R();
         const pre: string[] = [];
         const fmt: string[] = [];
         const args = this.parts.map((p) => expression_stringer(p, fmt, "||", pre)).join(", ");
-        pre.push(`const auto ${r} = $concat("${fmt.join("")}", ${args}); /* ${r} */`);
+        pre.push(`const STR ${r} = $concat("${fmt.join("")}", ${args}); /* ${r} */`);
         return emit(pre);
     }
 }
@@ -1899,6 +1935,7 @@ class Compiler {
                 SUBSTR: new BuiltinFunction("SUBSTR", new StringType()),
                 FIX: new BuiltinFunction("FIX", new IntegerType()),
                 FLOAT: new BuiltinFunction("FLOAT", new RealType()),
+                FLOOR: new BuiltinFunction("FLOOR", new IntegerType()),
             },
             procedures: {},
             variables: {},
@@ -1946,9 +1983,9 @@ function run(argv: string[]) {
         const tokensFile = inputFile.replace(/\.[^.]+$/, "") + ".tokens";
         const lines = context.tokens.map((token) => {
             const input = token.context.text;
-            return `${input.filename}:${token.line}:${token.character}\t ${token.value} / ${token.type}`;
+            return [`${input.filename}:${token.line}:${token.character}`, token.type, token.value];
         });
-        fs.writeFileSync(tokensFile, lines.join("\n") + "\n", "utf-8");
+        fs.writeFileSync(tokensFile, table(lines), "utf-8");
     }
 
     if (argv.includes("-a")) {
@@ -1980,24 +2017,29 @@ function run(argv: string[]) {
         procedures.push([proc.name, proc.constructor.name, `(${args})`, String(proc.token)]);
     }
 
-    const sOut = table(variables) + "\n" + table(types) + "\n" + table(functions) + "\n" + table(procedures);
-    fs.writeFileSync(symbolsFile, sOut + "\n", "utf-8");
+    const symbols = table(variables) + "\n" + table(types) + "\n" + table(functions) + "\n" + table(procedures);
+    fs.writeFileSync(symbolsFile, symbols + "\n", "utf-8");
 
     const outputFile = arg(argv, "-c") ?? inputFile.replace(/\.[^.]+$/, "") + ".c";
     const compiledText = program.c().trim();
 
     const output: string[] = [];
     output.push('#include "runtime.c"\n');
-    for (const [name, def] of Object.entries(context.types)) output.push(def.typedef(name) + ";\n");
+
+    for (const [name, definition] of Object.entries(context.types)) output.push(definition.typedef(name) + ";\n");
+
     if (context.common.length) output.push(emit(context.common) + "\n");
+
     for (const v of Object.values(context.variables)) if (v.isConst()) output.push(v.const() + ";\n");
+
     for (const f of Object.values(context.functions)) {
         if (f instanceof BuiltinFunction) continue;
         output.push((f as FUNCTION).c() + "\n");
     }
-    for (const v of Object.values(context.procedures)) output.push(v.c() + "\n");
-    output.push(compiledText + "\n");
 
+    for (const v of Object.values(context.procedures)) output.push(v.c() + "\n");
+
+    output.push(compiledText + "\n");
     fs.writeFileSync(outputFile, output.join(""), "utf-8");
 }
 

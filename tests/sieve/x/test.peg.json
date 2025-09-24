@@ -50,7 +50,7 @@
                       "parts": []
                     },
                     "op": "<",
-                    "rhs": "0"
+                    "rhs": "0."
                   },
                   "then_body": {
                     "type": "segment_body",

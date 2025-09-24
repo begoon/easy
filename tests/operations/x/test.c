@@ -13,11 +13,11 @@ int main()
 {
     a = 1;
     b = 2;
-    const auto $r2 = (a + 0);
-    const auto $r1 = ($r2 + b);
+    const int $r2 = (a + 0);
+    const int $r1 = ($r2 + b);
     c = $r1;
     $output("iA", c, $0);
-    const auto $r3 = $concat("AA", s, $1);
+    const STR $r3 = $concat("AA", s, $1);
     s = $r3;
     $output("A", s);
 }
