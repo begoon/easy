@@ -38,65 +38,43 @@ STR bf(STR program)
         if (!(pc <= $r2)) break;
         const STR $r4 = SUBSTR(program, pc, 1);
         ch = $r4;
-        if (strcmp(ch.data, $1.data) == 0)
+        const int $r5 = strcmp(ch.data, $1.data) == 0;
+        if ($r5)
         {
-            const int $r5 = (ptr + 1);
-            ptr = $r5;
-        }
-        if (strcmp(ch.data, $2.data) == 0)
-        {
-            const int $r6 = (ptr - 1);
+            const int $r6 = (ptr + 1);
             ptr = $r6;
         }
-        if (strcmp(ch.data, $3.data) == 0)
+        const int $r7 = strcmp(ch.data, $2.data) == 0;
+        if ($r7)
+        {
+            const int $r8 = (ptr - 1);
+            ptr = $r8;
+        }
+        const int $r9 = strcmp(ch.data, $3.data) == 0;
+        if ($r9)
         {
             $index(ptr, 0, 299, &$F, 26, 33);
-            const int $r7 = (tape.data[(ptr) - (0)] + 1);
-            tape.data[(ptr) - (0)] = $r7;
+            const int $r10 = (tape.data[(ptr) - (0)] + 1);
+            tape.data[(ptr) - (0)] = $r10;
         }
-        if (strcmp(ch.data, $5.data) == 0)
+        const int $r11 = strcmp(ch.data, $5.data) == 0;
+        if ($r11)
         {
             $index(ptr, 0, 299, &$F, 27, 33);
-            const int $r8 = (tape.data[(ptr) - (0)] - 1);
-            tape.data[(ptr) - (0)] = $r8;
+            const int $r12 = (tape.data[(ptr) - (0)] - 1);
+            tape.data[(ptr) - (0)] = $r12;
         }
-        if (strcmp(ch.data, $6.data) == 0)
+        const int $r13 = strcmp(ch.data, $6.data) == 0;
+        if ($r13)
         {
-            const STR $r10 = CHARACTER(tape.data[(ptr) - (0)]);
-            const STR $r9 = $concat("AA", out, $r10);
-            out = $r9;
+            const STR $r15 = CHARACTER(tape.data[(ptr) - (0)]);
+            const STR $r14 = $concat("AA", out, $r15);
+            out = $r14;
         }
-        if (strcmp(ch.data, $7.data) == 0)
+        const int $r16 = strcmp(ch.data, $7.data) == 0;
+        if ($r16)
         {
-            const int $r11 = (tape.data[(ptr) - (0)] == 0);
-            if ($r11)
-            {
-                depth = 1;
-                while (1)
-                {
-                    const int $r12 = (depth > 0);
-                    if (!($r12)) break;
-                    const int $r13 = (pc + 1);
-                    pc = $r13;
-                    const STR $r14 = SUBSTR(program, pc, 1);
-                    ch = $r14;
-                    if (strcmp(ch.data, $7.data) == 0)
-                    {
-                        const int $r15 = (depth + 1);
-                        depth = $r15;
-                    }
-                    if (strcmp(ch.data, $8.data) == 0)
-                    {
-                        const int $r16 = (depth - 1);
-                        depth = $r16;
-                    }
-                    depth += 0;
-                }
-            }
-        }
-        if (strcmp(ch.data, $8.data) == 0)
-        {
-            const int $r17 = (tape.data[(ptr) - (0)] != 0);
+            const int $r17 = (tape.data[(ptr) - (0)] == 0);
             if ($r17)
             {
                 depth = 1;
@@ -104,19 +82,52 @@ STR bf(STR program)
                 {
                     const int $r18 = (depth > 0);
                     if (!($r18)) break;
-                    const int $r19 = (pc - 1);
+                    const int $r19 = (pc + 1);
                     pc = $r19;
                     const STR $r20 = SUBSTR(program, pc, 1);
                     ch = $r20;
-                    if (strcmp(ch.data, $8.data) == 0)
+                    const int $r21 = strcmp(ch.data, $7.data) == 0;
+                    if ($r21)
                     {
-                        const int $r21 = (depth + 1);
-                        depth = $r21;
-                    }
-                    if (strcmp(ch.data, $7.data) == 0)
-                    {
-                        const int $r22 = (depth - 1);
+                        const int $r22 = (depth + 1);
                         depth = $r22;
+                    }
+                    const int $r23 = strcmp(ch.data, $8.data) == 0;
+                    if ($r23)
+                    {
+                        const int $r24 = (depth - 1);
+                        depth = $r24;
+                    }
+                    depth += 0;
+                }
+            }
+        }
+        const int $r25 = strcmp(ch.data, $8.data) == 0;
+        if ($r25)
+        {
+            const int $r26 = (tape.data[(ptr) - (0)] != 0);
+            if ($r26)
+            {
+                depth = 1;
+                while (1)
+                {
+                    const int $r27 = (depth > 0);
+                    if (!($r27)) break;
+                    const int $r28 = (pc - 1);
+                    pc = $r28;
+                    const STR $r29 = SUBSTR(program, pc, 1);
+                    ch = $r29;
+                    const int $r30 = strcmp(ch.data, $8.data) == 0;
+                    if ($r30)
+                    {
+                        const int $r31 = (depth + 1);
+                        depth = $r31;
+                    }
+                    const int $r32 = strcmp(ch.data, $7.data) == 0;
+                    if ($r32)
+                    {
+                        const int $r33 = (depth - 1);
+                        depth = $r33;
                     }
                     depth += 0;
                 }

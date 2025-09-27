@@ -118,13 +118,14 @@ const KEYWORDS = new Set([
     "TRUE",
     "FALSE",
     //
-    // "ARRAY",
-    // "OF",
-    // "STRUCTURE",
-    // "FIELD",
-    // "NOT",
-    // "MOD",
-    // "XOR",
+    "ARRAY",
+    "OF",
+    "STRUCTURE",
+    "FIELD",
+    //
+    "NOT",
+    "MOD",
+    "XOR",
 ]);
 
 const SYMBOLS = new Set("+ - * / | & ( ) [ ] ; , . : := = <> < <= > >= ||".split(" ").filter(Boolean));
@@ -162,22 +163,6 @@ class Context {
         this.variables = init.variables ?? {};
         this.r = 1;
     }
-}
-
-// This function looks for a comment like /* $rN */, which represents a name
-// of a temporary variable, which, in turn, represents a value that has been.
-// If found, the comment is removed from the string, the of the string without
-// the comment is pushed to `pre` (to be emitted before the current line),
-// and the name of the temporary variable is returned.
-function extract_value(c: string, pre: string[]): string {
-    // looks for: /* $rN */ at the end (or anywhere) of the string
-    const m = c.match(/\/\*\s*(\$r\d+)\s*\*\//);
-    if (!m) return c;
-    const ref = m[1];
-    // remove the comment and any trailing whitespace/newlines from the string
-    const str = c.replace(/\s*\/\*\s*\$r\d+\s*\*\/\s*$/, "");
-    pre.push(str);
-    return ref;
 }
 
 class Token {
@@ -375,19 +360,25 @@ abstract class Node {
 }
 
 abstract class Statement extends Node {}
+
 abstract class Expression extends Node {
     type: Type;
     constructor(token: Token, scope: string, type: Type) {
         super(token, scope);
         this.type = type;
     }
+    v(code: string[]): string {
+        throw new GenerateError(`v() not implemented for ${this.constructor.name} at ${this.token}`);
+    }
 }
+
 abstract class Entity {
     token: Token;
     constructor(token: Token) {
         this.token = token;
     }
 }
+
 class TYPEIS extends Node {
     name: string;
     definition: Type;
@@ -580,13 +571,12 @@ class VariableReference extends Entity {
     }
     c(): string {
         const variable = discover_variable(this);
-        const pre: string[] = [];
-        const { reference } = expand_variable_reference(variable, this, pre);
+        const code: string[] = [];
+        const { reference } = expand_variable_reference(variable, this, code);
         return reference;
     }
-    context() {
-        return this.token.context;
-    }
+    v = (code: string[]) => this.c();
+    context = () => this.token.context;
 }
 
 class BuiltinLiteral extends Expression {
@@ -602,6 +592,7 @@ class IntegerLiteral extends BuiltinLiteral {
         this.value = value;
     }
     c = () => String(this.value);
+    v = (code: string[]) => this.c();
     format = () => "i";
 }
 
@@ -615,6 +606,7 @@ class RealLiteral extends BuiltinLiteral {
         const v = String(this.value);
         return v.includes(".") || v.includes("e") ? v : v + ".0";
     }
+    v = (code: string[]) => this.c();
     format = () => "r";
 }
 
@@ -627,9 +619,8 @@ class BoolLiteral extends BuiltinLiteral {
     c() {
         return this.value ? "TRUE" : "FALSE";
     }
-    format() {
-        return "b";
-    }
+    v = (code: string[]) => this.c();
+    format = () => "b";
 }
 
 class SET extends Statement {
@@ -641,36 +632,37 @@ class SET extends Statement {
         this.expression = expr;
     }
     c(): string {
-        const out: string[] = [];
+        const code: string[] = [];
         for (const target of this.target) {
             const variable = discover_variable(target);
-            const pre: string[] = [];
-            const { reference } = expand_variable_reference(variable, target, pre);
-            const rhs = extract_value(this.expression.c(), pre);
-            out.push(...pre, `${reference} = ${rhs};`);
+            const { reference } = expand_variable_reference(variable, target, code);
+            const value = this.expression.v(code);
+            code.push(`${reference} = ${value};`);
         }
-        return emit(out);
+        return emit(code);
     }
 }
 
 class IF extends Statement {
-    cond: Expression;
+    condition: Expression;
     then_branch: Segment;
     else_branch?: Segment | null;
     constructor(token: Token, scope: string, cond: Expression, then_: Segment, else_?: Segment | null) {
         super(token, scope);
-        this.cond = cond;
+        this.condition = cond;
         this.then_branch = then_;
         this.else_branch = else_ ?? null;
     }
     c(): string {
-        const pre: string[] = [];
-        let cond = extract_value(this.cond.c(), pre);
-        if (cond.startsWith("(") && cond.endsWith(")")) cond = cond.slice(1, -1);
+        const code: string[] = [];
+        let condition = this.condition.v(code);
 
-        const v = [...pre, `if (${cond})`, "{", indent(this.then_branch.c(), 1), "}"];
-        if (this.else_branch) v.push("else", "{", indent(this.else_branch.c(), 1), "}");
-        return emit(v);
+        if (condition.startsWith("(") && condition.endsWith(")")) condition = condition.slice(1, -1);
+
+        code.push(`if (${condition})`, "{", indent(this.then_branch.c(), 1), "}");
+        if (this.else_branch) code.push("else", "{", indent(this.else_branch.c(), 1), "}");
+
+        return emit(code);
     }
 }
 
@@ -700,37 +692,32 @@ class FOR extends Statement {
         this.condition = cond ?? null;
     }
     c(): string {
-        const v: string[] = [];
-        const preInit: string[] = [];
-        const init = extract_value(this.init.c(), preInit);
-        v.push(...preInit, `${this.variable.c()} = ${init};`);
+        const code: string[] = [];
+        const init = this.init.v(code);
+        code.push(`${this.variable.c()} = ${init};`);
 
         const inner: string[] = [];
-        const condition = extract_value(this.format_condition(inner), inner);
-        const step = extract_value(this.step(inner), inner);
 
-        v.push(
+        const conditions = [];
+
+        if (this.condition) conditions.push(`${this.condition.v(inner)}`);
+        if (this.to) conditions.push(`${this.variable.c()} <= ${this.to.v(inner)}`);
+
+        const condition = conditions.join(" && ");
+
+        const by = this.by ? this.by.v(inner) : "1";
+        const increment = `${this.variable.c()} += ${by};`;
+
+        code.push(
             "while (1)",
             "{",
             indent(emit(inner), 1),
             indent(`if (!(${condition})) break;`, 1),
             indent(this.segment.c(), 1),
-            indent(step, 1),
+            indent(increment, 1),
             "}"
         );
-        return emit(v);
-    }
-
-    format_condition(pre: string[]): string {
-        const parts: string[] = [];
-        if (this.condition) parts.push(extract_value(this.condition.c(), pre));
-        if (this.to) parts.push(`${this.variable.c()} <= ${extract_value(this.to.c(), pre)}`);
-        return parts.join("");
-    }
-
-    step(pre: string[]): string {
-        const by = this.by ? extract_value(this.by.c(), pre) : "1";
-        return `${this.variable.c()} += ${by};`;
+        return emit(code);
     }
 }
 
@@ -743,39 +730,40 @@ class SELECT extends Statement {
         this.cases = cases;
     }
     c(): string {
-        const v: string[] = [];
-        const pre: string[] = [];
+        const code: string[] = [];
+        const preable: string[] = [];
         for (let i = 0; i < this.cases.length; i++) {
-            const [condExpr, body] = this.cases[i];
-            if (condExpr) {
-                const cond = extract_value(condExpr.c(), pre);
-                v.push((i > 0 ? "else " : "") + `if (${cond})`);
+            const [condition, segment] = this.cases[i];
+            if (condition) {
+                const value = condition.v(preable);
+                code.push((i > 0 ? "else " : "") + `if (${value})`);
             } else {
-                v.push("else");
+                code.push("else");
             }
-            v.push("{", indent(body.c(), 1), "}");
+            code.push("{", indent(segment.c(), 1), "}");
         }
-        return emit([...pre, ...v]);
+        return emit([...preable, ...code]);
     }
 }
 
 class INPUT extends Statement {
-    variables: VariableReference[];
-    constructor(token: Token, scope: string, variables: VariableReference[]) {
+    variable_references: VariableReference[];
+    constructor(token: Token, scope: string, variable_references: VariableReference[]) {
         super(token, scope);
-        this.variables = variables;
+        this.variable_references = variable_references;
     }
     c(): string {
-        const pre: string[] = [];
-        for (const vr of this.variables) {
-            const variable = discover_variable(vr);
-            const { type, reference } = expand_variable_reference(variable, vr, pre);
-            if (type instanceof StringType) pre.push(`scanf("%s", ${reference}.data);`);
-            else if (type instanceof IntegerType) pre.push(`scanf("%d", &${reference});`);
-            else if (type instanceof RealType) pre.push(`scanf("%lf", &${reference});`);
+        const code: string[] = [];
+        for (const variable_reference of this.variable_references) {
+            const variable = discover_variable(variable_reference);
+            const { type, reference } = expand_variable_reference(variable, variable_reference, code);
+
+            if (type instanceof StringType) code.push(`scanf("%s", ${reference}.data);`);
+            else if (type instanceof IntegerType) code.push(`scanf("%d", &${reference});`);
+            else if (type instanceof RealType) code.push(`scanf("%lf", &${reference});`);
             else throw new GenerateError(`unsupported variable '${variable}' type in INPUT at ${variable.token}`);
         }
-        return emit(pre);
+        return emit(code);
     }
 }
 
@@ -786,11 +774,11 @@ class OUTPUT extends Statement {
         this.arguments = args;
     }
     c(): string {
-        const pre: string[] = [];
+        const code: string[] = [];
         const fmt: string[] = [];
-        const params = this.arguments.map((a) => expression_stringer(a, fmt, "OUTPUT", pre)).join(", ");
-        pre.push(`$output("${fmt.join("")}", ${params});`);
-        return emit(pre);
+        const params = this.arguments.map((a) => expression_stringer(a, fmt, "OUTPUT", code)).join(", ");
+        code.push(`$output("${fmt.join("")}", ${params});`);
+        return emit(code);
     }
 }
 
@@ -840,10 +828,10 @@ class CALL extends Statement {
         this.arguments = args;
     }
     c(): string {
-        const pre: string[] = [];
-        const args = this.arguments.map((a) => extract_value(a.c(), pre)).join(", ");
-        pre.push(`${this.name}(${args});`);
-        return emit(pre);
+        const code: string[] = [];
+        const args = this.arguments.map((a) => a.v(code)).join(", ");
+        code.push(`${this.name}(${args});`);
+        return emit(code);
     }
 }
 
@@ -855,10 +843,10 @@ class RETURN extends Statement {
     }
     c(): string {
         if (!this.value) return "return;";
-        const pre: string[] = [];
-        const value = extract_value(this.value.c(), pre);
-        pre.push(`return ${value};`);
-        return emit(pre);
+        const code: string[] = [];
+        const value = this.value.v(code);
+        code.push(`return ${value};`);
+        return emit(code);
     }
 }
 
@@ -884,13 +872,12 @@ class FunctionCall extends Expression {
         this.name = name;
         this.arguments = args;
     }
-    c(): string {
+    v(code: string[]) {
         const r = this.context().R();
-        const pre: string[] = [];
-        const args = this.arguments.map((a) => extract_value(a.c(), pre)).join(", ");
+        const args = this.arguments.map((a) => a.v(code)).join(", ");
         const type = this.type.c();
-        pre.push(`const ${type} ${r} = ${this.name}(${args}); /* ${r} */`);
-        return emit(pre);
+        code.push(`const ${type} ${r} = ${this.name}(${args});`);
+        return r;
     }
 }
 
@@ -917,20 +904,15 @@ class BinaryOperation extends Expression {
         this.leftType = leftType;
         this.rightType = rightType;
     }
-    c(): string {
+    v(code: string[]) {
         const operation = OPERATIONS[this.operation] ?? this.operation;
-        const is_string = string_compare(this.left, this.right, operation);
+        const is_string = string_compare(this.left, this.right, operation, code);
         if (is_string) return is_string;
 
         const r = this.context().R();
 
-        const pre: string[] = [];
-        const left = extract_value(this.left.c(), pre);
-        const right = extract_value(this.right.c(), pre);
-
-        function is_numeric_type(t: Type): boolean {
-            return t instanceof IntegerType || t instanceof RealType;
-        }
+        const left = this.left.v(code);
+        const right = this.right.v(code);
 
         if (this.left.type.constructor !== this.right.type.constructor) {
             throw new GenerateError(
@@ -941,10 +923,14 @@ class BinaryOperation extends Expression {
             );
         }
 
-        const resultType = this.left.type;
-        pre.push(`const ${resultType.c()} ${r} = (${left} ${operation} ${right}); /* ${r} */`);
-        return emit(pre);
+        const type = this.left.type;
+        code.push(`const ${type.c()} ${r} = (${left} ${operation} ${right});`);
+        return r;
     }
+}
+
+function is_numeric_type(t: Type): boolean {
+    return t instanceof IntegerType || t instanceof RealType;
 }
 
 class UnaryOperation extends Expression {
@@ -955,17 +941,16 @@ class UnaryOperation extends Expression {
         this.operation = operation;
         this.expr = expr;
     }
-    c(): string {
+    v(code: string[]) {
         const r = this.context().R();
         const operation = this.operation === "NOT" ? "!" : this.operation;
-        const pre: string[] = [];
-        const v = extract_value(this.expr.c(), pre);
-        pre.push(`const int ${r} = (${operation}${v}); /* ${r} */`);
-        return emit(pre);
+        const value = this.expr.v(code);
+        code.push(`const int ${r} = (${operation}${value});`);
+        return r;
     }
 }
 
-function string_compare(left: Expression, right: Expression, operation: string): string | null {
+function string_compare(left: Expression, right: Expression, operation: string, code: string[]) {
     if (operation !== "==" && operation !== "!=") return null;
 
     function is_string_type(e: Expression): [boolean, string | null] {
@@ -980,7 +965,9 @@ function string_compare(left: Expression, right: Expression, operation: string):
 
     if (left_string || right_string) {
         const cmp = operation === "!=" ? "!=" : "==";
-        return `strcmp(${left_reference}.data, ${right_reference}.data) ${cmp} 0`;
+        const r = left.context().R();
+        code.push(`const int ${r} = strcmp(${left_reference}.data, ${right_reference}.data) ${cmp} 0;`);
+        return r;
     }
     return null;
 }
@@ -1145,14 +1132,18 @@ class Lexer {
     }
 }
 
-class GenerateError extends Error {}
+class GenerateError extends Error {
+    constructor(message: string) {
+        super(`compiler error: ${message}`);
+    }
+}
 
 function is_number_name(name: string): boolean {
     return name === "INTEGER" || name === "REAL";
 }
 
-function expression_stringer(e: Expression, fmt: string[], callee: string, pre: string[]): string {
-    const c = extract_value(e.c(), pre);
+function expression_stringer(e: Expression, fmt: string[], callee: string, code: string[]): string {
+    const c = e.v(code);
 
     if (e instanceof BuiltinLiteral) {
         fmt.push(e.format());
@@ -1161,7 +1152,7 @@ function expression_stringer(e: Expression, fmt: string[], callee: string, pre: 
 
     if (e instanceof VariableReference) {
         const variable = discover_variable(e);
-        let { type, reference } = expand_variable_reference(variable, e, pre);
+        let { type, reference } = expand_variable_reference(variable, e, code);
         if (type instanceof AliasType) type = type.reference_type;
         if (!(type instanceof BuiltinType))
             throw new GenerateError(
@@ -1192,7 +1183,7 @@ function expression_stringer(e: Expression, fmt: string[], callee: string, pre: 
     throw new GenerateError(`unsupported ${callee} argument '${e}' at ${e.token}`);
 }
 
-function expand_variable_reference(variable: Variable, variable_reference: VariableReference, pre: string[]) {
+function expand_variable_reference(variable: Variable, variable_reference: VariableReference, code: string[]) {
     let type: Type = variable.type;
     let reference = variable.name;
 
@@ -1210,15 +1201,13 @@ function expand_variable_reference(variable: Variable, variable_reference: Varia
 
             enlist_variable(new Variable(part.token, "$F", new StringType(), filename), "");
 
-            const lo = extract_value(type.lo.c(), pre);
-            const hi = extract_value(type.hi.c(), pre);
-            const index = extract_value(part.index(), pre);
+            const lo = type.lo.v(code);
+            const hi = type.hi.v(code);
+            const index = part.value.v(code);
 
-            pre.push(`$index(${index}, ${lo}, ${hi}, &$F, ${line}, ${character});`);
-
-            const indexExpr = `(${index}) - (${lo})`;
+            code.push(`$index(${index}, ${lo}, ${hi}, &$F, ${line}, ${character});`);
             type = type.type;
-            reference += `.data[${indexExpr}]`;
+            reference += `.data[(${index}) - (${lo})]`;
         } else if (part instanceof VariableField) {
             if (type instanceof AliasType) type = type.reference_type;
 
@@ -1892,13 +1881,12 @@ class ConcatenationOperation extends Expression {
         super(token, scope, type);
         this.parts = parts;
     }
-    c(): string {
+    v(code: string[]) {
         const r = this.context().R();
-        const pre: string[] = [];
         const fmt: string[] = [];
-        const args = this.parts.map((p) => expression_stringer(p, fmt, "||", pre)).join(", ");
-        pre.push(`const STR ${r} = $concat("${fmt.join("")}", ${args}); /* ${r} */`);
-        return emit(pre);
+        const args = this.parts.map((x) => expression_stringer(x, fmt, "||", code)).join(", ");
+        code.push(`const STR ${r} = $concat("${fmt.join("")}", ${args});`);
+        return r;
     }
 }
 

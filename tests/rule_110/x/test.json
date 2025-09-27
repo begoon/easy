@@ -344,7 +344,7 @@
                     "node": "IF",
                     "token": "<IF|KEYWORD tests/rule_110/test.easy:19:7>",
                     "scope": "PROGRAM:Rule110.PROCEDURE:step",
-                    "cond": {
+                    "condition": {
                       "node": "BinaryOperation",
                       "token": "<<|SYMBOL tests/rule_110/test.easy:19:12>",
                       "scope": "PROGRAM:Rule110.PROCEDURE:step",
@@ -523,7 +523,7 @@
                     "node": "IF",
                     "token": "<IF|KEYWORD tests/rule_110/test.easy:25:7>",
                     "scope": "PROGRAM:Rule110.PROCEDURE:step",
-                    "cond": {
+                    "condition": {
                       "node": "BinaryOperation",
                       "token": "<>|SYMBOL tests/rule_110/test.easy:25:12>",
                       "scope": "PROGRAM:Rule110.PROCEDURE:step",
@@ -915,7 +915,7 @@
                               "node": "IF",
                               "token": "<IF|KEYWORD tests/rule_110/test.easy:33:20>",
                               "scope": "PROGRAM:Rule110.PROCEDURE:step",
-                              "cond": {
+                              "condition": {
                                 "node": "BinaryOperation",
                                 "token": "<=|SYMBOL tests/rule_110/test.easy:33:25>",
                                 "scope": "PROGRAM:Rule110.PROCEDURE:step",
@@ -1134,7 +1134,7 @@
                     "node": "IF",
                     "token": "<IF|KEYWORD tests/rule_110/test.easy:43:7>",
                     "scope": "PROGRAM:Rule110.PROCEDURE:print",
-                    "cond": {
+                    "condition": {
                       "node": "BinaryOperation",
                       "token": "<=|SYMBOL tests/rule_110/test.easy:43:17>",
                       "scope": "PROGRAM:Rule110.PROCEDURE:print",

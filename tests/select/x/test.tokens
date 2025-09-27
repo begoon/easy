@@ -12,7 +12,7 @@ tests/select/test.easy:3:12   INTEGER  100
 tests/select/test.easy:3:15   SYMBOL   ;        
 tests/select/test.easy:4:3    KEYWORD  SELECT   
 tests/select/test.easy:4:10   KEYWORD  TRUE     
-tests/select/test.easy:4:15   IDENT    OF       
+tests/select/test.easy:4:15   KEYWORD  OF       
 tests/select/test.easy:5:5    KEYWORD  CASE     
 tests/select/test.easy:5:10   SYMBOL   (        
 tests/select/test.easy:5:11   IDENT    a        

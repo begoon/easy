@@ -42,7 +42,7 @@ tests/sieve/test.easy:8:35   KEYWORD  INTEGER
 tests/sieve/test.easy:8:42   SYMBOL   :                             
 tests/sieve/test.easy:9:5    KEYWORD  SELECT                        
 tests/sieve/test.easy:9:12   KEYWORD  TRUE                          
-tests/sieve/test.easy:9:17   IDENT    OF                            
+tests/sieve/test.easy:9:17   KEYWORD  OF                            
 tests/sieve/test.easy:10:7   KEYWORD  CASE                          
 tests/sieve/test.easy:10:12  SYMBOL   (                             
 tests/sieve/test.easy:10:13  IDENT    a                             
@@ -185,13 +185,13 @@ tests/sieve/test.easy:30:15  INTEGER  0
 tests/sieve/test.easy:30:17  KEYWORD  THEN                          
 tests/sieve/test.easy:31:5   KEYWORD  DECLARE                       
 tests/sieve/test.easy:31:13  IDENT    sieve                         
-tests/sieve/test.easy:31:19  IDENT    ARRAY                         
+tests/sieve/test.easy:31:19  KEYWORD  ARRAY                         
 tests/sieve/test.easy:31:24  SYMBOL   [                             
 tests/sieve/test.easy:31:25  INTEGER  1                             
 tests/sieve/test.easy:31:26  SYMBOL   :                             
 tests/sieve/test.easy:31:27  IDENT    topnum                        
 tests/sieve/test.easy:31:33  SYMBOL   ]                             
-tests/sieve/test.easy:31:35  IDENT    OF                            
+tests/sieve/test.easy:31:35  KEYWORD  OF                            
 tests/sieve/test.easy:31:38  KEYWORD  BOOLEAN                       
 tests/sieve/test.easy:31:45  SYMBOL   ;                             
 tests/sieve/test.easy:32:5   KEYWORD  DECLARE                       
