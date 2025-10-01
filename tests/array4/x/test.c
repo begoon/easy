@@ -31,10 +31,10 @@ struct
         } data[2 - 0 + 1];
     } data[8 - 0 + 1];
 } b = {0};
-STR $0 = { .data = "abc" };
-STR $1 = { .data = " " };
-STR $F = { .data = "tests/array4/test.easy" };
-int main()
+STR $0 = { .data = "abc", .sz = 3, .immutable = 1 };;
+STR $1 = { .data = " ", .sz = 1, .immutable = 1 };;
+STR $F = { .data = "tests/array4/test.easy", .sz = 22, .immutable = 1 };;
+int main_program()
 {
     $index(1, 0, 8, &$F, 10, 9);
     $index(2, 0, 2, &$F, 10, 12);
@@ -47,6 +47,12 @@ int main()
     $index(1, 0, 8, &$F, 12, 12);
     $index(2, 0, 2, &$F, 12, 15);
     $index(3, 0, 4, &$F, 12, 18);
+    $index(1, 0, 8, &$F, 12, 12);
+    $index(2, 0, 2, &$F, 12, 15);
+    $index(3, 0, 4, &$F, 12, 18);
+    $index(1, 0, 8, &$F, 12, 31);
+    $index(2, 0, 2, &$F, 12, 34);
+    $index(3, 0, 4, &$F, 12, 37);
     $index(1, 0, 8, &$F, 12, 31);
     $index(2, 0, 2, &$F, 12, 34);
     $index(3, 0, 4, &$F, 12, 37);
@@ -54,10 +60,16 @@ int main()
     $index(1, 0, 8, &$F, 13, 12);
     $index(2, 0, 2, &$F, 13, 15);
     $index(3, 0, 4, &$F, 13, 18);
+    $index(1, 0, 8, &$F, 13, 12);
+    $index(2, 0, 2, &$F, 13, 15);
+    $index(3, 0, 4, &$F, 13, 18);
     $index(1, 0, 8, &$F, 13, 35);
     $index(2, 0, 2, &$F, 13, 38);
     $index(3, 0, 4, &$F, 13, 41);
-    const STR $r1 = $concat("AAA", a.data[(1) - (0)].data[(2) - (0)].data[(3) - (0)].s, $1, b.data[(1) - (0)].data[(2) - (0)].data[(3) - (0)].s);
+    $index(1, 0, 8, &$F, 13, 35);
+    $index(2, 0, 2, &$F, 13, 38);
+    $index(3, 0, 4, &$F, 13, 41);
+    const STR AUTOFREE $r1 = $concat("AAA", a.data[(1) - (0)].data[(2) - (0)].data[(3) - (0)].s, $1, b.data[(1) - (0)].data[(2) - (0)].data[(3) - (0)].s);
     $output("A", $r1);
     exit(0);
 }

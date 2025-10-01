@@ -8,6 +8,7 @@ tests/**/*.output
 !tests/**/x/*.*
 
 *.o
+*.dSYM
 
 /life
 life.c

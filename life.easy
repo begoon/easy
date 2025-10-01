@@ -106,7 +106,7 @@ PROGRAM Life:
 
     CALL evolution;
 
-    CALL pause(0.3);
+    CALL rt_pause(0.3);
 
     IF i MOD 10 = 0 THEN
       CALL glider(40, 10);

@@ -228,7 +228,7 @@ async function runTest(testDir: string) {
             const exe = testStem + ".exe";
             removals.push(exe);
 
-            await run(["clang", ...cc_flags, created_c, "-I", ".", "-o", exe]);
+            await run(["clang", ...cc_flags, created_c, "-g", "-fsanitize=address", "-I", ".", "-o", exe]);
 
             const cmd: string[] = [exe, ">" + JSON.stringify(created_output)];
             const input_file = x + ".input";

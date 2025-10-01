@@ -1,0 +1,17 @@
+PROGRAM String3:
+  TYPE T IS STRUCTURE 
+    FIELD x IS STRING
+  END STRUCTURE;
+
+  DECLARE b T;
+
+  BEGIN
+    DECLARE a T;
+    SET a.x := CHARACTER(100);
+    OUTPUT a.x;
+    SET b := a;
+  END;
+
+  OUTPUT b.x;
+END PROGRAM String3;
+
