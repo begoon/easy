@@ -19,10 +19,10 @@ typedef struct
 } A;
 A a = {0};
 A b = {0};
-STR $0 = { .data = "abc" };
-STR $1 = { .data = " " };
-STR $F = { .data = "tests/array3/test.easy" };
-int main()
+STR $0 = { .data = "abc", .sz = 3, .immutable = 1 };
+STR $1 = { .data = " ", .sz = 1, .immutable = 1 };
+STR $F = { .data = "tests/array3/test.easy", .sz = 22, .immutable = 1 };
+int main_program()
 {
     $index(1, 0, 8, &$F, 11, 9);
     $index(2, 0, 2, &$F, 11, 12);
@@ -36,6 +36,12 @@ int main()
     $index(1, 0, 8, &$F, 14, 12);
     $index(2, 0, 2, &$F, 14, 15);
     $index(3, 0, 4, &$F, 14, 18);
+    $index(1, 0, 8, &$F, 14, 12);
+    $index(2, 0, 2, &$F, 14, 15);
+    $index(3, 0, 4, &$F, 14, 18);
+    $index(1, 0, 8, &$F, 14, 31);
+    $index(2, 0, 2, &$F, 14, 34);
+    $index(3, 0, 4, &$F, 14, 37);
     $index(1, 0, 8, &$F, 14, 31);
     $index(2, 0, 2, &$F, 14, 34);
     $index(3, 0, 4, &$F, 14, 37);
@@ -43,6 +49,12 @@ int main()
     $index(1, 0, 8, &$F, 15, 12);
     $index(2, 0, 2, &$F, 15, 15);
     $index(3, 0, 4, &$F, 15, 18);
+    $index(1, 0, 8, &$F, 15, 12);
+    $index(2, 0, 2, &$F, 15, 15);
+    $index(3, 0, 4, &$F, 15, 18);
+    $index(1, 0, 8, &$F, 15, 35);
+    $index(2, 0, 2, &$F, 15, 38);
+    $index(3, 0, 4, &$F, 15, 41);
     $index(1, 0, 8, &$F, 15, 35);
     $index(2, 0, 2, &$F, 15, 38);
     $index(3, 0, 4, &$F, 15, 41);

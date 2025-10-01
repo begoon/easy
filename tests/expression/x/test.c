@@ -9,18 +9,19 @@ int b = 0;
 int c = 0;
 STR s = {0};
 int f = 0;
-STR $0 = { .data = "3" };
-STR $1 = { .data = "x = " };
-STR $2 = { .data = " OK" };
-STR $3 = { .data = "f = " };
-STR $4 = { .data = "a" };
-STR $5 = { .data = "abc" };
-STR $6 = { .data = "s = " };
+STR $0 = { .data = "3", .sz = 1, .immutable = 1 };
+STR $1 = { .data = "x = ", .sz = 4, .immutable = 1 };
+STR $2 = { .data = " OK", .sz = 3, .immutable = 1 };
+STR $3 = { .data = "f = ", .sz = 4, .immutable = 1 };
+STR $4 = { .data = "a", .sz = 1, .immutable = 1 };
+STR $5 = { .data = "abc", .sz = 3, .immutable = 1 };
+STR $6 = { .data = "s = ", .sz = 4, .immutable = 1 };
+STR $F = { .data = "tests/expression/test.easy", .sz = 26, .immutable = 1 };
 int func(int z)
 {
     return z;
 }
-int main()
+int main_program()
 {
     x = a;
     const int $r1 = (a + b);

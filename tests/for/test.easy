@@ -1,6 +1,13 @@
 PROGRAM For:
-DECLARE a INTEGER;
+DECLARE (a, b) INTEGER;
+
+SET b := 69;
+
 FOR a := 0 TO 10 WHILE a < 7 DO
-  OUTPUT a;
+  DECLARE b INTEGER;
+  SET b := a * 11;
+  OUTPUT a, " - ", b;
 END FOR;
+
+OUTPUT b;
 END PROGRAM For;

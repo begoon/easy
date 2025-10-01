@@ -8,9 +8,10 @@ int i = 0;
 int j = 0;
 double r = 0.0;
 int b = 0;
-STR $0 = { .data = "abc" };
-STR $1 = { .data = " - " };
-STR $2 = { .data = "xzy" };
+STR $0 = { .data = "abc", .sz = 3, .immutable = 1 };
+STR $1 = { .data = " - ", .sz = 3, .immutable = 1 };
+STR $2 = { .data = "xzy", .sz = 3, .immutable = 1 };
+STR $F = { .data = "tests/typing/test.easy", .sz = 22, .immutable = 1 };
 STR S()
 {
     return $0;
@@ -27,7 +28,7 @@ int B()
 {
     return TRUE;
 }
-int main()
+int main_program()
 {
     const STR $r1 = S();
     const int $r2 = I();

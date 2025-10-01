@@ -33,18 +33,18 @@ struct
     } data[2 - 1 + 1];
 } t = {0};
 int b = 0;
-STR $0 = { .data = "=" };
-STR $1 = { .data = "i=" };
-STR $2 = { .data = " " };
-STR $3 = { .data = "s=" };
-STR $4 = { .data = "v=[" };
-STR $5 = { .data = "]" };
-STR $6 = { .data = "456" };
-STR $7 = { .data = "123" };
-STR $8 = { .data = "X" };
-STR $9 = { .data = "M" };
-STR $10 = { .data = "S" };
-STR $F = { .data = "tests/eval/test.easy" };
+STR $0 = { .data = "=", .sz = 1, .immutable = 1 };
+STR $1 = { .data = "i=", .sz = 2, .immutable = 1 };
+STR $2 = { .data = " ", .sz = 1, .immutable = 1 };
+STR $3 = { .data = "s=", .sz = 2, .immutable = 1 };
+STR $4 = { .data = "v=[", .sz = 3, .immutable = 1 };
+STR $5 = { .data = "]", .sz = 1, .immutable = 1 };
+STR $6 = { .data = "456", .sz = 3, .immutable = 1 };
+STR $7 = { .data = "123", .sz = 3, .immutable = 1 };
+STR $8 = { .data = "X", .sz = 1, .immutable = 1 };
+STR $9 = { .data = "M", .sz = 1, .immutable = 1 };
+STR $10 = { .data = "S", .sz = 1, .immutable = 1 };
+STR $F = { .data = "tests/eval/test.easy", .sz = 20, .immutable = 1 };
 STR F1(int x, STR s)
 {
     const int $r39 = LENGTH(s);
@@ -55,12 +55,15 @@ void P1(int i, STR s, STR v)
 {
     $output("AiAAAAAAA", $1, i, $2, $3, s, $2, $4, v, $5);
 }
-int main()
+int main_program()
 {
     $index(1, 1, 2, &$F, 25, 9);
     $index(2, 1, 4, &$F, 25, 12);
     $index(1, 1, 2, &$F, 25, 17);
     t.data[(1) - (1)].data[(2) - (1)].d.data[(1) - (1)] = 42;
+    $index(1, 1, 2, &$F, 26, 12);
+    $index(2, 1, 4, &$F, 26, 15);
+    $index(1, 1, 2, &$F, 26, 20);
     $index(1, 1, 2, &$F, 26, 12);
     $index(2, 1, 4, &$F, 26, 15);
     $index(1, 1, 2, &$F, 26, 20);
@@ -80,6 +83,10 @@ int main()
     const int $r6 = (a + 2);
     $index($r6, 1, 2, &$F, 36, 14);
     m.data[($r5) - (1)].data[($r6) - (1)] = 42;
+    const int $r7 = (a + 1);
+    $index($r7, 1, 4, &$F, 37, 12);
+    const int $r8 = (a + 2);
+    $index($r8, 1, 2, &$F, 37, 17);
     const int $r9 = (a + 1);
     $index($r9, 1, 4, &$F, 37, 12);
     const int $r10 = (a + 2);

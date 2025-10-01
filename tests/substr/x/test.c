@@ -4,10 +4,11 @@ typedef double REAL;
 typedef int BOOLEAN;
 typedef STR STRING;
 STR s = {0};
-STR $0 = { .data = "abcXYZ" };
-STR $1 = { .data = "12345" };
-STR $2 = { .data = "abc" };
-int main()
+STR $0 = { .data = "abcXYZ", .sz = 6, .immutable = 1 };
+STR $1 = { .data = "12345", .sz = 5, .immutable = 1 };
+STR $2 = { .data = "abc", .sz = 3, .immutable = 1 };
+STR $F = { .data = "tests/substr/test.easy", .sz = 22, .immutable = 1 };
+int main_program()
 {
     s = $0;
     const STR $r1 = SUBSTR($1, 1, 2);

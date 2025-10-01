@@ -161,33 +161,33 @@ function diff(expectedFile: string, createdFile: string) {
     }
 }
 
-async function runTest(testDir: string) {
-    const testStem = path.join(testDir, "test");
-    if (verbose) console.log("[TEST]", path.basename(testDir));
-    else process.stdout.write(path.basename(testDir) + " ");
+async function runTest(test_folder: string) {
+    const test_stem = path.join(test_folder, "test");
+    if (verbose) console.log("[TEST]", path.basename(test_folder));
+    else process.stdout.write(path.basename(test_folder) + " ");
 
-    const program = testStem + ".easy";
-    const x = path.join(testDir, "x", "test");
+    const program = test_stem + ".easy";
+    const x = path.join(test_folder, "x", "test");
 
     const removals: string[] = [];
     const flags: string[] = [];
 
     const expected_tokens = x + ".tokens";
-    let created_tokens = testStem + ".tokens";
+    let created_tokens = test_stem + ".tokens";
     if (exists(expected_tokens)) {
         removals.push(created_tokens);
         flags.push("-t");
     }
 
     const expected_ast = x + ".json";
-    const created_ast = testStem + ".json";
+    const created_ast = test_stem + ".json";
     if (exists(expected_ast)) {
         removals.push(created_ast);
         flags.push("-a");
     }
 
     const expected_peg_ast = x + ".peg.json";
-    const created_peg_ast = testStem + ".peg.json";
+    const created_peg_ast = test_stem + ".peg.json";
     if (exists(expected_peg_ast)) {
         removals.push(created_peg_ast);
         await run(["bun", "peg.ts", program]);
@@ -196,14 +196,14 @@ async function runTest(testDir: string) {
     await run(["bun", "easyc.ts", program, ...flags]);
 
     const expected_c = x + ".c";
-    const created_c = testStem + ".c";
+    const created_c = test_stem + ".c";
     if (exists(expected_c)) {
         removals.push(created_c);
         flags.push("-c", created_c);
     }
 
     const expected_s = x + ".s";
-    const created_s = testStem + ".s";
+    const created_s = test_stem + ".s";
     if (exists(expected_s)) {
         removals.push(created_s);
         flags.push("-s", created_s);
@@ -217,15 +217,15 @@ async function runTest(testDir: string) {
 
     const skip_run = exists(expected_c) && Boolean(process.env.SKIP_RUN);
 
-    const cc_flags = ["-Wall", "-Wextra", "-Werror", "-std=c23"];
+    const cc_flags = ["-Wall", "-Wextra", "-Werror", "-std=c23", "-g", "-fsanitize=address"];
 
     const expected_output = x + ".output";
     if (exists(expected_output) && !skip_run) {
-        const created_output = testStem + ".output";
+        const created_output = test_stem + ".output";
         removals.push(created_output);
 
         if (exists(expected_c)) {
-            const exe = testStem + ".exe";
+            const exe = test_stem + ".exe";
             removals.push(exe);
 
             await run(["clang", ...cc_flags, created_c, "-I", ".", "-o", exe]);
@@ -241,7 +241,7 @@ async function runTest(testDir: string) {
         }
     } else {
         if (exists(expected_c)) {
-            const obj = testStem + ".o";
+            const obj = test_stem + ".o";
             removals.push(obj);
             await run(["clang", ...cc_flags, created_c, "-I", ".", "-c", "-o", obj]);
         }

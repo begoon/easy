@@ -16,12 +16,12 @@ Field field = {0};
 int x = 0;
 int y = 0;
 int i = 0;
-STR $0 = { .data = "** [ EASY LIFE ]" };
-STR $1 = { .data = " " };
-STR $2 = { .data = "*" };
-STR $F = { .data = "tests/life/test.easy" };
-STR $4 = { .data = "x" };
-STR $5 = { .data = "GENERATION: " };
+STR $0 = { .data = "** [ EASY LIFE ]", .sz = 16, .immutable = 1 };
+STR $1 = { .data = " ", .sz = 1, .immutable = 1 };
+STR $2 = { .data = "*", .sz = 1, .immutable = 1 };
+STR $F = { .data = "tests/life/test.easy", .sz = 20, .immutable = 1 };
+STR $4 = { .data = "x", .sz = 1, .immutable = 1 };
+STR $5 = { .data = "GENERATION: ", .sz = 12, .immutable = 1 };
 int valid(int x, int y)
 {
     const int $r10 = (x < 0);
@@ -60,6 +60,8 @@ int neighbours(int x, int y)
                 const int $r21 = valid(xx, yy);
                 if ($r21)
                 {
+                    $index(yy, 0, 25, &$F, 23, 22);
+                    $index(xx, 0, 80, &$F, 23, 26);
                     if (field.data[(yy) - (0)].data[(xx) - (0)])
                     {
                         const int $r22 = (n + 1);
@@ -101,6 +103,8 @@ void print()
         {
             const int $r28 = (w - 1);
             if (!(x <= $r28)) break;
+            $index(y, 0, 25, &$F, 40, 18);
+            $index(x, 0, 80, &$F, 40, 21);
             const int $r29 = (field.data[(y) - (0)].data[(x) - (0)] == TRUE);
             if ($r29)
             {
@@ -169,6 +173,8 @@ void evolution()
             if (!(x <= $r41)) break;
             int alive = 0;
             int n = 0;
+            $index(y, 0, 25, &$F, 68, 28);
+            $index(x, 0, 80, &$F, 68, 31);
             alive = field.data[(y) - (0)].data[(x) - (0)];
             const int $r42 = neighbours(x, y);
             n = $r42;
@@ -200,7 +206,7 @@ void evolution()
     }
     field = next;
 }
-int main()
+int main_program()
 {
     w = 80;
     h = 25;

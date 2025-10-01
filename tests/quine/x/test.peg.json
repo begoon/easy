@@ -29,7 +29,7 @@
                 }
               }
             ],
-            "expr": "\"PROGRAM Q: DECLARE s STRING; SET s := %; OUTPUT SUBSTR(s, 0, 38) || CHARACTER(34) || s || CHARACTER(34) || SUBSTR(s, 39, LENGTH(s)-38); EXIT; END PROGRAM Q;\""
+            "expr": "\"PROGRAM Q: DECLARE s STRING; SET s := %; OUTPUT SUBSTR(s, 0, 38) || CHARACTER(34) || s || CHARACTER(34) || SUBSTR(s, 39, LENGTH(s)-39); END PROGRAM Q;\""
           },
           {
             "type": "output_statement",
@@ -102,7 +102,7 @@
                           }
                         },
                         "op": "-",
-                        "rhs": "38"
+                        "rhs": "39"
                       }
                     ]
                   }

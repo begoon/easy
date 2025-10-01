@@ -4,17 +4,18 @@ typedef double REAL;
 typedef int BOOLEAN;
 typedef STR STRING;
 STR s = {0};
-STR $0 = { .data = "\"" };
-STR $1 = { .data = "<1>" };
-STR $2 = { .data = "" };
-STR $3 = { .data = "<2>" };
-STR $4 = { .data = "<3>" };
-STR $5 = { .data = "<4>" };
-STR $6 = { .data = "..." };
-STR $7 = { .data = "we said \"ok\"" };
-STR $8 = { .data = "str = [" };
-STR $9 = { .data = "abc = [" };
-int main()
+STR $0 = { .data = "\"", .sz = 2, .immutable = 1 };
+STR $1 = { .data = "<1>", .sz = 3, .immutable = 1 };
+STR $2 = { .data = "", .sz = 0, .immutable = 1 };
+STR $3 = { .data = "<2>", .sz = 3, .immutable = 1 };
+STR $4 = { .data = "<3>", .sz = 3, .immutable = 1 };
+STR $5 = { .data = "<4>", .sz = 3, .immutable = 1 };
+STR $6 = { .data = "...", .sz = 3, .immutable = 1 };
+STR $7 = { .data = "we said \"ok\"", .sz = 14, .immutable = 1 };
+STR $8 = { .data = "str = [", .sz = 7, .immutable = 1 };
+STR $9 = { .data = "abc = [", .sz = 7, .immutable = 1 };
+STR $F = { .data = "tests/quote/test.easy", .sz = 21, .immutable = 1 };
+int main_program()
 {
     s = $0;
     $output("A", s);

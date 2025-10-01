@@ -3,12 +3,13 @@ typedef int INTEGER;
 typedef double REAL;
 typedef int BOOLEAN;
 typedef STR STRING;
-STR $0 = { .data = "123" };
-STR $1 = { .data = "!" };
-STR $2 = { .data = "a" };
-STR $3 = { .data = "b" };
-STR $4 = { .data = "c" };
-int main()
+STR $0 = { .data = "123", .sz = 3, .immutable = 1 };
+STR $1 = { .data = "!", .sz = 1, .immutable = 1 };
+STR $2 = { .data = "a", .sz = 1, .immutable = 1 };
+STR $3 = { .data = "b", .sz = 1, .immutable = 1 };
+STR $4 = { .data = "c", .sz = 1, .immutable = 1 };
+STR $F = { .data = "tests/character/test.easy", .sz = 25, .immutable = 1 };
+int main_program()
 {
     const STR $r2 = CHARACTER(48);
     const STR $r3 = CHARACTER(50);

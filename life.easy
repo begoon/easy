@@ -62,6 +62,18 @@ PROGRAM Life:
     SET field[y+2][x+1] := TRUE;
   END PROCEDURE glider;
 
+  PROCEDURE glider2(x INTEGER, y INTEGER):
+    SET field[y][x] := TRUE;
+    SET field[y][x+1] := TRUE;
+    SET field[y][x+2] := TRUE;
+    SET field[y][x+3] := TRUE;
+    SET field[y+1][x+4] := TRUE;
+    SET field[y+3][x+4] := TRUE;
+    SET field[y+1][x] := TRUE;
+    SET field[y+2][x] := TRUE;
+    SET field[y+3][x+1] := TRUE;
+  END PROCEDURE glider2;
+
   PROCEDURE evolution:
     DECLARE (x, y) INTEGER;
     DECLARE next Field;
@@ -98,7 +110,7 @@ PROGRAM Life:
 
   CALL glider(30, 15);
   CALL glider(40, 10);
-  CALL glider(50, 20);
+  CALL glider2(50, 15);
 
   FOR i := 1 WHILE TRUE DO
     CALL print;
@@ -106,7 +118,7 @@ PROGRAM Life:
 
     CALL evolution;
 
-    CALL pause(0.3);
+    CALL rt_pause(0.3);
 
     IF i MOD 10 = 0 THEN
       CALL glider(40, 10);

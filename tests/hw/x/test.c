@@ -4,8 +4,9 @@ typedef double REAL;
 typedef int BOOLEAN;
 typedef STR STRING;
 int a = 0;
-STR $0 = { .data = "abc " };
-int main()
+STR $0 = { .data = "abc ", .sz = 4, .immutable = 1 };
+STR $F = { .data = "tests/hw/test.easy", .sz = 18, .immutable = 1 };
+int main_program()
 {
     a = 100;
     const STR $r1 = $concat("Ai", $0, a);

@@ -5,9 +5,10 @@ typedef int BOOLEAN;
 typedef STR STRING;
 int a = 0;
 int b = 0;
-STR $0 = { .data = "> " };
-STR $1 = { .data = "-" };
-int main()
+STR $0 = { .data = "> ", .sz = 2, .immutable = 1 };
+STR $1 = { .data = "-", .sz = 1, .immutable = 1 };
+STR $F = { .data = "tests/set_group/test.easy", .sz = 25, .immutable = 1 };
+int main_program()
 {
     a = 123;
     b = 123;

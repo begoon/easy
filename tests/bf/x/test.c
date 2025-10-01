@@ -8,16 +8,16 @@ typedef struct
     int data[299 - 0 + 1];
 } Tape;
 STR program = {0};
-STR $0 = { .data = "" };
-STR $1 = { .data = ">" };
-STR $2 = { .data = "<" };
-STR $3 = { .data = "+" };
-STR $F = { .data = "tests/bf/test.easy" };
-STR $5 = { .data = "-" };
-STR $6 = { .data = "." };
-STR $7 = { .data = "[" };
-STR $8 = { .data = "]" };
-STR $9 = { .data = "+++++++++++[>+++++>+++<<-]>++++++++++++++ .---- .++++++++++++++++++ .++++++ .>." };
+STR $0 = { .data = "", .sz = 0, .immutable = 1 };
+STR $1 = { .data = ">", .sz = 1, .immutable = 1 };
+STR $2 = { .data = "<", .sz = 1, .immutable = 1 };
+STR $3 = { .data = "+", .sz = 1, .immutable = 1 };
+STR $F = { .data = "tests/bf/test.easy", .sz = 18, .immutable = 1 };
+STR $5 = { .data = "-", .sz = 1, .immutable = 1 };
+STR $6 = { .data = ".", .sz = 1, .immutable = 1 };
+STR $7 = { .data = "[", .sz = 1, .immutable = 1 };
+STR $8 = { .data = "]", .sz = 1, .immutable = 1 };
+STR $9 = { .data = "+++++++++++[>+++++>+++<<-]>++++++++++++++ .---- .++++++++++++++++++ .++++++ .>.", .sz = 79, .immutable = 1 };
 STR bf(STR program)
 {
     Tape tape = {0};
@@ -54,6 +54,7 @@ STR bf(STR program)
         if ($r9)
         {
             $index(ptr, 0, 299, &$F, 26, 33);
+            $index(ptr, 0, 299, &$F, 26, 46);
             const int $r10 = (tape.data[(ptr) - (0)] + 1);
             tape.data[(ptr) - (0)] = $r10;
         }
@@ -61,12 +62,14 @@ STR bf(STR program)
         if ($r11)
         {
             $index(ptr, 0, 299, &$F, 27, 33);
+            $index(ptr, 0, 299, &$F, 27, 46);
             const int $r12 = (tape.data[(ptr) - (0)] - 1);
             tape.data[(ptr) - (0)] = $r12;
         }
         const int $r13 = strcmp(ch.data, $6.data) == 0;
         if ($r13)
         {
+            $index(ptr, 0, 299, &$F, 28, 57);
             const STR $r15 = CHARACTER(tape.data[(ptr) - (0)]);
             const STR $r14 = $concat("AA", out, $r15);
             out = $r14;
@@ -74,6 +77,7 @@ STR bf(STR program)
         const int $r16 = strcmp(ch.data, $7.data) == 0;
         if ($r16)
         {
+            $index(ptr, 0, 299, &$F, 30, 17);
             const int $r17 = (tape.data[(ptr) - (0)] == 0);
             if ($r17)
             {
@@ -105,6 +109,7 @@ STR bf(STR program)
         const int $r25 = strcmp(ch.data, $8.data) == 0;
         if ($r25)
         {
+            $index(ptr, 0, 299, &$F, 40, 17);
             const int $r26 = (tape.data[(ptr) - (0)] != 0);
             if ($r26)
             {
@@ -137,7 +142,7 @@ STR bf(STR program)
     }
     return out;
 }
-int main()
+int main_program()
 {
     program = $9;
     const STR $r1 = bf(program);

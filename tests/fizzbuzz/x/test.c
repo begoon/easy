@@ -4,9 +4,10 @@ typedef double REAL;
 typedef int BOOLEAN;
 typedef STR STRING;
 int n = 0;
-STR $0 = { .data = "FizzBuzz" };
-STR $1 = { .data = "Fizz" };
-STR $2 = { .data = "Buzz" };
+STR $0 = { .data = "FizzBuzz", .sz = 8, .immutable = 1 };
+STR $1 = { .data = "Fizz", .sz = 4, .immutable = 1 };
+STR $2 = { .data = "Buzz", .sz = 4, .immutable = 1 };
+STR $F = { .data = "tests/fizzbuzz/test.easy", .sz = 24, .immutable = 1 };
 void FizzBuzz(int n)
 {
     int i = 0;
@@ -42,7 +43,7 @@ void FizzBuzz(int n)
         i += 1;
     }
 }
-int main()
+int main_program()
 {
     FizzBuzz(20);
 }

@@ -14,7 +14,7 @@ test-compiler:
 
 one NAME:
     bun easyc.ts tests/{{NAME}}/test.easy \
-    && cc -std=c23 tests/{{NAME}}/test.c -o tests/{{NAME}}/test.exe -I . \
+    && cc -std=c23 tests/{{NAME}}/test.c -o tests/{{NAME}}/test.exe -I . -g -fsanitize=address \
     && ./tests/{{NAME}}/test.exe
 
 life:

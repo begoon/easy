@@ -30,7 +30,6 @@ PROGRAM Eratosthenes:
   IF topnum > 0 THEN
     DECLARE sieve ARRAY[1:topnum] OF BOOLEAN;
     DECLARE (i, limit, count) INTEGER;
-    SET topnum := topnum + 1;
     FOR i := 1 TO topnum DO SET sieve[i] := TRUE; END FOR;
     SET limit := integersqrt(topnum)+1; /* Avoid repeating square root */ 
     FOR i := 2 TO limit DO

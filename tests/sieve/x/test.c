@@ -4,19 +4,19 @@ typedef double REAL;
 typedef int BOOLEAN;
 typedef STR STRING;
 int topnum = 0;
-STR $0 = { .data = "a < 0 in FUNCTION integersqrt." };
-STR $1 = { .data = "Prime[" };
-STR $2 = { .data = "] = " };
-STR $3 = { .data = "Input value " };
-STR $4 = { .data = " non-positive." };
-STR $F = { .data = "tests/sieve/test.easy" };
+STR $0 = { .data = "a < 0 in FUNCTION integersqrt.", .sz = 30, .immutable = 1 };
+STR $1 = { .data = "Prime[", .sz = 6, .immutable = 1 };
+STR $2 = { .data = "] = ", .sz = 4, .immutable = 1 };
+STR $3 = { .data = "Input value ", .sz = 12, .immutable = 1 };
+STR $4 = { .data = " non-positive.", .sz = 14, .immutable = 1 };
+STR $F = { .data = "tests/sieve/test.easy", .sz = 21, .immutable = 1 };
 double abs(double x)
 {
-    const double $r9 = (x < 0.0);
-    if ($r9)
+    const double $r8 = (x < 0.0);
+    if ($r8)
     {
-        const int $r10 = (-x);
-        return $r10;
+        const int $r9 = (-x);
+        return $r9;
     }
     else
     {
@@ -25,60 +25,60 @@ double abs(double x)
 }
 int integersqrt(int a)
 {
-    const int $r11 = (a < 0);
-    const int $r12 = (a == 0);
-    const int $r13 = (a > 0);
-    if ($r11)
+    const int $r10 = (a < 0);
+    const int $r11 = (a == 0);
+    const int $r12 = (a > 0);
+    if ($r10)
     {
         $output("A", $0);
         exit(0);
     }
-    else if ($r12)
+    else if ($r11)
     {
         return 0;
     }
-    else if ($r13)
+    else if ($r12)
     {
         double x = 0.0;
         double ra = 0.0;
         double epsilon = 0.0;
         int sqrt = 0;
-        const double $r14 = FLOAT(a);
-        ra = $r14;
-        const double $r15 = (1e-7 * ra);
-        epsilon = $r15;
-        const double $r16 = (ra / 2.0);
-        x = $r16;
+        const double $r13 = FLOAT(a);
+        ra = $r13;
+        const double $r14 = (1e-7 * ra);
+        epsilon = $r14;
+        const double $r15 = (ra / 2.0);
+        x = $r15;
         while (1)
         {
-            const double $r20 = (x * x);
-            const double $r19 = (ra - $r20);
-            const double $r18 = abs($r19);
-            const double $r17 = ($r18 > epsilon);
-            const double $r23 = (ra / x);
-            const double $r22 = ($r23 - x);
-            const double $r21 = ($r22 / 2.0);
-            if (!($r17)) break;
+            const double $r19 = (x * x);
+            const double $r18 = (ra - $r19);
+            const double $r17 = abs($r18);
+            const double $r16 = ($r17 > epsilon);
+            const double $r22 = (ra / x);
+            const double $r21 = ($r22 - x);
+            const double $r20 = ($r21 / 2.0);
+            if (!($r16)) break;
             while (0);
-            x += $r21;
+            x += $r20;
         }
-        const int $r25 = FIX(x);
-        const int $r24 = ($r25 - 1);
-        sqrt = $r24;
+        const int $r24 = FIX(x);
+        const int $r23 = ($r24 - 1);
+        sqrt = $r23;
         while (1)
         {
+            const int $r27 = (sqrt + 1);
             const int $r28 = (sqrt + 1);
-            const int $r29 = (sqrt + 1);
-            const int $r27 = ($r28 * $r29);
-            const int $r26 = ($r27 <= a);
-            if (!($r26)) break;
+            const int $r26 = ($r27 * $r28);
+            const int $r25 = ($r26 <= a);
+            if (!($r25)) break;
             while (0);
             sqrt += 1;
         }
         return sqrt;
     }
 }
-int main()
+int main_program()
 {
     scanf("%d", &topnum);
     const int $r1 = (topnum > 0);
@@ -91,32 +91,31 @@ int main()
         int i = 0;
         int limit = 0;
         int count = 0;
-        const int $r2 = (topnum + 1);
-        topnum = $r2;
         i = 1;
         while (1)
         {
             if (!(i <= topnum)) break;
-            $index(i, 1, topnum, &$F, 34, 39);
+            $index(i, 1, topnum, &$F, 33, 39);
             sieve.data[(i) - (1)] = TRUE;
             i += 1;
         }
-        const int $r4 = integersqrt(topnum);
-        const int $r3 = ($r4 + 1);
-        limit = $r3;
+        const int $r3 = integersqrt(topnum);
+        const int $r2 = ($r3 + 1);
+        limit = $r2;
         i = 2;
         while (1)
         {
             if (!(i <= limit)) break;
+            $index(i, 1, topnum, &$F, 36, 16);
             if (sieve.data[(i) - (1)])
             {
                 int j = 0;
-                const int $r5 = (2 * i);
-                j = $r5;
+                const int $r4 = (2 * i);
+                j = $r4;
                 while (1)
                 {
                     if (!(j <= topnum)) break;
-                    $index(j, 1, topnum, &$F, 39, 50);
+                    $index(j, 1, topnum, &$F, 38, 50);
                     sieve.data[(j) - (1)] = FALSE;
                     j += i;
                 }
@@ -128,20 +127,21 @@ int main()
         while (1)
         {
             if (!(i <= topnum)) break;
+            $index(i, 1, topnum, &$F, 43, 16);
             if (sieve.data[(i) - (1)])
             {
-                const int $r6 = (count + 1);
-                count = $r6;
-                const STR $r7 = $concat("AiAi", $1, count, $2, i);
-                $output("A", $r7);
+                const int $r5 = (count + 1);
+                count = $r5;
+                const STR $r6 = $concat("AiAi", $1, count, $2, i);
+                $output("A", $r6);
             }
             i += 1;
         }
     }
     else
     {
-        const STR $r8 = $concat("AiA", $3, topnum, $4);
-        $output("A", $r8);
+        const STR $r7 = $concat("AiA", $3, topnum, $4);
+        $output("A", $r7);
     }
     exit(0);
 }

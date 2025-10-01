@@ -130,6 +130,15 @@ const KEYWORDS = new Set([
 
 const SYMBOLS = new Set("+ - * / | & ( ) [ ] ; , . : := = <> < <= > >= ||".split(" ").filter(Boolean));
 
+type Defer = {
+    id: string;
+    code: string;
+};
+
+type Frame = {
+    defer: Defer[];
+};
+
 class Context {
     flags: Flags;
     text: InputText;
@@ -139,9 +148,32 @@ class Context {
     functions: Record<string, BuiltinFunction | FUNCTION>;
     procedures: Record<string, PROCEDURE>;
     variables: Record<string, Variable>;
-    r: number;
 
+    r: number;
     R = () => `$r${this.r++}`;
+
+    s: number;
+    S = () => `$${this.s++}`;
+
+    frames: Frame[] = [];
+
+    enter_frame = () => {
+        this.frames.push({ defer: [] });
+    };
+
+    leave_frame = (code: string[]) => {
+        const frame = this.frames.pop();
+        if (frame && frame.defer.length) code.push(...frame.defer.reverse().map((v) => v.code));
+    };
+
+    defer = (v: Defer) => {
+        const frame = this.frames.at(-1);
+        if (!frame) throw new GenerateError("no active frame for defer");
+        const code = v.code.trim();
+        const defer = frame.defer.filter((x) => x.id !== v.id);
+        defer.push({ id: v.id, code: indent(code, 1) });
+        frame.defer = defer;
+    };
 
     constructor(init: {
         flags?: Flags;
@@ -162,6 +194,7 @@ class Context {
         this.procedures = init.procedures ?? {};
         this.variables = init.variables ?? {};
         this.r = 1;
+        this.s = 1;
     }
 }
 
@@ -273,7 +306,7 @@ class StringType extends BuiltinType {
         super();
         this.initial = initial;
     }
-    zero = () => (this.initial ? `{ .data = "${this.initial}" }` : "{0}");
+    zero = () => (this.initial ? `{ .data = "${this.initial}", .sz = ${this.initial.length} }` : "{0}");
     c = () => "STR";
     typedef = (alias: string) => `typedef STR ${alias}`;
     format = () => "A";
@@ -397,7 +430,7 @@ class DECLARE extends Node {
         this.names = names;
         this.type = type;
     }
-    c(): string {
+    c() {
         return this.names.map((n) => `${this.type.c()} ${n} = ${this.type.zero()};`).join("\n");
     }
 }
@@ -463,7 +496,12 @@ class PROCEDURE extends Node {
     }
     c(): string {
         const args = this.arguments.map((v) => v.c()).join(", ");
-        return emit([`void ${this.name}(${args})`, "{", indent(this.segment.c(), 1), "}"]);
+        const v = [`void ${this.name}(${args})`, "{"];
+        this.segment.context().enter_frame();
+        v.push(indent(this.segment.c(), 1));
+        this.segment.context().leave_frame(v);
+        v.push("}");
+        return emit(v);
     }
 }
 
@@ -483,11 +521,16 @@ class FUNCTION extends Node {
         const func = this.context().functions[this.name] as BuiltinFunction | FUNCTION;
         const type = (func instanceof BuiltinFunction ? func.type : func.type).c();
         const args = this.arguments.map((a) => a.c()).join(", ");
-        return emit([`${type} ${this.name}(${args})`, "{", indent(this.segment.c(), 1), "}"]);
+        const v = [`${type} ${this.name}(${args})`, "{"];
+        this.segment.context().enter_frame();
+        v.push(indent(this.segment.c(), 1));
+        this.segment.context().leave_frame(v);
+        v.push("}");
+        return emit(v);
     }
 }
 
-class Label extends Node {
+class LABEL extends Node {
     name: string;
     constructor(token: Token, scope: string, name: string) {
         super(token, scope);
@@ -516,7 +559,7 @@ class Variable {
     const(): string {
         if (!this.isConst()) throw new GenerateError(`variable '${this.name}' is not a constant at ${this.token}`);
         const z = (this.zeroValue ?? "").replace(/"/g, '\\"');
-        return `${this.type.c()} ${this.name} = { .data = "${z}" }`;
+        return `${this.type.c()} ${this.name} = { .data = "${z}", .sz = ${z.length}, .immutable = 1 }`;
     }
     s(scope: string): string[] {
         return [this.name, scope, this.type.constructor.name, String(this.token)];
@@ -569,13 +612,12 @@ class VariableReference extends Entity {
         const { type } = expand_variable_reference(variable, this, []);
         return type;
     }
-    c(): string {
+    c(code: string[]): string {
         const variable = discover_variable(this);
-        const code: string[] = [];
         const { reference } = expand_variable_reference(variable, this, code);
         return reference;
     }
-    v = (code: string[]) => this.c();
+    v = (code: string[]) => this.c(code);
     context = () => this.token.context;
 }
 
@@ -659,8 +701,19 @@ class IF extends Statement {
 
         if (condition.startsWith("(") && condition.endsWith(")")) condition = condition.slice(1, -1);
 
-        code.push(`if (${condition})`, "{", indent(this.then_branch.c(), 1), "}");
-        if (this.else_branch) code.push("else", "{", indent(this.else_branch.c(), 1), "}");
+        code.push(`if (${condition})`, "{");
+        this.then_branch.context().enter_frame();
+        code.push(indent(this.then_branch.c(), 1));
+        this.then_branch.context().leave_frame(code);
+        code.push("}");
+
+        if (this.else_branch) {
+            code.push("else", "{");
+            this.else_branch.context().enter_frame();
+            code.push(indent(this.else_branch.c(), 1));
+            this.else_branch.context().leave_frame(code);
+            code.push("}");
+        }
 
         return emit(code);
     }
@@ -694,29 +747,33 @@ class FOR extends Statement {
     c(): string {
         const code: string[] = [];
         const init = this.init.v(code);
-        code.push(`${this.variable.c()} = ${init};`);
+        code.push(`${this.variable.c([])} = ${init};`);
 
         const inner: string[] = [];
 
         const conditions = [];
 
+        code.push("while (1)", "{");
+        this.segment.context().enter_frame();
+
         if (this.condition) conditions.push(`${this.condition.v(inner)}`);
-        if (this.to) conditions.push(`${this.variable.c()} <= ${this.to.v(inner)}`);
+        if (this.to) conditions.push(`${this.variable.c([])} <= ${this.to.v(inner)}`);
 
         const condition = conditions.join(" && ");
 
         const by = this.by ? this.by.v(inner) : "1";
-        const increment = `${this.variable.c()} += ${by};`;
+        const increment = `${this.variable.c([])} += ${by};`;
 
         code.push(
-            "while (1)",
-            "{",
             indent(emit(inner), 1),
             indent(`if (!(${condition})) break;`, 1),
             indent(this.segment.c(), 1),
-            indent(increment, 1),
-            "}"
+            indent(increment, 1)
         );
+
+        this.segment.context().leave_frame(code);
+        code.push("}");
+
         return emit(code);
     }
 }
@@ -740,7 +797,13 @@ class SELECT extends Statement {
             } else {
                 code.push("else");
             }
-            code.push("{", indent(segment.c(), 1), "}");
+            code.push("{");
+            segment.context().enter_frame();
+
+            code.push(indent(segment.c(), 1));
+
+            segment.context().leave_frame(code);
+            code.push("}");
         }
         return emit([...preable, ...code]);
     }
@@ -758,8 +821,10 @@ class INPUT extends Statement {
             const variable = discover_variable(variable_reference);
             const { type, reference } = expand_variable_reference(variable, variable_reference, code);
 
-            if (type instanceof StringType) code.push(`scanf("%s", ${reference}.data);`);
-            else if (type instanceof IntegerType) code.push(`scanf("%d", &${reference});`);
+            if (type instanceof StringType) {
+                code.push(`scanf("%4095s", ${reference}.data);`);
+                code.push(`${reference}.sz = strlen(${reference}.data);`);
+            } else if (type instanceof IntegerType) code.push(`scanf("%d", &${reference});`);
             else if (type instanceof RealType) code.push(`scanf("%lf", &${reference});`);
             else throw new GenerateError(`unsupported variable '${variable}' type in INPUT at ${variable.token}`);
         }
@@ -805,15 +870,22 @@ class REPENT extends Statement {
 }
 
 class BEGIN extends Statement {
-    body: Segment;
+    segment: Segment;
     label?: string | null;
     constructor(token: Token, scope: string, segment: Segment, label?: string | null) {
         super(token, scope);
-        this.body = segment;
+        this.segment = segment;
         this.label = label ?? null;
     }
     c(): string {
-        const v = ["{", indent(this.body.c(), 1), "}"];
+        const v = ["{"];
+        this.segment.context().enter_frame();
+
+        v.push(indent(this.segment.c(), 1));
+
+        this.segment.context().leave_frame(v);
+        v.push("}");
+
         if (this.label) v.push(this.label + ":");
         return emit(v);
     }
@@ -851,15 +923,11 @@ class RETURN extends Statement {
 }
 
 class EXIT extends Statement {
-    c() {
-        return "exit(0);";
-    }
+    c = () => "exit(0);";
 }
 
 class EMPTY extends Statement {
-    c() {
-        return "while (0);";
-    }
+    c = () => "while (0);";
 }
 
 const OPERATIONS: Record<string, string> = { "|": "||", "&": "&&", "=": "==", "<>": "!=", MOD: "%", XOR: "^" };
@@ -872,7 +940,7 @@ class FunctionCall extends Expression {
         this.name = name;
         this.arguments = args;
     }
-    v(code: string[]) {
+    v(code: string[]): string {
         const r = this.context().R();
         const args = this.arguments.map((a) => a.v(code)).join(", ");
         const type = this.type.c();
@@ -1268,6 +1336,7 @@ class Parser {
     scope = () => (this.scopes.length ? this.scopes.join(".") : "@");
 
     enter_scope = (name: string) => this.scopes.push(name);
+
     leave_scope = () => this.scopes.pop();
 
     current = () => this.tokens[this.i];
@@ -1500,7 +1569,7 @@ class Parser {
                 const token = this.eat("IDENT");
                 const label = token.value;
                 this.eat(":");
-                statements.push(new Label(token, this.scope(), label));
+                statements.push(new LABEL(token, this.scope(), label));
             } else {
                 statements.push(this.statement());
             }
@@ -1553,8 +1622,19 @@ class Parser {
         const token = this.eat("IF");
         const condition = this.expression();
         this.eat("THEN");
+
+        this.enter_scope(token.value + ":" + this.context.S());
         const then_ = this.segment();
-        const else_ = this.accept("ELSE") ? this.segment() : null;
+        this.leave_scope();
+
+        let else_ = null;
+        if (this.accept("ELSE")) {
+            this.enter_scope(token.value + ":" + this.context.S());
+            const else_segment = this.segment();
+            this.leave_scope();
+            else_ = else_segment;
+        }
+
         this.eat("FI");
         this.eat(";");
         return new IF(token, this.scope(), condition, then_, else_);
@@ -1569,7 +1649,11 @@ class Parser {
         const to = this.accept("TO") ? this.expression() : null;
         const cond = this.accept("WHILE") ? this.expression() : null;
         this.eat("DO");
+
+        this.enter_scope(token.value + ":" + this.context.S());
         const segment = this.segment();
+        this.leave_scope();
+
         this.eat("END");
         this.eat("FOR");
         this.eat(";");
@@ -1586,12 +1670,20 @@ class Parser {
             const cond = this.expression();
             this.eat(")");
             this.eat(":");
-            const body = this.segment();
-            cases.push([cond, body]);
+
+            this.enter_scope(token.value + ":" + this.context.S());
+            const segment = this.segment();
+            this.leave_scope();
+
+            cases.push([cond, segment]);
         }
         if (this.accept("OTHERWISE")) {
             this.eat(":");
+
+            this.enter_scope(token.value + ":" + this.context.S());
             const segment = this.segment();
+            this.leave_scope();
+
             cases.push([null, segment]);
         }
         this.eat("END");
@@ -1607,6 +1699,7 @@ class Parser {
         this.eat(";");
         return new RETURN(token, this.scope(), value);
     }
+
     exit_statement(): EXIT {
         const token = this.eat("EXIT");
         this.eat(";");
@@ -1645,7 +1738,11 @@ class Parser {
 
     begin_statement(): BEGIN {
         const token = this.eat("BEGIN");
+
+        this.enter_scope(token.value + ":" + this.context.S());
         const segment = this.segment();
+        this.leave_scope();
+
         this.eat("END");
         const label = this.accept("IDENT");
         this.eat(";");
@@ -1899,7 +1996,14 @@ class PROGRAM extends Node {
         this.segment = segment;
     }
     c(): string {
-        return emit(["int main()", "{", indent(this.segment.c(true), 1), "}"]);
+        const { filename } = this.token.context.text;
+        enlist_variable(new Variable(this.token, "$F", new StringType(), filename), "");
+        const v = ["int main_program()", "{"];
+        this.segment.context().enter_frame();
+        v.push(indent(this.segment.c(true), 1));
+        this.segment.context().leave_frame(v);
+        v.push("}");
+        return emit(v);
     }
 }
 

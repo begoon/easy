@@ -1,33 +1,74 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdarg.h>
-extern void exit(int);
-extern void *malloc(size_t);
-extern void usleep(int);
+#include <alloca.h>
+#include <unistd.h>
+
+void exit(int status);
+void *malloc(size_t size);
+
 #define TRUE 1
 #define FALSE 0
+
 typedef struct
 {
-    char data[1024];
+    int sz;
+    int immutable;
+    char data[4096];
 } STR;
+
+typedef struct
+{
+    const STR *filename;
+    int line;
+    int character;
+} Location;
+
 int FIX(double v) { return (int)v; }
 double FLOAT(int v) { return (double)v; }
 double FLOOR(double v) { return (double)((int)v); }
-int LENGTH(STR s) { return strlen(s.data); }
+int LENGTH(STR s) { return s.sz; }
+
 STR CHARACTER(int c)
 {
-    STR v = {0};
-    v.data[0] = (char)c;
-    v.data[1] = '\0';
+    STR v = {.sz = 1, .data = {c, 0}};
     return v;
 }
-STR SUBSTR(STR str, int start, int length)
+
+STR SUBSTR(STR from, int start, int length)
 {
-    STR v = {0};
-    strncpy(v.data, str.data + start, length);
-    v.data[length] = '\0';
+    // start cannot be < 0
+    if (start < 0)
+    {
+        char *buf = alloca(from.sz + 1);
+        memcpy(buf, from.data, from.sz);
+        buf[from.sz] = '\0';
+        fprintf(stderr, "substr (%s): start < 0 (%d)\n", buf, start);
+        exit(1);
+    }
+    // length cannot be < 0
+    if (length < 0)
+    {
+        char *buf = alloca(from.sz + 1);
+        memcpy(buf, from.data, from.sz);
+        buf[from.sz] = '\0';
+        fprintf(stderr, "substr (%s): length < 0 (%d)\n", buf, length);
+        exit(1);
+    }
+    // start + length cannot be > from.sz
+    if (start + length > from.sz)
+    {
+        char *buf = alloca(from.sz + 1);
+        memcpy(buf, from.data, from.sz);
+        buf[from.sz] = '\0';
+        fprintf(stderr, "substr (%s): start + length > size (%d + %d = %d > %d)\n", buf, start, length, start + length, from.sz);
+        exit(1);
+    }
+    STR v = {.sz = length};
+    memcpy(v.data, from.data + start, length);
     return v;
 }
+
 // i - INTEGER (int)
 // r - REAL (double)
 // s - STRING (char *)
@@ -36,32 +77,43 @@ STR SUBSTR(STR str, int start, int length)
 // A - STRING (STR)
 STR $concat(const char *fmt, ...)
 {
+    char buf[4096];
+
     va_list args;
     va_start(args, fmt);
-
-    STR r = {0};
 
     int sz = 0;
     for (; *fmt != '\0'; fmt += 1)
     {
         int n = 0;
         if (*fmt == 'i')
-            n = sprintf(r.data + sz, "%d", va_arg(args, int));
+            n = snprintf(buf + sz, sizeof(buf) - sz, "%d", va_arg(args, int));
         else if (*fmt == 'r')
-            n = sprintf(r.data + sz, "%f", va_arg(args, double));
+            n = snprintf(buf + sz, sizeof(buf) - sz, "%f", va_arg(args, double));
         else if (*fmt == 'b')
-            n = sprintf(r.data + sz, "%s", va_arg(args, int) ? "TRUE" : "FALSE");
+            n = snprintf(buf + sz, sizeof(buf) - sz, "%s", va_arg(args, int) ? "TRUE" : "FALSE");
         else if (*fmt == 's')
-            n = sprintf(r.data + sz, "%s", va_arg(args, const char *));
+            n = snprintf(buf + sz, sizeof(buf) - sz, "%s", va_arg(args, const char *));
         else if (*fmt == 'S')
-            n = sprintf(r.data + sz, "%s", (va_arg(args, STR *))->data);
+        {
+            const STR *arg = va_arg(args, STR *);
+            n = arg->sz;
+            memcpy(buf + sz, arg->data, n);
+        }
         else if (*fmt == 'A')
-            n = sprintf(r.data + sz, "%s", va_arg(args, STR).data);
+        {
+            const STR arg = va_arg(args, STR);
+            n = arg.sz;
+            memcpy(buf + sz, arg.data, n);
+        }
         sz += n;
     }
     va_end(args);
-    return r;
+    STR v = {.sz = sz};
+    memcpy(v.data, buf, sz);
+    return v;
 }
+
 void $output(const char *fmt, ...)
 {
     va_list args;
@@ -79,29 +131,35 @@ void $output(const char *fmt, ...)
         else if (*fmt == 's')
             n = printf("%s", va_arg(args, const char *));
         else if (*fmt == 'S')
-            n = printf("%s", va_arg(args, STR *)->data);
+        {
+            const STR *arg = va_arg(args, STR *);
+            n = arg->sz;
+            char *const buf = alloca(n + 1);
+            memcpy(buf, arg->data, n);
+            buf[n] = '\0';
+            n = printf("%s", buf);
+        }
         else if (*fmt == 'A')
-            n = printf("%s", va_arg(args, STR).data);
+        {
+            const STR arg = va_arg(args, STR);
+            n = arg.sz;
+            char *const buf = alloca(n + 1);
+            memcpy(buf, arg.data, n);
+            buf[n] = '\0';
+            n = printf("%s", buf);
+        }
     }
     va_end(args);
 
     if (n > 1 || fmt[-1] == 'i')
         putchar('\n');
 }
-void pause(double seconds)
+
+void rt_pause(double seconds)
 {
     usleep(seconds * 1e6);
 }
-void *$ref(void *ptr, int index, int lo, int hi, int element_size, const STR *filename, int line, int character)
-{
-    if (index < lo || index > hi)
-    {
-        fprintf(stderr, "array index out of bounds: %d not in [%d..%d] (%s:%d:%d)\n", index, lo, hi, filename->data, line, character);
-        exit(1);
-    }
-    index -= lo;
-    return (void *)((unsigned char *)ptr + index * element_size);
-}
+
 void $index(int index, int lo, int hi, const STR *filename, int line, int character)
 {
     if (index < lo || index > hi)
@@ -110,6 +168,15 @@ void $index(int index, int lo, int hi, const STR *filename, int line, int charac
         exit(1);
     }
 }
+
+int main_program();
+
+int main()
+{
+    main_program();
+    return 0;
+}
+
 #pragma clang diagnostic ignored "-Wincompatible-library-redeclaration"
 #pragma clang diagnostic ignored "-Wunused-label"
 #pragma clang diagnostic ignored "-Wunused-variable"

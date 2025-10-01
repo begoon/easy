@@ -5,10 +5,11 @@ typedef int BOOLEAN;
 typedef STR STRING;
 STR s = {0};
 int b = 0;
-STR $0 = { .data = "abcXYZ" };
-STR $1 = { .data = "12345" };
-STR $2 = { .data = "abc" };
-int main()
+STR $0 = { .data = "abcXYZ", .sz = 6, .immutable = 1 };
+STR $1 = { .data = "12345", .sz = 5, .immutable = 1 };
+STR $2 = { .data = "abc", .sz = 3, .immutable = 1 };
+STR $F = { .data = "tests/string/test.easy", .sz = 22, .immutable = 1 };
+int main_program()
 {
     s = $0;
     const int $r1 = strcmp(s.data, $0.data) == 0;
@@ -35,5 +36,4 @@ int main()
     const STR $r12 = SUBSTR(s, 3, 2);
     const STR $r11 = $concat("AA", $2, $r12);
     $output("A", $r11);
-    exit(0);
 }

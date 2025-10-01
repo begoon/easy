@@ -11,10 +11,10 @@ Row row = {0};
 int N = 0;
 int n = 0;
 int i = 0;
-STR $F = { .data = "tests/rule_110/test.easy" };
-STR $1 = { .data = "X" };
-STR $2 = { .data = "." };
-STR $3 = { .data = "  " };
+STR $F = { .data = "tests/rule_110/test.easy", .sz = 24, .immutable = 1 };
+STR $1 = { .data = "X", .sz = 1, .immutable = 1 };
+STR $2 = { .data = ".", .sz = 1, .immutable = 1 };
+STR $3 = { .data = "  ", .sz = 2, .immutable = 1 };
 void step()
 {
     int i = 0;
@@ -43,7 +43,9 @@ void step()
         {
             j = N;
         }
+        $index(j, 1, 32, &$F, 20, 23);
         left = row.data[(j) - (1)];
+        $index(i, 1, 32, &$F, 22, 20);
         c = row.data[(i) - (1)];
         const int $r5 = (i + 1);
         j = $r5;
@@ -52,6 +54,7 @@ void step()
         {
             j = 1;
         }
+        $index(j, 1, 32, &$F, 26, 24);
         right = row.data[(j) - (1)];
         const int $r8 = (left + c);
         const int $r7 = ($r8 + right);
@@ -95,6 +98,7 @@ void print()
     while (1)
     {
         if (!(i <= N)) break;
+        $index(i, 1, 32, &$F, 43, 14);
         const int $r14 = (row.data[(i) - (1)] == 1);
         if ($r14)
         {
@@ -108,7 +112,7 @@ void print()
     }
     $output("A", $3);
 }
-int main()
+int main_program()
 {
     N = 32;
     const int $r2 = (N / 2);

@@ -19,12 +19,14 @@ struct
         STR x;
     } data[25 - 0 + 1];
 } b = {0};
-STR $0 = { .data = "..." };
-STR $F = { .data = "tests/array1/test.easy" };
-int main()
+STR $0 = { .data = "...", .sz = 3, .immutable = 1 };
+STR $F = { .data = "tests/array1/test.easy", .sz = 22, .immutable = 1 };
+int main_program()
 {
     $index(1, 0, 25, &$F, 15, 9);
     $index(2, 0, 80, &$F, 15, 14);
+    $index(2, 0, 25, &$F, 15, 22);
+    $index(1, 0, 80, &$F, 15, 27);
     b.data[(1) - (0)].a.data[(2) - (0)] = b.data[(2) - (0)].a.data[(1) - (0)];
     $output("A", $0);
     exit(0);

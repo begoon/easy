@@ -7,20 +7,21 @@ int a = 0;
 double r = 0.0;
 int b = 0;
 STR s = {0};
-STR $0 = { .data = "xyz" };
-STR $1 = { .data = " - " };
-STR $2 = { .data = " = " };
-STR $3 = { .data = " <> " };
-STR $4 = { .data = "abc" };
-STR $5 = { .data = "i:" };
-STR $6 = { .data = " r:" };
-STR $7 = { .data = " b:" };
-STR $8 = { .data = " s:" };
-STR $9 = { .data = "%%" };
-STR $10 = { .data = " " };
-STR $11 = { .data = "123" };
-STR $12 = { .data = "456" };
-STR $13 = { .data = "$$" };
+STR $0 = { .data = "xyz", .sz = 3, .immutable = 1 };
+STR $1 = { .data = " - ", .sz = 3, .immutable = 1 };
+STR $2 = { .data = " = ", .sz = 3, .immutable = 1 };
+STR $3 = { .data = " <> ", .sz = 4, .immutable = 1 };
+STR $4 = { .data = "abc", .sz = 3, .immutable = 1 };
+STR $5 = { .data = "i:", .sz = 2, .immutable = 1 };
+STR $6 = { .data = " r:", .sz = 3, .immutable = 1 };
+STR $7 = { .data = " b:", .sz = 3, .immutable = 1 };
+STR $8 = { .data = " s:", .sz = 3, .immutable = 1 };
+STR $9 = { .data = "%%", .sz = 2, .immutable = 1 };
+STR $10 = { .data = " ", .sz = 1, .immutable = 1 };
+STR $11 = { .data = "123", .sz = 3, .immutable = 1 };
+STR $12 = { .data = "456", .sz = 3, .immutable = 1 };
+STR $13 = { .data = "$$", .sz = 2, .immutable = 1 };
+STR $F = { .data = "tests/concat/test.easy", .sz = 22, .immutable = 1 };
 int fa()
 {
     return 1;
@@ -39,7 +40,7 @@ STR fs()
     s = $0;
     return s;
 }
-int main()
+int main_program()
 {
     const STR $r1 = $concat("iArAbAb", 0, $1, 0.001, $2, TRUE, $3, FALSE);
     $output("A", $r1);

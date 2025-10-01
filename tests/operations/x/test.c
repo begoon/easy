@@ -7,9 +7,10 @@ int a = 0;
 int b = 0;
 int c = 0;
 STR s = {0};
-STR $0 = { .data = "..." };
-STR $1 = { .data = "abc" };
-int main()
+STR $0 = { .data = "...", .sz = 3, .immutable = 1 };
+STR $1 = { .data = "abc", .sz = 3, .immutable = 1 };
+STR $F = { .data = "tests/operations/test.easy", .sz = 26, .immutable = 1 };
+int main_program()
 {
     a = 1;
     b = 2;

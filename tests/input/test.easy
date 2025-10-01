@@ -9,5 +9,4 @@ PROGRAM Input:
   OUTPUT "i = [" || i || "]";
   OUTPUT "f = [" || f || "]";
   OUTPUT "s = [" || s || "]";
-  EXIT;
 END PROGRAM Input;

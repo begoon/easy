@@ -101,7 +101,7 @@
         "segment": {
           "node": "Segment",
           "token": "<OUTPUT|KEYWORD tests/hw/test.easy:6:3>",
-          "scope": "PROGRAM:hw",
+          "scope": "PROGRAM:hw.FOR:$1",
           "types": [],
           "variables": [],
           "subroutines": [],
@@ -109,12 +109,12 @@
             {
               "node": "OUTPUT",
               "token": "<OUTPUT|KEYWORD tests/hw/test.easy:6:3>",
-              "scope": "PROGRAM:hw",
+              "scope": "PROGRAM:hw.FOR:$1",
               "arguments": [
                 {
                   "node": "VariableReference",
                   "token": "<a|IDENT tests/hw/test.easy:6:10>",
-                  "scope": "PROGRAM:hw",
+                  "scope": "PROGRAM:hw.FOR:$1",
                   "name": "a",
                   "parts": []
                 }

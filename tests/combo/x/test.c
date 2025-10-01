@@ -39,12 +39,12 @@ Row r = {0};
 Matrix m = {0};
 Matrix m1 = {0};
 Record2 s = {0};
-STR $0 = { .data = "**" };
-STR $1 = { .data = "123" };
-STR $2 = { .data = "456" };
-STR $3 = { .data = "abc" };
-STR $4 = { .data = "XYZ" };
-STR $F = { .data = "tests/combo/test.easy" };
+STR $0 = { .data = "**", .sz = 2, .immutable = 1 };
+STR $1 = { .data = "123", .sz = 3, .immutable = 1 };
+STR $2 = { .data = "456", .sz = 3, .immutable = 1 };
+STR $3 = { .data = "abc", .sz = 3, .immutable = 1 };
+STR $4 = { .data = "XYZ", .sz = 3, .immutable = 1 };
+STR $F = { .data = "tests/combo/test.easy", .sz = 21, .immutable = 1 };
 STR F1(int x, STR s)
 {
     const int $r6 = LENGTH(s);
@@ -59,11 +59,13 @@ void P1(int xx, STR s, STR xx2)
     const STR $r7 = $concat("iAiiAA", x, s, $r8, xx, xx2, $0);
     $output("A", $r7);
 }
-int main()
+int main_program()
 {
     const STR $r1 = F1(456, $2);
     P1(123, $1, $r1);
     s.a.s = $3;
+    $index(1, 1, 8, &$F, 48, 14);
+    $index(1, 1, 256, &$F, 48, 17);
     $index(1, 1, 8, &$F, 48, 14);
     $index(1, 1, 256, &$F, 48, 17);
     $output("iA", s.m.data[(1) - (1)].data[(1) - (1)], s.a.s);

@@ -4,17 +4,18 @@ typedef double REAL;
 typedef int BOOLEAN;
 typedef STR STRING;
 int i = 0;
-STR $0 = { .data = "if_label" };
-STR $1 = { .data = "for_label" };
-STR $2 = { .data = "select_label" };
-STR $3 = { .data = "repeat_label_NO" };
-STR $4 = { .data = "repeat_label" };
-STR $5 = { .data = "repent_label_NO" };
-STR $6 = { .data = "repent_label" };
-STR $7 = { .data = "block" };
-STR $8 = { .data = "label block_NO" };
-STR $9 = { .data = "." };
-int main()
+STR $0 = { .data = "if_label", .sz = 8, .immutable = 1 };
+STR $1 = { .data = "for_label", .sz = 9, .immutable = 1 };
+STR $2 = { .data = "select_label", .sz = 12, .immutable = 1 };
+STR $3 = { .data = "repeat_label_NO", .sz = 15, .immutable = 1 };
+STR $4 = { .data = "repeat_label", .sz = 12, .immutable = 1 };
+STR $5 = { .data = "repent_label_NO", .sz = 15, .immutable = 1 };
+STR $6 = { .data = "repent_label", .sz = 12, .immutable = 1 };
+STR $7 = { .data = "block", .sz = 5, .immutable = 1 };
+STR $8 = { .data = "label block_NO", .sz = 14, .immutable = 1 };
+STR $9 = { .data = ".", .sz = 1, .immutable = 1 };
+STR $F = { .data = "tests/label/test.easy", .sz = 21, .immutable = 1 };
+int main_program()
 {
     if_label:
     if (TRUE)

@@ -519,29 +519,6 @@
               ],
               "statements": [
                 {
-                  "type": "assignment_statement",
-                  "targets": [
-                    {
-                      "type": "target",
-                      "var": {
-                        "type": "variable",
-                        "base": "topnum",
-                        "parts": []
-                      }
-                    }
-                  ],
-                  "expr": {
-                    "type": "add_expr",
-                    "head": {
-                      "type": "variable",
-                      "base": "topnum",
-                      "parts": []
-                    },
-                    "op": "+",
-                    "rhs": "1"
-                  }
-                },
-                {
                   "type": "simple_iteration_statement",
                   "tgt": {
                     "type": "iteration_target",
