@@ -7,7 +7,6 @@
 
 void exit(int status);
 void *malloc(size_t size);
-int usleep(useconds_t usec);
 
 #define TRUE 1
 #define FALSE 0
