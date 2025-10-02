@@ -3,7 +3,6 @@
 #include <stdarg.h>
 #include <alloca.h>
 #include <unistd.h>
-#include <time.h>
 
 void exit(int status);
 void *malloc(size_t size);
