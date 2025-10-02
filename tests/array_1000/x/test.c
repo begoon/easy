@@ -32,20 +32,22 @@ int main_program()
     $output("i", b.data[(1000) - (1000)]);
     n = 1000;
     {
+        void *$r1 AUTOFREE = malloc(sizeof(double) * (n - n + 1));
         struct
         {
             double *data;
-        } c = { .data = malloc(sizeof(double) * (n - n + 1)) };
+        } c = { .data = $r1 };
+        void *$r2 AUTOFREE = malloc(sizeof(struct
+        {
+            double data[1 - 0 + 1];
+        }) * (n - n + 1));
         struct
         {
             struct
             {
                 double data[1 - 0 + 1];
             } *data;
-        } d = { .data = malloc(sizeof(struct
-        {
-            double data[1 - 0 + 1];
-        }) * (n - n + 1)) };
+        } d = { .data = $r2 };
         $index(n, n, n, &$F, 20, 11);
         c.data[(n) - (n)] = 3.14;
         $index(n, n, n, &$F, 21, 14);

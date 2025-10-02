@@ -10,9 +10,28 @@
 
 void exit(int status);
 void *malloc(size_t size);
+void free(void *ptr);
 
 #define TRUE 1
 #define FALSE 0
+
+#define AUTOFREE __attribute__((cleanup(free_array)))
+
+typedef struct
+{
+    void *data;
+} ARRAY;
+
+void free_array(void *ptr)
+{
+    ARRAY *array = (ARRAY *)ptr;
+    void *data = array->data;
+    if (data)
+    {
+        free(data);
+        array->data = NULL;
+    }
+}
 
 static inline void $sleep(double seconds)
 {

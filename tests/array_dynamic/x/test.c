@@ -13,10 +13,11 @@ int main_program()
 {
     sz = 1024;
     {
+        void *$r1 AUTOFREE = malloc(sizeof(int) * (sz - 1 + 1));
         struct
         {
             int *data;
-        } b = { .data = malloc(sizeof(int) * (sz - 1 + 1)) };
+        } b = { .data = $r1 };
         $index(1, 1, sz, &$F, 9, 11);
         b.data[(1) - (1)] = 42;
         $index(1, 1, sz, &$F, 10, 14);

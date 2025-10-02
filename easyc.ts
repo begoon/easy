@@ -329,9 +329,11 @@ class ArrayType extends Type {
         return emit(["struct", "{", indent(`${this.type.c()} ${data};`, 1), "}"]);
     }
     sz = () => `${this.hi.c()} - ${this.lo.c()} + 1`;
-    zero(): string {
+    zero(code: string[]): string {
         if (!this.dynamic) return "{0}";
-        return `{ .data = malloc(sizeof(${this.type.c()}) * (${this.sz()})) }`;
+        const r = this.hi.context().R();
+        code.push(`void *${r} AUTOFREE = malloc(sizeof(${this.type.c()}) * (${this.sz()}));`);
+        return `{ .data = ${r} }`;
     }
     typedef = (alias: string) => `typedef ${this.c()} ${alias}`;
 }
@@ -431,7 +433,18 @@ class DECLARE extends Node {
         this.type = type;
     }
     c() {
-        return this.names.map((n) => `${this.type.c()} ${n} = ${this.type.zero()};`).join("\n");
+        function zeroValue(n: string, type: Type): string | undefined {
+            const autofree = type instanceof ArrayType && type.dynamic ? "AUTOFREE " : "";
+            return `${type.c()} ${autofree}${n} = ${type.zero()};`;
+        }
+        return this.names.map((n) => zeroValue(n, this.type)).join("\n");
+    }
+    v(code: string[]): string {
+        function zeroValue(n: string, type: Type): string | undefined {
+            const autofree = "";
+            return `${type.c()} ${autofree}${n} = ${type.zero(code)};`;
+        }
+        return this.names.map((n) => zeroValue(n, this.type)).join("\n");
     }
 }
 
@@ -458,7 +471,7 @@ class Segment extends Node {
         const v: string[] = [];
         if (this.variables) {
             for (const variable of this.variables) {
-                const c = variable.c();
+                const c = variable.v(v);
                 if (main) this.context().common.push(c);
                 else v.push(c);
             }

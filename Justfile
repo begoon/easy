@@ -22,3 +22,6 @@ life:
 
 clean:
     git clean -Xf
+
+test-docker:
+    docker build --platform linux/amd64 -t easy . && docker run --platform linux/amd64 --rm easy
