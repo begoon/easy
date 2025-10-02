@@ -45,4 +45,3 @@ neighbours  ->  int     FUNCTION  (x int, y int)  <FUNCTION|KEYWORD|tests/life/t
 print      PROCEDURE  ()              <PROCEDURE|KEYWORD|tests/life/test.easy:32:3>
 glider     PROCEDURE  (x int, y int)  <PROCEDURE|KEYWORD|tests/life/test.easy:51:3>
 evolution  PROCEDURE  ()              <PROCEDURE|KEYWORD|tests/life/test.easy:59:3>
-

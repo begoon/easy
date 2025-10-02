@@ -1,5 +1,8 @@
 default: test-compiler
 
+x:
+    just test-docker
+
 ci:
     just
 

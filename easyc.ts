@@ -2123,7 +2123,7 @@ function run(argv: string[]) {
     }
 
     const symbols = table(variables) + "\n" + table(types) + "\n" + table(functions) + "\n" + table(procedures);
-    fs.writeFileSync(symbolsFile, symbols + "\n", "utf-8");
+    fs.writeFileSync(symbolsFile, symbols, "utf-8");
 
     const outputFile = arg(argv, "-c") ?? inputFile.replace(/\.[^.]+$/, "") + ".c";
     const compiledText = program.c().trim();
