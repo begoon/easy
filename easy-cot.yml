@@ -1,0 +1,48 @@
+attributes: []
+characters: []
+commands:
+- beginString: \b(LENGTH|CHARACTER|FIX|NUMBER|SUBSTR|FLOOR|FLOAT)
+  regularExpression: true
+commentDelimiters:
+  beginDelimiter: /*
+  endDelimiter: '*/'
+  inlineDelimiter: //
+comments: []
+completions: []
+extensions:
+- keyString: easy
+- keyString: es
+filenames: []
+interpreters: []
+keywords:
+- beginString: \b(PROGRAM|END|EXTERNAL|PROCEDURE|SET|FUNCTION|TYPE|IS|ARRAY|OF|STRUCTURE|FIELD|DECLARE|NAME|BEGIN|FOR|DO|BY|TO|WHILE|IF|THEN|ELSE|FI|CALL|RETURN|EXIT|SELECT|CASE|OTHERWISE|REPEAT|REPENT|INPUT|OUTPUT|INTEGER|REAL|BOOLEAN|STRING|MOD|XOR|NOT)\b
+  regularExpression: true
+kind: code
+metadata: {}
+numbers:
+- beginString: \d+
+  regularExpression: true
+- beginString: \d+.\d+
+  regularExpression: true
+- beginString: \d+\.
+  regularExpression: true
+outlineMenu:
+- beginString: '[\t ]*(PROCEDURE) +\w+:'
+  keyString: ''
+- beginString: '[\t ]*(PROCEDURE) +\w+\(.*?\):'
+  bold: true
+  keyString: ''
+strings:
+- beginString: '"'
+  endString: '"'
+types:
+- beginString: ARRAY
+  regularExpression: true
+- beginString: BOOLEAN
+- beginString: INTEGER
+- beginString: REAL
+- beginString: STRING
+values:
+- beginString: \b(TRUE|FALSE)\b
+  regularExpression: true
+variables: []
