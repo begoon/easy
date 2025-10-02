@@ -2,13 +2,25 @@
 #include <string.h>
 #include <stdarg.h>
 #include <alloca.h>
-#include <unistd.h>
+#include <time.h>
 
 void exit(int status);
 void *malloc(size_t size);
 
 #define TRUE 1
 #define FALSE 0
+
+static inline void $sleep(double seconds)
+{
+    struct timespec ts;
+    ts.tv_sec = (time_t)seconds;
+    ts.tv_nsec = (long)((seconds - (double)ts.tv_sec) * 1e9);
+    if (ts.tv_nsec < 0)
+    {
+        ts.tv_nsec = 0;
+    }
+    nanosleep(&ts, NULL);
+}
 
 typedef struct
 {
@@ -157,7 +169,7 @@ void $output(const char *fmt, ...)
 
 void rt_pause(double seconds)
 {
-    usleep(seconds * 1e6);
+    $sleep(seconds);
 }
 
 void $index(int index, int lo, int hi, const STR *filename, int line, int character)
