@@ -1388,14 +1388,8 @@
                               "token": "<X|STRING tests/rule_110/test.easy:43:33>",
                               "scope": "",
                               "type": {
-                                "node": "Variable",
-                                "token": "<X|STRING tests/rule_110/test.easy:43:33>",
-                                "name": "$1",
-                                "type": {
-                                  "node": "StringType",
-                                  "initial": ""
-                                },
-                                "zeroValue": "X"
+                                "node": "StringType",
+                                "initial": ""
                               },
                               "name": "$1",
                               "parts": []
@@ -1422,14 +1416,8 @@
                               "token": "<.|STRING tests/rule_110/test.easy:43:50>",
                               "scope": "",
                               "type": {
-                                "node": "Variable",
-                                "token": "<.|STRING tests/rule_110/test.easy:43:50>",
-                                "name": "$2",
-                                "type": {
-                                  "node": "StringType",
-                                  "initial": ""
-                                },
-                                "zeroValue": "."
+                                "node": "StringType",
+                                "initial": ""
                               },
                               "name": "$2",
                               "parts": []
@@ -1464,14 +1452,8 @@
                   "token": "<  |STRING tests/rule_110/test.easy:45:12>",
                   "scope": "",
                   "type": {
-                    "node": "Variable",
-                    "token": "<  |STRING tests/rule_110/test.easy:45:12>",
-                    "name": "$3",
-                    "type": {
-                      "node": "StringType",
-                      "initial": ""
-                    },
-                    "zeroValue": "  "
+                    "node": "StringType",
+                    "initial": ""
                   },
                   "name": "$3",
                   "parts": []

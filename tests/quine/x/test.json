@@ -46,14 +46,8 @@
           "token": "<PROGRAM Q: DECLARE s STRING; SET s := %; OUTPUT SUBSTR(s, 0, 38) || CHARACTER(34) || s || CHARACTER(34) || SUBSTR(s, 39, LENGTH(s)-39); END PROGRAM Q;|STRING tests/quine/test.easy:1:39>",
           "scope": "",
           "type": {
-            "node": "Variable",
-            "token": "<PROGRAM Q: DECLARE s STRING; SET s := %; OUTPUT SUBSTR(s, 0, 38) || CHARACTER(34) || s || CHARACTER(34) || SUBSTR(s, 39, LENGTH(s)-39); END PROGRAM Q;|STRING tests/quine/test.easy:1:39>",
-            "name": "$0",
-            "type": {
-              "node": "StringType",
-              "initial": ""
-            },
-            "zeroValue": "PROGRAM Q: DECLARE s STRING; SET s := %; OUTPUT SUBSTR(s, 0, 38) || CHARACTER(34) || s || CHARACTER(34) || SUBSTR(s, 39, LENGTH(s)-39); END PROGRAM Q;"
+            "node": "StringType",
+            "initial": ""
           },
           "name": "$0",
           "parts": []

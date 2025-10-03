@@ -68,14 +68,8 @@
                 "token": "<abc |STRING tests/hw/test.easy:4:8>",
                 "scope": "",
                 "type": {
-                  "node": "Variable",
-                  "token": "<abc |STRING tests/hw/test.easy:4:8>",
-                  "name": "$0",
-                  "type": {
-                    "node": "StringType",
-                    "initial": ""
-                  },
-                  "zeroValue": "abc "
+                  "node": "StringType",
+                  "initial": ""
                 },
                 "name": "$0",
                 "parts": []

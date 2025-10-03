@@ -654,14 +654,14 @@ class IntegerLiteral extends BuiltinLiteral {
 }
 
 class RealLiteral extends BuiltinLiteral {
-    value: number;
-    constructor(token: Token, scope: string, value: number) {
+    value: string;
+    constructor(token: Token, scope: string, value: string) {
         super(token, scope, new RealType());
         this.value = value;
     }
     c() {
-        const v = String(this.value);
-        return v.includes(".") || v.includes("e") ? v : v + ".0";
+        const v = this.value;
+        return v.includes(".") || v.includes("e") ? v : `${v}.0`;
     }
     v = (code: string[]) => this.c();
     format = () => "r";
@@ -1951,19 +1951,19 @@ class Parser {
         }
         if (token.type === "REAL") {
             const token = this.eat("REAL");
-            return new RealLiteral(token, this.scope(), parseFloat(token.value));
+            return new RealLiteral(token, this.scope(), token.value);
         }
         if (token.type === "STRING") {
             const token = this.eat("STRING");
             const context = this.context;
             const existing = Object.values(context.variables).find((v) => v.isConst() && v.zeroValue === token.value);
-            if (existing) return new VariableReference(token, "", existing.name, [], existing);
+            if (existing) return new VariableReference(token, "", existing.name, [], existing.type);
 
             const const_i = Object.values(context.variables).filter((v) => v.isConst()).length;
             const name = `$${const_i}`;
             const variable = new Variable(token, name, new StringType(), token.value);
             enlist_variable(variable, "");
-            return new VariableReference(token, "", name, [], variable);
+            return new VariableReference(token, "", name, [], variable.type);
         }
         if (token.value === "+" || token.value === "-") {
             const unaryToken = this.eat(token.value);

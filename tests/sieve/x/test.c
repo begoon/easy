@@ -12,7 +12,7 @@ STR $4 = { .data = "Input value ", .sz = 12, .immutable = 1 };
 STR $5 = { .data = " non-positive.", .sz = 14, .immutable = 1 };
 double abs(double x)
 {
-    const double $r9 = (x < 0.0);
+    const double $r9 = (x < 0.);
     if ($r9)
     {
         const int $r10 = (-x);
@@ -45,9 +45,9 @@ int integersqrt(int a)
         int sqrt = 0;
         const double $r14 = FLOAT(a);
         ra = $r14;
-        const double $r15 = (1e-7 * ra);
+        const double $r15 = (0.0000001 * ra);
         epsilon = $r15;
-        const double $r16 = (ra / 2.0);
+        const double $r16 = (ra / 2.);
         x = $r16;
         while (1)
         {
@@ -57,7 +57,7 @@ int integersqrt(int a)
             const double $r17 = ($r18 > epsilon);
             const double $r23 = (ra / x);
             const double $r22 = ($r23 - x);
-            const double $r21 = ($r22 / 2.0);
+            const double $r21 = ($r22 / 2.);
             if (!($r17)) break;
             while (0);
             x += $r21;
