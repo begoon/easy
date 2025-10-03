@@ -268,7 +268,7 @@ abstract class Type {
     c(): string {
         throw new GenerateError(`c() not implemented for ${this.constructor.name}`);
     }
-    zero(): string {
+    zero(code: string[]): string {
         throw new GenerateError(`zero() not implemented for ${this.constructor.name}`);
     }
     typedef(alias: string): string {
@@ -278,6 +278,13 @@ abstract class Type {
 }
 
 abstract class BuiltinType extends Type {}
+
+class UnknownType extends Type {
+    c = () => "UNKNOWN";
+    zero = () => "0";
+    typedef = (alias: string) => `typedef UNKNOWN ${alias}`;
+    format = () => "?";
+}
 
 class IntegerType extends BuiltinType {
     c = () => "int";
@@ -328,7 +335,7 @@ class ArrayType extends Type {
         const data = this.dynamic ? `*data` : `data[${this.sz()}]`;
         return emit(["struct", "{", indent(`${this.type.c()} ${data};`, 1), "}"]);
     }
-    sz = () => `${this.hi.c()} - ${this.lo.c()} + 1`;
+    sz = () => `${this.hi.v([])} - ${this.lo.v([])} + 1`;
     zero(code: string[]): string {
         if (!this.dynamic) return "{0}";
         const r = this.hi.context().R();
@@ -376,7 +383,7 @@ class AliasType extends Type {
         this.reference_type = ref;
     }
     c = () => this.reference_name;
-    zero = () => this.reference_type.zero();
+    zero = () => this.reference_type.zero([]);
     typedef = (alias: string) => `typedef ${this.c()} ${alias}`;
 }
 
@@ -435,7 +442,7 @@ class DECLARE extends Node {
     c() {
         function zeroValue(n: string, type: Type): string | undefined {
             const autofree = type instanceof ArrayType && type.dynamic ? "AUTOFREE " : "";
-            return `${type.c()} ${autofree}${n} = ${type.zero()};`;
+            return `${type.c()} ${autofree}${n} = ${type.zero([])};`;
         }
         return this.names.map((n) => zeroValue(n, this.type)).join("\n");
     }
@@ -610,27 +617,22 @@ class VariableSubscript {
         return this.value.c();
     }
 }
-class VariableReference extends Entity {
+class VariableReference extends Expression {
     scope: string;
     name: string;
     parts: (VariableSubscript | VariableField)[];
-    constructor(token: Token, scope: string, name: string, parts: (VariableSubscript | VariableField)[], type?: Type) {
-        super(token);
+    constructor(token: Token, scope: string, name: string, parts: (VariableSubscript | VariableField)[], type: Type) {
+        super(token, scope, type);
+
         this.scope = scope;
         this.name = name;
         this.parts = parts;
     }
-    get type(): Type {
-        const variable = discover_variable(this);
-        const { type } = expand_variable_reference(variable, this, []);
-        return type;
-    }
-    c(code: string[]): string {
-        const variable = discover_variable(this);
+    v(code: string[]): string {
+        const variable = find_existing_variable(this);
         const { reference } = expand_variable_reference(variable, this, code);
         return reference;
     }
-    v = (code: string[]) => this.c(code);
     context = () => this.token.context;
 }
 
@@ -671,9 +673,7 @@ class BoolLiteral extends BuiltinLiteral {
         super(token, scope, new BooleanType());
         this.value = value;
     }
-    c() {
-        return this.value ? "TRUE" : "FALSE";
-    }
+    c = () => (this.value ? "TRUE" : "FALSE");
     v = (code: string[]) => this.c();
     format = () => "b";
 }
@@ -689,7 +689,7 @@ class SET extends Statement {
     c(): string {
         const code: string[] = [];
         for (const target of this.target) {
-            const variable = discover_variable(target);
+            const variable = find_existing_variable(target);
             const { reference } = expand_variable_reference(variable, target, code);
             const value = this.expression.v(code);
             code.push(`${reference} = ${value};`);
@@ -760,7 +760,7 @@ class FOR extends Statement {
     c(): string {
         const code: string[] = [];
         const init = this.init.v(code);
-        code.push(`${this.variable.c([])} = ${init};`);
+        code.push(`${this.variable.v([])} = ${init};`);
 
         const inner: string[] = [];
 
@@ -770,12 +770,12 @@ class FOR extends Statement {
         this.segment.context().enter_frame();
 
         if (this.condition) conditions.push(`${this.condition.v(inner)}`);
-        if (this.to) conditions.push(`${this.variable.c([])} <= ${this.to.v(inner)}`);
+        if (this.to) conditions.push(`${this.variable.v([])} <= ${this.to.v(inner)}`);
 
         const condition = conditions.join(" && ");
 
         const by = this.by ? this.by.v(inner) : "1";
-        const increment = `${this.variable.c([])} += ${by};`;
+        const increment = `${this.variable.v([])} += ${by};`;
 
         code.push(
             indent(emit(inner), 1),
@@ -831,7 +831,7 @@ class INPUT extends Statement {
     c(): string {
         const code: string[] = [];
         for (const variable_reference of this.variable_references) {
-            const variable = discover_variable(variable_reference);
+            const variable = find_existing_variable(variable_reference);
             const { type, reference } = expand_variable_reference(variable, variable_reference, code);
 
             if (type instanceof StringType) {
@@ -1036,7 +1036,7 @@ function string_compare(left: Expression, right: Expression, operation: string, 
 
     function is_string_type(e: Expression): [boolean, string | null] {
         if (!(e instanceof VariableReference)) return [false, null];
-        const variable = discover_variable(e);
+        const variable = find_existing_variable(e);
         const { type, reference } = expand_variable_reference(variable, e, []);
         return [type instanceof StringType, reference];
     }
@@ -1232,7 +1232,7 @@ function expression_stringer(e: Expression, fmt: string[], callee: string, code:
     }
 
     if (e instanceof VariableReference) {
-        const variable = discover_variable(e);
+        const variable = find_existing_variable(e);
         let { type, reference } = expand_variable_reference(variable, e, code);
         if (type instanceof AliasType) type = type.reference_type;
         if (!(type instanceof BuiltinType))
@@ -1309,15 +1309,13 @@ function expand_variable_reference(variable: Variable, variable_reference: Varia
     return { type, reference };
 }
 
-function discover_variable(v: VariableReference): Variable {
+function find_existing_variable(v: VariableReference): Variable {
     const { context } = v.token;
-
     const parts = v.scope.split(".");
-
     let variable: Variable | undefined;
     while (parts.length) {
-        const fqn = parts.join(".") + "|" + v.name;
-        variable = context.variables[fqn];
+        const scoped_name = parts.join(".") + "|" + v.name;
+        variable = context.variables[scoped_name];
         if (variable) break;
         parts.pop();
     }
@@ -1594,7 +1592,7 @@ class Parser {
         const token = this.current();
         switch (token.value) {
             case "SET":
-                return this.assignment_statement();
+                return this.set_statement();
             case "CALL":
                 return this.call_statement();
             case "IF":
@@ -1762,19 +1760,23 @@ class Parser {
         return new BEGIN(token, this.scope(), segment, label ? label.value : null);
     }
 
-    assignment_statement(): SET {
+    set_statement(): SET {
         const token = this.eat("SET");
         const variable = this.variable_reference();
         this.eat(":=");
         const targets = [variable];
         while (true) {
             const position = this.i;
-            if (this.current().type !== "IDENT") break;
-            const variable = this.variable_reference();
-            if (this.current().value !== ":=") {
-                this.i = position;
-                break;
+            const tokens_ahead = [];
+            while (this.current().value !== ";" && this.current().type !== "EOF") {
+                tokens_ahead.push(this.current().value);
+                this.i += 1;
             }
+            this.i = position;
+
+            if (!tokens_ahead.includes(":=")) break;
+
+            const variable = this.variable_reference();
             this.eat(":=");
             targets.push(variable);
         }
@@ -1789,20 +1791,23 @@ class Parser {
         const parts: (VariableField | VariableSubscript)[] = [];
         while (true) {
             if (this.accept(".")) {
-                const ft = this.eat("IDENT");
-                parts.push(new VariableField(ft, ft.value));
+                const token = this.eat("IDENT");
+                parts.push(new VariableField(token, token.value));
                 continue;
             }
             if (this.accept("[")) {
-                const st = this.current();
-                const sub = this.expression();
-                parts.push(new VariableSubscript(st, sub));
+                const token = this.current();
+                const expression = this.expression();
+                parts.push(new VariableSubscript(token, expression));
                 this.eat("]");
                 continue;
             }
             break;
         }
-        return new VariableReference(token, this.scope(), name, parts);
+        const reference = new VariableReference(token, this.scope(), name, parts, new UnknownType());
+        const variable = find_existing_variable(reference);
+        reference.type = expand_variable_reference(variable, reference, []).type;
+        return reference;
     }
 
     call_statement(): CALL {
@@ -1952,13 +1957,13 @@ class Parser {
             const token = this.eat("STRING");
             const context = this.context;
             const existing = Object.values(context.variables).find((v) => v.isConst() && v.zeroValue === token.value);
-            if (existing) return new VariableReference(token, "", existing.name, []);
+            if (existing) return new VariableReference(token, "", existing.name, [], existing);
 
             const const_i = Object.values(context.variables).filter((v) => v.isConst()).length;
             const name = `$${const_i}`;
             const variable = new Variable(token, name, new StringType(), token.value);
             enlist_variable(variable, "");
-            return new VariableReference(token, "", name, []);
+            return new VariableReference(token, "", name, [], variable);
         }
         if (token.value === "+" || token.value === "-") {
             const unaryToken = this.eat(token.value);

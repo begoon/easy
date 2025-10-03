@@ -32,6 +32,9 @@
             "node": "VariableReference",
             "token": "<a|IDENT tests/hw/test.easy:3:5>",
             "scope": "PROGRAM:hw",
+            "type": {
+              "node": "IntegerType"
+            },
             "name": "a",
             "parts": []
           }
@@ -64,6 +67,16 @@
                 "node": "VariableReference",
                 "token": "<abc |STRING tests/hw/test.easy:4:8>",
                 "scope": "",
+                "type": {
+                  "node": "Variable",
+                  "token": "<abc |STRING tests/hw/test.easy:4:8>",
+                  "name": "$0",
+                  "type": {
+                    "node": "StringType",
+                    "initial": ""
+                  },
+                  "zeroValue": "abc "
+                },
                 "name": "$0",
                 "parts": []
               },
@@ -71,6 +84,9 @@
                 "node": "VariableReference",
                 "token": "<a|IDENT tests/hw/test.easy:4:18>",
                 "scope": "PROGRAM:hw",
+                "type": {
+                  "node": "IntegerType"
+                },
                 "name": "a",
                 "parts": []
               }
@@ -86,6 +102,9 @@
           "node": "VariableReference",
           "token": "<a|IDENT tests/hw/test.easy:5:5>",
           "scope": "PROGRAM:hw",
+          "type": {
+            "node": "IntegerType"
+          },
           "name": "a",
           "parts": []
         },
@@ -115,6 +134,9 @@
                   "node": "VariableReference",
                   "token": "<a|IDENT tests/hw/test.easy:6:10>",
                   "scope": "PROGRAM:hw.FOR:$1",
+                  "type": {
+                    "node": "IntegerType"
+                  },
                   "name": "a",
                   "parts": []
                 }

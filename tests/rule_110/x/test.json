@@ -164,6 +164,9 @@
                 "node": "VariableReference",
                 "token": "<i|IDENT tests/rule_110/test.easy:11:9>",
                 "scope": "PROGRAM:Rule110.PROCEDURE:step",
+                "type": {
+                  "node": "IntegerType"
+                },
                 "name": "i",
                 "parts": []
               },
@@ -193,6 +196,9 @@
                         "node": "VariableReference",
                         "token": "<next|IDENT tests/rule_110/test.easy:11:28>",
                         "scope": "PROGRAM:Rule110.PROCEDURE:step.FOR:$1",
+                        "type": {
+                          "node": "IntegerType"
+                        },
                         "name": "next",
                         "parts": [
                           {
@@ -202,6 +208,9 @@
                               "node": "VariableReference",
                               "token": "<i|IDENT tests/rule_110/test.easy:11:33>",
                               "scope": "PROGRAM:Rule110.PROCEDURE:step.FOR:$1",
+                              "type": {
+                                "node": "IntegerType"
+                              },
                               "name": "i",
                               "parts": []
                             }
@@ -226,6 +235,9 @@
                 "node": "VariableReference",
                 "token": "<N|IDENT tests/rule_110/test.easy:11:19>",
                 "scope": "PROGRAM:Rule110.PROCEDURE:step",
+                "type": {
+                  "node": "IntegerType"
+                },
                 "name": "N",
                 "parts": []
               },
@@ -239,6 +251,9 @@
                 "node": "VariableReference",
                 "token": "<i|IDENT tests/rule_110/test.easy:13:9>",
                 "scope": "PROGRAM:Rule110.PROCEDURE:step",
+                "type": {
+                  "node": "IntegerType"
+                },
                 "name": "i",
                 "parts": []
               },
@@ -304,6 +319,9 @@
                         "node": "VariableReference",
                         "token": "<j|IDENT tests/rule_110/test.easy:18:11>",
                         "scope": "PROGRAM:Rule110.PROCEDURE:step.FOR:$2",
+                        "type": {
+                          "node": "IntegerType"
+                        },
                         "name": "j",
                         "parts": []
                       }
@@ -320,6 +338,9 @@
                         "node": "VariableReference",
                         "token": "<i|IDENT tests/rule_110/test.easy:18:16>",
                         "scope": "PROGRAM:Rule110.PROCEDURE:step.FOR:$2",
+                        "type": {
+                          "node": "IntegerType"
+                        },
                         "name": "i",
                         "parts": []
                       },
@@ -356,6 +377,9 @@
                         "node": "VariableReference",
                         "token": "<j|IDENT tests/rule_110/test.easy:19:10>",
                         "scope": "PROGRAM:Rule110.PROCEDURE:step.FOR:$2",
+                        "type": {
+                          "node": "IntegerType"
+                        },
                         "name": "j",
                         "parts": []
                       },
@@ -392,6 +416,9 @@
                               "node": "VariableReference",
                               "token": "<j|IDENT tests/rule_110/test.easy:19:25>",
                               "scope": "PROGRAM:Rule110.PROCEDURE:step.FOR:$2.IF:$3",
+                              "type": {
+                                "node": "IntegerType"
+                              },
                               "name": "j",
                               "parts": []
                             }
@@ -400,6 +427,9 @@
                             "node": "VariableReference",
                             "token": "<N|IDENT tests/rule_110/test.easy:19:30>",
                             "scope": "PROGRAM:Rule110.PROCEDURE:step.FOR:$2.IF:$3",
+                            "type": {
+                              "node": "IntegerType"
+                            },
                             "name": "N",
                             "parts": []
                           }
@@ -417,6 +447,9 @@
                         "node": "VariableReference",
                         "token": "<left|IDENT tests/rule_110/test.easy:20:11>",
                         "scope": "PROGRAM:Rule110.PROCEDURE:step.FOR:$2",
+                        "type": {
+                          "node": "IntegerType"
+                        },
                         "name": "left",
                         "parts": []
                       }
@@ -425,6 +458,9 @@
                       "node": "VariableReference",
                       "token": "<row|IDENT tests/rule_110/test.easy:20:19>",
                       "scope": "PROGRAM:Rule110.PROCEDURE:step.FOR:$2",
+                      "type": {
+                        "node": "IntegerType"
+                      },
                       "name": "row",
                       "parts": [
                         {
@@ -434,6 +470,9 @@
                             "node": "VariableReference",
                             "token": "<j|IDENT tests/rule_110/test.easy:20:23>",
                             "scope": "PROGRAM:Rule110.PROCEDURE:step.FOR:$2",
+                            "type": {
+                              "node": "IntegerType"
+                            },
                             "name": "j",
                             "parts": []
                           }
@@ -450,6 +489,9 @@
                         "node": "VariableReference",
                         "token": "<c|IDENT tests/rule_110/test.easy:22:11>",
                         "scope": "PROGRAM:Rule110.PROCEDURE:step.FOR:$2",
+                        "type": {
+                          "node": "IntegerType"
+                        },
                         "name": "c",
                         "parts": []
                       }
@@ -458,6 +500,9 @@
                       "node": "VariableReference",
                       "token": "<row|IDENT tests/rule_110/test.easy:22:16>",
                       "scope": "PROGRAM:Rule110.PROCEDURE:step.FOR:$2",
+                      "type": {
+                        "node": "IntegerType"
+                      },
                       "name": "row",
                       "parts": [
                         {
@@ -467,6 +512,9 @@
                             "node": "VariableReference",
                             "token": "<i|IDENT tests/rule_110/test.easy:22:20>",
                             "scope": "PROGRAM:Rule110.PROCEDURE:step.FOR:$2",
+                            "type": {
+                              "node": "IntegerType"
+                            },
                             "name": "i",
                             "parts": []
                           }
@@ -483,6 +531,9 @@
                         "node": "VariableReference",
                         "token": "<j|IDENT tests/rule_110/test.easy:24:11>",
                         "scope": "PROGRAM:Rule110.PROCEDURE:step.FOR:$2",
+                        "type": {
+                          "node": "IntegerType"
+                        },
                         "name": "j",
                         "parts": []
                       }
@@ -499,6 +550,9 @@
                         "node": "VariableReference",
                         "token": "<i|IDENT tests/rule_110/test.easy:24:16>",
                         "scope": "PROGRAM:Rule110.PROCEDURE:step.FOR:$2",
+                        "type": {
+                          "node": "IntegerType"
+                        },
                         "name": "i",
                         "parts": []
                       },
@@ -535,6 +589,9 @@
                         "node": "VariableReference",
                         "token": "<j|IDENT tests/rule_110/test.easy:25:10>",
                         "scope": "PROGRAM:Rule110.PROCEDURE:step.FOR:$2",
+                        "type": {
+                          "node": "IntegerType"
+                        },
                         "name": "j",
                         "parts": []
                       },
@@ -542,6 +599,9 @@
                         "node": "VariableReference",
                         "token": "<N|IDENT tests/rule_110/test.easy:25:14>",
                         "scope": "PROGRAM:Rule110.PROCEDURE:step.FOR:$2",
+                        "type": {
+                          "node": "IntegerType"
+                        },
                         "name": "N",
                         "parts": []
                       },
@@ -569,6 +629,9 @@
                               "node": "VariableReference",
                               "token": "<j|IDENT tests/rule_110/test.easy:25:25>",
                               "scope": "PROGRAM:Rule110.PROCEDURE:step.FOR:$2.IF:$4",
+                              "type": {
+                                "node": "IntegerType"
+                              },
                               "name": "j",
                               "parts": []
                             }
@@ -596,6 +659,9 @@
                         "node": "VariableReference",
                         "token": "<right|IDENT tests/rule_110/test.easy:26:11>",
                         "scope": "PROGRAM:Rule110.PROCEDURE:step.FOR:$2",
+                        "type": {
+                          "node": "IntegerType"
+                        },
                         "name": "right",
                         "parts": []
                       }
@@ -604,6 +670,9 @@
                       "node": "VariableReference",
                       "token": "<row|IDENT tests/rule_110/test.easy:26:20>",
                       "scope": "PROGRAM:Rule110.PROCEDURE:step.FOR:$2",
+                      "type": {
+                        "node": "IntegerType"
+                      },
                       "name": "row",
                       "parts": [
                         {
@@ -613,6 +682,9 @@
                             "node": "VariableReference",
                             "token": "<j|IDENT tests/rule_110/test.easy:26:24>",
                             "scope": "PROGRAM:Rule110.PROCEDURE:step.FOR:$2",
+                            "type": {
+                              "node": "IntegerType"
+                            },
                             "name": "j",
                             "parts": []
                           }
@@ -629,6 +701,9 @@
                         "node": "VariableReference",
                         "token": "<s|IDENT tests/rule_110/test.easy:28:11>",
                         "scope": "PROGRAM:Rule110.PROCEDURE:step.FOR:$2",
+                        "type": {
+                          "node": "IntegerType"
+                        },
                         "name": "s",
                         "parts": []
                       }
@@ -653,6 +728,9 @@
                           "node": "VariableReference",
                           "token": "<left|IDENT tests/rule_110/test.easy:28:16>",
                           "scope": "PROGRAM:Rule110.PROCEDURE:step.FOR:$2",
+                          "type": {
+                            "node": "IntegerType"
+                          },
                           "name": "left",
                           "parts": []
                         },
@@ -660,6 +738,9 @@
                           "node": "VariableReference",
                           "token": "<c|IDENT tests/rule_110/test.easy:28:23>",
                           "scope": "PROGRAM:Rule110.PROCEDURE:step.FOR:$2",
+                          "type": {
+                            "node": "IntegerType"
+                          },
                           "name": "c",
                           "parts": []
                         },
@@ -674,6 +755,9 @@
                         "node": "VariableReference",
                         "token": "<right|IDENT tests/rule_110/test.easy:28:27>",
                         "scope": "PROGRAM:Rule110.PROCEDURE:step.FOR:$2",
+                        "type": {
+                          "node": "IntegerType"
+                        },
                         "name": "right",
                         "parts": []
                       },
@@ -712,6 +796,9 @@
                             "node": "VariableReference",
                             "token": "<s|IDENT tests/rule_110/test.easy:31:15>",
                             "scope": "PROGRAM:Rule110.PROCEDURE:step.FOR:$2",
+                            "type": {
+                              "node": "IntegerType"
+                            },
                             "name": "s",
                             "parts": []
                           },
@@ -748,6 +835,9 @@
                                   "node": "VariableReference",
                                   "token": "<next|IDENT tests/rule_110/test.easy:31:27>",
                                   "scope": "PROGRAM:Rule110.PROCEDURE:step.FOR:$2.SELECT:$5",
+                                  "type": {
+                                    "node": "IntegerType"
+                                  },
                                   "name": "next",
                                   "parts": [
                                     {
@@ -757,6 +847,9 @@
                                         "node": "VariableReference",
                                         "token": "<i|IDENT tests/rule_110/test.easy:31:32>",
                                         "scope": "PROGRAM:Rule110.PROCEDURE:step.FOR:$2.SELECT:$5",
+                                        "type": {
+                                          "node": "IntegerType"
+                                        },
                                         "name": "i",
                                         "parts": []
                                       }
@@ -798,6 +891,9 @@
                               "node": "VariableReference",
                               "token": "<s|IDENT tests/rule_110/test.easy:32:15>",
                               "scope": "PROGRAM:Rule110.PROCEDURE:step.FOR:$2",
+                              "type": {
+                                "node": "IntegerType"
+                              },
                               "name": "s",
                               "parts": []
                             },
@@ -829,6 +925,9 @@
                               "node": "VariableReference",
                               "token": "<s|IDENT tests/rule_110/test.easy:32:23>",
                               "scope": "PROGRAM:Rule110.PROCEDURE:step.FOR:$2",
+                              "type": {
+                                "node": "IntegerType"
+                              },
                               "name": "s",
                               "parts": []
                             },
@@ -872,6 +971,9 @@
                                   "node": "VariableReference",
                                   "token": "<next|IDENT tests/rule_110/test.easy:32:35>",
                                   "scope": "PROGRAM:Rule110.PROCEDURE:step.FOR:$2.SELECT:$6",
+                                  "type": {
+                                    "node": "IntegerType"
+                                  },
                                   "name": "next",
                                   "parts": [
                                     {
@@ -881,6 +983,9 @@
                                         "node": "VariableReference",
                                         "token": "<i|IDENT tests/rule_110/test.easy:32:40>",
                                         "scope": "PROGRAM:Rule110.PROCEDURE:step.FOR:$2.SELECT:$6",
+                                        "type": {
+                                          "node": "IntegerType"
+                                        },
                                         "name": "i",
                                         "parts": []
                                       }
@@ -927,6 +1032,9 @@
                                   "node": "VariableReference",
                                   "token": "<c|IDENT tests/rule_110/test.easy:33:23>",
                                   "scope": "PROGRAM:Rule110.PROCEDURE:step.FOR:$2.SELECT:$7",
+                                  "type": {
+                                    "node": "IntegerType"
+                                  },
                                   "name": "c",
                                   "parts": []
                                 },
@@ -963,6 +1071,9 @@
                                         "node": "VariableReference",
                                         "token": "<next|IDENT tests/rule_110/test.easy:33:38>",
                                         "scope": "PROGRAM:Rule110.PROCEDURE:step.FOR:$2.SELECT:$7.IF:$8",
+                                        "type": {
+                                          "node": "IntegerType"
+                                        },
                                         "name": "next",
                                         "parts": [
                                           {
@@ -972,6 +1083,9 @@
                                               "node": "VariableReference",
                                               "token": "<i|IDENT tests/rule_110/test.easy:33:43>",
                                               "scope": "PROGRAM:Rule110.PROCEDURE:step.FOR:$2.SELECT:$7.IF:$8",
+                                              "type": {
+                                                "node": "IntegerType"
+                                              },
                                               "name": "i",
                                               "parts": []
                                             }
@@ -1008,6 +1122,9 @@
                                         "node": "VariableReference",
                                         "token": "<next|IDENT tests/rule_110/test.easy:33:61>",
                                         "scope": "PROGRAM:Rule110.PROCEDURE:step.FOR:$2.SELECT:$7.IF:$9",
+                                        "type": {
+                                          "node": "IntegerType"
+                                        },
                                         "name": "next",
                                         "parts": [
                                           {
@@ -1017,6 +1134,9 @@
                                               "node": "VariableReference",
                                               "token": "<i|IDENT tests/rule_110/test.easy:33:66>",
                                               "scope": "PROGRAM:Rule110.PROCEDURE:step.FOR:$2.SELECT:$7.IF:$9",
+                                              "type": {
+                                                "node": "IntegerType"
+                                              },
                                               "name": "i",
                                               "parts": []
                                             }
@@ -1028,6 +1148,9 @@
                                       "node": "VariableReference",
                                       "token": "<right|IDENT tests/rule_110/test.easy:33:72>",
                                       "scope": "PROGRAM:Rule110.PROCEDURE:step.FOR:$2.SELECT:$7.IF:$9",
+                                      "type": {
+                                        "node": "IntegerType"
+                                      },
                                       "name": "right",
                                       "parts": []
                                     }
@@ -1047,6 +1170,9 @@
                 "node": "VariableReference",
                 "token": "<N|IDENT tests/rule_110/test.easy:13:19>",
                 "scope": "PROGRAM:Rule110.PROCEDURE:step",
+                "type": {
+                  "node": "IntegerType"
+                },
                 "name": "N",
                 "parts": []
               },
@@ -1061,6 +1187,35 @@
                   "node": "VariableReference",
                   "token": "<row|IDENT tests/rule_110/test.easy:37:9>",
                   "scope": "PROGRAM:Rule110.PROCEDURE:step",
+                  "type": {
+                    "node": "AliasType",
+                    "reference_name": "Row",
+                    "reference_type": {
+                      "node": "ArrayType",
+                      "type": {
+                        "node": "IntegerType"
+                      },
+                      "hi": {
+                        "node": "IntegerLiteral",
+                        "token": "<32|INTEGER tests/rule_110/test.easy:2:24>",
+                        "scope": "PROGRAM:Rule110",
+                        "type": {
+                          "node": "IntegerType"
+                        },
+                        "value": 32
+                      },
+                      "lo": {
+                        "node": "IntegerLiteral",
+                        "token": "<1|INTEGER tests/rule_110/test.easy:2:22>",
+                        "scope": "PROGRAM:Rule110",
+                        "type": {
+                          "node": "IntegerType"
+                        },
+                        "value": 1
+                      },
+                      "dynamic": false
+                    }
+                  },
                   "name": "row",
                   "parts": []
                 }
@@ -1069,6 +1224,35 @@
                 "node": "VariableReference",
                 "token": "<next|IDENT tests/rule_110/test.easy:37:16>",
                 "scope": "PROGRAM:Rule110.PROCEDURE:step",
+                "type": {
+                  "node": "AliasType",
+                  "reference_name": "Row",
+                  "reference_type": {
+                    "node": "ArrayType",
+                    "type": {
+                      "node": "IntegerType"
+                    },
+                    "hi": {
+                      "node": "IntegerLiteral",
+                      "token": "<32|INTEGER tests/rule_110/test.easy:2:24>",
+                      "scope": "PROGRAM:Rule110",
+                      "type": {
+                        "node": "IntegerType"
+                      },
+                      "value": 32
+                    },
+                    "lo": {
+                      "node": "IntegerLiteral",
+                      "token": "<1|INTEGER tests/rule_110/test.easy:2:22>",
+                      "scope": "PROGRAM:Rule110",
+                      "type": {
+                        "node": "IntegerType"
+                      },
+                      "value": 1
+                    },
+                    "dynamic": false
+                  }
+                },
                 "name": "next",
                 "parts": []
               }
@@ -1110,6 +1294,9 @@
                 "node": "VariableReference",
                 "token": "<i|IDENT tests/rule_110/test.easy:42:9>",
                 "scope": "PROGRAM:Rule110.PROCEDURE:print",
+                "type": {
+                  "node": "IntegerType"
+                },
                 "name": "i",
                 "parts": []
               },
@@ -1146,6 +1333,9 @@
                         "node": "VariableReference",
                         "token": "<row|IDENT tests/rule_110/test.easy:43:10>",
                         "scope": "PROGRAM:Rule110.PROCEDURE:print.FOR:$10",
+                        "type": {
+                          "node": "IntegerType"
+                        },
                         "name": "row",
                         "parts": [
                           {
@@ -1155,6 +1345,9 @@
                               "node": "VariableReference",
                               "token": "<i|IDENT tests/rule_110/test.easy:43:14>",
                               "scope": "PROGRAM:Rule110.PROCEDURE:print.FOR:$10",
+                              "type": {
+                                "node": "IntegerType"
+                              },
                               "name": "i",
                               "parts": []
                             }
@@ -1194,6 +1387,16 @@
                               "node": "VariableReference",
                               "token": "<X|STRING tests/rule_110/test.easy:43:33>",
                               "scope": "",
+                              "type": {
+                                "node": "Variable",
+                                "token": "<X|STRING tests/rule_110/test.easy:43:33>",
+                                "name": "$1",
+                                "type": {
+                                  "node": "StringType",
+                                  "initial": ""
+                                },
+                                "zeroValue": "X"
+                              },
                               "name": "$1",
                               "parts": []
                             }
@@ -1218,6 +1421,16 @@
                               "node": "VariableReference",
                               "token": "<.|STRING tests/rule_110/test.easy:43:50>",
                               "scope": "",
+                              "type": {
+                                "node": "Variable",
+                                "token": "<.|STRING tests/rule_110/test.easy:43:50>",
+                                "name": "$2",
+                                "type": {
+                                  "node": "StringType",
+                                  "initial": ""
+                                },
+                                "zeroValue": "."
+                              },
                               "name": "$2",
                               "parts": []
                             }
@@ -1233,6 +1446,9 @@
                 "node": "VariableReference",
                 "token": "<N|IDENT tests/rule_110/test.easy:42:19>",
                 "scope": "PROGRAM:Rule110.PROCEDURE:print",
+                "type": {
+                  "node": "IntegerType"
+                },
                 "name": "N",
                 "parts": []
               },
@@ -1247,6 +1463,16 @@
                   "node": "VariableReference",
                   "token": "<  |STRING tests/rule_110/test.easy:45:12>",
                   "scope": "",
+                  "type": {
+                    "node": "Variable",
+                    "token": "<  |STRING tests/rule_110/test.easy:45:12>",
+                    "name": "$3",
+                    "type": {
+                      "node": "StringType",
+                      "initial": ""
+                    },
+                    "zeroValue": "  "
+                  },
                   "name": "$3",
                   "parts": []
                 }
@@ -1266,6 +1492,9 @@
             "node": "VariableReference",
             "token": "<N|IDENT tests/rule_110/test.easy:48:7>",
             "scope": "PROGRAM:Rule110",
+            "type": {
+              "node": "IntegerType"
+            },
             "name": "N",
             "parts": []
           }
@@ -1289,6 +1518,9 @@
             "node": "VariableReference",
             "token": "<row|IDENT tests/rule_110/test.easy:50:7>",
             "scope": "PROGRAM:Rule110",
+            "type": {
+              "node": "IntegerType"
+            },
             "name": "row",
             "parts": [
               {
@@ -1315,6 +1547,9 @@
                         "node": "VariableReference",
                         "token": "<N|IDENT tests/rule_110/test.easy:50:15>",
                         "scope": "PROGRAM:Rule110",
+                        "type": {
+                          "node": "IntegerType"
+                        },
                         "name": "N",
                         "parts": []
                       },
@@ -1365,6 +1600,9 @@
           "node": "VariableReference",
           "token": "<n|IDENT tests/rule_110/test.easy:54:7>",
           "scope": "PROGRAM:Rule110",
+          "type": {
+            "node": "IntegerType"
+          },
           "name": "n",
           "parts": []
         },

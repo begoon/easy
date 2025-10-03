@@ -33,6 +33,10 @@
             "node": "VariableReference",
             "token": "<s|IDENT tests/quine/test.easy:1:34>",
             "scope": "PROGRAM:Q",
+            "type": {
+              "node": "StringType",
+              "initial": ""
+            },
             "name": "s",
             "parts": []
           }
@@ -41,6 +45,16 @@
           "node": "VariableReference",
           "token": "<PROGRAM Q: DECLARE s STRING; SET s := %; OUTPUT SUBSTR(s, 0, 38) || CHARACTER(34) || s || CHARACTER(34) || SUBSTR(s, 39, LENGTH(s)-39); END PROGRAM Q;|STRING tests/quine/test.easy:1:39>",
           "scope": "",
+          "type": {
+            "node": "Variable",
+            "token": "<PROGRAM Q: DECLARE s STRING; SET s := %; OUTPUT SUBSTR(s, 0, 38) || CHARACTER(34) || s || CHARACTER(34) || SUBSTR(s, 39, LENGTH(s)-39); END PROGRAM Q;|STRING tests/quine/test.easy:1:39>",
+            "name": "$0",
+            "type": {
+              "node": "StringType",
+              "initial": ""
+            },
+            "zeroValue": "PROGRAM Q: DECLARE s STRING; SET s := %; OUTPUT SUBSTR(s, 0, 38) || CHARACTER(34) || s || CHARACTER(34) || SUBSTR(s, 39, LENGTH(s)-39); END PROGRAM Q;"
+          },
           "name": "$0",
           "parts": []
         }
@@ -73,6 +87,10 @@
                     "node": "VariableReference",
                     "token": "<s|IDENT tests/quine/test.easy:1:207>",
                     "scope": "PROGRAM:Q",
+                    "type": {
+                      "node": "StringType",
+                      "initial": ""
+                    },
                     "name": "s",
                     "parts": []
                   },
@@ -121,6 +139,10 @@
                 "node": "VariableReference",
                 "token": "<s|IDENT tests/quine/test.easy:1:237>",
                 "scope": "PROGRAM:Q",
+                "type": {
+                  "node": "StringType",
+                  "initial": ""
+                },
                 "name": "s",
                 "parts": []
               },
@@ -159,6 +181,10 @@
                     "node": "VariableReference",
                     "token": "<s|IDENT tests/quine/test.easy:1:266>",
                     "scope": "PROGRAM:Q",
+                    "type": {
+                      "node": "StringType",
+                      "initial": ""
+                    },
                     "name": "s",
                     "parts": []
                   },
@@ -192,6 +218,10 @@
                           "node": "VariableReference",
                           "token": "<s|IDENT tests/quine/test.easy:1:280>",
                           "scope": "PROGRAM:Q",
+                          "type": {
+                            "node": "StringType",
+                            "initial": ""
+                          },
                           "name": "s",
                           "parts": []
                         }

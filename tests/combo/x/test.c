@@ -43,8 +43,8 @@ STR $0 = { .data = "**", .sz = 2, .immutable = 1 };
 STR $1 = { .data = "123", .sz = 3, .immutable = 1 };
 STR $2 = { .data = "456", .sz = 3, .immutable = 1 };
 STR $3 = { .data = "abc", .sz = 3, .immutable = 1 };
-STR $4 = { .data = "XYZ", .sz = 3, .immutable = 1 };
 STR $F = { .data = "tests/combo/test.easy", .sz = 21, .immutable = 1 };
+STR $5 = { .data = "XYZ", .sz = 3, .immutable = 1 };
 STR F1(int x, STR s)
 {
     const int $r6 = LENGTH(s);
@@ -69,7 +69,7 @@ int main_program()
     $index(1, 1, 8, &$F, 48, 14);
     $index(1, 1, 256, &$F, 48, 17);
     $output("iA", s.m.data[(1) - (1)].data[(1) - (1)], s.a.s);
-    const STR $r2 = $concat("AA", s.a.s, $4);
+    const STR $r2 = $concat("AA", s.a.s, $5);
     s.a.s = $r2;
     s.m = m1;
     i = 0;

@@ -11,12 +11,12 @@ y      PROGRAM:Life.FUNCTION:neighbours|y                      IntegerType  <y|I
 n      PROGRAM:Life.FUNCTION:neighbours|n                      IntegerType  <n|IDENT|tests/life/test.easy:15:13>                  
 xx     PROGRAM:Life.FUNCTION:neighbours|xx                     IntegerType  <'('|SYMBOL|tests/life/test.easy:16:13>               
 yy     PROGRAM:Life.FUNCTION:neighbours|yy                     IntegerType  <'('|SYMBOL|tests/life/test.easy:16:13>               
+$F     |$F                                                     StringType   <x|IDENT|tests/life/test.easy:89:20>                  
 x      PROGRAM:Life.PROCEDURE:print|x                          IntegerType  <'('|SYMBOL|tests/life/test.easy:33:13>               
 y      PROGRAM:Life.PROCEDURE:print|y                          IntegerType  <'('|SYMBOL|tests/life/test.easy:33:13>               
-$0     |$0                                                     StringType   <'** [ EASY LIFE ]'|STRING|tests/life/test.easy:35:12>
-$1     |$1                                                     StringType   <' '|STRING|tests/life/test.easy:35:32>               
-$2     |$2                                                     StringType   <'*'|STRING|tests/life/test.easy:36:38>               
-$F     |$F                                                     StringType   <x|IDENT|tests/life/test.easy:40:21>                  
+$1     |$1                                                     StringType   <'** [ EASY LIFE ]'|STRING|tests/life/test.easy:35:12>
+$2     |$2                                                     StringType   <' '|STRING|tests/life/test.easy:35:32>               
+$3     |$3                                                     StringType   <'*'|STRING|tests/life/test.easy:36:38>               
 $4     |$4                                                     StringType   <'x'|STRING|tests/life/test.easy:41:18>               
 x      PROGRAM:Life.PROCEDURE:glider|x                         IntegerType  <x|IDENT|tests/life/test.easy:51:20>                  
 y      PROGRAM:Life.PROCEDURE:glider|y                         IntegerType  <y|IDENT|tests/life/test.easy:51:31>                  

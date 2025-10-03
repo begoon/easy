@@ -5,11 +5,11 @@ typedef int BOOLEAN;
 typedef STR STRING;
 int topnum = 0;
 STR $0 = { .data = "a < 0 in FUNCTION integersqrt.", .sz = 30, .immutable = 1 };
-STR $1 = { .data = "Prime[", .sz = 6, .immutable = 1 };
-STR $2 = { .data = "] = ", .sz = 4, .immutable = 1 };
-STR $3 = { .data = "Input value ", .sz = 12, .immutable = 1 };
-STR $4 = { .data = " non-positive.", .sz = 14, .immutable = 1 };
 STR $F = { .data = "tests/sieve/test.easy", .sz = 21, .immutable = 1 };
+STR $2 = { .data = "Prime[", .sz = 6, .immutable = 1 };
+STR $3 = { .data = "] = ", .sz = 4, .immutable = 1 };
+STR $4 = { .data = "Input value ", .sz = 12, .immutable = 1 };
+STR $5 = { .data = " non-positive.", .sz = 14, .immutable = 1 };
 double abs(double x)
 {
     const double $r9 = (x < 0.0);
@@ -133,7 +133,7 @@ int main_program()
             {
                 const int $r6 = (count + 1);
                 count = $r6;
-                const STR $r7 = $concat("AiAi", $1, count, $2, i);
+                const STR $r7 = $concat("AiAi", $2, count, $3, i);
                 $output("A", $r7);
             }
             i += 1;
@@ -141,7 +141,7 @@ int main_program()
     }
     else
     {
-        const STR $r8 = $concat("AiA", $3, topnum, $4);
+        const STR $r8 = $concat("AiA", $4, topnum, $5);
         $output("A", $r8);
     }
     exit(0);

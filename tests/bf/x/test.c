@@ -8,11 +8,11 @@ typedef struct
     int data[299 - 0 + 1];
 } Tape;
 STR program = {0};
-STR $0 = { .data = "", .sz = 0, .immutable = 1 };
-STR $1 = { .data = ">", .sz = 1, .immutable = 1 };
-STR $2 = { .data = "<", .sz = 1, .immutable = 1 };
-STR $3 = { .data = "+", .sz = 1, .immutable = 1 };
 STR $F = { .data = "tests/bf/test.easy", .sz = 18, .immutable = 1 };
+STR $1 = { .data = "", .sz = 0, .immutable = 1 };
+STR $2 = { .data = ">", .sz = 1, .immutable = 1 };
+STR $3 = { .data = "<", .sz = 1, .immutable = 1 };
+STR $4 = { .data = "+", .sz = 1, .immutable = 1 };
 STR $5 = { .data = "-", .sz = 1, .immutable = 1 };
 STR $6 = { .data = ".", .sz = 1, .immutable = 1 };
 STR $7 = { .data = "[", .sz = 1, .immutable = 1 };
@@ -29,7 +29,7 @@ STR bf(STR program)
     $index(0, 0, 299, &$F, 16, 14);
     tape.data[(0) - (0)] = 0;
     ptr = 0;
-    out = $0;
+    out = $1;
     pc = 0;
     while (1)
     {
@@ -38,19 +38,19 @@ STR bf(STR program)
         if (!(pc <= $r2)) break;
         const STR $r4 = SUBSTR(program, pc, 1);
         ch = $r4;
-        const int $r5 = strcmp(ch.data, $1.data) == 0;
+        const int $r5 = strcmp(ch.data, $2.data) == 0;
         if ($r5)
         {
             const int $r6 = (ptr + 1);
             ptr = $r6;
         }
-        const int $r7 = strcmp(ch.data, $2.data) == 0;
+        const int $r7 = strcmp(ch.data, $3.data) == 0;
         if ($r7)
         {
             const int $r8 = (ptr - 1);
             ptr = $r8;
         }
-        const int $r9 = strcmp(ch.data, $3.data) == 0;
+        const int $r9 = strcmp(ch.data, $4.data) == 0;
         if ($r9)
         {
             $index(ptr, 0, 299, &$F, 26, 33);
