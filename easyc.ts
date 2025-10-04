@@ -515,6 +515,16 @@ class PROCEDURE extends Node {
         this.segment = seg;
     }
     c(): string {
+        const procedure = this.context().procedures[this.name];
+        for (let i = 0; i < this.arguments.length; i++) {
+            if (this.arguments[i].type.constructor.name !== procedure.arguments[i].type.constructor.name) {
+                throw new GenerateError(
+                    `type mismatch in PROCEDURE call: ` +
+                        `${this.arguments[i].type.constructor.name} !== ${procedure.arguments[i].type.constructor.name} ` +
+                        `at ${this.token}`
+                );
+            }
+        }
         const args = this.arguments.map((v) => v.c()).join(", ");
         const v = [`void ${this.name}(${args})`, "{"];
         this.segment.context().enter_frame();
@@ -539,6 +549,17 @@ class FUNCTION extends Node {
     }
     c(): string {
         const func = this.context().functions[this.name] as BuiltinFunction | FUNCTION;
+        if (func instanceof FUNCTION) {
+            for (let i = 0; i < this.arguments.length; i++) {
+                if (this.arguments[i].type.constructor.name !== func.arguments[i].type.constructor.name) {
+                    throw new GenerateError(
+                        `type mismatch in FUNCTION call: ` +
+                            `${this.arguments[i].type.constructor.name} !== ${func.arguments[i].type.constructor.name} ` +
+                            `at ${this.token}`
+                    );
+                }
+            }
+        }
         const type = (func instanceof BuiltinFunction ? func.type : func.type).c();
         const args = this.arguments.map((a) => a.c()).join(", ");
         const v = [`${type} ${this.name}(${args})`, "{"];
@@ -860,8 +881,8 @@ class OUTPUT extends Statement {
     c(): string {
         const code: string[] = [];
         const fmt: string[] = [];
-        const params = this.arguments.map((a) => expression_stringer(a, fmt, "OUTPUT", code)).join(", ");
-        code.push(`$output("${fmt.join("")}", ${params});`);
+        const parameters = this.arguments.map((a) => expression_stringer(a, fmt, "OUTPUT", code)).join(", ");
+        code.push(`$output("${fmt.join("")}", ${parameters});`);
         return emit(code);
     }
 }
