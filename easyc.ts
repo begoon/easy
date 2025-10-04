@@ -690,7 +690,13 @@ class SET extends Statement {
         const code: string[] = [];
         for (const target of this.target) {
             const variable = find_existing_variable(target);
-            const { reference } = expand_variable_reference(variable, target, code);
+            const { reference, type } = expand_variable_reference(variable, target, code);
+
+            if (type.constructor.name !== this.expression.type.constructor.name) {
+                throw new GenerateError(
+                    `type mismatch in SET: ${type.constructor.name} !== ${this.expression.type.constructor.name} at ${this.token}`
+                );
+            }
             const value = this.expression.v(code);
             code.push(`${reference} = ${value};`);
         }

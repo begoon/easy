@@ -19,12 +19,12 @@ PROGRAM Array1000:
 
     SET c[n] := 3.14;
     OUTPUT c[n];
-    SET c[n] := 42;
+    SET c[n] := 42.0;
     OUTPUT c[n];
 
-    SET d[n][1] := 0;
+    SET d[n][1] := 0.0;
     OUTPUT d[n][1];
-    SET d[n][1] := 84;
+    SET d[n][1] := 84.0;
     OUTPUT d[n][1];
   END;
 END PROGRAM Array1000;

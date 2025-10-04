@@ -18,7 +18,7 @@ PROGRAM Typing:
   SET i := 100 + FIX(R()) * 2 / 7;
   SET r := R() + FLOAT(200);
   SET j := FLOOR(r) + i;
-  SET i := r + 2.1;
+  SET i := FIX(r + 2.1);
   SET b := (i < j) & B() | NOT (i >= j);
 
   OUTPUT i, " - ", j, " - ", r, " - ", b;

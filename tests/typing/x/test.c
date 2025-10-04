@@ -54,14 +54,15 @@ int main_program()
     const int $r17 = FLOOR(r);
     const int $r16 = ($r17 + i);
     j = $r16;
-    const double $r18 = (r + 2.1);
+    const double $r19 = (r + 2.1);
+    const int $r18 = FIX($r19);
     i = $r18;
-    const int $r21 = (i < j);
-    const int $r22 = B();
-    const int $r20 = ($r21 && $r22);
-    const int $r24 = (i >= j);
-    const int $r23 = (!$r24);
-    const int $r19 = ($r20 || $r23);
-    b = $r19;
+    const int $r22 = (i < j);
+    const int $r23 = B();
+    const int $r21 = ($r22 && $r23);
+    const int $r25 = (i >= j);
+    const int $r24 = (!$r25);
+    const int $r20 = ($r21 || $r24);
+    b = $r20;
     $output("iAiArAb", i, $1, j, $1, r, $1, b);
 }

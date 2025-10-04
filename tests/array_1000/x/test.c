@@ -54,13 +54,13 @@ int main_program()
         $index(n, n, n, &$F, 21, 14);
         $output("r", c.data[(n) - (n)]);
         $index(n, n, n, &$F, 22, 11);
-        c.data[(n) - (n)] = 42;
+        c.data[(n) - (n)] = 42.0;
         $index(n, n, n, &$F, 23, 14);
         $index(n, n, n, &$F, 23, 14);
         $output("r", c.data[(n) - (n)]);
         $index(n, n, n, &$F, 25, 11);
         $index(1, 0, 1, &$F, 25, 14);
-        d.data[(n) - (n)].data[(1) - (0)] = 0;
+        d.data[(n) - (n)].data[(1) - (0)] = 0.0;
         $index(n, n, n, &$F, 26, 14);
         $index(1, 0, 1, &$F, 26, 17);
         $index(n, n, n, &$F, 26, 14);
@@ -68,7 +68,7 @@ int main_program()
         $output("r", d.data[(n) - (n)].data[(1) - (0)]);
         $index(n, n, n, &$F, 27, 11);
         $index(1, 0, 1, &$F, 27, 14);
-        d.data[(n) - (n)].data[(1) - (0)] = 84;
+        d.data[(n) - (n)].data[(1) - (0)] = 84.0;
         $index(n, n, n, &$F, 28, 14);
         $index(1, 0, 1, &$F, 28, 17);
         $index(n, n, n, &$F, 28, 14);

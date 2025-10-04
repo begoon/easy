@@ -122,8 +122,8 @@ tests/array_1000/test.easy:22:10  SYMBOL   [
 tests/array_1000/test.easy:22:11  IDENT    n        
 tests/array_1000/test.easy:22:12  SYMBOL   ]        
 tests/array_1000/test.easy:22:14  SYMBOL   :=       
-tests/array_1000/test.easy:22:17  INTEGER  42       
-tests/array_1000/test.easy:22:19  SYMBOL   ;        
+tests/array_1000/test.easy:22:17  REAL     42.0     
+tests/array_1000/test.easy:22:21  SYMBOL   ;        
 tests/array_1000/test.easy:23:5   KEYWORD  OUTPUT   
 tests/array_1000/test.easy:23:12  IDENT    c        
 tests/array_1000/test.easy:23:13  SYMBOL   [        
@@ -139,8 +139,8 @@ tests/array_1000/test.easy:25:13  SYMBOL   [
 tests/array_1000/test.easy:25:14  INTEGER  1        
 tests/array_1000/test.easy:25:15  SYMBOL   ]        
 tests/array_1000/test.easy:25:17  SYMBOL   :=       
-tests/array_1000/test.easy:25:20  INTEGER  0        
-tests/array_1000/test.easy:25:21  SYMBOL   ;        
+tests/array_1000/test.easy:25:20  REAL     0.0      
+tests/array_1000/test.easy:25:23  SYMBOL   ;        
 tests/array_1000/test.easy:26:5   KEYWORD  OUTPUT   
 tests/array_1000/test.easy:26:12  IDENT    d        
 tests/array_1000/test.easy:26:13  SYMBOL   [        
@@ -159,8 +159,8 @@ tests/array_1000/test.easy:27:13  SYMBOL   [
 tests/array_1000/test.easy:27:14  INTEGER  1        
 tests/array_1000/test.easy:27:15  SYMBOL   ]        
 tests/array_1000/test.easy:27:17  SYMBOL   :=       
-tests/array_1000/test.easy:27:20  INTEGER  84       
-tests/array_1000/test.easy:27:22  SYMBOL   ;        
+tests/array_1000/test.easy:27:20  REAL     84.0     
+tests/array_1000/test.easy:27:24  SYMBOL   ;        
 tests/array_1000/test.easy:28:5   KEYWORD  OUTPUT   
 tests/array_1000/test.easy:28:12  IDENT    d        
 tests/array_1000/test.easy:28:13  SYMBOL   [        
