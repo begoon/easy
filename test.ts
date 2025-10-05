@@ -217,7 +217,7 @@ async function runTest(test_folder: string) {
 
     const skip_run = exists(expected_c) && Boolean(process.env.SKIP_RUN);
 
-    const cc_flags = ["-Wall", "-Wextra", "-Werror", "-std=c23", "-g", "-fsanitize=address"];
+    const cc_flags = ["-I", ".", "-Wall", "-Wextra", "-Werror", "-std=c23", "-g", "-fsanitize=address"];
 
     const expected_output = x + ".output";
     if (exists(expected_output) && !skip_run) {
@@ -228,7 +228,7 @@ async function runTest(test_folder: string) {
             const exe = test_stem + ".exe";
             removals.push(exe);
 
-            await run(["clang", ...cc_flags, created_c, "-I", ".", "-o", exe]);
+            await run(["clang", ...cc_flags, created_c, "-o", exe]);
 
             const cmd: string[] = [exe, ">" + JSON.stringify(created_output)];
             const input_file = x + ".input";
@@ -243,7 +243,7 @@ async function runTest(test_folder: string) {
         if (exists(expected_c)) {
             const obj = test_stem + ".o";
             removals.push(obj);
-            await run(["clang", ...cc_flags, created_c, "-I", ".", "-c", "-o", obj]);
+            await run(["clang", ...cc_flags, created_c, "-c", "-o", obj]);
         }
     }
 
