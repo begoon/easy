@@ -1,0 +1,218 @@
+PROGRAM MasterMind:
+
+TYPE Universe IS ARRAY[0 : 1295] OF INTEGER;
+
+TYPE Comparison IS STRUCTURE 
+  FIELD in_place IS INTEGER,
+  FIELD by_value IS INTEGER
+END STRUCTURE;
+
+DECLARE (universe, candidates) Universe;
+
+DECLARE candidate_index INTEGER;
+
+DECLARE (in_place, by_value) INTEGER;
+DECLARE tries INTEGER;
+
+FUNCTION create_universe() Universe:
+  DECLARE universe Universe;
+  DECLARE (i, j, k, l) INTEGER;
+  FOR i := 0 TO 5 DO
+    FOR j := 0 TO 5 DO
+      FOR k := 0 TO 5 DO
+        FOR l := 0 TO 5 DO
+          DECLARE (v, offset) INTEGER;
+          SET v := i * 1000 + j * 100 + k * 10 + l + 1111;
+          SET offset := (i * 6 * 6 + j * 6 + k) * 6 + l;
+          SET universe[offset] := v;
+        END FOR;
+      END FOR;
+    END FOR;
+  END FOR;
+  RETURN universe;
+END FUNCTION create_universe;
+
+FUNCTION compare(probe INTEGER, code INTEGER) Comparison:
+  DECLARE (p1, p2, p3, p4) INTEGER;
+  DECLARE (c1, c2, c3, c4) INTEGER;
+
+  DECLARE comparison Comparison;
+
+  SET p1 := probe / 1000 MOD 10;
+  SET p2 := probe / 100 MOD 10;
+  SET p3 := probe / 10 MOD 10;
+  SET p4 := probe MOD 10;
+
+  SET c1 := code / 1000 MOD 10;
+  SET c2 := code / 100 MOD 10;
+  SET c3 := code / 10 MOD 10;
+  SET c4 := code MOD 10;
+
+  SET comparison.in_place := 0;
+  SET comparison.by_value := 0;
+
+  IF p1 = c1 THEN
+    SET comparison.in_place := comparison.in_place + 1;
+    SET c1 := -1;
+  FI;
+
+  IF p2 = c2 THEN
+    SET comparison.in_place := comparison.in_place + 1;
+    SET c2 := -1;
+  FI;
+
+  IF p3 = c3 THEN
+    SET comparison.in_place := comparison.in_place + 1;
+    SET c3 := -1;
+  FI;
+
+  IF p4 = c4 THEN
+    SET comparison.in_place := comparison.in_place + 1;
+    SET c4 := -1;
+  FI;
+
+  IF p1 = c2 THEN
+    SET comparison.by_value := comparison.by_value + 1;
+    SET c2 := -1;
+  ELSE IF p1 = c3 THEN
+    SET comparison.by_value := comparison.by_value + 1;
+    SET c3 := -1;
+  ELSE IF p1 = c4 THEN
+    SET comparison.by_value := comparison.by_value + 1;
+    SET c4 := -1;
+  FI; FI; FI;
+
+  IF p2 = c1 THEN
+    SET comparison.by_value := comparison.by_value + 1;
+    SET c1 := -1;
+  ELSE IF p2 = c3 THEN
+    SET comparison.by_value := comparison.by_value + 1;
+    SET c3 := -1;
+  ELSE IF p2 = c4 THEN
+    SET comparison.by_value := comparison.by_value + 1;
+    SET c4 := -1;
+  FI; FI; FI;
+
+  IF p3 = c1 THEN
+    SET comparison.by_value := comparison.by_value + 1;
+    SET c1 := -1;
+  ELSE IF p3 = c2 THEN
+    SET comparison.by_value := comparison.by_value + 1;
+    SET c2 := -1;
+  ELSE IF p3 = c4 THEN
+    SET comparison.by_value := comparison.by_value + 1;
+    SET c4 := -1;
+  FI; FI; FI;
+
+  IF p4 = c1 THEN
+    SET comparison.by_value := comparison.by_value + 1;
+    SET c1 := -1;
+  ELSE IF p4 = c2 THEN
+    SET comparison.by_value := comparison.by_value + 1;
+    SET c2 := -1;
+  ELSE IF p4 = c3 THEN
+    SET comparison.by_value := comparison.by_value + 1;
+    SET c3 := -1;
+  FI; FI; FI;
+
+  RETURN comparison;
+END FUNCTION compare;
+
+SET universe := create_universe();
+SET candidates := create_universe();
+
+FOR tries := 1 WHILE TRUE DO
+  DECLARE (eliminated_candidates, remaining_candidates) INTEGER;
+
+  DECLARE probe_index INTEGER;
+
+  DECLARE (best_probe, min_rank) INTEGER;
+
+  // knuth's minimax algorithm
+  FOR probe_index := 0 TO 1295 DO
+    DECLARE probe INTEGER;
+    DECLARE probe_in_candidates INTEGER;
+
+    DECLARE buckets ARRAY[0 : 44] OF INTEGER; // max is 4*10 + 4 = 44
+
+    DECLARE rank INTEGER;
+    DECLARE worst_evaluation INTEGER;
+
+    DECLARE i INTEGER;
+
+    SET probe := universe[probe_index];
+    SET probe_in_candidates := 0;
+
+    SET worst_evaluation := -1;
+
+    FOR candidate_index := 0 TO 1295 DO
+      DECLARE candidate INTEGER;
+      SET candidate := candidates[candidate_index];
+
+      IF probe = candidate THEN SET probe_in_candidates := 1; FI;
+
+      IF candidate <> 0 THEN
+        DECLARE cmp Comparison;
+        DECLARE bucket_index INTEGER;
+
+        SET cmp := compare(probe, candidate);
+
+        SET bucket_index := cmp.in_place * 10 + cmp.by_value;
+        SET buckets[bucket_index] := buckets[bucket_index] + 1;
+
+        IF buckets[bucket_index] > worst_evaluation THEN SET worst_evaluation := buckets[bucket_index]; FI;
+      FI;
+    END FOR;
+
+    SET rank := probe /* 1111-6666 */+ (1-probe_in_candidates) * 10000 + worst_evaluation * 100000;
+    IF min_rank = 0 | rank < min_rank THEN
+      SET min_rank := rank;
+      SET best_probe := probe;
+    FI; 
+    
+  END FOR;
+
+  OUTPUT "  ";
+  OUTPUT "maybe ", best_probe, " ? ";
+  OUTPUT "#", tries, ", enter feedback, <in-place> and <by-value>: (e.g. '1 2' for 1 in place and 2 by value):", " ";
+  INPUT in_place, by_value;
+
+  IF in_place = 4 THEN
+    OUTPUT "  ";
+    OUTPUT "  ";
+    OUTPUT "guesses in ", tries, " tries";
+    EXIT;
+  FI;
+
+  SET eliminated_candidates := 0;
+  SET remaining_candidates := 0;
+
+  OUTPUT "  ";
+
+  // eliminate candidates that do not match the feedback
+  FOR candidate_index := 0 TO 1295 DO
+    DECLARE candidate INTEGER;
+    DECLARE comparison Comparison;
+
+    SET candidate := candidates[candidate_index];
+    IF candidate <> 0 THEN
+      SET comparison := compare(best_probe, candidate);
+      IF comparison.in_place <> in_place | comparison.by_value <> by_value THEN
+        SET candidates[candidate_index] := 0;
+        SET eliminated_candidates := eliminated_candidates + 1;
+      ELSE
+        SET remaining_candidates := remaining_candidates + 1;
+        OUTPUT candidate, " ";
+      FI;
+    FI;
+  END FOR;
+  OUTPUT "  ";
+  OUTPUT eliminated_candidates, " candidates eliminated, ", remaining_candidates, " remaining.";
+
+  IF remaining_candidates = 0 THEN
+    OUTPUT "no candidates remaining, it is impossible!";
+    EXIT;
+  FI;
+END FOR;
+
+END PROGRAM MasterMind;
