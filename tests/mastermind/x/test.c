@@ -28,7 +28,7 @@ STR $6 = { .data = " ", .sz = 1, .immutable = 1 };
 STR $7 = { .data = "guesses in ", .sz = 11, .immutable = 1 };
 STR $8 = { .data = " tries", .sz = 6, .immutable = 1 };
 STR $9 = { .data = " candidates eliminated, ", .sz = 24, .immutable = 1 };
-STR $10 = { .data = " remaining.", .sz = 11, .immutable = 1 };
+STR $10 = { .data = " remaining", .sz = 10, .immutable = 1 };
 STR $11 = { .data = "no candidates remaining, it is impossible!", .sz = 42, .immutable = 1 };
 Universe create_universe()
 {
@@ -299,8 +299,7 @@ int main_program()
             } buckets = {0};
             int rank = 0;
             int worst_evaluation = 0;
-            int i = 0;
-            $index(probe_index, 0, 1295, &$F, 143, 27);
+            $index(probe_index, 0, 1295, &$F, 141, 27);
             probe = universe.data[(probe_index) - (0)];
             probe_in_candidates = 0;
             const int $r3 = (-1);
@@ -310,7 +309,7 @@ int main_program()
             {
                 if (!(candidate_index <= 1295)) break;
                 int candidate = 0;
-                $index(candidate_index, 0, 1295, &$F, 150, 35);
+                $index(candidate_index, 0, 1295, &$F, 148, 35);
                 candidate = candidates.data[(candidate_index) - (0)];
                 const int $r4 = (probe == candidate);
                 if ($r4)
@@ -327,15 +326,15 @@ int main_program()
                     const int $r8 = (cmp.in_place * 10);
                     const int $r7 = ($r8 + cmp.by_value);
                     bucket_index = $r7;
-                    $index(bucket_index, 0, 44, &$F, 161, 21);
-                    $index(bucket_index, 0, 44, &$F, 161, 46);
+                    $index(bucket_index, 0, 44, &$F, 159, 21);
+                    $index(bucket_index, 0, 44, &$F, 159, 46);
                     const int $r9 = (buckets.data[(bucket_index) - (0)] + 1);
                     buckets.data[(bucket_index) - (0)] = $r9;
-                    $index(bucket_index, 0, 44, &$F, 163, 20);
+                    $index(bucket_index, 0, 44, &$F, 161, 20);
                     const int $r10 = (buckets.data[(bucket_index) - (0)] > worst_evaluation);
                     if ($r10)
                     {
-                        $index(bucket_index, 0, 44, &$F, 163, 90);
+                        $index(bucket_index, 0, 44, &$F, 161, 90);
                         worst_evaluation = buckets.data[(bucket_index) - (0)];
                     }
                 }
@@ -379,7 +378,7 @@ int main_program()
             if (!(candidate_index <= 1295)) break;
             int candidate = 0;
             Comparison comparison = {0};
-            $index(candidate_index, 0, 1295, &$F, 197, 33);
+            $index(candidate_index, 0, 1295, &$F, 195, 33);
             candidate = candidates.data[(candidate_index) - (0)];
             const int $r20 = (candidate != 0);
             if ($r20)
@@ -391,7 +390,7 @@ int main_program()
                 const int $r22 = ($r23 || $r24);
                 if ($r22)
                 {
-                    $index(candidate_index, 0, 1295, &$F, 201, 24);
+                    $index(candidate_index, 0, 1295, &$F, 199, 24);
                     candidates.data[(candidate_index) - (0)] = 0;
                     const int $r25 = (eliminated_candidates + 1);
                     eliminated_candidates = $r25;

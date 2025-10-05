@@ -138,8 +138,6 @@ FOR tries := 1 WHILE TRUE DO
     DECLARE rank INTEGER;
     DECLARE worst_evaluation INTEGER;
 
-    DECLARE i INTEGER;
-
     SET probe := universe[probe_index];
     SET probe_in_candidates := 0;
 
@@ -207,7 +205,7 @@ FOR tries := 1 WHILE TRUE DO
     FI;
   END FOR;
   OUTPUT "  ";
-  OUTPUT eliminated_candidates, " candidates eliminated, ", remaining_candidates, " remaining.";
+  OUTPUT eliminated_candidates, " candidates eliminated, ", remaining_candidates, " remaining";
 
   IF remaining_candidates = 0 THEN
     OUTPUT "no candidates remaining, it is impossible!";
