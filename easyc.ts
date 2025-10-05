@@ -1358,7 +1358,6 @@ function enlist_type(name: string, type: Type, context: Context) {
 function enlist_variable(variable: Variable, scope: string) {
     const scopedName = scope + "|" + variable.name;
     variable.token.context.variables[scopedName] = variable;
-    console.log(`enlisted variable: ${scopedName} of type ${variable.type.constructor.name}`);
 }
 
 class Parser {
@@ -1690,7 +1689,6 @@ class Parser {
         this.eat("DO");
 
         this.enter_scope(token.value + ":" + this.context.S());
-        console.log(`!!!!!!!!!! entering scope FOR: ${this.scope()}, variable: ${variable.name}`);
         const segment = this.segment();
         this.leave_scope();
 
