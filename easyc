@@ -1,0 +1,3 @@
+#! /usr/bin/env -S node
+import { run } from "./easyc.ts";
+run(process.argv);

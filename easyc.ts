@@ -2,6 +2,10 @@ import * as fs from "node:fs";
 import * as path from "node:path";
 import process from "node:process";
 
+import child_process from "node:child_process";
+
+const { execFileSync } = child_process;
+
 function indent(str: string, n: number): string {
     return str
         .split(/\r?\n/)
@@ -438,13 +442,6 @@ class DECLARE extends Node {
         super(token, scope);
         this.names = names;
         this.type = type;
-    }
-    c() {
-        function zeroValue(n: string, type: Type): string | undefined {
-            const autofree = type instanceof ArrayType && type.dynamic ? "AUTOFREE " : "";
-            return `${type.c()} ${autofree}${n} = ${type.zero([])};`;
-        }
-        return this.names.map((n) => zeroValue(n, this.type)).join("\n");
     }
     v(code: string[]): string {
         function zeroValue(n: string, type: Type): string | undefined {
@@ -2090,16 +2087,26 @@ class Compiler {
     }
 }
 
-function run(argv: string[]) {
+export function run(argv: string[]) {
     if (argv.length < 3) {
         const exe = path.basename(argv[1] || "easyc.ts");
-        console.log(`usage: ${exe} <input.easy> [-c <output.c>] [-t] [-a] [-e]`);
+        console.log(`usage: ${exe} [run] <input.easy> [-c <output.c>] [-t] [-a] [-e]`);
         console.log("  -c <output.c>  - specify output C file (default: input.c)");
         console.log("  -t             - generate tokens file (default: input.tokens)");
         console.log("  -a             - generate JSON AST file (default: input.json)");
         console.log("  -e             - generate PEG JSON AST file (default: input.peg.json)");
         console.log("  -s <output.s>  - generate symbols file (default: input.s)");
         process.exit(1);
+    }
+
+    const run_mode = argv[2] === "run";
+    if (run_mode) {
+        if (argv.length < 4) {
+            const exe = path.basename(argv[1] || "easyc.ts");
+            console.log(`usage: ${exe} run <input.easy>`);
+            process.exit(1);
+        }
+        argv.splice(2, 1);
     }
 
     const inputFile = argv[2];
@@ -2178,6 +2185,17 @@ function run(argv: string[]) {
 
     output.push(compiledText + "\n");
     fs.writeFileSync(outputFile, output.join(""), "utf-8");
+
+    if (run_mode) {
+        const exeFile = outputFile.replace(/\.c$/, ".exe");
+        const cc_flags = ["-I", ".", "-Wall", "-Wextra", "-Werror", "-std=c23", "-g", "-fsanitize=address"];
+        execute(["clang", ...cc_flags, outputFile, "-o", exeFile]);
+        execute([exeFile]);
+    }
+}
+
+function execute(cmd: string[]) {
+    execFileSync(cmd.join(" "), { stdio: "inherit", shell: true });
 }
 
 if (import.meta.main) {
