@@ -31,7 +31,7 @@ int integersqrt(int a)
     if ($r11)
     {
         $output("A", $0);
-        exit(0);
+        $exit();
     }
     else if ($r12)
     {
@@ -144,5 +144,5 @@ int main_program()
         const STR $r8 = $concat("AiA", $4, topnum, $5);
         $output("A", $r8);
     }
-    exit(0);
+    $exit();
 }

@@ -212,6 +212,11 @@ int main()
     return 0;
 }
 
+void $exit()
+{
+    exit(0);
+}
+
 #pragma clang diagnostic ignored "-Wincompatible-library-redeclaration"
 #pragma clang diagnostic ignored "-Wunused-label"
 #pragma clang diagnostic ignored "-Wunused-variable"

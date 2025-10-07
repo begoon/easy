@@ -12,5 +12,5 @@ Point t = {0};
 STR $F = { .data = "tests/type_struct/test.easy", .sz = 27, .immutable = 1 };
 int main_program()
 {
-    exit(0);
+    $exit();
 }

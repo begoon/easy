@@ -18,5 +18,5 @@ int main_program()
     const STR $r4 = SUBSTR(s, 3, 2);
     const STR $r3 = $concat("AA", $2, $r4);
     $output("A", $r3);
-    exit(0);
+    $exit();
 }

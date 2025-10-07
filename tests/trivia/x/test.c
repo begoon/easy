@@ -14,5 +14,5 @@ int main_program()
     const STR $r2 = $concat("AA", b, $r3);
     const STR $r1 = $concat("AA", a, $r2);
     x = $r1;
-    exit(0);
+    $exit();
 }

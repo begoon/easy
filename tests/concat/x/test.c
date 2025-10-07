@@ -64,5 +64,5 @@ int main_program()
     const STR $r13 = fs();
     const STR $r9 = $concat("AiArAbAAA", $5, $r10, $6, $r11, $7, $r12, $8, $r13, $13);
     $output("A", $r9);
-    exit(0);
+    $exit();
 }

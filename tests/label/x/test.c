@@ -60,5 +60,5 @@ int main_program()
     }
     block_label:
     $output("A", $9);
-    exit(0);
+    $exit();
 }

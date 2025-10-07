@@ -1,14 +1,9 @@
 #!/usr/bin/env bun
-/* Generic PEG interpreter (packrat) with left recursion detection and labeled AST.
- * Includes: TRACE, whitespace handling fixes, list-merge, and AST simplifier that
- * preserves variable suffixes as fields/indexes and flattens comma lists.
- */
 
 import * as fs from "node:fs";
 import * as path from "node:path";
 import { fileURLToPath } from "node:url";
 
-// ---------- TRACE CONFIG ----------
 const TRACE: boolean = !["", "0", "false", "False", undefined as any].includes(process.env.PEG_TRACE as any);
 const _TRACE_RULES_ENV = (process.env.PEG_TRACE_RULES ?? "").trim();
 const TRACE_RULES: Set<string> | null = _TRACE_RULES_ENV
@@ -47,13 +42,8 @@ function _snippet(text: string, i: number, span: number = TRACE_SNIPPET): string
 function _tprint(rule: string, when: string, text: string, i: number, extra = "") {
     if (!_trace_enabled(rule)) return;
     const [line, character] = _fmt_loc(text, i);
-    // eslint-disable-next-line no-console
     console.log(`[${rule}] ${when} @ ${i} (L${line}:C${character}) ${extra}\n${_snippet(text, i)}`);
 }
-
-// -------------------------------
-// Errors
-// -------------------------------
 
 class PEGSyntaxError extends Error {}
 class ParseError extends Error {
@@ -86,10 +76,6 @@ class ParseError extends Error {
     }
 }
 
-// -------------------------------
-// Grammar AST nodes
-// -------------------------------
-
 abstract class Expr {}
 
 class Literal extends Expr {
@@ -101,6 +87,7 @@ class Literal extends Expr {
         this.ignore_case = ignore_case;
     }
 }
+
 class CharClass extends Expr {
     ranges: Array<[string, string]>;
     negated: boolean;
@@ -110,7 +97,9 @@ class CharClass extends Expr {
         this.negated = negated;
     }
 }
+
 class AnyChar extends Expr {}
+
 class RuleRef extends Expr {
     name: string;
     constructor(name: string) {
@@ -118,6 +107,7 @@ class RuleRef extends Expr {
         this.name = name;
     }
 }
+
 class Sequence extends Expr {
     parts: Expr[];
     constructor(parts: Expr[]) {
@@ -125,6 +115,7 @@ class Sequence extends Expr {
         this.parts = parts;
     }
 }
+
 class Choice extends Expr {
     alts: Expr[];
     constructor(alts: Expr[]) {
@@ -132,6 +123,7 @@ class Choice extends Expr {
         this.alts = alts;
     }
 }
+
 class OptionalE extends Expr {
     inner: Expr;
     constructor(inner: Expr) {
@@ -139,6 +131,7 @@ class OptionalE extends Expr {
         this.inner = inner;
     }
 }
+
 class ZeroOrMore extends Expr {
     inner: Expr;
     constructor(inner: Expr) {
@@ -146,6 +139,7 @@ class ZeroOrMore extends Expr {
         this.inner = inner;
     }
 }
+
 class OneOrMore extends Expr {
     inner: Expr;
     constructor(inner: Expr) {
@@ -153,6 +147,7 @@ class OneOrMore extends Expr {
         this.inner = inner;
     }
 }
+
 class And extends Expr {
     inner: Expr;
     constructor(inner: Expr) {
@@ -160,6 +155,7 @@ class And extends Expr {
         this.inner = inner;
     }
 }
+
 class Not extends Expr {
     inner: Expr;
     constructor(inner: Expr) {
@@ -167,6 +163,7 @@ class Not extends Expr {
         this.inner = inner;
     }
 }
+
 class Labeled extends Expr {
     label: string;
     inner: Expr;
@@ -176,10 +173,6 @@ class Labeled extends Expr {
         this.inner = inner;
     }
 }
-
-// -------------------------------
-// PEG grammar parser (for the PEG text)
-// -------------------------------
 
 const _token_ws = /[ \t\r\n]+/y;
 const _identifier = /[A-Za-z_][A-Za-z0-9_]*/y;
@@ -437,10 +430,6 @@ class PEG {
     }
 }
 
-// -------------------------------
-// Runtime parser (packrat)
-// -------------------------------
-
 type MemoVal = [boolean, number, any];
 
 class _Runtime {
@@ -554,7 +543,7 @@ class _Runtime {
         if (prev instanceof CharClass && nxt instanceof OneOrMore && nxt.inner instanceof CharClass) return false;
         if (prev instanceof CharClass && nxt instanceof CharClass) return false;
 
-        // Important for strings: do not skip between quotes and content
+        // Important for strings: do not skip between quotes and content.
         if (prev instanceof Literal && (prev.value === '"' || prev.value === "'" || prev.value === "\\")) return false;
         if (nxt instanceof Literal && (nxt.value === '"' || nxt.value === "'")) return false;
 
@@ -734,10 +723,6 @@ class _Runtime {
     }
 }
 
-// -------------------------------
-// AST simplifier
-// -------------------------------
-
 function _simplify_ast(node: any): any {
     if (Array.isArray(node)) {
         const out = node.map((x) => _simplify_ast(x));
@@ -745,11 +730,9 @@ function _simplify_ast(node: any): any {
     }
     if (!(node && typeof node === "object")) return node;
 
-    // simplify children first
     const simp: Record<string, any> = {};
     for (const [k, v] of Object.entries(node)) simp[k] = _simplify_ast(v);
 
-    // drop empty
     for (const k of Object.keys(simp)) {
         const v = simp[k];
         const isEmptyObj = v && typeof v === "object" && !Array.isArray(v) && Object.keys(v).length === 0;
@@ -824,10 +807,6 @@ function _simplify_ast(node: any): any {
     return simp;
 }
 
-// -------------------------------
-// Public API
-// -------------------------------
-
 class PEGParser {
     grammar: PEG;
     constructor(grammar_text: string, start?: string | null) {
@@ -842,10 +821,6 @@ class PEGParser {
     }
 }
 
-// -------------------------------
-// CLI
-// -------------------------------
-
 const TRIVIA = `
 PROGRAM Test:
   OUTPUT CHARACTER (48);
@@ -853,7 +828,6 @@ END PROGRAM Test;
 `;
 
 function main(argv: string[]) {
-    // Resolve easy.peg next to this file
     const thisFile = fileURLToPath(import.meta.url);
     const thisDir = path.dirname(thisFile);
     const grammarPath = path.join(thisDir, "easy.peg");
@@ -868,7 +842,6 @@ function main(argv: string[]) {
     const ast_text = JSON.stringify(ast, null, 2);
 
     if (self_test) {
-        // eslint-disable-next-line no-console
         console.log(ast_text);
     } else {
         const inputFile = argv[2];
@@ -881,7 +854,6 @@ if (import.meta.main) {
     try {
         main(process.argv);
     } catch (e: any) {
-        // eslint-disable-next-line no-console
         console.error(e?.stack || String(e));
         process.exit(2);
     }

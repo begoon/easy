@@ -22,5 +22,5 @@ int main_program()
     const int $r1 = b(100);
     x = $r1;
     $output("i", x);
-    exit(0);
+    $exit();
 }

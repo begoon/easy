@@ -1,452 +1,99 @@
-# EASY grammar
+# EASY language compiler
 
-## COMPILATIONS
+The repository contains a compiler for the educational programming language Easy, as described in the book [Etudes for Programmers](https://dl.acm.org/doi/10.5555/1096892) by Charles Wetherell.
 
-```bnf
-<compilation> ::= <program segment>
-                | <compilation> <program segment>
-<program segment> ::= <main program>
-                    | <external procedure>
+The compiler is also educational.
+
+## Overview
+
+The compiler is implemented in Typescript. The compiler emits C code, which Clang or GCC then compiles into the native binary. The "runtime.c" file is a bare minimum runtime support. In the `x` subfolders of the tests, there are `test.c` files, representing the output of the compiler.
+
+The compiler requires a Javascript runtime (Node 24+ or Bun) and Clang 17+.
+
+To compile and run a program in Easy, you run "easyc run filename.easy", for example:
+
+```sh
+easyc run life.easy
 ```
 
-## PROGRAMS
+or step by step:
 
-```bnf
-<main program> ::= <program head> <program body> <program end>
-<program head> ::= PROGRAM <identifier> :
-<program body> ::= <segment body>
-<program end> ::= END PROGRAM <identifier> ;
+```sh
+node easyc.ts life.easy && cc life.c -o test.exe -I . && ./test.exe
 ```
 
-## EXTERNAL PROCEDURES
+NOTE: `.exe` extension is optional.
 
-```bnf
- <external procedure> ::= <external subprogram>
-                        | <external function>
+`easyc.ts` compiles `life.easy` to `life.c`, and then Clang compiles `easy.c` to the executable.
 
- <external subprogram> ::= <external subprogram head> :
-                           <external subprogram body>
-                           <external subprogram end>
+The Easy language is supported in full, according to the book. However, there are a few points worth mentioning.
 
- <external function> ::= <external function head> :
-                         <external function body>
-                         <external function end>
+`EXTERNAL` subroutines and `NAME` aliases are not supported.
 
- <external subprogram head> ::= EXTERNAL PROCEDURE
-                                <external procedure name>
+Multiple `PROGRAM` segments are not supported, and the program should have only one `PROGRAM` segment, which becomes its entry point. The identifiers (type, variables, subroutine) from the `PROGRAM` segment are hoisted to the global namespace and visible in all parts of the Easy program.
 
- <external function head> ::= EXTERNAL FUNCTION
-                              <external procedure name>
-                              <external type>
+The maximum length of the `STRING` variable is 4096 bytes.
 
- <external procedure name> ::= <identifier>
-                             | <identifier> <external parameter list>
+According to the book, Easy is a copy semantics language. It means that copying a primitive type, a structure, or an array always makes a full, deep copy. The subroutine arguments and the function return value are also copied deeply to provide the value semantics.
 
- <external parameter list> ::= <external parameter head> >
- <external parameter head> ::= <external parameter>
-                             | <external parameter head> , <external parameter>
+The only exception to the value semantics is the array, whose size is not known at compile time. Such arrays are allocated dynamically, but the copy operation (an assignment, or passing as a subroutine argument, or returning as a result from the function) performs a shallow copy (runtime limitation). Also, the arrays in the top-level `PROGRAM` segment must have a compile-time known size.
 
- <external parameter> ::= <identifier> <external type>
-                        | <identifier> <external type> NAME
+The compiler uses C `struct` to implement compound types, such as strings, arrays, and structures.
 
- <external type> ::= <basic type>
- <external subprogram body> ::= <segment body>
- <external function body> ::= <segment body>
+The compiler implements a handwritten recursive descent parser. However, there is a second experimental PEG parser (`peg.ts` with `east.peg` grammar file), but this parser is not used to generate code. The PEG parser only runs in testing by `test.ts`. Maybe in the future, PEG will replace the basic recursive descent parser.
 
- <external subprogram end> ::= END EXTERNAL PROCEDURE <identifier> ;
- <external function end> ::= END EXTERNAL FUNCTION <identifier> ;
-```
+## Compiler test pipeline
 
-## SEGMENTS
+The compiler project has a test pipeline, `test.ts`, running a set of tests from the `tests` folder. Some of the tests implement well-known programs, such as the Brainfuck interpreter, Conway's Game of Life, Rule 110 automaton, Quine (a program that prints its own source code), Mastermind (utilising Knuth's Minimax algorithm), FizzBuzz, Eratosthenes Sieve (from the book).
 
-```bnf
-<segment body> ::= <type definition part> <variable declaration part>
-                   <procedure definition part>
-                   <executable statement part>
+The "tests" folder contains compiler tests. Each subfolder is an individual test. Inside each test folder, there is a file named `test.easy`. In the "x" subfolder of the test, there are expected ("golden") files that are expected to be generated by the test.
 
-<type definition part> ::= 
-                        | <type definition part> <type definition>
+There are several types of expected files. The main ones are `test.c` and `test.output`. The first is the compiler output. This file is then compiled to `test.exe` by the C compiler. The `test.output` is the console output of the `test.exe` execution. If a test requires console input (such as `sieve`), a `test.input` file is available.
 
-<variable declaration part> ::= 
-                              | <variable declaration part> <variable declaration>
+Additionally, a test may have `test.tokens` (lexer tokens), `test.s` (symbol table), `test.json` (AST), and `test.peg.json` (AST from PEG). These files are optional and not all tests use them.
 
-<procedure definition part> ::= 
-                             | <procedure definition part> <procedure definition>
+## Testing and running examples
 
-<executable statement part> ::= <executable statement>
-                            | <executable statement part> <executable statement>
-```
+### Prerequisites
 
-## TYPES
+- JavaScript runtime: `bun` or `node` (24+) (remember - the compiler is written in TypeScript)
+- clang 17+ (to compile the Easy compiler output to a native binary)
+- `just` (`make` alternative) - https://just.systems/
+- `docker` (optional, if we want to run tests in an isolated container
 
-```bnf
-<type definition> ::= TYPE <identifier> IS <type> ;
-<type> ::= <basic type>
-         | <arrayed type>
-         | <structured type>
-         | <type identifier>
+Currently, the compiler test pipeline runs either locally by `just test-compiler` or by `just docker-test`.
 
-<basic type> ::= INTEGER
-               | REAL
-               | BOOLEAN
-               | STRING
+NOTE: Running tests in the Linux container helps because the Clang memory sanitiser is more capable in Linux, rather than on macOS.
 
-<arrayed type> ::= ARRAY <bounds> OF <type>
+## Examples
 
-<bounds> ::= [ <bounds expression> ]
-           | [ <bounds expression> : <bounds expression> ]
+Take a feel of the compiler, run `just life` to run the Convey's Game of Life in the console.
 
-<bounds expression> ::= <expression>
+Other examples:
 
-<structured type> ::= STRUCTURE <field list> END STRUCTURE
+`just run bf` -- to run a Brainfuck program printing "EASY!".
 
-<field list> ::= <field>
-              | <field list> , <field>
+`just run fizzbuzz` -- FizzBuzz
 
-<field> ::= FIELD <identifier> IS <type>
+`just run mastermind` - to play Mastermind against the computer.
 
-<type identifier> ::= <identifier>
-```
+`just run sieve` -- to run the Eratosthenes Sieve (from the book) -- enter a maximum number, and the program will find all primes up to this number.
 
-## DECLARATIONS
+`just run rule_110` -- to run Rule 110 automaton.
 
-```bnf
-<variable declaration> ::= DECLARE <declared names> <type> ;
+## Compiler internals overview
 
-<declared names> ::= <identifier>
-                   | <declared names list>
+As mentioned above, the compiler utilises a manual recursive descent parser, as specified in the [grammar](GRAMMAR.md) from the book.
 
-<declared names list> ::= <identifier>
-                        | <declared names list> , <identifier>
-```
+Each AST node can emit C code in either `c()` or `v()` functions. `v()` function is used by expression nodes. The `v()` function emits C code and also the name of the variable with the result of the expression.
 
-## INTERNAL PROCEDURES
+## Related
 
-```bnf
-<procedure definition> ::= <subprogram definition>
-                         | <function definition>
-                         | <external subprogram definition>
-                         | <external function definition>
+- [easy-cot.yaml](easy-cot.yaml) -- syntax highlighting for Easy for the macOS "cot" editor
+- <https://github.com/begoon/easy-vscode> - a VSCode extension for Easy syntax highlighting
+- <https://github.com/begoon/easy-lsp> - a prototype of the VSCode LSP for Easy (proof of concept)
 
-<subprogram definition> ::= <subprogram head> : <subprogram body> <subprogram end>
+## Possible further work
 
-<function definition> ::= <function head> : <function body> <function end>
-
-<external subprogram definition> ::= <external subprogram head> ;
-
-<external function definition> ::= <external function head> ;
-
-<subprogram head> ::= PROCEDURE <procedure name>
-
-<function head> ::= FUNCTION <procedure name> <type>
-
-<subprogram body> ::= <segment body>
-
-<function body> ::= <segment body>
-
-<subprogram end> ::= END PROCEDURE <identifier> ;
-
-<function end> ::= END FUNCTION <identifier> ;
-
-<procedure name> ::= <identifier>
-                   | <identifier> <internal parameter list>
-
-<internal parameter list> ::= <internal parameter head> )
-                            | <internal parameter head> , <internal parameter>
-
-<internal parameter head> ::= <internal parameter>
-                            | <internal parameter head> , <internal parameter>
-
-<internal parameter> ::= <identifier> <type>
-                       | <identifier> <type> NAME
-```
-
-## EXECUTABLE STATEMENTS
-
-```bnf
-<executable statement> ::= <assignment statement>
-                         | <call statement>
-                         | <return statement>
-                         | <exit statement>
-                         | <conditional statement>
-                         | <compound statement>
-                         | <iteration statement>
-                         | <selection statement>
-                         | <repeat statement>
-                         | <repent statement>
-                         | <input statement>
-                         | <output statement>
-                         | <null statement>
-```
-
-## ASSIGNMENTS
-
-```bnf
-<assignment statement> ::= SET <target list> <expression> ;
-
-<target list> ::= <target>
-                | <target list> <target>
-
-<target> ::= <variable> <replace>
-
-<replace> ::= :=
-```
-
-## PROCEDURE CALLS
-
-```bnf
-<call statement> ::= CALL <procedure reference> ;
-
-<procedure reference> ::= <procedure identifier>
-                        | <procedure identifier> <actual argument list>
-
-<procedure identifier> ::= <identifier>
-
-<actual argument list> ::= ( <actual argument head> )
-
-<actual argument head> ::= <expression>
-                         | <actual argument head> , <expression>
-```
-
-## RETURNS
-
-```bnf
-<return statement> ::= RETURN ;
-                     | RETURN <expression> ;
-```
-
-## EXITS
-
-```bnf
-<exit statement> ::= EXIT ;
-```
-
-## CONDITIONALS
-
-```bnf
-<conditional statement> ::= <simple conditional statement>
-                          | <label> <simple conditional statement>
-
-<simple conditional statement> ::= <conditional clause> <true branch> FI ;
-                                 | <conditional clause> <true branch> <false branch> FI ;
-
-<conditional clause> ::= IF <expression>
-
-<true branch> ::= THEN <conditional body>
-
-<false branch> ::= <else> <conditional body>
-
-<else> ::= ELSE
-
-<conditional body> ::= <segment body>
-```
-
-## COMPOUNDS
-
-```bnf
-<compound statement> ::= <simple compound>
-                       | <label> <simple compound>
-
-<simple compound> ::= <compound head> <compound body> <compound end>
-
-<compound head> ::= BEGIN
-
-<compound body> ::= <segment body>
-
-<compound end> ::= END ;
-                 | END <identifier> ;
-```
-
-## ITERATIONS
-
-```bnf
-<iteration statement> ::= <simple iteration statement>
-                        | <label> <simple iteration statement>
-
-<simple iteration statement> ::= <iteration head> <iteration body> <iteration end>
-
-<iteration head> ::= <for> <iteration target> <control> DO
-
-<iteration body> ::= <segment body>
-
-<iteration end> ::= END FOR ;
-                  | END FOR <identifier> ;
-
-<for> ::= FOR
-
-<iteration target> ::= <variable> <replace>
-
-<control> ::= <step control>
-            | <while control>
-
-<step control> ::= <initial value> <step>
-                 | <initial value> <limit>
-                 | <initial value> <step> <limit>
-
-<initial value> ::= <expression>
-
-<step> ::= BY <expression>
-
-<limit> ::= TO <expression>
-
-<while control> ::= WHILE <expression>
-```
-
-### ITERATION EXECUTION
-
-```algol
-    SET <iteration target> := <initial value>;
-
-top:
-    IF <while control> exists
-        THEN SET stoploop := NOT <while control>;
-        ELSE SET stoploop := FALSE; FI;
-    IF stoploop THEN GOTO end; FI;
-
-    IF <limit> exists & (<iteration target> > <limit>)
-        THEN GOTO end; FI;
-
-    <iteration body>
-
-    IF <step> exists
-        THEN SET stepvalue := <step>;
-        ELSE SET stepvalue := 1; FI;
-
-    SET <iteration target> := <iteration target> + stepvalue;
-
-    GOTO top;
-end: ...
-```
-
-## SELECTION
-
-```bnf
-<selection statement> ::= <simple selection>
-                        | <label> <simple selection>
-
-<simple selection> ::= <selection head> <selection body> <selection end>
-<selection head> ::= SELECT <expression> OF
-<selection body> ::= <cast list> 
-                   | <case list> <escape case>
-<selection end> ::= END SELECT ;  END SELECT <identifier> ;
-<case list> ::= <case> 
-              | <case list> <case>
-<case> ::= <case head> <case body>
-<case head> ::= CASE <selector>
-<selector> ::= <selector head> )
-<selector head> ::= ( <expression> 
-                  | <selector head> , <expression>
-<escape case> ::= <escape head> <case body>
-<escape head> ::= OTHERWISE :
-<case body> ::= <segment body>
-```
-
-## REPEAT and REPENT
-
-```bnf
-<repeat statement> ::= REPEAT <identifier> ;
-<repent statement> ::= REPENT <identifier> ;
-```
-
-## INPUT and OUTPUT
-
-```bnf
-<input statement> ::= INPUT <input list> ;
-<input list> ::= <variable> 
-               | <input list> , <variable>
-
-<output statement> ::= OUTPUT <output list> ;
-<output list> ::=  <expression> 
-                | <output list> , <expression>
-```
-
-## NULLS and LABELS
-
-```bnf
-<null statement> ::= ;
-<label> ::= <identifier> :
-```
-
-## EXPRESSIONS
-
-```bnf
-<expression> ::= <expression one> 
-               | <expression> "|" <expression one>
-               | <expression> XOR <expression one>
-
-<expression one> ::= <expression two>
-                   | <expression one> & <expression two>
-
-<expression two> ::= <expression three>
-                   | NOT <expression three>
-
-<expression three> ::= <expression four>
-                     | <expression three> <relation> <expression four>
-
-<expression four> ::= <expression five>
-                    | <expression four> || <expression five>
-
-<expression five> ::= <expression six>
-                    | <expression five> <adding operator> <expression six>
-                    | <adding operator> <expression six>
-
-<expression six> ::= <expression seven>
-                   | <expression six> <multiplying operator> <expression seven>
-
-<expression seven> ::= FLOOR ( <expression> )
-                     | LENGTH ( <expression> )
-                     | SUBSTR ( <expression>, <expression>, <expression> )
-                     | CHARACTER ( <expression> )
-                     | NUMBER ( <expression> )
-                     | FLOAT ( <expression> )
-                     | FIX ( <expression> )
-                     | <expression eight>
-
-<expression eight> ::= <variable>
-                     | <constant>
-                     | <function reference>
-                     | ( <expression> )
-```
-
-## VARIABLES
-
-```bnf
-<variable> ::= <identifier>
-             | <variable> . <identifier>
-             | <variable> [ <expression> ]
-```
-
-## CONSTANTS
-
-```bnf
-<contant> ::= <integer contant> 
-            | <real constant> 
-            | <boolean constant> 
-            | <string constant>
-<boolean constant> ::= TRUE 
-                     | FALSE
-```
-
-## FUNCTION CALLS
-
-```bnf
-<function reference> ::= <function identifier> ()
-                       | <function identifier> <actual argument list>
-<function identifier> ::= <identifier>
-```
-
-## LEXICAL ITEMS
-
-```bnf
-<relation> ::= < 
-              | > 
-              | = 
-              | <= 
-              | >= 
-              | <>
-<adding operator> ::= + 
-                    | -
-<multiplying operator> ::= * 
-                         | / 
-                         | MOD
-```
+- optimise STRINGs support in runtime
+- emit LLVM IR instead of C

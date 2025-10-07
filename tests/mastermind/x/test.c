@@ -367,7 +367,7 @@ int main_program()
             $output("A", $1);
             $output("A", $1);
             $output("AiA", $7, tries, $8);
-            exit(0);
+            $exit();
         }
         eliminated_candidates = 0;
         remaining_candidates = 0;
@@ -410,7 +410,7 @@ int main_program()
         if ($r27)
         {
             $output("A", $11);
-            exit(0);
+            $exit();
         }
         tries += 1;
     }

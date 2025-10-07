@@ -49,5 +49,5 @@ int main_program()
     $index(10, 1, 100, &$F, 19, 47);
     const STR $r2 = $concat("AiAA", $5, f.data[(10) - (1)].score, $2, f.data[(10) - (1)].name);
     $output("A", $r2);
-    exit(0);
+    $exit();
 }

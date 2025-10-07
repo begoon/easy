@@ -25,5 +25,5 @@ int main_program()
     $output("A", $r8);
     const STR $r9 = $concat("AAA", $2, $3, $4);
     $output("A", $r9);
-    exit(0);
+    $exit();
 }

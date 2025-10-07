@@ -71,5 +71,5 @@ int main_program()
     $index(3, 0, 4, &$F, 13, 41);
     const STR $r1 = $concat("AAA", a.data[(1) - (0)].data[(2) - (0)].data[(3) - (0)].s, $2, b.data[(1) - (0)].data[(2) - (0)].data[(3) - (0)].s);
     $output("A", $r1);
-    exit(0);
+    $exit();
 }

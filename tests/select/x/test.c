@@ -25,5 +25,5 @@ int main_program()
     {
         $output("A", $2);
     }
-    exit(0);
+    $exit();
 }

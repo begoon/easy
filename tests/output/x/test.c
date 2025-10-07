@@ -60,5 +60,5 @@ int main_program()
     const int $r8 = fb();
     const STR $r9 = fs();
     $output("AiArAbAAA", $5, $r6, $6, $r7, $7, $r8, $8, $r9, $13);
-    exit(0);
+    $exit();
 }

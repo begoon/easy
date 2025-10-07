@@ -960,7 +960,7 @@ class RETURN extends Statement {
 }
 
 class EXIT extends Statement {
-    c = () => "exit(0);";
+    c = () => "$exit();";
 }
 
 class EMPTY extends Statement {

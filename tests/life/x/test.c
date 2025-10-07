@@ -247,5 +247,5 @@ int main_program()
         }
         i += 1;
     }
-    exit(0);
+    $exit();
 }

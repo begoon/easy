@@ -18,5 +18,5 @@ int main_program()
         $output("i", a);
         a += 1;
     }
-    exit(0);
+    $exit();
 }

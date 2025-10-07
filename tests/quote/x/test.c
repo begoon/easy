@@ -31,5 +31,5 @@ int main_program()
     s = $7;
     s = $8;
     s = $9;
-    exit(0);
+    $exit();
 }

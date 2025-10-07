@@ -29,5 +29,5 @@ int main_program()
     $index(1, 0, 80, &$F, 15, 27);
     b.data[(1) - (0)].a.data[(2) - (0)] = b.data[(2) - (0)].a.data[(1) - (0)];
     $output("A", $1);
-    exit(0);
+    $exit();
 }
