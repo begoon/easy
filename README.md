@@ -71,15 +71,15 @@ Take a feel of the compiler, run `just life` to run the Convey's Game of Life in
 
 Other examples:
 
-`just run bf` -- to run a Brainfuck program printing "EASY!".
+`just run bf` - to run a Brainfuck program printing "EASY!".
 
-`just run fizzbuzz` -- FizzBuzz
+`just run fizzbuzz` - FizzBuzz
 
 `just run mastermind` - to play Mastermind against the computer.
 
-`just run sieve` -- to run the Eratosthenes Sieve (from the book) -- enter a maximum number, and the program will find all primes up to this number.
+`just run sieve` - to run the Eratosthenes Sieve (from the book) - enter a maximum number, and the program will find all primes up to this number.
 
-`just run rule_110` -- to run Rule 110 automaton.
+`just run rule_110` - to run Rule 110 automaton.
 
 ## Compiler internals overview
 
@@ -89,7 +89,7 @@ Each AST node can emit C code in either `c()` or `v()` functions. `v()` function
 
 ## Related
 
-- [easy-cot.yaml](easy-cot.yaml) -- syntax highlighting for Easy for the macOS "cot" editor
+- [easy-cot.yaml](easy-cot.yml) - syntax highlighting for Easy for the macOS "cot" editor
 - <https://github.com/begoon/easy-vscode> - a VSCode extension for Easy syntax highlighting
 - <https://github.com/begoon/easy-lsp> - a prototype of the VSCode LSP for Easy (proof of concept)
 
