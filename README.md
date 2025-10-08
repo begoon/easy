@@ -30,7 +30,7 @@ The Easy language is supported in full, according to the book. However, there ar
 
 `EXTERNAL` subroutines and `NAME` aliases are not supported.
 
-Multiple `PROGRAM` segments are not supported, and the program should have only one `PROGRAM` segment, which becomes its entry point. The identifiers (type, variables, subroutine) from the `PROGRAM` segment are hoisted to the global namespace and visible in all parts of the Easy program.
+Multiple `PROGRAM` segments are not supported, and the program should have only one `PROGRAM` segment, which becomes its entry point. The identifiers (type, variables, subroutines) from the `PROGRAM` segment are hoisted to the global namespace and visible in all parts of the Easy program.
 
 The maximum length of the `STRING` variable is 4096 bytes.
 
@@ -40,7 +40,7 @@ The only exception to the value semantics is the array, whose size is not known 
 
 The compiler uses C `struct` to implement compound types, such as strings, arrays, and structures.
 
-The compiler implements a handwritten recursive descent parser. However, there is a second experimental PEG parser (`peg.ts` with `east.peg` grammar file), but this parser is not used to generate code. The PEG parser only runs in testing by `test.ts`. Maybe in the future, PEG will replace the basic recursive descent parser.
+The compiler implements a handwritten recursive descent parser. However, there is a second experimental PEG parser (`peg.ts` with `easy.peg` grammar file), but this parser is not used to generate code. The PEG parser only runs in testing by `test.ts`. Maybe in the future, PEG will replace the basic recursive descent parser.
 
 ## Compiler test pipeline
 
