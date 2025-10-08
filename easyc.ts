@@ -444,11 +444,10 @@ class DECLARE extends Node {
         this.type = type;
     }
     v(code: string[]): string {
-        function zeroValue(n: string, type: Type): string | undefined {
-            const autofree = "";
-            return `${type.c()} ${autofree}${n} = ${type.zero(code)};`;
+        function zero(n: string, type: Type): string | undefined {
+            return `${type.c()} ${n} = ${type.zero(code)};`;
         }
-        return this.names.map((n) => zeroValue(n, this.type)).join("\n");
+        return this.names.map((n) => zero(n, this.type)).join("\n");
     }
 }
 
@@ -581,22 +580,22 @@ class Variable {
     token: Token;
     name: string;
     type: Type;
-    zeroValue?: string;
+    zero?: string;
     constructor(token: Token, name: string, type: Type, zero?: string) {
         this.token = token;
         this.name = name;
         this.type = type;
-        this.zeroValue = zero;
+        this.zero = zero;
     }
     c(): string {
         return `${this.type.c()} ${this.name}`;
     }
     isConst(): boolean {
-        return this.zeroValue !== undefined;
+        return this.zero !== undefined;
     }
     const(): string {
         if (!this.isConst()) throw new GenerateError(`variable '${this.name}' is not a constant at ${this.token}`);
-        const z = (this.zeroValue ?? "").replace(/"/g, '\\"');
+        const z = (this.zero ?? "").replace(/"/g, '\\"');
         return `${this.type.c()} ${this.name} = { .data = "${z}", .sz = ${z.length}, .immutable = 1 }`;
     }
     s(scope: string): string[] {
@@ -1980,7 +1979,7 @@ class Parser {
         if (token.type === "STRING") {
             const token = this.eat("STRING");
             const context = this.context;
-            const existing = Object.values(context.variables).find((v) => v.isConst() && v.zeroValue === token.value);
+            const existing = Object.values(context.variables).find((v) => v.isConst() && v.zero === token.value);
             if (existing) return new VariableReference(token, "", existing.name, [], existing.type);
 
             const const_i = Object.values(context.variables).filter((v) => v.isConst()).length;
