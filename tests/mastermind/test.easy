@@ -53,66 +53,66 @@ FUNCTION compare(probe INTEGER, code INTEGER) Comparison:
 
   IF p1 = c1 THEN
     SET comparison.in_place := comparison.in_place + 1;
-    SET c1 := -1;
+    SET c1 := -1; SET p1 := -2;
   FI;
 
   IF p2 = c2 THEN
     SET comparison.in_place := comparison.in_place + 1;
-    SET c2 := -1;
+    SET c2 := -1; SET p2 := -2;
   FI;
 
   IF p3 = c3 THEN
     SET comparison.in_place := comparison.in_place + 1;
-    SET c3 := -1;
+    SET c3 := -1; SET p3 := -2;
   FI;
 
   IF p4 = c4 THEN
     SET comparison.in_place := comparison.in_place + 1;
-    SET c4 := -1;
+    SET c4 := -1; SET p4 := -2;
   FI;
 
   IF p1 = c2 THEN
     SET comparison.by_value := comparison.by_value + 1;
-    SET c2 := -1;
+    SET c2 := -1; SET p1 := -2;
   ELSE IF p1 = c3 THEN
     SET comparison.by_value := comparison.by_value + 1;
-    SET c3 := -1;
+    SET c3 := -1; SET p1 := -2;
   ELSE IF p1 = c4 THEN
     SET comparison.by_value := comparison.by_value + 1;
-    SET c4 := -1;
+    SET c4 := -1; SET p1 := -2;
   FI; FI; FI;
 
   IF p2 = c1 THEN
     SET comparison.by_value := comparison.by_value + 1;
-    SET c1 := -1;
+    SET c1 := -1; SET p2 := -2;
   ELSE IF p2 = c3 THEN
     SET comparison.by_value := comparison.by_value + 1;
-    SET c3 := -1;
+    SET c3 := -1; SET p2 := -2;
   ELSE IF p2 = c4 THEN
     SET comparison.by_value := comparison.by_value + 1;
-    SET c4 := -1;
+    SET c4 := -1; SET p2 := -2;
   FI; FI; FI;
 
   IF p3 = c1 THEN
     SET comparison.by_value := comparison.by_value + 1;
-    SET c1 := -1;
+    SET c1 := -1; SET p3 := -2;
   ELSE IF p3 = c2 THEN
     SET comparison.by_value := comparison.by_value + 1;
-    SET c2 := -1;
+    SET c2 := -1; SET p3 := -2;
   ELSE IF p3 = c4 THEN
     SET comparison.by_value := comparison.by_value + 1;
-    SET c4 := -1;
+    SET c4 := -1; SET p3 := -2;
   FI; FI; FI;
 
   IF p4 = c1 THEN
     SET comparison.by_value := comparison.by_value + 1;
-    SET c1 := -1;
+    SET c1 := -1; SET p4 := -2;
   ELSE IF p4 = c2 THEN
     SET comparison.by_value := comparison.by_value + 1;
-    SET c2 := -1;
+    SET c2 := -1; SET p4 := -2;
   ELSE IF p4 = c3 THEN
     SET comparison.by_value := comparison.by_value + 1;
-    SET c3 := -1;
+    SET c3 := -1; SET p4 := -2;
   FI; FI; FI;
 
   RETURN comparison;

@@ -125,148 +125,180 @@ Comparison compare(int probe, int code)
         comparison.in_place = $r57;
         const int $r58 = (-1);
         c1 = $r58;
+        const int $r59 = (-2);
+        p1 = $r59;
     }
-    const int $r59 = (p2 == c2);
-    if ($r59)
+    const int $r60 = (p2 == c2);
+    if ($r60)
     {
-        const int $r60 = (comparison.in_place + 1);
-        comparison.in_place = $r60;
-        const int $r61 = (-1);
-        c2 = $r61;
+        const int $r61 = (comparison.in_place + 1);
+        comparison.in_place = $r61;
+        const int $r62 = (-1);
+        c2 = $r62;
+        const int $r63 = (-2);
+        p2 = $r63;
     }
-    const int $r62 = (p3 == c3);
-    if ($r62)
+    const int $r64 = (p3 == c3);
+    if ($r64)
     {
-        const int $r63 = (comparison.in_place + 1);
-        comparison.in_place = $r63;
-        const int $r64 = (-1);
-        c3 = $r64;
+        const int $r65 = (comparison.in_place + 1);
+        comparison.in_place = $r65;
+        const int $r66 = (-1);
+        c3 = $r66;
+        const int $r67 = (-2);
+        p3 = $r67;
     }
-    const int $r65 = (p4 == c4);
-    if ($r65)
-    {
-        const int $r66 = (comparison.in_place + 1);
-        comparison.in_place = $r66;
-        const int $r67 = (-1);
-        c4 = $r67;
-    }
-    const int $r68 = (p1 == c2);
+    const int $r68 = (p4 == c4);
     if ($r68)
     {
-        const int $r69 = (comparison.by_value + 1);
-        comparison.by_value = $r69;
+        const int $r69 = (comparison.in_place + 1);
+        comparison.in_place = $r69;
         const int $r70 = (-1);
-        c2 = $r70;
+        c4 = $r70;
+        const int $r71 = (-2);
+        p4 = $r71;
+    }
+    const int $r72 = (p1 == c2);
+    if ($r72)
+    {
+        const int $r73 = (comparison.by_value + 1);
+        comparison.by_value = $r73;
+        const int $r74 = (-1);
+        c2 = $r74;
+        const int $r75 = (-2);
+        p1 = $r75;
     }
     else
     {
-        const int $r71 = (p1 == c3);
-        if ($r71)
+        const int $r76 = (p1 == c3);
+        if ($r76)
         {
-            const int $r72 = (comparison.by_value + 1);
-            comparison.by_value = $r72;
-            const int $r73 = (-1);
-            c3 = $r73;
+            const int $r77 = (comparison.by_value + 1);
+            comparison.by_value = $r77;
+            const int $r78 = (-1);
+            c3 = $r78;
+            const int $r79 = (-2);
+            p1 = $r79;
         }
         else
         {
-            const int $r74 = (p1 == c4);
-            if ($r74)
+            const int $r80 = (p1 == c4);
+            if ($r80)
             {
-                const int $r75 = (comparison.by_value + 1);
-                comparison.by_value = $r75;
-                const int $r76 = (-1);
-                c4 = $r76;
+                const int $r81 = (comparison.by_value + 1);
+                comparison.by_value = $r81;
+                const int $r82 = (-1);
+                c4 = $r82;
+                const int $r83 = (-2);
+                p1 = $r83;
             }
         }
     }
-    const int $r77 = (p2 == c1);
-    if ($r77)
+    const int $r84 = (p2 == c1);
+    if ($r84)
     {
-        const int $r78 = (comparison.by_value + 1);
-        comparison.by_value = $r78;
-        const int $r79 = (-1);
-        c1 = $r79;
+        const int $r85 = (comparison.by_value + 1);
+        comparison.by_value = $r85;
+        const int $r86 = (-1);
+        c1 = $r86;
+        const int $r87 = (-2);
+        p2 = $r87;
     }
     else
     {
-        const int $r80 = (p2 == c3);
-        if ($r80)
+        const int $r88 = (p2 == c3);
+        if ($r88)
         {
-            const int $r81 = (comparison.by_value + 1);
-            comparison.by_value = $r81;
-            const int $r82 = (-1);
-            c3 = $r82;
+            const int $r89 = (comparison.by_value + 1);
+            comparison.by_value = $r89;
+            const int $r90 = (-1);
+            c3 = $r90;
+            const int $r91 = (-2);
+            p2 = $r91;
         }
         else
         {
-            const int $r83 = (p2 == c4);
-            if ($r83)
-            {
-                const int $r84 = (comparison.by_value + 1);
-                comparison.by_value = $r84;
-                const int $r85 = (-1);
-                c4 = $r85;
-            }
-        }
-    }
-    const int $r86 = (p3 == c1);
-    if ($r86)
-    {
-        const int $r87 = (comparison.by_value + 1);
-        comparison.by_value = $r87;
-        const int $r88 = (-1);
-        c1 = $r88;
-    }
-    else
-    {
-        const int $r89 = (p3 == c2);
-        if ($r89)
-        {
-            const int $r90 = (comparison.by_value + 1);
-            comparison.by_value = $r90;
-            const int $r91 = (-1);
-            c2 = $r91;
-        }
-        else
-        {
-            const int $r92 = (p3 == c4);
+            const int $r92 = (p2 == c4);
             if ($r92)
             {
                 const int $r93 = (comparison.by_value + 1);
                 comparison.by_value = $r93;
                 const int $r94 = (-1);
                 c4 = $r94;
+                const int $r95 = (-2);
+                p2 = $r95;
             }
         }
     }
-    const int $r95 = (p4 == c1);
-    if ($r95)
+    const int $r96 = (p3 == c1);
+    if ($r96)
     {
-        const int $r96 = (comparison.by_value + 1);
-        comparison.by_value = $r96;
-        const int $r97 = (-1);
-        c1 = $r97;
+        const int $r97 = (comparison.by_value + 1);
+        comparison.by_value = $r97;
+        const int $r98 = (-1);
+        c1 = $r98;
+        const int $r99 = (-2);
+        p3 = $r99;
     }
     else
     {
-        const int $r98 = (p4 == c2);
-        if ($r98)
+        const int $r100 = (p3 == c2);
+        if ($r100)
         {
-            const int $r99 = (comparison.by_value + 1);
-            comparison.by_value = $r99;
-            const int $r100 = (-1);
-            c2 = $r100;
+            const int $r101 = (comparison.by_value + 1);
+            comparison.by_value = $r101;
+            const int $r102 = (-1);
+            c2 = $r102;
+            const int $r103 = (-2);
+            p3 = $r103;
         }
         else
         {
-            const int $r101 = (p4 == c3);
-            if ($r101)
+            const int $r104 = (p3 == c4);
+            if ($r104)
             {
-                const int $r102 = (comparison.by_value + 1);
-                comparison.by_value = $r102;
-                const int $r103 = (-1);
-                c3 = $r103;
+                const int $r105 = (comparison.by_value + 1);
+                comparison.by_value = $r105;
+                const int $r106 = (-1);
+                c4 = $r106;
+                const int $r107 = (-2);
+                p3 = $r107;
+            }
+        }
+    }
+    const int $r108 = (p4 == c1);
+    if ($r108)
+    {
+        const int $r109 = (comparison.by_value + 1);
+        comparison.by_value = $r109;
+        const int $r110 = (-1);
+        c1 = $r110;
+        const int $r111 = (-2);
+        p4 = $r111;
+    }
+    else
+    {
+        const int $r112 = (p4 == c2);
+        if ($r112)
+        {
+            const int $r113 = (comparison.by_value + 1);
+            comparison.by_value = $r113;
+            const int $r114 = (-1);
+            c2 = $r114;
+            const int $r115 = (-2);
+            p4 = $r115;
+        }
+        else
+        {
+            const int $r116 = (p4 == c3);
+            if ($r116)
+            {
+                const int $r117 = (comparison.by_value + 1);
+                comparison.by_value = $r117;
+                const int $r118 = (-1);
+                c3 = $r118;
+                const int $r119 = (-2);
+                p4 = $r119;
             }
         }
     }

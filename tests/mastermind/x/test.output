@@ -6,20 +6,20 @@ maybe 1122 ?
   
 maybe 2344 ? 
 #2, enter feedback, <in-place> and <by-value>: (e.g. '1 2' for 1 in place and 2 by value):   
-2455 2456 2465 2466 2533 2535 2536 2553 2563 2633 2635 2636 2653 2663 3313 3315 3316 3331 3351 3361 3514 3541 3614 3641 4315 4316 4351 4361 4514 4541 4614 4641 5245 5246 5254 5264 5313 5331 5414 5441 6245 6246 6254 6264 6313 6331 6414 6441   
-208 candidates eliminated, 48 remaining
+2455 2456 2465 2466 2533 2535 2536 2553 2563 2633 2635 2636 2653 2663 3514 3541 3614 3641 4313 4315 4316 4331 4351 4361 4414 4441 4514 4541 4614 4641 5245 5246 5254 5264 5414 5441 6245 6246 6254 6264 6414 6441   
+214 candidates eliminated, 42 remaining
   
-maybe 2546 ? 
+maybe 4514 ? 
 #3, enter feedback, <in-place> and <by-value>: (e.g. '1 2' for 1 in place and 2 by value):   
-3614 4315 4351 4361 4614 5414 6414   
-41 candidates eliminated, 7 remaining
+2455 2456 2465 3641 5245 5246 6245   
+35 candidates eliminated, 7 remaining
   
-maybe 3614 ? 
+maybe 2456 ? 
 #4, enter feedback, <in-place> and <by-value>: (e.g. '1 2' for 1 in place and 2 by value):   
-4361   
+6245   
 6 candidates eliminated, 1 remaining
   
-maybe 4361 ? 
+maybe 6245 ? 
 #5, enter feedback, <in-place> and <by-value>: (e.g. '1 2' for 1 in place and 2 by value):   
   
 guesses in 5 tries
