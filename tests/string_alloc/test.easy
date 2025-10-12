@@ -1,0 +1,14 @@
+PROGRAM StringAlloc:
+  TYPE T IS STRUCTURE 
+    FIELD x IS STRING
+  END STRUCTURE;
+
+  FUNCTION abc T:
+    DECLARE a T;
+    SET a.x := "xyz";
+    SET a.x := CHARACTER(100);
+    RETURN a;
+  END FUNCTION abc;
+
+END PROGRAM StringAlloc;
+

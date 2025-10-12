@@ -15,23 +15,8 @@ void free(void *ptr);
 #define TRUE 1
 #define FALSE 0
 
-#define AUTOFREE __attribute__((cleanup(free_array)))
-
-typedef struct
-{
-    void *data;
-} ARRAY;
-
-void free_array(void *ptr)
-{
-    ARRAY *array = (ARRAY *)ptr;
-    void *data = array->data;
-    if (data)
-    {
-        free(data);
-        array->data = NULL;
-    }
-}
+#define AUTOFREE_ARRAY __attribute__((cleanup(free_array)))
+#define AUTOFREE_STRUCT __attribute__((cleanup(free_struct)))
 
 static inline void $sleep(double seconds)
 {
@@ -49,7 +34,7 @@ typedef struct
 {
     int sz;
     int immutable;
-    char data[4096];
+    char *data;
 } STR;
 
 typedef struct
@@ -57,16 +42,126 @@ typedef struct
     const STR *filename;
     int line;
     int character;
-} Location;
+} L;
 
-int FIX(double v) { return (int)v; }
+void STR_copy(STR *to, const STR *from)
+{
+    if (to->data && !to->immutable)
+    {
+        free(to->data);
+    }
+    to->sz = from->sz;
+    to->immutable = from->immutable;
+    if (from->sz > 0)
+    {
+        void *ptr = malloc(from->sz);
+        if (!ptr)
+        {
+            fprintf(stderr, "STR_copy(): out of memory\n");
+            exit(1);
+        }
+        memcpy(ptr, from->data, from->sz);
+        to->data = ptr;
+    }
+    else
+    {
+        to->data = NULL;
+    }
+}
+
+typedef struct STR_REFERENCE
+{
+    STR *str;
+    struct STR_REFERENCE *next;
+} STR_REFERENCE;
+
+typedef struct STRINGS_OWNER
+{
+    STR_REFERENCE *strings;
+} STRINGS_OWNER;
+
+void STR_register(void *owner_, STR *str)
+{
+    STRINGS_OWNER *owner = (STRINGS_OWNER *)owner_;
+
+    STR_REFERENCE *ref = malloc(sizeof(STR_REFERENCE));
+    if (!ref)
+    {
+        fprintf(stderr, "STR_register(): out of memory\n");
+        exit(1);
+    }
+    ref->str = str;
+    ref->next = owner->strings;
+    owner->strings = ref;
+}
+
+void STR_release_strings(STRINGS_OWNER *owner)
+{
+    printf("STR_release_strings: %p\n", owner);
+    STR_REFERENCE *ref = owner->strings;
+    while (ref)
+    {
+        STR_REFERENCE *next = ref->next;
+        if (!ref->str->immutable && ref->str->data)
+        {
+            printf("freeing string: %p\n", ref->str);
+            free(ref->str->data);
+            ref->str->data = NULL;
+        }
+        free(ref);
+        ref = next;
+    }
+    owner->strings = NULL;
+}
+
+typedef struct
+{
+    void *data;
+} ARRAY;
+
+void free_array(void *ptr)
+{
+    printf("free_array: %p\n", ptr);
+    ARRAY *array = (ARRAY *)ptr;
+    void *data = array->data;
+    if (data)
+    {
+        free(data);
+        array->data = NULL;
+    }
+}
+
+void free_struct(void *ptr)
+{
+    printf("free_struct: %p\n", ptr);
+    STRINGS_OWNER *owner = (STRINGS_OWNER *)ptr;
+    STR_release_strings(owner);
+}
+
+int FIX(double v)
+{
+    return (int)v;
+}
 double FLOAT(int v) { return (double)v; }
 double FLOOR(double v) { return (double)((int)v); }
 int LENGTH(STR s) { return s.sz; }
 
 STR CHARACTER(int c)
 {
-    STR v = {.sz = 1, .data = {c, 0}};
+    void *ptr = malloc(1);
+    if (!ptr)
+    {
+        fprintf(stderr, "CHARACTER(): out of memory\n");
+        exit(1);
+    }
+    STR v = {.sz = 1, .data = ptr};
+    v.data[0] = (char)c;
+    {
+        char *buf = alloca(2);
+        buf[0] = (char)c;
+        buf[1] = '\0';
+        printf("CHARACTER: %d -> '%s'\n", c, buf);
+    }
     return v;
 }
 
@@ -99,8 +194,20 @@ STR SUBSTR(STR from, int start, int length)
         fprintf(stderr, "substr (%s): start + length > size (%d + %d = %d > %d)\n", buf, start, length, start + length, from.sz);
         exit(1);
     }
-    STR v = {.sz = length};
+    void *ptr = malloc(length);
+    if (!ptr)
+    {
+        fprintf(stderr, "SUBSTR(): out of memory\n");
+        exit(1);
+    }
+    STR v = {.sz = length, .data = ptr};
     memcpy(v.data, from.data + start, length);
+    {
+        char *buf = alloca(length + 1);
+        memcpy(buf, v.data, length);
+        buf[length] = '\0';
+        printf("SUBSTR: %d,%d -> '%s'\n", start, length, buf);
+    }
     return v;
 }
 
@@ -144,7 +251,13 @@ STR $concat(const char *fmt, ...)
         sz += n;
     }
     va_end(args);
-    STR v = {.sz = sz};
+    void *ptr = malloc(sz);
+    if (!ptr)
+    {
+        fprintf(stderr, "$concat(): out of memory\n");
+        exit(1);
+    }
+    STR v = {.sz = sz, .data = ptr};
     memcpy(v.data, buf, sz);
     return v;
 }

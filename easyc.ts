@@ -6,7 +6,7 @@ import child_process from "node:child_process";
 
 const { execFileSync } = child_process;
 
-function indent(str: string, n: number): string {
+function indent(str: string, n: number = 1): string {
     return str
         .split(/\r?\n/)
         .map((line) => "    ".repeat(n) + line)
@@ -337,13 +337,13 @@ class ArrayType extends Type {
     }
     c(): string {
         const data = this.dynamic ? `*data` : `data[${this.sz()}]`;
-        return emit(["struct", "{", indent(`${this.type.c()} ${data};`, 1), "}"]);
+        return emit(["struct", "{", indent(`STR* strings; ${this.type.c()} ${data};`, 1), "}"]);
     }
     sz = () => `${this.hi.v([])} - ${this.lo.v([])} + 1`;
     zero(code: string[]): string {
         if (!this.dynamic) return "{0}";
         const r = this.hi.context().R();
-        code.push(`void *${r} AUTOFREE = malloc(sizeof(${this.type.c()}) * (${this.sz()}));`);
+        code.push(`void *${r} AUTOFREE_ARRAY = malloc(sizeof(${this.type.c()}) * (${this.sz()}));`);
         return `{ .data = ${r} }`;
     }
     typedef = (alias: string) => `typedef ${this.c()} ${alias}`;
@@ -370,7 +370,7 @@ class StructType extends Type {
         this.fields = fields;
     }
     c(): string {
-        const v = ["struct", "{", ...this.fields.map((f) => indent(f.c() + ";", 1)), "}"];
+        const v = ["struct", "{", indent("STR* strings;"), ...this.fields.map((f) => indent(f.c() + ";", 1)), "}"];
         return emit(v);
     }
     init = () => "{0}";
@@ -445,7 +445,11 @@ class DECLARE extends Node {
     }
     v(code: string[]): string {
         function zero(n: string, type: Type): string | undefined {
-            return `${type.c()} ${n} = ${type.zero(code)};`;
+            const a_type = type instanceof AliasType ? type.reference_type : type;
+            let autofree = "";
+            if (a_type instanceof ArrayType && type.dynamic) autofree = "AUTOFREE_ARRAY ";
+            if (a_type instanceof StructType) autofree = "AUTOFREE_STRUCT ";
+            return `${type.c()} ${autofree}${n} = ${type.zero(code)};`;
         }
         return this.names.map((n) => zero(n, this.type)).join("\n");
     }
@@ -707,15 +711,25 @@ class SET extends Statement {
         const code: string[] = [];
         for (const target of this.target) {
             const variable = find_existing_variable(target);
-            const { reference, type } = expand_variable_reference(variable, target, code);
+            const { reference, type, owner } = expand_variable_reference(variable, target, code);
 
             if (type.constructor.name !== this.expression.type.constructor.name) {
                 throw new GenerateError(
                     `type mismatch in SET: ${type.constructor.name} !== ${this.expression.type.constructor.name} at ${this.token}`
                 );
             }
+
             const value = this.expression.v(code);
-            code.push(`${reference} = ${value};`);
+
+            if (owner.type instanceof AliasType) owner.type = owner.type.reference_type;
+
+            if (type instanceof StringType) {
+                code.push(`STR_copy(&${reference}, &${value});`);
+            } else code.push(`${reference} = ${value};`);
+
+            if (owner.type instanceof StructType || owner.type instanceof ArrayType) {
+                code.push(`STR_register(&${owner.name}, &${reference});`);
+            }
         }
         return emit(code);
     }
@@ -1291,6 +1305,8 @@ function expand_variable_reference(variable: Variable, variable_reference: Varia
     let type: Type = variable.type;
     let reference = variable.name;
 
+    const owner = { name: variable.name, type: variable.type };
+
     for (const part of variable_reference.parts) {
         if (part instanceof VariableSubscript) {
             if (type instanceof AliasType) type = type.reference_type;
@@ -1329,7 +1345,7 @@ function expand_variable_reference(variable: Variable, variable_reference: Varia
             throw new GenerateError(`unexpected variable reference part '${part}' at ${variable.token}`);
         }
     }
-    return { type, reference };
+    return { type, reference, owner };
 }
 
 function find_existing_variable(v: VariableReference): Variable {
