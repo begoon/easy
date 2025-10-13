@@ -4,14 +4,14 @@ PROGRAM String:
   SET s := "abcXYZ";
   SET b := s = "abcXYZ";
   SET b := "abcXYZ" = s;
-  SET b := "abcXYZ" = "abcXYZ";
-  SET b := s = s;
+  SET b := "abcXYZ" = "abcXYZ-*";
+  SET b := s = SUBSTR(s, 0, 6);
 
   SET s := "abcXYZ";
   SET b := s <> "abcXYZ";
   SET b := "abcXYZ" <> s;
-  SET b := "abcXYZ" <> "abcXYZ";
-  SET b := s <> s;
+  SET b := "abcXYZ" <> "abcXYZ-*";
+  // SET b := s <> SUBSTR(s, 0, 6);
 
   OUTPUT SUBSTR("12345", 1, 2);
   OUTPUT SUBSTR(s, 1, 2);

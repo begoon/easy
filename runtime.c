@@ -15,23 +15,7 @@ void free(void *ptr);
 #define TRUE 1
 #define FALSE 0
 
-#define AUTOFREE __attribute__((cleanup(free_array)))
-
-typedef struct
-{
-    void *data;
-} ARRAY;
-
-void free_array(void *ptr)
-{
-    ARRAY *array = (ARRAY *)ptr;
-    void *data = array->data;
-    if (data)
-    {
-        free(data);
-        array->data = NULL;
-    }
-}
+#define AUTOFREE_ARRAY __attribute__((cleanup(free_array)))
 
 static inline void $sleep(double seconds)
 {
@@ -49,7 +33,7 @@ typedef struct
 {
     int sz;
     int immutable;
-    char data[4096];
+    char *data;
 } STR;
 
 typedef struct
@@ -57,17 +41,103 @@ typedef struct
     const STR *filename;
     int line;
     int character;
-} Location;
+} L;
 
-int FIX(double v) { return (int)v; }
+typedef struct string_list
+{
+    struct string_list *next;
+    STR *str;
+} string_list;
+
+static string_list *strings = NULL;
+
+void print_string(STR s, const char *prefix)
+{
+    char *buf = alloca(s.sz + 1);
+    memcpy(buf, s.data, s.sz);
+    buf[s.sz] = '\0';
+    printf("%s: '%s'\n", prefix, buf);
+}
+
+STR make_string(const char *data, int sz)
+{
+    void *ptr = malloc(sz);
+    if (!ptr)
+    {
+        fprintf(stderr, "make_string|data: out of memory\n");
+        exit(1);
+    }
+    STR *str = malloc(sizeof(STR));
+    if (!str)
+    {
+        fprintf(stderr, "make_string|str: out of memory\n");
+        exit(1);
+    }
+    *str = (STR){.sz = sz, .data = ptr, .immutable = 0};
+    memcpy(str->data, data, sz);
+
+    string_list *reference = malloc(sizeof(string_list));
+    if (!reference)
+    {
+        fprintf(stderr, "make_string|list: out of memory\n");
+        exit(1);
+    }
+    reference->str = str;
+    reference->next = strings;
+    strings = reference;
+    return *str;
+}
+
+void free_strings()
+{
+    string_list *list = strings;
+    while (list)
+    {
+        string_list *next = list->next;
+        if (list->str->data && !list->str->immutable)
+        {
+            memset(list->str->data, 0, list->str->sz);
+            free(list->str->data);
+            list->str->data = NULL;
+
+            memset(list->str, 0, sizeof(STR));
+            free(list->str);
+            list->str = NULL;
+        }
+        free(list);
+        list = next;
+    }
+    strings = NULL;
+}
+
+typedef struct
+{
+    void *data;
+} ARRAY;
+
+void free_array(void *ptr)
+{
+    ARRAY *array = (ARRAY *)ptr;
+    if (array->data)
+    {
+        free(array->data);
+        array->data = NULL;
+    }
+}
+
+int FIX(double v)
+{
+    return (int)v;
+}
 double FLOAT(int v) { return (double)v; }
 double FLOOR(double v) { return (double)((int)v); }
 int LENGTH(STR s) { return s.sz; }
 
 STR CHARACTER(int c)
 {
-    STR v = {.sz = 1, .data = {c, 0}};
-    return v;
+    char cbuf = (char)c;
+    STR s = make_string(&cbuf, 1);
+    return s;
 }
 
 STR SUBSTR(STR from, int start, int length)
@@ -99,8 +169,7 @@ STR SUBSTR(STR from, int start, int length)
         fprintf(stderr, "substr (%s): start + length > size (%d + %d = %d > %d)\n", buf, start, length, start + length, from.sz);
         exit(1);
     }
-    STR v = {.sz = length};
-    memcpy(v.data, from.data + start, length);
+    STR v = make_string(from.data + start, length);
     return v;
 }
 
@@ -132,20 +201,20 @@ STR $concat(const char *fmt, ...)
         else if (*fmt == 'S')
         {
             const STR *arg = va_arg(args, STR *);
-            n = arg->sz;
+            n = (int)sizeof(buf) - sz < arg->sz ? (int)sizeof(buf) - sz : arg->sz;
             memcpy(buf + sz, arg->data, n);
         }
         else if (*fmt == 'A')
         {
             const STR arg = va_arg(args, STR);
-            n = arg.sz;
+            n = (int)sizeof(buf) - sz < arg.sz ? (int)sizeof(buf) - sz : arg.sz;
             memcpy(buf + sz, arg.data, n);
         }
         sz += n;
     }
     va_end(args);
-    STR v = {.sz = sz};
-    memcpy(v.data, buf, sz);
+
+    STR v = make_string(buf, sz);
     return v;
 }
 
@@ -190,7 +259,7 @@ void $output(const char *fmt, ...)
         putchar('\n');
 }
 
-void rt_pause(double seconds)
+void runtime_pause(double seconds)
 {
     $sleep(seconds);
 }
@@ -206,15 +275,16 @@ void $index(int index, int lo, int hi, const STR *filename, int line, int charac
 
 int main_program();
 
+void $exit()
+{
+    free_strings();
+    exit(0);
+}
+
 int main()
 {
     main_program();
-    return 0;
-}
-
-void $exit()
-{
-    exit(0);
+    $exit();
 }
 
 #pragma clang diagnostic ignored "-Wincompatible-library-redeclaration"

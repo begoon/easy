@@ -1,0 +1,25 @@
+PROGRAM StringAlloc:
+  TYPE T IS STRUCTURE 
+    FIELD x IS STRING
+  END STRUCTURE;
+
+  DECLARE t T;
+  DECLARE huge ARRAY[10485760] OF STRING; // 1024 * 1024 * 1
+  DECLARE i INTEGER;
+
+  FUNCTION abc T:
+    DECLARE a T;
+    SET a.x := "xyz";
+    SET a.x := CHARACTER(100);
+    RETURN a;
+  END FUNCTION abc;
+
+  SET t := abc();
+  OUTPUT t.x, CHARACTER(101), "  ";
+
+  FOR i := 0 TO 10485759 DO
+    SET huge[i] := "abcdefghijklm" || "nopqrstuvwxyz";
+  END FOR;
+
+END PROGRAM StringAlloc;
+

@@ -6,7 +6,7 @@ import child_process from "node:child_process";
 
 const { execFileSync } = child_process;
 
-function indent(str: string, n: number): string {
+function indent(str: string, n: number = 1): string {
     return str
         .split(/\r?\n/)
         .map((line) => "    ".repeat(n) + line)
@@ -343,7 +343,7 @@ class ArrayType extends Type {
     zero(code: string[]): string {
         if (!this.dynamic) return "{0}";
         const r = this.hi.context().R();
-        code.push(`void *${r} AUTOFREE = malloc(sizeof(${this.type.c()}) * (${this.sz()}));`);
+        code.push(`void *${r} AUTOFREE_ARRAY = malloc(sizeof(${this.type.c()}) * (${this.sz()}));`);
         return `{ .data = ${r} }`;
     }
     typedef = (alias: string) => `typedef ${this.c()} ${alias}`;
@@ -714,6 +714,7 @@ class SET extends Statement {
                     `type mismatch in SET: ${type.constructor.name} !== ${this.expression.type.constructor.name} at ${this.token}`
                 );
             }
+
             const value = this.expression.v(code);
             code.push(`${reference} = ${value};`);
         }
@@ -858,8 +859,11 @@ class INPUT extends Statement {
             const { type, reference } = expand_variable_reference(variable, variable_reference, code);
 
             if (type instanceof StringType) {
-                code.push(`scanf("%4095s", ${reference}.data);`);
-                code.push(`${reference}.sz = strlen(${reference}.data);`);
+                code.push(`{`);
+                code.push(indent(`char buf[4096];`, 1));
+                code.push(indent(`scanf("%4095s", buf);`, 1));
+                code.push(indent(`${reference} = make_string(buf, strlen(buf));`, 1));
+                code.push(`}`);
             } else if (type instanceof IntegerType) code.push(`scanf("%d", &${reference});`);
             else if (type instanceof RealType) code.push(`scanf("%lf", &${reference});`);
             else throw new GenerateError(`unsupported variable '${variable}' type in INPUT at ${variable.token}`);
@@ -1058,10 +1062,18 @@ function string_compare(left: Expression, right: Expression, operation: string, 
     if (operation !== "==" && operation !== "!=") return null;
 
     function is_string_type(e: Expression): [boolean, string | null] {
-        if (!(e instanceof VariableReference)) return [false, null];
-        const variable = find_existing_variable(e);
-        const { type, reference } = expand_variable_reference(variable, e, []);
-        return [type instanceof StringType, reference];
+        if (e instanceof VariableReference) {
+            const variable = find_existing_variable(e);
+            const { type, reference } = expand_variable_reference(variable, e, []);
+            return [type instanceof StringType, reference];
+        }
+        if (e.type instanceof StringType) return [true, e.v(code)];
+        if (e instanceof FunctionCall) {
+            const func = e.context().functions[e.name];
+            if (!func) throw new GenerateError(`unknown function '${e.name}' at ${e.token}`);
+            if (func.type instanceof StringType) return [true, e.v(code)];
+        }
+        return [false, null];
     }
 
     const [left_string, left_reference] = is_string_type(left);
@@ -1070,7 +1082,15 @@ function string_compare(left: Expression, right: Expression, operation: string, 
     if (left_string || right_string) {
         const cmp = operation === "!=" ? "!=" : "==";
         const r = left.context().R();
-        code.push(`const int ${r} = strcmp(${left_reference}.data, ${right_reference}.data) ${cmp} 0;`);
+        const left_sz = `${left_reference}.sz`;
+        const right_sz = `${right_reference}.sz`;
+        console.log(right_reference);
+        code.push(
+            `const int ${r} = ` +
+                `${left_sz} == ${right_sz} ` +
+                `&& ` +
+                `memcmp(${left_reference}.data, ${right_reference}.data, ${left_sz}) ${cmp} 0;`
+        );
         return r;
     }
     return null;
@@ -1291,6 +1311,8 @@ function expand_variable_reference(variable: Variable, variable_reference: Varia
     let type: Type = variable.type;
     let reference = variable.name;
 
+    const owner = { name: variable.name, type: variable.type };
+
     for (const part of variable_reference.parts) {
         if (part instanceof VariableSubscript) {
             if (type instanceof AliasType) type = type.reference_type;
@@ -1329,7 +1351,7 @@ function expand_variable_reference(variable: Variable, variable_reference: Varia
             throw new GenerateError(`unexpected variable reference part '${part}' at ${variable.token}`);
         }
     }
-    return { type, reference };
+    return { type, reference, owner };
 }
 
 function find_existing_variable(v: VariableReference): Variable {

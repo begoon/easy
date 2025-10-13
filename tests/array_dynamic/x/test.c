@@ -13,7 +13,7 @@ int main_program()
 {
     sz = 1024;
     {
-        void *$r1 AUTOFREE = malloc(sizeof(int) * (sz - 1 + 1));
+        void *$r1 AUTOFREE_ARRAY = malloc(sizeof(int) * (sz - 1 + 1));
         struct
         {
             int *data;
