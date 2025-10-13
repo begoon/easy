@@ -84,7 +84,7 @@ int main_program()
     const int $r1 = (topnum > 0);
     if ($r1)
     {
-        void *$r2 AUTOFREE = malloc(sizeof(int) * (topnum - 1 + 1));
+        void *$r2 AUTOFREE_ARRAY = malloc(sizeof(int) * (topnum - 1 + 1));
         struct
         {
             int *data;

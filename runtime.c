@@ -16,7 +16,6 @@ void free(void *ptr);
 #define FALSE 0
 
 #define AUTOFREE_ARRAY __attribute__((cleanup(free_array)))
-#define AUTOFREE_STRUCT __attribute__((cleanup(free_struct)))
 
 static inline void $sleep(double seconds)
 {
@@ -44,74 +43,71 @@ typedef struct
     int character;
 } L;
 
-void STR_copy(STR *to, const STR *from)
+typedef struct string_list
 {
-    if (to->data && !to->immutable)
-    {
-        free(to->data);
-    }
-    to->sz = from->sz;
-    to->immutable = from->immutable;
-    if (from->sz > 0)
-    {
-        void *ptr = malloc(from->sz);
-        if (!ptr)
-        {
-            fprintf(stderr, "STR_copy(): out of memory\n");
-            exit(1);
-        }
-        memcpy(ptr, from->data, from->sz);
-        to->data = ptr;
-    }
-    else
-    {
-        to->data = NULL;
-    }
+    struct string_list *next;
+    STR *str;
+} string_list;
+
+static string_list *strings = NULL;
+
+void print_string(STR s, const char *prefix)
+{
+    char *buf = alloca(s.sz + 1);
+    memcpy(buf, s.data, s.sz);
+    buf[s.sz] = '\0';
+    printf("%s: '%s'\n", prefix, buf);
 }
 
-typedef struct STR_REFERENCE
+STR make_string(const char *data, int sz)
 {
-    STR *str;
-    struct STR_REFERENCE *next;
-} STR_REFERENCE;
-
-typedef struct STRINGS_OWNER
-{
-    STR_REFERENCE *strings;
-} STRINGS_OWNER;
-
-void STR_register(void *owner_, STR *str)
-{
-    STRINGS_OWNER *owner = (STRINGS_OWNER *)owner_;
-
-    STR_REFERENCE *ref = malloc(sizeof(STR_REFERENCE));
-    if (!ref)
+    void *ptr = malloc(sz);
+    if (!ptr)
     {
-        fprintf(stderr, "STR_register(): out of memory\n");
+        fprintf(stderr, "make_string|data: out of memory\n");
         exit(1);
     }
-    ref->str = str;
-    ref->next = owner->strings;
-    owner->strings = ref;
+    STR *str = malloc(sizeof(STR));
+    if (!str)
+    {
+        fprintf(stderr, "make_string|str: out of memory\n");
+        exit(1);
+    }
+    *str = (STR){.sz = sz, .data = ptr, .immutable = 0};
+    memcpy(str->data, data, sz);
+
+    string_list *reference = malloc(sizeof(string_list));
+    if (!reference)
+    {
+        fprintf(stderr, "make_string|list: out of memory\n");
+        exit(1);
+    }
+    reference->str = str;
+    reference->next = strings;
+    strings = reference;
+    return *str;
 }
 
-void STR_release_strings(STRINGS_OWNER *owner)
+void free_strings()
 {
-    printf("STR_release_strings: %p\n", owner);
-    STR_REFERENCE *ref = owner->strings;
-    while (ref)
+    string_list *list = strings;
+    while (list)
     {
-        STR_REFERENCE *next = ref->next;
-        if (!ref->str->immutable && ref->str->data)
+        string_list *next = list->next;
+        if (list->str->data && !list->str->immutable)
         {
-            printf("freeing string: %p\n", ref->str);
-            free(ref->str->data);
-            ref->str->data = NULL;
+            memset(list->str->data, 0, list->str->sz);
+            free(list->str->data);
+            list->str->data = NULL;
+
+            memset(list->str, 0, sizeof(STR));
+            free(list->str);
+            list->str = NULL;
         }
-        free(ref);
-        ref = next;
+        free(list);
+        list = next;
     }
-    owner->strings = NULL;
+    strings = NULL;
 }
 
 typedef struct
@@ -121,21 +117,12 @@ typedef struct
 
 void free_array(void *ptr)
 {
-    printf("free_array: %p\n", ptr);
     ARRAY *array = (ARRAY *)ptr;
-    void *data = array->data;
-    if (data)
+    if (array->data)
     {
-        free(data);
+        free(array->data);
         array->data = NULL;
     }
-}
-
-void free_struct(void *ptr)
-{
-    printf("free_struct: %p\n", ptr);
-    STRINGS_OWNER *owner = (STRINGS_OWNER *)ptr;
-    STR_release_strings(owner);
 }
 
 int FIX(double v)
@@ -148,21 +135,9 @@ int LENGTH(STR s) { return s.sz; }
 
 STR CHARACTER(int c)
 {
-    void *ptr = malloc(1);
-    if (!ptr)
-    {
-        fprintf(stderr, "CHARACTER(): out of memory\n");
-        exit(1);
-    }
-    STR v = {.sz = 1, .data = ptr};
-    v.data[0] = (char)c;
-    {
-        char *buf = alloca(2);
-        buf[0] = (char)c;
-        buf[1] = '\0';
-        printf("CHARACTER: %d -> '%s'\n", c, buf);
-    }
-    return v;
+    char cbuf = (char)c;
+    STR s = make_string(&cbuf, 1);
+    return s;
 }
 
 STR SUBSTR(STR from, int start, int length)
@@ -194,20 +169,7 @@ STR SUBSTR(STR from, int start, int length)
         fprintf(stderr, "substr (%s): start + length > size (%d + %d = %d > %d)\n", buf, start, length, start + length, from.sz);
         exit(1);
     }
-    void *ptr = malloc(length);
-    if (!ptr)
-    {
-        fprintf(stderr, "SUBSTR(): out of memory\n");
-        exit(1);
-    }
-    STR v = {.sz = length, .data = ptr};
-    memcpy(v.data, from.data + start, length);
-    {
-        char *buf = alloca(length + 1);
-        memcpy(buf, v.data, length);
-        buf[length] = '\0';
-        printf("SUBSTR: %d,%d -> '%s'\n", start, length, buf);
-    }
+    STR v = make_string(from.data + start, length);
     return v;
 }
 
@@ -239,26 +201,20 @@ STR $concat(const char *fmt, ...)
         else if (*fmt == 'S')
         {
             const STR *arg = va_arg(args, STR *);
-            n = arg->sz;
+            n = (int)sizeof(buf) - sz < arg->sz ? (int)sizeof(buf) - sz : arg->sz;
             memcpy(buf + sz, arg->data, n);
         }
         else if (*fmt == 'A')
         {
             const STR arg = va_arg(args, STR);
-            n = arg.sz;
+            n = (int)sizeof(buf) - sz < arg.sz ? (int)sizeof(buf) - sz : arg.sz;
             memcpy(buf + sz, arg.data, n);
         }
         sz += n;
     }
     va_end(args);
-    void *ptr = malloc(sz);
-    if (!ptr)
-    {
-        fprintf(stderr, "$concat(): out of memory\n");
-        exit(1);
-    }
-    STR v = {.sz = sz, .data = ptr};
-    memcpy(v.data, buf, sz);
+
+    STR v = make_string(buf, sz);
     return v;
 }
 
@@ -303,7 +259,7 @@ void $output(const char *fmt, ...)
         putchar('\n');
 }
 
-void rt_pause(double seconds)
+void runtime_pause(double seconds)
 {
     $sleep(seconds);
 }
@@ -319,15 +275,16 @@ void $index(int index, int lo, int hi, const STR *filename, int line, int charac
 
 int main_program();
 
+void $exit()
+{
+    free_strings();
+    exit(0);
+}
+
 int main()
 {
     main_program();
-    return 0;
-}
-
-void $exit()
-{
-    exit(0);
+    $exit();
 }
 
 #pragma clang diagnostic ignored "-Wincompatible-library-redeclaration"

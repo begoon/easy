@@ -38,19 +38,19 @@ STR bf(STR program)
         if (!(pc <= $r2)) break;
         const STR $r4 = SUBSTR(program, pc, 1);
         ch = $r4;
-        const int $r5 = strcmp(ch.data, $2.data) == 0;
+        const int $r5 = ch.sz == $2.sz && memcmp(ch.data, $2.data, ch.sz) == 0;
         if ($r5)
         {
             const int $r6 = (ptr + 1);
             ptr = $r6;
         }
-        const int $r7 = strcmp(ch.data, $3.data) == 0;
+        const int $r7 = ch.sz == $3.sz && memcmp(ch.data, $3.data, ch.sz) == 0;
         if ($r7)
         {
             const int $r8 = (ptr - 1);
             ptr = $r8;
         }
-        const int $r9 = strcmp(ch.data, $4.data) == 0;
+        const int $r9 = ch.sz == $4.sz && memcmp(ch.data, $4.data, ch.sz) == 0;
         if ($r9)
         {
             $index(ptr, 0, 299, &$F, 26, 33);
@@ -58,7 +58,7 @@ STR bf(STR program)
             const int $r10 = (tape.data[(ptr) - (0)] + 1);
             tape.data[(ptr) - (0)] = $r10;
         }
-        const int $r11 = strcmp(ch.data, $5.data) == 0;
+        const int $r11 = ch.sz == $5.sz && memcmp(ch.data, $5.data, ch.sz) == 0;
         if ($r11)
         {
             $index(ptr, 0, 299, &$F, 27, 33);
@@ -66,7 +66,7 @@ STR bf(STR program)
             const int $r12 = (tape.data[(ptr) - (0)] - 1);
             tape.data[(ptr) - (0)] = $r12;
         }
-        const int $r13 = strcmp(ch.data, $6.data) == 0;
+        const int $r13 = ch.sz == $6.sz && memcmp(ch.data, $6.data, ch.sz) == 0;
         if ($r13)
         {
             $index(ptr, 0, 299, &$F, 28, 57);
@@ -74,7 +74,7 @@ STR bf(STR program)
             const STR $r14 = $concat("AA", out, $r15);
             out = $r14;
         }
-        const int $r16 = strcmp(ch.data, $7.data) == 0;
+        const int $r16 = ch.sz == $7.sz && memcmp(ch.data, $7.data, ch.sz) == 0;
         if ($r16)
         {
             $index(ptr, 0, 299, &$F, 30, 17);
@@ -90,13 +90,13 @@ STR bf(STR program)
                     pc = $r19;
                     const STR $r20 = SUBSTR(program, pc, 1);
                     ch = $r20;
-                    const int $r21 = strcmp(ch.data, $7.data) == 0;
+                    const int $r21 = ch.sz == $7.sz && memcmp(ch.data, $7.data, ch.sz) == 0;
                     if ($r21)
                     {
                         const int $r22 = (depth + 1);
                         depth = $r22;
                     }
-                    const int $r23 = strcmp(ch.data, $8.data) == 0;
+                    const int $r23 = ch.sz == $8.sz && memcmp(ch.data, $8.data, ch.sz) == 0;
                     if ($r23)
                     {
                         const int $r24 = (depth - 1);
@@ -106,7 +106,7 @@ STR bf(STR program)
                 }
             }
         }
-        const int $r25 = strcmp(ch.data, $8.data) == 0;
+        const int $r25 = ch.sz == $8.sz && memcmp(ch.data, $8.data, ch.sz) == 0;
         if ($r25)
         {
             $index(ptr, 0, 299, &$F, 40, 17);
@@ -122,13 +122,13 @@ STR bf(STR program)
                     pc = $r28;
                     const STR $r29 = SUBSTR(program, pc, 1);
                     ch = $r29;
-                    const int $r30 = strcmp(ch.data, $8.data) == 0;
+                    const int $r30 = ch.sz == $8.sz && memcmp(ch.data, $8.data, ch.sz) == 0;
                     if ($r30)
                     {
                         const int $r31 = (depth + 1);
                         depth = $r31;
                     }
-                    const int $r32 = strcmp(ch.data, $7.data) == 0;
+                    const int $r32 = ch.sz == $7.sz && memcmp(ch.data, $7.data, ch.sz) == 0;
                     if ($r32)
                     {
                         const int $r33 = (depth - 1);

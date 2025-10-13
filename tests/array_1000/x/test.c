@@ -32,12 +32,12 @@ int main_program()
     $output("i", b.data[(1000) - (1000)]);
     n = 1000;
     {
-        void *$r1 AUTOFREE = malloc(sizeof(double) * (n - n + 1));
+        void *$r1 AUTOFREE_ARRAY = malloc(sizeof(double) * (n - n + 1));
         struct
         {
             double *data;
         } c = { .data = $r1 };
-        void *$r2 AUTOFREE = malloc(sizeof(struct
+        void *$r2 AUTOFREE_ARRAY = malloc(sizeof(struct
         {
             double data[1 - 0 + 1];
         }) * (n - n + 1));

@@ -15,8 +15,11 @@ int main_program()
 {
     scanf("%d", &i);
     scanf("%lf", &f);
-    scanf("%4095s", s.data);
-    s.sz = strlen(s.data);
+    {
+        char buf[4096];
+        scanf("%4095s", buf);
+        s = make_string(buf, strlen(buf));
+    }
     const STR $r1 = $concat("AiA", $0, i, $1);
     $output("A", $r1);
     const STR $r2 = $concat("ArA", $2, f, $1);
