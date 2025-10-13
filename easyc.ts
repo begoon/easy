@@ -88,9 +88,13 @@ const KEYWORDS = new Set([
     //
     "TYPE",
     "IS",
-    "DECLARE",
+    "NAME",
+    //
+    "EXTERNAL",
     "FUNCTION",
     "PROCEDURE",
+    //
+    "DECLARE",
     "SET",
     //
     "CALL",
@@ -1549,6 +1553,7 @@ class Parser {
     procedures_and_functions_section(): (PROCEDURE | FUNCTION)[] {
         const subroutines: (PROCEDURE | FUNCTION)[] = [];
         while (true) {
+            const is_external = this.accept("EXTERNAL");
             const token = this.accept(["FUNCTION", "PROCEDURE"]);
             if (!token) break;
             const name = this.eat("IDENT").value;
@@ -1566,6 +1571,7 @@ class Parser {
             this.eat(":");
             const segment = this.segment();
             this.eat("END");
+            if (is_external) this.eat("EXTERNAL");
             this.eat(token.value);
             this.eat(name);
             this.eat(";");
@@ -1591,6 +1597,7 @@ class Parser {
             const token = this.eat("IDENT");
             const name = token.value;
             const type = this.parse_type();
+            this.accept("NAME");
             const variable = new Variable(token, name, type);
             parameters.push(variable);
             enlist_variable(variable, this.scope());
