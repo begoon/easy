@@ -32,7 +32,7 @@ or step by step:
 node easyc.ts life.easy && cc life.c -o test -I . && ./test
 ```
 
-[life.png](life.png)
+[<img src="life.png">](life.png)
 
 `easyc.ts` compiles [life.easy](tests/life/test.easy) to [life.c](tests/life/x/test.c), and then Clang compiles `easy.c` to the executable.
 
