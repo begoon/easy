@@ -1,10 +1,20 @@
 # EASY language compiler
 
-The repository contains a compiler for the educational programming language Easy, as described in the book [Etudes for Programmers](https://dl.acm.org/doi/10.5555/1096892) by Charles Wetherell.
+The repository contains a compiler for the educational programming language called Easy, as described in the book [Etudes for Programmers](https://dl.acm.org/doi/10.5555/1096892) (1978) by Charles Wetherell.
 
-The compiler is also educational.
+NOTE: The compiler is also educational only. The compiler was written from scratch, and I had no compiler-writing experience before. My purpose was to learn compiler implementations and runtimes.
 
-## Overview
+## EASY language intro
+
+The program below is from the book. It is intended to demonstrate the gist of the EASY language. This code was my very first milestone when developing the compiler:
+
+[<img src="sieve1.png">](sieve1.png)
+
+[<img src="sieve2.png">](sieve2.png)
+
+Here is the [source](tests/sieve/test.easy) of the program and also the [output of the compiler](tests/sieve/x/test.c).
+
+## Implementation
 
 The compiler is implemented in Typescript. The compiler emits C code, which Clang or GCC then compiles into the native binary. The "runtime.c" file is a bare minimum runtime support. In the `x` subfolders of the tests, there are `test.c` files, representing the output of the compiler.
 
@@ -19,24 +29,20 @@ easyc run life.easy
 or step by step:
 
 ```sh
-node easyc.ts life.easy && cc life.c -o test.exe -I . && ./test.exe
+node easyc.ts life.easy && cc life.c -o test -I . && ./test
 ```
 
-NOTE: `.exe` extension is optional.
+`easyc.ts` compiles `[life.easy](tests/life/test.easy)` to `[life.c](tests/life/x/test.c)`, and then Clang compiles `easy.c` to the executable.
 
-`easyc.ts` compiles `life.easy` to `life.c`, and then Clang compiles `easy.c` to the executable.
+The Easy language syntax is fully supported, according to the book. However, there are a few points worth mentioning.
 
-The Easy language is supported in full, according to the book. However, there are a few points worth mentioning.
-
-`EXTERNAL` subroutines and `NAME` aliases are not supported.
+`EXTERNAL` subroutines and `NAME` aliases are allowed but not supported semantically.
 
 Multiple `PROGRAM` segments are not supported, and the program should have only one `PROGRAM` segment, which becomes its entry point. The identifiers (type, variables, subroutines) from the `PROGRAM` segment are hoisted to the global namespace and visible in all parts of the Easy program.
 
-The maximum length of the `STRING` variable is 4096 bytes.
-
 According to the book, Easy is a copy semantics language. It means that copying a primitive type, a structure, or an array always makes a full, deep copy. The subroutine arguments and the function return value are also copied deeply to provide the value semantics.
 
-The only exception to the value semantics is the array, whose size is not known at compile time. Such arrays are allocated dynamically, but the copy operation (an assignment, or passing as a subroutine argument, or returning as a result from the function) performs a shallow copy (runtime limitation). Also, the arrays in the top-level `PROGRAM` segment must have a compile-time known size.
+The only exception to the value semantics is the array, whose size is not known at compile time. Such arrays are allocated dynamically, but the copy operation (an assignment, passing as a subroutine argument, or returning as a result from the function) performs a shallow copy (a runtime limitation). Also, the arrays in the top-level `PROGRAM` segment must have a compile-time known size.
 
 The compiler uses C `struct` to implement compound types, such as strings, arrays, and structures.
 
@@ -59,7 +65,7 @@ Additionally, a test may have `test.tokens` (lexer tokens), `test.s` (symbol tab
 - JavaScript runtime: `bun` or `node` (24+) (remember - the compiler is written in TypeScript)
 - clang 17+ (to compile the Easy compiler output to a native binary)
 - `just` (`make` alternative) - https://just.systems/
-- `docker` (optional, if we want to run tests in an isolated container
+- `docker` (optional, if we want to run tests in an isolated container)
 
 Currently, the compiler test pipeline runs either locally by `just test-compiler` or by `just docker-test`.
 
@@ -67,7 +73,7 @@ NOTE: Running tests in the Linux container helps because the Clang memory saniti
 
 ## Examples
 
-Take a feel of the compiler, run `just life` to run the Convey's Game of Life in the console.
+Get a feel for the compiler, and run `just life` to play the Convey's Game of Life in the console.
 
 Other examples:
 
@@ -75,7 +81,9 @@ Other examples:
 
 `just run fizzbuzz` - FizzBuzz
 
-`just run mastermind` - to play Mastermind against the computer.
+`just run quine` - the program which prints its source (an etude from the book)
+
+`just run mastermind` - to play Mastermind, so the computer will guess your code using the Knuth's minimax algoright for Mastermind (also an etude from the book about)
 
 `just run sieve` - to run the Eratosthenes Sieve (from the book) - enter a maximum number, and the program will find all primes up to this number.
 
@@ -83,7 +91,7 @@ Other examples:
 
 ## Compiler internals overview
 
-As mentioned above, the compiler utilises a manual recursive descent parser, as specified in the [grammar](GRAMMAR.md) from the book.
+As mentioned above, the compiler utilises a manual recursive descent parser, as specified in the [Easy grammar specification](GRAMMAR.md) from the book.
 
 Each AST node can emit C code in either `c()` or `v()` functions. `v()` function is used by expression nodes. The `v()` function emits C code and also the name of the variable with the result of the expression.
 
@@ -92,8 +100,3 @@ Each AST node can emit C code in either `c()` or `v()` functions. `v()` function
 - [easy-cot.yaml](easy-cot.yml) - syntax highlighting for Easy for the macOS "cot" editor
 - <https://github.com/begoon/easy-vscode> - a VSCode extension for Easy syntax highlighting
 - <https://github.com/begoon/easy-lsp> - a prototype of the VSCode LSP for Easy (proof of concept)
-
-## Possible further work
-
-- optimise STRINGs support in runtime
-- emit LLVM IR instead of C
