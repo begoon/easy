@@ -85,7 +85,7 @@ Other examples:
 
 `just run quine` - the program which prints its source (an etude from the book)
 
-`just run mastermind` - to play Mastermind, so the computer will guess your code using the Knuth's minimax algoright for Mastermind (also an etude from the book about)
+`just run mastermind` - to play Mastermind, so the computer will guess your code using the Knuth's minimax algorithm for Mastermind (also an etude from the book about)
 
 `just run sieve` - to run the Eratosthenes Sieve (from the book) - enter a maximum number, and the program will find all primes up to this number.
 
