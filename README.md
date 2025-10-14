@@ -32,7 +32,7 @@ or step by step:
 node easyc.ts life.easy && cc life.c -o test -I . && ./test
 ```
 
-`easyc.ts` compiles `[life.easy](tests/life/test.easy)` to `[life.c](tests/life/x/test.c)`, and then Clang compiles `easy.c` to the executable.
+`easyc.ts` compiles [life.easy](tests/life/test.easy) to [life.c](tests/life/x/test.c), and then Clang compiles `easy.c` to the executable.
 
 The Easy language syntax is fully supported, according to the book. However, there are a few points worth mentioning.
 
