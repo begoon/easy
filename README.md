@@ -16,7 +16,7 @@ Here is the [source](tests/sieve/test.easy) of the program and also the [output 
 
 ## Implementation
 
-The compiler is implemented in Typescript. The compiler emits C code, which Clang or GCC then compiles into the native binary. The "runtime.c" file is a bare minimum runtime support. In the `x` subfolders of the tests, there are `test.c` files, representing the output of the compiler.
+The compiler is implemented in Typescript. The compiler emits C code, which Clang or GCC then compiles into the native binary. The [runtime.c](runtime.c) file is a bare minimum runtime support. In the `x` subfolders of the tests, there are `test.c` files, representing the output of the compiler.
 
 The compiler requires a Javascript runtime (Node 24+ or Bun) and Clang 17+.
 
