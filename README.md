@@ -64,7 +64,7 @@ Additionally, a test may have `test.tokens` (lexer tokens), `test.s` (symbol tab
 
 - JavaScript runtime: `bun` or `node` (24+) (remember - the compiler is written in TypeScript)
 - clang 17+ (to compile the Easy compiler output to a native binary)
-- `just` (`make` alternative) - https://just.systems/
+- `just` (`make` [alternative](https://just.systems/))
 - `docker` (optional, if we want to run tests in an isolated container)
 
 Currently, the compiler test pipeline runs either locally by `just test-compiler` or by `just docker-test`.
@@ -94,6 +94,10 @@ Other examples:
 As mentioned above, the compiler utilises a manual recursive descent parser, as specified in the [Easy grammar specification](GRAMMAR.md) from the book.
 
 Each AST node can emit C code in either `c()` or `v()` functions. `v()` function is used by expression nodes. The `v()` function emits C code and also the name of the variable with the result of the expression.
+
+## Outro
+
+As I mentioned at the beginning, this is a purely educational project where I wanted to learn how to write compilers. I never implemented computers before, and implementing one was an interesting challenge.
 
 ## Related
 
