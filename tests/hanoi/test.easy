@@ -1,0 +1,19 @@
+PROGRAM Hanoi:
+
+PROCEDURE move(n INTEGER, a INTEGER, b INTEGER):
+  OUTPUT "move ", n, " from ", a, " to ", b;
+END PROCEDURE move;
+
+PROCEDURE hanoi(n INTEGER, a INTEGER, b INTEGER, c INTEGER):
+  IF n = 1 THEN
+    CALL move(1, a, c);
+  ELSE
+    CALL hanoi(n - 1, a, c, b);
+    CALL move(n, a, c);
+    CALL hanoi(n - 1, b, a, c);
+  FI;
+END PROCEDURE hanoi;
+
+CALL hanoi(4, 1, 2, 3);
+
+END PROGRAM Hanoi;

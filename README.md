@@ -89,7 +89,9 @@ Other examples:
 
 `just run sieve` - to run the Eratosthenes Sieve (from the book) - enter a maximum number, and the program will find all primes up to this number.
 
-`just run rule_110` - to run Rule 110 automaton.
+`just run rule_110` - to run the Rule 110 automaton.
+
+`just run hanoi` - to run the Hanoi Tower puzze recursive solver.
 
 ## Compiler internals overview
 
