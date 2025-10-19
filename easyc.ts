@@ -886,7 +886,10 @@ class OUTPUT extends Statement {
         const code: string[] = [];
         const fmt: string[] = [];
         const parameters = this.arguments.map((a) => expression_stringer(a, fmt, "OUTPUT", code)).join(", ");
-        code.push(`$output("${fmt.join("")}", ${parameters});`);
+        let v = `$output("${fmt.join("")}"`;
+        if (parameters.length > 0) v += `, ${parameters}`;
+        v += ");";
+        code.push(v);
         return emit(code);
     }
 }
@@ -1779,8 +1782,11 @@ class Parser {
 
     output_statement(): OUTPUT {
         const token = this.eat("OUTPUT");
-        const expressions = [this.expression()];
-        while (this.accept(",")) expressions.push(this.expression());
+        const expressions: Expression[] = [];
+        if (this.current().value != ";") {
+            expressions.push(this.expression());
+            while (this.accept(",")) expressions.push(this.expression());
+        }
         this.eat(";");
         return new OUTPUT(token, this.scope(), expressions);
     }

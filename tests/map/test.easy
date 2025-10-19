@@ -1,0 +1,120 @@
+PROGRAM map:
+
+DECLARE node_number INTEGER;
+
+INPUT node_number;
+IF node_number < 1 THEN
+  OUTPUT "ERROR: number of nodes must be 1 or greater";
+  EXIT;
+ELSE
+  TYPE Node IS STRUCTURE
+    FIELD id IS INTEGER,
+    FIELD neighbour_number IS INTEGER,
+    FIELD name IS STRING,
+    FIELD neighbours IS ARRAY[1:10] OF INTEGER
+  END STRUCTURE;
+
+  DECLARE adjacency ARRAY[1:49] OF ARRAY [1:49] OF BOOLEAN;
+  DECLARE nodes ARRAY[1:node_number] OF Node;
+  
+  OUTPUT "NUMBER OF nodes ", node_number;
+  OUTPUT;
+  
+  BEGIN
+    DECLARE i INTEGER;
+
+    FOR i := 1 TO node_number DO
+      DECLARE j INTEGER;
+  
+      INPUT nodes[i].id, nodes[i].neighbour_number, nodes[i].name;
+      
+      FOR j := 1 TO nodes[i].neighbour_number DO
+        INPUT nodes[i].neighbours[j];
+        SET adjacency[nodes[i].id][nodes[i].neighbours[j]] := TRUE;
+      END FOR;
+      OUTPUT CHARACTER(13);
+    END FOR;
+  
+    INPUT i;
+    IF i <> 0 THEN OUTPUT "ERROR: expected 0 at the end of input"; EXIT; FI;
+  
+    OUTPUT "ADJACENCY MATRIX:"; OUTPUT;
+  
+    OUTPUT "    ", CHARACTER(0);
+    FOR i := 1 TO node_number DO
+      DECLARE j INTEGER;
+      SET j := (i MOD 10);
+      OUTPUT j, CHARACTER(0);
+    END FOR;
+    OUTPUT;
+  
+    OUTPUT "    ", CHARACTER(0);
+    FOR i := 1 TO node_number DO OUTPUT "-"; END FOR;
+    OUTPUT;
+  
+    FOR i := 1 TO node_number DO
+      DECLARE j INTEGER;
+  
+      IF i < 10 THEN OUTPUT " "; FI;
+      OUTPUT i, "| ", CHARACTER(0);
+      FOR j := 1 TO node_number DO
+        IF adjacency[i][j] = TRUE THEN OUTPUT "*"; ELSE OUTPUT " "; FI;
+      END FOR;
+      OUTPUT CHARACTER(10);
+    END FOR;
+  END;
+
+  BEGIN
+    DECLARE colors ARRAY[1:node_number] OF INTEGER;
+    DECLARE available ARRAY[1:node_number] OF BOOLEAN;
+    DECLARE max_color INTEGER;
+    DECLARE i INTEGER;
+
+    FOR i := 1 TO node_number DO SET colors[i] := -1; END FOR;
+    SET colors[1] := 1;
+    SET max_color := 1;
+
+    FOR i := 1 TO node_number DO SET available[i] := TRUE; END FOR;
+
+    FOR i := 2 TO node_number DO
+      DECLARE j INTEGER;
+      DECLARE found BOOLEAN;
+
+      FOR j := 1 TO node_number DO
+        IF adjacency[i][j] = TRUE THEN
+          IF colors[j] <> -1 THEN
+            SET available[colors[j]] := FALSE;
+          FI;
+        FI;
+      END FOR;
+
+      SET found := FALSE;
+      FOR j := 1 TO node_number WHILE NOT found DO
+          IF available[j] = TRUE THEN
+            SET colors[i] := j;
+            IF j > max_color THEN SET max_color := j; FI;
+            SET found := TRUE;
+          FI;
+      END FOR;
+
+      FOR j := 1 TO node_number DO SET available[j] := TRUE; END FOR;
+    END FOR;
+
+    OUTPUT; OUTPUT "NUMBER OF COLORS NEEDED: ", max_color; OUTPUT;
+
+    BEGIN
+      DECLARE (color, i) INTEGER;
+      FOR color := 1 TO max_color DO
+        OUTPUT "COLOR ", color, ", nodes: ", CHARACTER(0);
+        FOR i := 1 TO node_number DO
+          IF colors[i] = color THEN
+            OUTPUT nodes[i].id, " ";
+          FI;
+        END FOR;
+        OUTPUT CHARACTER(10);
+      END FOR;
+    END;
+  END;
+FI;
+
+END PROGRAM map;

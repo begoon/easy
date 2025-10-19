@@ -220,8 +220,16 @@ STR $concat(const char *fmt, ...)
 
 void $output(const char *fmt, ...)
 {
+    if (fmt[0] == '\0')
+    {
+        putchar('\n');
+        return;
+    }
+
     va_list args;
     va_start(args, fmt);
+
+    int zero = 0;
 
     int n = 0;
     for (; *fmt != '\0'; fmt += 1)
@@ -238,24 +246,36 @@ void $output(const char *fmt, ...)
         {
             const STR *arg = va_arg(args, STR *);
             n = arg->sz;
-            char *const buf = alloca(n + 1);
-            memcpy(buf, arg->data, n);
-            buf[n] = '\0';
-            n = printf("%s", buf);
+
+            zero = n == 1 && arg->data[0] == '\0' ? 1 : 0;
+
+            if (!zero)
+            {
+                char *const buf = alloca(n + 1);
+                memcpy(buf, arg->data, n);
+                buf[n] = '\0';
+                n = printf("%s", buf);
+            }
         }
         else if (*fmt == 'A')
         {
             const STR arg = va_arg(args, STR);
             n = arg.sz;
-            char *const buf = alloca(n + 1);
-            memcpy(buf, arg.data, n);
-            buf[n] = '\0';
-            n = printf("%s", buf);
+
+            zero = n == 1 && arg.data[0] == '\0' ? 1 : 0;
+
+            if (!zero)
+            {
+                char *const buf = alloca(n + 1);
+                memcpy(buf, arg.data, n);
+                buf[n] = '\0';
+                n = printf("%s", buf);
+            }
         }
     }
     va_end(args);
 
-    if (n > 1 || fmt[-1] == 'i')
+    if (!zero && (n > 1 || fmt[-1] == 'i'))
         putchar('\n');
 }
 
