@@ -15,7 +15,7 @@ typedef struct
 } Node;
 int node_number = 0;
 STR $0 = { .data = "ERROR: number of nodes must be 1 or greater", .sz = 43, .immutable = 1 };
-STR $1 = { .data = "NUMBER OF nodes ", .sz = 16, .immutable = 1 };
+STR $1 = { .data = "NUMBER OF NODES ", .sz = 16, .immutable = 1 };
 STR $F = { .data = "tests/map/test.easy", .sz = 19, .immutable = 1 };
 STR $3 = { .data = "ERROR: expected 0 at the end of input", .sz = 37, .immutable = 1 };
 STR $4 = { .data = "ADJACENCY MATRIX:", .sz = 17, .immutable = 1 };
@@ -26,7 +26,7 @@ STR $8 = { .data = "| ", .sz = 2, .immutable = 1 };
 STR $9 = { .data = "*", .sz = 1, .immutable = 1 };
 STR $10 = { .data = "NUMBER OF COLORS NEEDED: ", .sz = 25, .immutable = 1 };
 STR $11 = { .data = "COLOR ", .sz = 6, .immutable = 1 };
-STR $12 = { .data = ", nodes: ", .sz = 9, .immutable = 1 };
+STR $12 = { .data = ", NODES: ", .sz = 9, .immutable = 1 };
 int main_program()
 {
     scanf("%d", &node_number);

@@ -93,6 +93,10 @@ Other examples:
 
 `just run hanoi` - to run the Hanoi Tower puzze recursive solver.
 
+`just run map <tests/map/x/test.input` - to run the graph (map) colouring program (an etude from the book)
+
+[<img src="map.png">](map.png)
+
 ## Compiler internals overview
 
 As mentioned above, the compiler utilises a manual recursive descent parser, as specified in the [Easy grammar specification](GRAMMAR.md) from the book.

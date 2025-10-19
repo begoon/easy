@@ -17,7 +17,7 @@ ELSE
   DECLARE adjacency ARRAY[1:49] OF ARRAY [1:49] OF BOOLEAN;
   DECLARE nodes ARRAY[1:node_number] OF Node;
   
-  OUTPUT "NUMBER OF nodes ", node_number;
+  OUTPUT "NUMBER OF NODES ", node_number;
   OUTPUT;
   
   BEGIN
@@ -105,7 +105,7 @@ ELSE
     BEGIN
       DECLARE (color, i) INTEGER;
       FOR color := 1 TO max_color DO
-        OUTPUT "COLOR ", color, ", nodes: ", CHARACTER(0);
+        OUTPUT "COLOR ", color, ", NODES: ", CHARACTER(0);
         FOR i := 1 TO node_number DO
           IF colors[i] = color THEN
             OUTPUT nodes[i].id, " ";
