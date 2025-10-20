@@ -38,18 +38,22 @@ int main_program()
     }
     else
     {
+        void *$r2 AUTOFREE_ARRAY = malloc(sizeof(struct
+        {
+            int data[49 - 1 + 1];
+        }) * (node_number - 1 + 1));
         struct
         {
             struct
             {
                 int data[49 - 1 + 1];
-            } data[49 - 1 + 1];
-        } adjacency = {0};
-        void *$r2 AUTOFREE_ARRAY = malloc(sizeof(Node) * (node_number - 1 + 1));
+            } *data;
+        } adjacency = { .data = $r2 };
+        void *$r3 AUTOFREE_ARRAY = malloc(sizeof(Node) * (node_number - 1 + 1));
         struct
         {
             Node *data;
-        } nodes = { .data = $r2 };
+        } nodes = { .data = $r3 };
         $output("Ai", $1, node_number);
         $output("");
         {
@@ -78,42 +82,42 @@ int main_program()
                     $index(j, 1, 10, &$F, 32, 35);
                     scanf("%d", &nodes.data[(i) - (1)].neighbours.data[(j) - (1)]);
                     $index(i, 1, node_number, &$F, 33, 29);
-                    $index(nodes.data[(i) - (1)].id, 1, 49, &$F, 33, 23);
+                    $index(nodes.data[(i) - (1)].id, 1, node_number, &$F, 33, 23);
                     $index(i, 1, node_number, &$F, 33, 42);
                     $index(j, 1, 10, &$F, 33, 56);
                     $index(nodes.data[(i) - (1)].neighbours.data[(j) - (1)], 1, 49, &$F, 33, 36);
                     adjacency.data[(nodes.data[(i) - (1)].id) - (1)].data[(nodes.data[(i) - (1)].neighbours.data[(j) - (1)]) - (1)] = TRUE;
                     j += 1;
                 }
-                const STR $r3 = CHARACTER(13);
-                $output("A", $r3);
+                const STR $r4 = CHARACTER(13);
+                $output("A", $r4);
                 i += 1;
             }
             scanf("%d", &i);
-            const int $r4 = (i != 0);
-            if ($r4)
+            const int $r5 = (i != 0);
+            if ($r5)
             {
                 $output("A", $3);
                 $exit();
             }
             $output("A", $4);
             $output("");
-            const STR $r5 = CHARACTER(0);
-            $output("AA", $5, $r5);
+            const STR $r6 = CHARACTER(0);
+            $output("AA", $5, $r6);
             i = 1;
             while (1)
             {
                 if (!(i <= node_number)) break;
                 int j = 0;
-                const int $r6 = (i % 10);
-                j = $r6;
-                const STR $r7 = CHARACTER(0);
-                $output("iA", j, $r7);
+                const int $r7 = (i % 10);
+                j = $r7;
+                const STR $r8 = CHARACTER(0);
+                $output("iA", j, $r8);
                 i += 1;
             }
             $output("");
-            const STR $r8 = CHARACTER(0);
-            $output("AA", $5, $r8);
+            const STR $r9 = CHARACTER(0);
+            $output("AA", $5, $r9);
             i = 1;
             while (1)
             {
@@ -127,21 +131,21 @@ int main_program()
             {
                 if (!(i <= node_number)) break;
                 int j = 0;
-                const int $r9 = (i < 10);
-                if ($r9)
+                const int $r10 = (i < 10);
+                if ($r10)
                 {
                     $output("A", $7);
                 }
-                const STR $r10 = CHARACTER(0);
-                $output("iAA", i, $8, $r10);
+                const STR $r11 = CHARACTER(0);
+                $output("iAA", i, $8, $r11);
                 j = 1;
                 while (1)
                 {
                     if (!(j <= node_number)) break;
-                    $index(i, 1, 49, &$F, 61, 22);
+                    $index(i, 1, node_number, &$F, 61, 22);
                     $index(j, 1, 49, &$F, 61, 25);
-                    const int $r11 = (adjacency.data[(i) - (1)].data[(j) - (1)] == TRUE);
-                    if ($r11)
+                    const int $r12 = (adjacency.data[(i) - (1)].data[(j) - (1)] == TRUE);
+                    if ($r12)
                     {
                         $output("A", $9);
                     }
@@ -151,22 +155,22 @@ int main_program()
                     }
                     j += 1;
                 }
-                const STR $r12 = CHARACTER(10);
-                $output("A", $r12);
+                const STR $r13 = CHARACTER(10);
+                $output("A", $r13);
                 i += 1;
             }
         }
         {
-            void *$r13 AUTOFREE_ARRAY = malloc(sizeof(int) * (node_number - 1 + 1));
-            struct
-            {
-                int *data;
-            } colors = { .data = $r13 };
             void *$r14 AUTOFREE_ARRAY = malloc(sizeof(int) * (node_number - 1 + 1));
             struct
             {
                 int *data;
-            } available = { .data = $r14 };
+            } colors = { .data = $r14 };
+            void *$r15 AUTOFREE_ARRAY = malloc(sizeof(int) * (node_number - 1 + 1));
+            struct
+            {
+                int *data;
+            } available = { .data = $r15 };
             int max_color = 0;
             int i = 0;
             i = 1;
@@ -174,8 +178,8 @@ int main_program()
             {
                 if (!(i <= node_number)) break;
                 $index(i, 1, node_number, &$F, 73, 45);
-                const int $r15 = (-1);
-                colors.data[(i) - (1)] = $r15;
+                const int $r16 = (-1);
+                colors.data[(i) - (1)] = $r16;
                 i += 1;
             }
             $index(1, 1, node_number, &$F, 74, 16);
@@ -199,15 +203,15 @@ int main_program()
                 while (1)
                 {
                     if (!(j <= node_number)) break;
-                    $index(i, 1, 49, &$F, 84, 22);
+                    $index(i, 1, node_number, &$F, 84, 22);
                     $index(j, 1, 49, &$F, 84, 25);
-                    const int $r16 = (adjacency.data[(i) - (1)].data[(j) - (1)] == TRUE);
-                    if ($r16)
+                    const int $r17 = (adjacency.data[(i) - (1)].data[(j) - (1)] == TRUE);
+                    if ($r17)
                     {
                         $index(j, 1, node_number, &$F, 85, 21);
-                        const int $r18 = (-1);
-                        const int $r17 = (colors.data[(j) - (1)] != $r18);
-                        if ($r17)
+                        const int $r19 = (-1);
+                        const int $r18 = (colors.data[(j) - (1)] != $r19);
+                        if ($r18)
                         {
                             $index(j, 1, node_number, &$F, 86, 34);
                             $index(colors.data[(j) - (1)], 1, node_number, &$F, 86, 27);
@@ -220,16 +224,16 @@ int main_program()
                 j = 1;
                 while (1)
                 {
-                    const int $r19 = (!found);
-                    if (!($r19 && j <= node_number)) break;
+                    const int $r20 = (!found);
+                    if (!($r20 && j <= node_number)) break;
                     $index(j, 1, node_number, &$F, 93, 24);
-                    const int $r20 = (available.data[(j) - (1)] == TRUE);
-                    if ($r20)
+                    const int $r21 = (available.data[(j) - (1)] == TRUE);
+                    if ($r21)
                     {
                         $index(i, 1, node_number, &$F, 94, 24);
                         colors.data[(i) - (1)] = j;
-                        const int $r21 = (j > max_color);
-                        if ($r21)
+                        const int $r22 = (j > max_color);
+                        if ($r22)
                         {
                             max_color = j;
                         }
@@ -257,15 +261,15 @@ int main_program()
                 while (1)
                 {
                     if (!(color <= max_color)) break;
-                    const STR $r22 = CHARACTER(0);
-                    $output("AiAA", $11, color, $12, $r22);
+                    const STR $r23 = CHARACTER(0);
+                    $output("AiAA", $11, color, $12, $r23);
                     i = 1;
                     while (1)
                     {
                         if (!(i <= node_number)) break;
                         $index(i, 1, node_number, &$F, 110, 21);
-                        const int $r23 = (colors.data[(i) - (1)] == color);
-                        if ($r23)
+                        const int $r24 = (colors.data[(i) - (1)] == color);
+                        if ($r24)
                         {
                             $index(i, 1, node_number, &$F, 111, 26);
                             $index(i, 1, node_number, &$F, 111, 26);
@@ -273,8 +277,8 @@ int main_program()
                         }
                         i += 1;
                     }
-                    const STR $r24 = CHARACTER(10);
-                    $output("A", $r24);
+                    const STR $r25 = CHARACTER(10);
+                    $output("A", $r25);
                     color += 1;
                 }
             }
