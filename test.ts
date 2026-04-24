@@ -193,7 +193,7 @@ async function runTest(test_folder: string) {
         await run(["bun", "peg.ts", program]);
     }
 
-    await run(["bun", "easyc.ts", program, ...flags]);
+    await run(["bun", "easyc.ts", program, "--no-runtime", ...flags]);
 
     const expected_c = x + ".c";
     const created_c = test_stem + ".c";

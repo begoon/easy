@@ -2,6 +2,7 @@
 import * as fs from "node:fs";
 import * as path from "node:path";
 import * as process from "node:process";
+import * as url from "node:url";
 
 import child_process from "node:child_process";
 
@@ -2257,6 +2258,8 @@ export function run(argv: string[]) {
     output.push(compiledText + "\n");
     fs.writeFileSync(outputFile, output.join(""), "utf-8");
 
+    if (!argv.includes("--no-runtime")) copyRuntimeBeside(outputFile);
+
     if (run_mode) {
         const exeFile = outputFile.replace(/\.c$/, ".exe");
         const cc_flags = ["-I", ".", "-Wall", "-Wextra", "-Werror", "-std=c23", "-g", "-fsanitize=address"];
@@ -2267,6 +2270,32 @@ export function run(argv: string[]) {
 
 function execute(cmd: string[]) {
     execFileSync(cmd.join(" "), { stdio: "inherit", shell: true });
+}
+
+// Locate the runtime.c shipped with the compiler.
+//   - In-tree: easyc.ts sits next to runtime.c at the repo root.
+//   - Published: dist/easycc.js sits in <pkg>/dist, runtime.c at <pkg>/runtime.c.
+function findPackagedRuntime(): string | null {
+    const here = path.dirname(url.fileURLToPath(import.meta.url));
+    for (const c of [path.join(here, "runtime.c"), path.join(here, "..", "runtime.c")]) {
+        if (fs.existsSync(c)) return c;
+    }
+    return null;
+}
+
+// Emitted C has `#include "runtime.c"`, which the C compiler resolves
+// relative to the including file. Copy the packaged runtime.c next to the
+// emitted file so `cc out.c` Just Works after `npx easycc foo.easy`.
+// Skip when source and destination resolve to the same path (the in-tree
+// case where the CLI is run from the repo root).
+function copyRuntimeBeside(outputFile: string) {
+    const src = findPackagedRuntime();
+    if (!src) return;
+    const dest = path.join(path.dirname(outputFile) || ".", "runtime.c");
+    try {
+        if (fs.existsSync(dest) && fs.realpathSync(dest) === fs.realpathSync(src)) return;
+    } catch {}
+    fs.copyFileSync(src, dest);
 }
 
 if (import.meta.main) {

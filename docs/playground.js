@@ -321,6 +321,348 @@ var sep = "/";
 var delimiter = ":";
 var posix = ((p) => (p.posix = p, p))({ resolve, normalize, isAbsolute, join, relative, _makeLong, dirname, basename, extname, format, parse, sep, delimiter, win32: null, posix: null });
 
+// node:url
+var { URL: URL2, URLSearchParams } = globalThis;
+function util_isString(arg) {
+  return typeof arg === "string";
+}
+function util_isObject(arg) {
+  return typeof arg === "object" && arg !== null;
+}
+function util_isNull(arg) {
+  return arg === null;
+}
+function util_isNullOrUndefined(arg) {
+  return arg == null;
+}
+function Url() {
+  this.protocol = null, this.slashes = null, this.auth = null, this.host = null, this.port = null, this.hostname = null, this.hash = null, this.search = null, this.query = null, this.pathname = null, this.path = null, this.href = null;
+}
+var protocolPattern = /^([a-z0-9.+-]+:)/i;
+var portPattern = /:[0-9]*$/;
+var simplePathPattern = /^(\/\/?(?!\/)[^\?\s]*)(\?[^\s]*)?$/;
+var delims = ["<", ">", '"', "`", " ", "\r", `
+`, "\t"];
+var unwise = ["{", "}", "|", "\\", "^", "`"].concat(delims);
+var autoEscape = ["'"].concat(unwise);
+var nonHostChars = ["%", "/", "?", ";", "#"].concat(autoEscape);
+var hostEndingChars = ["/", "?", "#"];
+var hostnameMaxLen = 255;
+var hostnamePartPattern = /^[+a-z0-9A-Z_-]{0,63}$/;
+var hostnamePartStart = /^([+a-z0-9A-Z_-]{0,63})(.*)$/;
+var unsafeProtocol = { javascript: true, "javascript:": true };
+var hostlessProtocol = { javascript: true, "javascript:": true };
+var slashedProtocol = { http: true, https: true, ftp: true, gopher: true, file: true, "http:": true, "https:": true, "ftp:": true, "gopher:": true, "file:": true };
+var querystring = { parse(str) {
+  var decode = decodeURIComponent;
+  return (str + "").replace(/\+/g, " ").split("&").filter(Boolean).reduce(function(obj, item, index) {
+    var ref = item.split("="), key = decode(ref[0] || ""), val = decode(ref[1] || ""), prev = obj[key];
+    return obj[key] = prev === undefined ? val : [].concat(prev, val), obj;
+  }, {});
+}, stringify(obj) {
+  var encode = encodeURIComponent;
+  return Object.keys(obj || {}).reduce(function(arr, key) {
+    return [].concat(obj[key]).forEach(function(v) {
+      arr.push(encode(key) + "=" + encode(v));
+    }), arr;
+  }, []).join("&").replace(/\s/g, "+");
+} };
+function urlParse(url, parseQueryString, slashesDenoteHost) {
+  if (url && util_isObject(url) && url instanceof Url)
+    return url;
+  var u = new Url;
+  return u.parse(url, parseQueryString, slashesDenoteHost), u;
+}
+Url.prototype.parse = function(url, parseQueryString, slashesDenoteHost) {
+  if (!util_isString(url))
+    throw TypeError("Parameter 'url' must be a string, not " + typeof url);
+  var queryIndex = url.indexOf("?"), splitter = queryIndex !== -1 && queryIndex < url.indexOf("#") ? "?" : "#", uSplit = url.split(splitter), slashRegex = /\\/g;
+  uSplit[0] = uSplit[0].replace(slashRegex, "/"), url = uSplit.join(splitter);
+  var rest = url;
+  if (rest = rest.trim(), !slashesDenoteHost && url.split("#").length === 1) {
+    var simplePath = simplePathPattern.exec(rest);
+    if (simplePath) {
+      if (this.path = rest, this.href = rest, this.pathname = simplePath[1], simplePath[2])
+        if (this.search = simplePath[2], parseQueryString)
+          this.query = querystring.parse(this.search.substr(1));
+        else
+          this.query = this.search.substr(1);
+      else if (parseQueryString)
+        this.search = "", this.query = {};
+      return this;
+    }
+  }
+  var proto = protocolPattern.exec(rest);
+  if (proto) {
+    proto = proto[0];
+    var lowerProto = proto.toLowerCase();
+    this.protocol = lowerProto, rest = rest.substr(proto.length);
+  }
+  if (slashesDenoteHost || proto || rest.match(/^\/\/[^@\/]+@[^@\/]+/)) {
+    var slashes = rest.substr(0, 2) === "//";
+    if (slashes && !(proto && hostlessProtocol[proto]))
+      rest = rest.substr(2), this.slashes = true;
+  }
+  if (!hostlessProtocol[proto] && (slashes || proto && !slashedProtocol[proto])) {
+    var hostEnd = -1;
+    for (var i = 0;i < hostEndingChars.length; i++) {
+      var hec = rest.indexOf(hostEndingChars[i]);
+      if (hec !== -1 && (hostEnd === -1 || hec < hostEnd))
+        hostEnd = hec;
+    }
+    var auth, atSign;
+    if (hostEnd === -1)
+      atSign = rest.lastIndexOf("@");
+    else
+      atSign = rest.lastIndexOf("@", hostEnd);
+    if (atSign !== -1)
+      auth = rest.slice(0, atSign), rest = rest.slice(atSign + 1), this.auth = decodeURIComponent(auth);
+    hostEnd = -1;
+    for (var i = 0;i < nonHostChars.length; i++) {
+      var hec = rest.indexOf(nonHostChars[i]);
+      if (hec !== -1 && (hostEnd === -1 || hec < hostEnd))
+        hostEnd = hec;
+    }
+    if (hostEnd === -1)
+      hostEnd = rest.length;
+    this.host = rest.slice(0, hostEnd), rest = rest.slice(hostEnd), this.parseHost(), this.hostname = this.hostname || "";
+    var ipv6Hostname = this.hostname[0] === "[" && this.hostname[this.hostname.length - 1] === "]";
+    if (!ipv6Hostname) {
+      var hostparts = this.hostname.split(/\./);
+      for (var i = 0, l = hostparts.length;i < l; i++) {
+        var part = hostparts[i];
+        if (!part)
+          continue;
+        if (!part.match(hostnamePartPattern)) {
+          var newpart = "";
+          for (var j = 0, k = part.length;j < k; j++)
+            if (part.charCodeAt(j) > 127)
+              newpart += "x";
+            else
+              newpart += part[j];
+          if (!newpart.match(hostnamePartPattern)) {
+            var validParts = hostparts.slice(0, i), notHost = hostparts.slice(i + 1), bit = part.match(hostnamePartStart);
+            if (bit)
+              validParts.push(bit[1]), notHost.unshift(bit[2]);
+            if (notHost.length)
+              rest = "/" + notHost.join(".") + rest;
+            this.hostname = validParts.join(".");
+            break;
+          }
+        }
+      }
+    }
+    if (this.hostname.length > hostnameMaxLen)
+      this.hostname = "";
+    else
+      this.hostname = this.hostname.toLowerCase();
+    if (!ipv6Hostname)
+      this.hostname = new URL2(`https://${this.hostname}`).hostname;
+    var p = this.port ? ":" + this.port : "", h = this.hostname || "";
+    if (this.host = h + p, this.href += this.host, ipv6Hostname) {
+      if (this.hostname = this.hostname.substr(1, this.hostname.length - 2), rest[0] !== "/")
+        rest = "/" + rest;
+    }
+  }
+  if (!unsafeProtocol[lowerProto])
+    for (var i = 0, l = autoEscape.length;i < l; i++) {
+      var ae = autoEscape[i];
+      if (rest.indexOf(ae) === -1)
+        continue;
+      var esc = encodeURIComponent(ae);
+      if (esc === ae)
+        esc = escape(ae);
+      rest = rest.split(ae).join(esc);
+    }
+  var hash = rest.indexOf("#");
+  if (hash !== -1)
+    this.hash = rest.substr(hash), rest = rest.slice(0, hash);
+  var qm = rest.indexOf("?");
+  if (qm !== -1) {
+    if (this.search = rest.substr(qm), this.query = rest.substr(qm + 1), parseQueryString)
+      this.query = querystring.parse(this.query);
+    rest = rest.slice(0, qm);
+  } else if (parseQueryString)
+    this.search = "", this.query = {};
+  if (rest)
+    this.pathname = rest;
+  if (slashedProtocol[lowerProto] && this.hostname && !this.pathname)
+    this.pathname = "/";
+  if (this.pathname || this.search) {
+    var p = this.pathname || "", s = this.search || "";
+    this.path = p + s;
+  }
+  return this.href = this.format(), this;
+};
+Url.prototype.format = function() {
+  var auth = this.auth || "";
+  if (auth)
+    auth = encodeURIComponent(auth), auth = auth.replace(/%3A/i, ":"), auth += "@";
+  var protocol = this.protocol || "", pathname = this.pathname || "", hash = this.hash || "", host = false, query = "";
+  if (this.host)
+    host = auth + this.host;
+  else if (this.hostname) {
+    if (host = auth + (this.hostname.indexOf(":") === -1 ? this.hostname : "[" + this.hostname + "]"), this.port)
+      host += ":" + this.port;
+  }
+  if (this.query && util_isObject(this.query) && Object.keys(this.query).length)
+    query = querystring.stringify(this.query);
+  var search = this.search || query && "?" + query || "";
+  if (protocol && protocol.substr(-1) !== ":")
+    protocol += ":";
+  if (this.slashes || (!protocol || slashedProtocol[protocol]) && host !== false) {
+    if (host = "//" + (host || ""), pathname && pathname.charAt(0) !== "/")
+      pathname = "/" + pathname;
+  } else if (!host)
+    host = "";
+  if (hash && hash.charAt(0) !== "#")
+    hash = "#" + hash;
+  if (search && search.charAt(0) !== "?")
+    search = "?" + search;
+  return pathname = pathname.replace(/[?#]/g, function(match) {
+    return encodeURIComponent(match);
+  }), search = search.replace("#", "%23"), protocol + host + pathname + search + hash;
+};
+Url.prototype.resolve = function(relative2) {
+  return this.resolveObject(urlParse(relative2, false, true)).format();
+};
+Url.prototype.resolveObject = function(relative2) {
+  if (util_isString(relative2)) {
+    var rel = new Url;
+    rel.parse(relative2, false, true), relative2 = rel;
+  }
+  var result = new Url, tkeys = Object.keys(this);
+  for (var tk = 0;tk < tkeys.length; tk++) {
+    var tkey = tkeys[tk];
+    result[tkey] = this[tkey];
+  }
+  if (result.hash = relative2.hash, relative2.href === "")
+    return result.href = result.format(), result;
+  if (relative2.slashes && !relative2.protocol) {
+    var rkeys = Object.keys(relative2);
+    for (var rk = 0;rk < rkeys.length; rk++) {
+      var rkey = rkeys[rk];
+      if (rkey !== "protocol")
+        result[rkey] = relative2[rkey];
+    }
+    if (slashedProtocol[result.protocol] && result.hostname && !result.pathname)
+      result.path = result.pathname = "/";
+    return result.href = result.format(), result;
+  }
+  if (relative2.protocol && relative2.protocol !== result.protocol) {
+    if (!slashedProtocol[relative2.protocol]) {
+      var keys = Object.keys(relative2);
+      for (var v = 0;v < keys.length; v++) {
+        var k = keys[v];
+        result[k] = relative2[k];
+      }
+      return result.href = result.format(), result;
+    }
+    if (result.protocol = relative2.protocol, !relative2.host && !hostlessProtocol[relative2.protocol]) {
+      var relPath = (relative2.pathname || "").split("/");
+      while (relPath.length && !(relative2.host = relPath.shift()))
+        ;
+      if (!relative2.host)
+        relative2.host = "";
+      if (!relative2.hostname)
+        relative2.hostname = "";
+      if (relPath[0] !== "")
+        relPath.unshift("");
+      if (relPath.length < 2)
+        relPath.unshift("");
+      result.pathname = relPath.join("/");
+    } else
+      result.pathname = relative2.pathname;
+    if (result.search = relative2.search, result.query = relative2.query, result.host = relative2.host || "", result.auth = relative2.auth, result.hostname = relative2.hostname || relative2.host, result.port = relative2.port, result.pathname || result.search) {
+      var p = result.pathname || "", s = result.search || "";
+      result.path = p + s;
+    }
+    return result.slashes = result.slashes || relative2.slashes, result.href = result.format(), result;
+  }
+  var isSourceAbs = result.pathname && result.pathname.charAt(0) === "/", isRelAbs = relative2.host || relative2.pathname && relative2.pathname.charAt(0) === "/", mustEndAbs = isRelAbs || isSourceAbs || result.host && relative2.pathname, removeAllDots = mustEndAbs, srcPath = result.pathname && result.pathname.split("/") || [], relPath = relative2.pathname && relative2.pathname.split("/") || [], psychotic = result.protocol && !slashedProtocol[result.protocol];
+  if (psychotic) {
+    if (result.hostname = "", result.port = null, result.host)
+      if (srcPath[0] === "")
+        srcPath[0] = result.host;
+      else
+        srcPath.unshift(result.host);
+    if (result.host = "", relative2.protocol) {
+      if (relative2.hostname = null, relative2.port = null, relative2.host)
+        if (relPath[0] === "")
+          relPath[0] = relative2.host;
+        else
+          relPath.unshift(relative2.host);
+      relative2.host = null;
+    }
+    mustEndAbs = mustEndAbs && (relPath[0] === "" || srcPath[0] === "");
+  }
+  if (isRelAbs)
+    result.host = relative2.host || relative2.host === "" ? relative2.host : result.host, result.hostname = relative2.hostname || relative2.hostname === "" ? relative2.hostname : result.hostname, result.search = relative2.search, result.query = relative2.query, srcPath = relPath;
+  else if (relPath.length) {
+    if (!srcPath)
+      srcPath = [];
+    srcPath.pop(), srcPath = srcPath.concat(relPath), result.search = relative2.search, result.query = relative2.query;
+  } else if (!util_isNullOrUndefined(relative2.search)) {
+    if (psychotic) {
+      result.hostname = result.host = srcPath.shift();
+      var authInHost = result.host && result.host.indexOf("@") > 0 ? result.host.split("@") : false;
+      if (authInHost)
+        result.auth = authInHost.shift(), result.host = result.hostname = authInHost.shift();
+    }
+    if (result.search = relative2.search, result.query = relative2.query, !util_isNull(result.pathname) || !util_isNull(result.search))
+      result.path = (result.pathname ? result.pathname : "") + (result.search ? result.search : "");
+    return result.href = result.format(), result;
+  }
+  if (!srcPath.length) {
+    if (result.pathname = null, result.search)
+      result.path = "/" + result.search;
+    else
+      result.path = null;
+    return result.href = result.format(), result;
+  }
+  var last = srcPath.slice(-1)[0], hasTrailingSlash = (result.host || relative2.host || srcPath.length > 1) && (last === "." || last === "..") || last === "", up = 0;
+  for (var i = srcPath.length;i >= 0; i--)
+    if (last = srcPath[i], last === ".")
+      srcPath.splice(i, 1);
+    else if (last === "..")
+      srcPath.splice(i, 1), up++;
+    else if (up)
+      srcPath.splice(i, 1), up--;
+  if (!mustEndAbs && !removeAllDots)
+    for (;up--; up)
+      srcPath.unshift("..");
+  if (mustEndAbs && srcPath[0] !== "" && (!srcPath[0] || srcPath[0].charAt(0) !== "/"))
+    srcPath.unshift("");
+  if (hasTrailingSlash && srcPath.join("/").substr(-1) !== "/")
+    srcPath.push("");
+  var isAbsolute2 = srcPath[0] === "" || srcPath[0] && srcPath[0].charAt(0) === "/";
+  if (psychotic) {
+    result.hostname = result.host = isAbsolute2 ? "" : srcPath.length ? srcPath.shift() : "";
+    var authInHost = result.host && result.host.indexOf("@") > 0 ? result.host.split("@") : false;
+    if (authInHost)
+      result.auth = authInHost.shift(), result.host = result.hostname = authInHost.shift();
+  }
+  if (mustEndAbs = mustEndAbs || result.host && srcPath.length, mustEndAbs && !isAbsolute2)
+    srcPath.unshift("");
+  if (!srcPath.length)
+    result.pathname = null, result.path = null;
+  else
+    result.pathname = srcPath.join("/");
+  if (!util_isNull(result.pathname) || !util_isNull(result.search))
+    result.path = (result.pathname ? result.pathname : "") + (result.search ? result.search : "");
+  return result.auth = relative2.auth || result.auth, result.slashes = result.slashes || relative2.slashes, result.href = result.format(), result;
+};
+Url.prototype.parseHost = function() {
+  var host = this.host, port = portPattern.exec(host);
+  if (port) {
+    if (port = port[0], port !== ":")
+      this.port = port.substr(1);
+    host = host.substr(0, host.length - port.length);
+  }
+  if (host)
+    this.hostname = host;
+};
+
 // easyc.ts
 var { default: child_process} = (() => ({}));
 function indent(str, n = 1) {
@@ -2245,7 +2587,7 @@ function compileToC(source, filename = "source.easy") {
 if (false) {}
 
 // docs/build-info.ts
-var BUILD_TIME = "2026-04-24 11:05:27";
+var BUILD_TIME = "2026-04-24 11:23:23";
 
 // docs/playground.ts
 var fetchExample = (f) => fetch(`examples/${f}`).then((r) => r.text());
