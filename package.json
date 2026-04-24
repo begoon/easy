@@ -2,5 +2,8 @@
   "dependencies": {
     "@types/node": "^24.5.2"
   },
-  "type": "module"
+  "type": "module",
+  "scripts": {
+    "build:playground": "printf 'export const BUILD_TIME = \"%s\";\\n' \"$(date '+%Y-%m-%d %H:%M:%S')\" > docs/build-info.ts && bun build docs/playground.ts --target=browser --format=esm --outfile=docs/playground.js"
+  }
 }

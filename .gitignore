@@ -14,3 +14,4 @@ tests/**/*.output
 life.c
 
 node_modules
+.claude/settings.local.json
