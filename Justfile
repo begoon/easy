@@ -39,6 +39,8 @@ build:
     bun run build
 
 # Build, bump patch version, and publish to npm.
+# --access=public is required for scoped packages (@begoon/easyc) since
+# npm defaults scoped names to private.
 publish: quick build
     npm version patch --no-git-tag-version
-    npm publish
+    npm publish --access=public

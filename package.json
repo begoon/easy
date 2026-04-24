@@ -1,6 +1,6 @@
 {
-  "name": "easycc",
-  "version": "0.1.0",
+  "name": "@begoon/easyc",
+  "version": "0.1.3",
   "description": "Compiler for the Easy language (Wetherell's 'Etudes for Programmers', 1978), emitting C",
   "keywords": [
     "easy",
@@ -22,7 +22,7 @@
   },
   "type": "module",
   "bin": {
-    "easycc": "dist/easycc.js"
+    "easyc": "dist/easyc.js"
   },
   "files": [
     "dist",
@@ -31,8 +31,8 @@
     "LICENSE"
   ],
   "scripts": {
-    "build": "bun build easyc.ts --target=node --outfile=dist/easycc.js --minify && chmod +x dist/easycc.js",
-    "build:playground": "printf 'export const BUILD_TIME = \"%s\";\\n' \"$(date '+%Y-%m-%d %H:%M:%S')\" > docs/build-info.ts && bun build docs/playground.ts --target=browser --format=esm --outfile=docs/playground.js",
+    "build": "bun build easyc.ts --target=node --outfile=dist/easyc.js --minify && chmod +x dist/easyc.js",
+    "build:playground": "cp runtime.c docs/runtime.c && printf 'export const BUILD_TIME = \"%s\";\\n' \"$(date '+%Y-%m-%d %H:%M:%S')\" > docs/build-info.ts && bun build docs/playground.ts --target=browser --format=esm --outfile=docs/playground.js",
     "prepublishOnly": "SKIP_RUN=1 bun run test.ts && bun run build"
   },
   "dependencies": {

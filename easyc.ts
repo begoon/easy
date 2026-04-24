@@ -2285,7 +2285,7 @@ function findPackagedRuntime(): string | null {
 
 // Emitted C has `#include "runtime.c"`, which the C compiler resolves
 // relative to the including file. Copy the packaged runtime.c next to the
-// emitted file so `cc out.c` Just Works after `npx easycc foo.easy`.
+// emitted file so `cc out.c` Just Works after `npx @begoon/easyc foo.easy`.
 // Skip when source and destination resolve to the same path (the in-tree
 // case where the CLI is run from the repo root).
 function copyRuntimeBeside(outputFile: string) {
