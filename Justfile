@@ -34,3 +34,11 @@ build-playground:
 
 playground: build-playground
     python3 -m http.server -d docs
+
+build:
+    bun run build
+
+# Build, bump patch version, and publish to npm.
+publish: quick build
+    npm version patch --no-git-tag-version
+    npm publish
