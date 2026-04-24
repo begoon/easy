@@ -1,0 +1,12 @@
+PROGRAM Input:
+  DECLARE i INTEGER;
+  DECLARE f REAL;
+  DECLARE s STRING;
+
+  INPUT i, f;
+  INPUT s;
+
+  OUTPUT "i = [" || i || "]";
+  OUTPUT "f = [" || f || "]";
+  OUTPUT "s = [" || s || "]";
+END PROGRAM Input;

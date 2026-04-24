@@ -1,0 +1,3 @@
+PROGRAM strconv:
+  OUTPUT "abc";
+END PROGRAM strconv;

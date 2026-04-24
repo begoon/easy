@@ -1,0 +1,29 @@
+PROGRAM Expression:
+  DECLARE (x, a, b, c) INTEGER;
+  DECLARE s STRING;
+  DECLARE f BOOLEAN;
+  FUNCTION func(z INTEGER) INTEGER: RETURN z; END FUNCTION func;
+  SET x := a;
+  SET x := a + b;
+  SET x := +a;
+  SET x := -a;
+  SET x := a + b * c;
+  SET x := -b + (1 - 2) - LENGTH("3") * 7;
+  SET x := -b + (1 - 2) - func(3);
+  OUTPUT "x = ", x, " OK";
+
+  SET f := NOT a < b;
+  SET f := (a < b) XOR TRUE;
+  SET f := (a < b) | (c >= 0) & FALSE;
+  SET f := (a >= b) & (c < 0) | TRUE;
+  OUTPUT "f = ", f, " OK";
+
+  SET s := a || b;
+  SET s := "a" || b;
+  SET s := "a" || b || c;
+  SET s := a || (b || SUBSTR("abc", 0, 2));
+  SET s := a || b || SUBSTR("abc", 0, 2);
+  SET s := a || CHARACTER(b);
+  OUTPUT "s = ", s, " OK";
+
+END PROGRAM Expression;

@@ -1,0 +1,9 @@
+PROGRAM hw:
+DECLARE a INTEGER;
+SET a := 100;
+OUTPUT "abc " || a;
+FOR a := 0 TO 10 DO
+  OUTPUT a;
+END FOR;
+EXIT;
+END PROGRAM hw;

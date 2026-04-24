@@ -1,0 +1,12 @@
+PROGRAM ArrayDynamic:
+  DECLARE a ARRAY [0:99] OF INTEGER;
+  DECLARE sz INTEGER;
+
+  SET sz := 1024;
+  
+  BEGIN
+    DECLARE b ARRAY [1:sz] OF INTEGER;
+    SET b[1] := 42;
+    OUTPUT b[1];
+  END;
+END PROGRAM ArrayDynamic;

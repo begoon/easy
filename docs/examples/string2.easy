@@ -1,0 +1,16 @@
+PROGRAM String2:
+  DECLARE (s, v) STRING;
+  DECLARE program STRING;
+
+  FUNCTION bf(v STRING) STRING:
+    RETURN v;
+  END FUNCTION bf;
+
+  SET s := "abc-XYZ-0123456789";
+  SET v := SUBSTR(s, 1, 3) || CHARACTER(100);
+  OUTPUT v;
+
+  SET program := "1234567890";
+  OUTPUT bf(program);
+
+END PROGRAM String2;
