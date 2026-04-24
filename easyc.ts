@@ -1093,7 +1093,6 @@ function string_compare(left: Expression, right: Expression, operation: string, 
         const r = left.context().R();
         const left_sz = `${left_reference}.sz`;
         const right_sz = `${right_reference}.sz`;
-        console.log(right_reference);
         code.push(
             `const int ${r} = ` +
                 `${left_sz} == ${right_sz} ` +
@@ -2162,12 +2161,13 @@ export { ParseError, LexerError, CompilerError, GenerateError };
 export function run(argv: string[]) {
     if (argv.length < 3) {
         const exe = path.basename(argv[1] || "easyc.ts");
-        console.log(`usage: ${exe} [run] <input.easy> [-c <output.c>] [-t] [-a] [-e]`);
+        console.log(`usage: ${exe} [run] <input.easy> [-c <output.c>] [-t] [-a] [-e] [--no-runtime]`);
         console.log("  -c <output.c>  - specify output C file (default: input.c)");
         console.log("  -t             - generate tokens file (default: input.tokens)");
         console.log("  -a             - generate JSON AST file (default: input.json)");
         console.log("  -e             - generate PEG JSON AST file (default: input.peg.json)");
         console.log("  -s <output.s>  - generate symbols file (default: input.s)");
+        console.log("  --no-runtime   - do not copy runtime.c next to the output file");
         process.exit(1);
     }
 
