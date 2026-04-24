@@ -1,6 +1,6 @@
 import * as fs from "node:fs";
 import * as path from "node:path";
-import process from "node:process";
+import * as process from "node:process";
 
 import child_process from "node:child_process";
 
@@ -45,7 +45,7 @@ class InputText {
         const { text = "", filename = null } = options;
         if (text) {
             this.text = text;
-            this.filename = "";
+            this.filename = filename ?? "";
         } else if (filename) {
             this.text = fs.readFileSync(filename, "utf-8");
             this.filename = filename;
@@ -2121,6 +2121,42 @@ class Compiler {
     }
 }
 
+export function compileToC(source: string, filename: string = "source.easy"): string {
+    const compiler = new Compiler(new InputText({ text: source, filename }));
+    const context = compiler.context;
+
+    const firstLine = source.split(/\r?\n/)[0]?.trim() ?? "";
+    if (firstLine.startsWith("//flags ")) {
+        const pairs: string[] = firstLine.split(/\s+/).slice(1);
+        const flags = Object.fromEntries(pairs.map((v) => v.split("=")));
+        Object.assign(context.flags, flags);
+    }
+
+    const program = compiler.compile();
+    const compiledText = program.c().trim();
+
+    const output: string[] = [];
+    output.push('#include "runtime.c"\n');
+
+    for (const [name, definition] of Object.entries(context.types)) output.push(definition.typedef(name) + ";\n");
+
+    if (context.common.length) output.push(emit(context.common) + "\n");
+
+    for (const v of Object.values(context.variables)) if (v.isConst()) output.push(v.const() + ";\n");
+
+    for (const f of Object.values(context.functions)) {
+        if (f instanceof BuiltinFunction) continue;
+        output.push((f as FUNCTION).c() + "\n");
+    }
+
+    for (const v of Object.values(context.procedures)) output.push(v.c() + "\n");
+
+    output.push(compiledText + "\n");
+    return output.join("");
+}
+
+export { ParseError, LexerError, CompilerError, GenerateError };
+
 export function run(argv: string[]) {
     if (argv.length < 3) {
         const exe = path.basename(argv[1] || "easyc.ts");
@@ -2180,7 +2216,7 @@ export function run(argv: string[]) {
     for (const [name, type] of Object.entries(context.types)) types.push([name, type.c().replace(/\s+/g, " ")]);
 
     const functions: string[][] = [];
-    for (const [name, fun] of Object.entries(context.functions)) {
+    for (const fun of Object.values(context.functions)) {
         if (fun instanceof BuiltinFunction) {
             functions.push([fun.name, "->", fun.type.c(), "built-in"]);
         } else {
