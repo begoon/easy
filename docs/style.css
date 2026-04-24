@@ -23,6 +23,12 @@
   --err-border: #5a3a3a;
   --modal-backdrop: rgba(0, 0, 0, 0.55);
   --modal-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+  --hl-kw: #569cd6;
+  --hl-type: #4ec9b0;
+  --hl-str: #ce9178;
+  --hl-num: #b5cea8;
+  --hl-comment: #6a9955;
+  --hl-preproc: #c586c0;
   color-scheme: dark;
 }
 
@@ -51,6 +57,12 @@ body.theme-light {
   --err-border: #f9aeb3;
   --modal-backdrop: rgba(0, 0, 0, 0.35);
   --modal-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+  --hl-kw: #005cc5;
+  --hl-type: #267f99;
+  --hl-str: #a31515;
+  --hl-num: #098658;
+  --hl-comment: #22863a;
+  --hl-preproc: #af00db;
   color-scheme: light;
 }
 
@@ -303,6 +315,20 @@ main {
   user-select: text;
 }
 
+.hl-k { color: var(--hl-kw); }
+.hl-t { color: var(--hl-type); }
+.hl-s { color: var(--hl-str); }
+.hl-n { color: var(--hl-num); }
+.hl-c { color: var(--hl-comment); font-style: italic; }
+.hl-p { color: var(--hl-preproc); }
+
+.hl-include {
+  cursor: pointer;
+  text-decoration: underline dotted;
+  text-underline-offset: 2px;
+}
+.hl-include:hover { filter: brightness(1.2); text-decoration: underline; }
+
 .error {
   flex: 0 0 auto;
   min-height: 28px;
@@ -342,6 +368,60 @@ main {
 }
 
 .confirm-panel { min-width: 320px; max-width: 480px; }
+
+.source-panel {
+  width: min(85vw, 960px);
+  height: min(80vh, 800px);
+  max-width: none;
+  max-height: none;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.source-modal-header {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 12px;
+  border-bottom: 1px solid var(--border);
+  background: var(--pane-title-bg);
+}
+
+#source-modal-title {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, "Courier New", monospace;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.modal-close {
+  background: transparent;
+  border: none;
+  font-size: 18px;
+  color: var(--muted);
+  cursor: pointer;
+  padding: 0 6px;
+  line-height: 1;
+}
+.modal-close:hover { color: var(--fg); }
+
+#source-modal-content {
+  flex: 1;
+  min-height: 0;
+  margin: 0;
+  padding: 10px 14px;
+  overflow: auto;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, "Courier New", monospace;
+  font-size: 13px;
+  line-height: 18px;
+  white-space: pre;
+  color: var(--fg);
+  background: transparent;
+  user-select: text;
+  tab-size: 4;
+}
 
 .confirm-panel p {
   margin: 0 0 16px;

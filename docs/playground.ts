@@ -100,6 +100,9 @@ const downloadFormatSel = document.getElementById("download-format") as HTMLSele
 const resetBtn = document.getElementById("reset") as HTMLButtonElement;
 const themeBtn = document.getElementById("theme") as HTMLButtonElement;
 const fileInput = document.getElementById("file-input") as HTMLInputElement;
+const sourceModal = document.getElementById("source-modal") as HTMLDivElement;
+const sourceModalContent = document.getElementById("source-modal-content") as HTMLPreElement;
+const sourceModalClose = document.getElementById("source-modal-close") as HTMLButtonElement;
 const filenameInput = document.getElementById("filename") as HTMLInputElement;
 const tabsEl = document.getElementById("tabs") as HTMLDivElement;
 
@@ -187,6 +190,43 @@ window.addEventListener("keydown", (e) => {
         e.preventDefault();
         closeConfirm(true);
     }
+    if (e.key === "Escape" && !sourceModal.hidden) closeSourceModal();
+});
+
+let runtimeSourcePromise: Promise<string> | null = null;
+function loadRuntime(): Promise<string> {
+    if (!runtimeSourcePromise) runtimeSourcePromise = fetch("runtime.c").then((r) => {
+        if (!r.ok) throw new Error(`${r.status} ${r.statusText}`);
+        return r.text();
+    });
+    return runtimeSourcePromise;
+}
+
+function closeSourceModal() {
+    sourceModal.hidden = true;
+}
+
+async function openRuntimeModal() {
+    sourceModalContent.innerHTML = "";
+    sourceModal.hidden = false;
+    try {
+        const text = await loadRuntime();
+        sourceModalContent.innerHTML = highlightC(text);
+    } catch (e) {
+        sourceModalContent.textContent = `failed to load runtime.c: ${(e as Error).message ?? String(e)}`;
+    }
+}
+
+sourceModalClose.addEventListener("click", closeSourceModal);
+sourceModal.addEventListener("click", (e) => {
+    if (e.target === sourceModal) closeSourceModal();
+});
+
+cOut.addEventListener("click", (e) => {
+    const el = (e.target as HTMLElement).closest("[data-runtime-link]");
+    if (!el) return;
+    e.preventDefault();
+    void openRuntimeModal();
 });
 
 let lastC: string | null = null;
@@ -227,10 +267,59 @@ function runPipeline() {
 
     clearError();
     lastC = cText;
-    cOut.textContent = cText;
+    cOut.innerHTML = highlightC(cText);
     const lines = cText.split(/\r?\n/).length;
     cTitle.textContent = `${stem(file)}.c — ${cText.length} B, ${lines} lines`;
     updateDownloadEnabled();
+}
+
+const C_KEYWORDS = new Set([
+    "int", "void", "char", "short", "long", "float", "double",
+    "signed", "unsigned", "bool", "const", "static", "extern",
+    "volatile", "inline", "register", "restrict", "auto",
+    "if", "else", "for", "while", "do", "break", "continue",
+    "return", "switch", "case", "default", "goto",
+    "sizeof", "typeof", "struct", "union", "enum", "typedef",
+    "_Bool", "_Atomic", "true", "false", "NULL",
+]);
+const C_TYPES = new Set([
+    "STR", "ARRAY", "INTEGER", "REAL", "BOOLEAN", "STRING",
+    "FILE", "size_t", "time_t",
+]);
+
+const C_TOKEN = /(\/\/[^\n]*)|(\/\*[\s\S]*?\*\/)|("(?:\\.|[^"\\])*")|('(?:\\.|[^'\\])*')|(^[ \t]*#[^\n]*)|(\b0x[0-9a-fA-F]+\b|\b\d+(?:\.\d+)?\b)|([A-Za-z_$][A-Za-z0-9_$]*)/gm;
+
+function escHtml(s: string): string {
+    return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
+
+function highlightC(text: string): string {
+    let out = "";
+    let last = 0;
+    C_TOKEN.lastIndex = 0;
+    let m: RegExpExecArray | null;
+    while ((m = C_TOKEN.exec(text))) {
+        if (m.index > last) out += escHtml(text.slice(last, m.index));
+        const full = m[0];
+        if (m[1] || m[2]) out += `<span class="hl-c">${escHtml(full)}</span>`;
+        else if (m[3] || m[4]) out += `<span class="hl-s">${escHtml(full)}</span>`;
+        else if (m[5]) {
+            if (/^\s*#\s*include\s+"runtime\.c"/.test(full)) {
+                out += `<span class="hl-p hl-include" data-runtime-link="1" title="click to view runtime.c">${escHtml(full)}</span>`;
+            } else {
+                out += `<span class="hl-p">${escHtml(full)}</span>`;
+            }
+        }
+        else if (m[6]) out += `<span class="hl-n">${escHtml(full)}</span>`;
+        else if (m[7]) {
+            if (C_KEYWORDS.has(full)) out += `<span class="hl-k">${escHtml(full)}</span>`;
+            else if (C_TYPES.has(full)) out += `<span class="hl-t">${escHtml(full)}</span>`;
+            else out += escHtml(full);
+        }
+        last = m.index + full.length;
+    }
+    out += escHtml(text.slice(last));
+    return out;
 }
 
 function saveTabs() {

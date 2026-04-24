@@ -1615,7 +1615,6 @@ function string_compare(left, right, operation, code) {
     const r = left.context().R();
     const left_sz = `${left_reference}.sz`;
     const right_sz = `${right_reference}.sz`;
-    console.log(right_reference);
     code.push(`const int ${r} = ` + `${left_sz} == ${right_sz} ` + `&& ` + `memcmp(${left_reference}.data, ${right_reference}.data, ${left_sz}) ${cmp} 0;`);
     return r;
   }
@@ -2587,7 +2586,7 @@ function compileToC(source, filename = "source.easy") {
 if (false) {}
 
 // docs/build-info.ts
-var BUILD_TIME = "2026-04-24 11:23:23";
+var BUILD_TIME = "2026-04-24 11:49:13";
 
 // docs/playground.ts
 var fetchExample = (f) => fetch(`examples/${f}`).then((r) => r.text());
@@ -2647,6 +2646,9 @@ var downloadFormatSel = document.getElementById("download-format");
 var resetBtn = document.getElementById("reset");
 var themeBtn = document.getElementById("theme");
 var fileInput = document.getElementById("file-input");
+var sourceModal = document.getElementById("source-modal");
+var sourceModalContent = document.getElementById("source-modal-content");
+var sourceModalClose = document.getElementById("source-modal-close");
 var filenameInput = document.getElementById("filename");
 var tabsEl = document.getElementById("tabs");
 function easyName() {
@@ -2728,6 +2730,43 @@ window.addEventListener("keydown", (e) => {
     e.preventDefault();
     closeConfirm(true);
   }
+  if (e.key === "Escape" && !sourceModal.hidden)
+    closeSourceModal();
+});
+var runtimeSourcePromise = null;
+function loadRuntime() {
+  if (!runtimeSourcePromise)
+    runtimeSourcePromise = fetch("runtime.c").then((r) => {
+      if (!r.ok)
+        throw new Error(`${r.status} ${r.statusText}`);
+      return r.text();
+    });
+  return runtimeSourcePromise;
+}
+function closeSourceModal() {
+  sourceModal.hidden = true;
+}
+async function openRuntimeModal() {
+  sourceModalContent.innerHTML = "";
+  sourceModal.hidden = false;
+  try {
+    const text = await loadRuntime();
+    sourceModalContent.innerHTML = highlightC(text);
+  } catch (e) {
+    sourceModalContent.textContent = `failed to load runtime.c: ${e.message ?? String(e)}`;
+  }
+}
+sourceModalClose.addEventListener("click", closeSourceModal);
+sourceModal.addEventListener("click", (e) => {
+  if (e.target === sourceModal)
+    closeSourceModal();
+});
+cOut.addEventListener("click", (e) => {
+  const el = e.target.closest("[data-runtime-link]");
+  if (!el)
+    return;
+  e.preventDefault();
+  openRuntimeModal();
 });
 var lastC = null;
 function setError(msg) {
@@ -2762,10 +2801,102 @@ function runPipeline() {
   }
   clearError();
   lastC = cText;
-  cOut.textContent = cText;
+  cOut.innerHTML = highlightC(cText);
   const lines = cText.split(/\r?\n/).length;
   cTitle.textContent = `${stem(file)}.c — ${cText.length} B, ${lines} lines`;
   updateDownloadEnabled();
+}
+var C_KEYWORDS = new Set([
+  "int",
+  "void",
+  "char",
+  "short",
+  "long",
+  "float",
+  "double",
+  "signed",
+  "unsigned",
+  "bool",
+  "const",
+  "static",
+  "extern",
+  "volatile",
+  "inline",
+  "register",
+  "restrict",
+  "auto",
+  "if",
+  "else",
+  "for",
+  "while",
+  "do",
+  "break",
+  "continue",
+  "return",
+  "switch",
+  "case",
+  "default",
+  "goto",
+  "sizeof",
+  "typeof",
+  "struct",
+  "union",
+  "enum",
+  "typedef",
+  "_Bool",
+  "_Atomic",
+  "true",
+  "false",
+  "NULL"
+]);
+var C_TYPES = new Set([
+  "STR",
+  "ARRAY",
+  "INTEGER",
+  "REAL",
+  "BOOLEAN",
+  "STRING",
+  "FILE",
+  "size_t",
+  "time_t"
+]);
+var C_TOKEN = /(\/\/[^\n]*)|(\/\*[\s\S]*?\*\/)|("(?:\\.|[^"\\])*")|('(?:\\.|[^'\\])*')|(^[ \t]*#[^\n]*)|(\b0x[0-9a-fA-F]+\b|\b\d+(?:\.\d+)?\b)|([A-Za-z_$][A-Za-z0-9_$]*)/gm;
+function escHtml(s) {
+  return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
+function highlightC(text) {
+  let out = "";
+  let last = 0;
+  C_TOKEN.lastIndex = 0;
+  let m;
+  while (m = C_TOKEN.exec(text)) {
+    if (m.index > last)
+      out += escHtml(text.slice(last, m.index));
+    const full = m[0];
+    if (m[1] || m[2])
+      out += `<span class="hl-c">${escHtml(full)}</span>`;
+    else if (m[3] || m[4])
+      out += `<span class="hl-s">${escHtml(full)}</span>`;
+    else if (m[5]) {
+      if (/^\s*#\s*include\s+"runtime\.c"/.test(full)) {
+        out += `<span class="hl-p hl-include" data-runtime-link="1" title="click to view runtime.c">${escHtml(full)}</span>`;
+      } else {
+        out += `<span class="hl-p">${escHtml(full)}</span>`;
+      }
+    } else if (m[6])
+      out += `<span class="hl-n">${escHtml(full)}</span>`;
+    else if (m[7]) {
+      if (C_KEYWORDS.has(full))
+        out += `<span class="hl-k">${escHtml(full)}</span>`;
+      else if (C_TYPES.has(full))
+        out += `<span class="hl-t">${escHtml(full)}</span>`;
+      else
+        out += escHtml(full);
+    }
+    last = m.index + full.length;
+  }
+  out += escHtml(text.slice(last));
+  return out;
 }
 function saveTabs() {
   try {
