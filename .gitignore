@@ -17,4 +17,3 @@ node_modules
 .claude/settings.local.json
 
 dist/
-docs/runtime.c

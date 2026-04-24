@@ -32,7 +32,7 @@
   ],
   "scripts": {
     "build": "bun build easyc.ts --target=node --outfile=dist/easyc.js --minify && chmod +x dist/easyc.js",
-    "build:playground": "cp runtime.c docs/runtime.c && printf 'export const BUILD_TIME = \"%s\";\\n' \"$(date '+%Y-%m-%d %H:%M:%S')\" > docs/build-info.ts && bun build docs/playground.ts --target=browser --format=esm --outfile=docs/playground.js",
+    "build:playground": "printf 'export const BUILD_TIME = \"%s\";\\n' \"$(date '+%Y-%m-%d %H:%M:%S')\" > docs/build-info.ts && bun build docs/playground.ts --target=browser --format=esm --outfile=docs/playground.js",
     "prepublishOnly": "SKIP_RUN=1 bun run test.ts && bun run build"
   },
   "dependencies": {

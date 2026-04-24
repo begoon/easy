@@ -1,5 +1,6 @@
 import { compileToC, ParseError, LexerError, CompilerError, GenerateError } from "../easyc.ts";
 import { BUILD_TIME } from "./build-info.ts";
+import runtimeC from "../runtime.c" with { type: "text" };
 
 // The "Example" dropdown is populated from a runtime-loaded manifest.
 // docs/examples.js defines `window.easyExamples` as
@@ -193,28 +194,13 @@ window.addEventListener("keydown", (e) => {
     if (e.key === "Escape" && !sourceModal.hidden) closeSourceModal();
 });
 
-let runtimeSourcePromise: Promise<string> | null = null;
-function loadRuntime(): Promise<string> {
-    if (!runtimeSourcePromise) runtimeSourcePromise = fetch("runtime.c").then((r) => {
-        if (!r.ok) throw new Error(`${r.status} ${r.statusText}`);
-        return r.text();
-    });
-    return runtimeSourcePromise;
-}
-
 function closeSourceModal() {
     sourceModal.hidden = true;
 }
 
-async function openRuntimeModal() {
-    sourceModalContent.innerHTML = "";
+function openRuntimeModal() {
+    sourceModalContent.innerHTML = highlightC(runtimeC);
     sourceModal.hidden = false;
-    try {
-        const text = await loadRuntime();
-        sourceModalContent.innerHTML = highlightC(text);
-    } catch (e) {
-        sourceModalContent.textContent = `failed to load runtime.c: ${(e as Error).message ?? String(e)}`;
-    }
 }
 
 sourceModalClose.addEventListener("click", closeSourceModal);
@@ -226,7 +212,7 @@ cOut.addEventListener("click", (e) => {
     const el = (e.target as HTMLElement).closest("[data-runtime-link]");
     if (!el) return;
     e.preventDefault();
-    void openRuntimeModal();
+    openRuntimeModal();
 });
 
 let lastC: string | null = null;
