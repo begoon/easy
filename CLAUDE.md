@@ -5,6 +5,10 @@ Wetherell's *Etudes for Programmers* (1978). Written in TypeScript, emits C,
 which Clang/GCC then compiles to a native binary. The `runtime.c` file is the
 bare-minimum runtime.
 
+Published on npm as **`@begoon/easyc`** (scoped; unscoped `easyc`/`easylc`/
+`easylang` were all rejected by npm's name-similarity filter). The bundled
+CLI is invoked as `easyc` (or `npx @begoon/easyc`).
+
 ## Layout
 
 - `easyc.ts` — single-file compiler (lexer + recursive-descent parser + tree-
@@ -21,6 +25,8 @@ bare-minimum runtime.
 - `docs/` — browser playground (static files + bundled `playground.js`).
 - `docs/examples/*.easy` — mirror of every `tests/*/test.easy`, fetched at
   runtime by the playground.
+- `dist/easyc.js` — bundled node CLI (published to npm). Not committed;
+  built by `bun run build`.
 
 ## Common commands
 
@@ -31,7 +37,12 @@ bare-minimum runtime.
 - `just test-docker` — Linux/MSAN container run.
 - `just playground` — build the bundle and serve `docs/` on
   `http://localhost:8000`.
-- `bun run build:playground` — rebuild `docs/playground.js` only.
+- `bun run build:playground` — rebuild `docs/playground.js` only (also
+  copies `runtime.c` into `docs/` so the source-browser modal can fetch it).
+- `bun run build` — bundle `easyc.ts` to `dist/easyc.js` for the npm CLI.
+- `just publish` — compile-only tests, build, `npm version patch`
+  (no git tag), `npm publish --access=public`. The `--access=public`
+  flag is required because scoped packages default to private on npm.
 
 ## Playground architecture
 
@@ -46,6 +57,16 @@ bare-minimum runtime.
   files live in `docs/examples/` and are fetched on demand.
 - Tabs, theme, and filename are persisted in `localStorage` under
   `easy-playground:*` keys.
+- **C-pane syntax highlighting**: `highlightC()` in `playground.ts` tokenises
+  with a single regex; `.hl-*` CSS classes (keyword / type / string / number
+  / comment / preproc) are defined globally so the source-browser modal
+  reuses them. Output is HTML-escaped before wrapping — never change that
+  without rechecking how `#include <…>` and string contents render.
+- **Runtime source modal**: the first-line `#include "runtime.c"` in the
+  C pane is rendered as a clickable `.hl-include` span with
+  `data-runtime-link`. Click delegation on `#c-output` opens `#source-modal`
+  which lazy-fetches `docs/runtime.c` (copied there by `build:playground`)
+  and renders it with the same highlighter. Esc and backdrop-click close.
 
 ## Conventions that matter
 
@@ -63,9 +84,25 @@ bare-minimum runtime.
 
 ## Before editing `easyc.ts`
 
-- The file is ~2250 lines and single-module by intent (pedagogical). If you
+- The file is ~2300 lines and single-module by intent (pedagogical). If you
   add exports for external consumers (e.g., the playground), keep the
   top-level import set node-only; defer anything browser-hostile into
   `run()`.
+- Node-only imports must be namespace-form (`import * as url from "node:url"`),
+  not named-form. Bun's browser polyfills expose a `*` namespace but not
+  every named export — `import { fileURLToPath } from "node:url"` broke the
+  browser bundle and had to be rewritten as `import * as url from "node:url"`.
 - The parser throws on the first error (`ParseError`). Don't silently swallow
   them — the playground relies on their `toString()` formatting.
+
+## CLI runtime.c handling
+
+- Emitted C starts with `#include "runtime.c"`. The CLI auto-copies the
+  packaged `runtime.c` next to the output `.c` so `cc out.c` works after
+  `npx @begoon/easyc foo.easy`. `findPackagedRuntime()` tries both
+  `<dirname(import.meta.url)>/runtime.c` (in-tree) and
+  `<dirname>/../runtime.c` (bundled at `dist/easyc.js`).
+- Self-copy is skipped via `realpathSync` equality — important for in-tree
+  runs at the repo root where source and destination are the same file.
+- `--no-runtime` skips the copy. `test.ts` passes it so test dirs stay free
+  of generated `runtime.c` artifacts.
