@@ -112,19 +112,41 @@ STR make_string(const char *data, int sz)
 // the element count independently of the variables used in the Easy bounds.
 typedef struct {
     size_t refs, count, element_size;
+    int lo, hi;
     Manage element;
     max_align_t alignment;
     unsigned char data[];
 } ArrayStorage;
 
-static inline void *make_array(size_t count, size_t element_size, Manage element)
+// Calculate in a widened type before converting to size_t. In particular,
+// [0:INT_MAX] has INT_MAX + 1 elements, which does not fit in an int.
+static inline size_t array_allocation_size(int lo, int hi, size_t element_size, size_t *count)
 {
-    if (count > (SIZE_MAX - sizeof(ArrayStorage)) / element_size) {
+    if (hi < lo) {
+        fprintf(stderr, "invalid array bounds: %d..%d\n", lo, hi); exit(1);
+    }
+    uint64_t length = (uint64_t)((int64_t)hi - (int64_t)lo) + 1;
+    if (!element_size || length > (SIZE_MAX - sizeof(ArrayStorage)) / element_size) {
         fprintf(stderr, "array allocation too large\n"); exit(1);
     }
-    ArrayStorage *owner = allocate(sizeof(*owner) + count * element_size);
+    *count = (size_t)length;
+    return sizeof(ArrayStorage) + *count * element_size;
+}
+
+static inline ArrayStorage *array_storage(const void *data)
+{
+    return (ArrayStorage *)((char *)data - offsetof(ArrayStorage, data));
+}
+
+static inline void *make_array(int lo, int hi, size_t element_size, Manage element)
+{
+    size_t count;
+    size_t bytes = array_allocation_size(lo, hi, element_size, &count);
+    ArrayStorage *owner = allocate(bytes);
     owner->refs = 1;
     owner->count = count;
+    owner->lo = lo;
+    owner->hi = hi;
     owner->element_size = element_size;
     owner->element = element;
     ++live_arrays;
@@ -136,7 +158,7 @@ static inline void manage_array(const void *value, int change)
     void *data;
     memcpy(&data, value, sizeof(data));
     if (!data) return;
-    ArrayStorage *owner = (ArrayStorage *)((char *)data - offsetof(ArrayStorage, data));
+    ArrayStorage *owner = array_storage(data);
     if (change > 0) ++owner->refs;
     else if (--owner->refs == 0) {
         if (owner->element)
@@ -314,6 +336,17 @@ void $index(int index, int lo, int hi, const STR *filename, int line, int charac
         fprintf(stderr, "array index out of bounds: %d not in [%d..%d] (%s:%d:%d)\n", index, lo, hi, filename->data, line, character);
         exit(1);
     }
+}
+
+static inline size_t $array_index(const void *data, int index, const STR *filename, int line, int character)
+{
+    if (!data) {
+        fprintf(stderr, "uninitialized array (%s:%d:%d)\n", filename->data, line, character);
+        exit(1);
+    }
+    const ArrayStorage *owner = array_storage(data);
+    $index(index, owner->lo, owner->hi, filename, line, character);
+    return (size_t)((int64_t)index - (int64_t)owner->lo);
 }
 
 int main_program();

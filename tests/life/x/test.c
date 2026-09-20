@@ -62,7 +62,7 @@ int neighbours(int x, int y)
                 {
                     $index(yy, 0, 25, &$F, 23, 22);
                     $index(xx, 0, 80, &$F, 23, 26);
-                    if (field.data[(yy) - (0)].data[(xx) - (0)])
+                    if (field.data[(size_t)((int64_t)(yy) - (0))].data[(size_t)((int64_t)(xx) - (0))])
                     {
                         const int $r28 = (n + 1);
                         n = $r28;
@@ -110,7 +110,7 @@ void print()
                 if (!(x <= $r36)) break;
                 $index(y, 0, 25, &$F, 40, 18);
                 $index(x, 0, 80, &$F, 40, 21);
-                const int $r37 = (field.data[(y) - (0)].data[(x) - (0)] == TRUE);
+                const int $r37 = (field.data[(size_t)((int64_t)(y) - (0))].data[(size_t)((int64_t)(x) - (0))] == TRUE);
                 if ($r37)
                 {
                     $output("A", $4);
@@ -151,24 +151,24 @@ void glider(int x, int y)
 {
     $index(y, 0, 25, &$F, 52, 15);
     $index(x, 0, 80, &$F, 52, 18);
-    field.data[(y) - (0)].data[(x) - (0)] = TRUE;
+    field.data[(size_t)((int64_t)(y) - (0))].data[(size_t)((int64_t)(x) - (0))] = TRUE;
     $index(y, 0, 25, &$F, 53, 15);
     const int $r47 = (x + 1);
     $index($r47, 0, 80, &$F, 53, 18);
-    field.data[(y) - (0)].data[($r47) - (0)] = TRUE;
+    field.data[(size_t)((int64_t)(y) - (0))].data[(size_t)((int64_t)($r47) - (0))] = TRUE;
     $index(y, 0, 25, &$F, 54, 15);
     const int $r48 = (x + 2);
     $index($r48, 0, 80, &$F, 54, 18);
-    field.data[(y) - (0)].data[($r48) - (0)] = TRUE;
+    field.data[(size_t)((int64_t)(y) - (0))].data[(size_t)((int64_t)($r48) - (0))] = TRUE;
     const int $r49 = (y + 1);
     $index($r49, 0, 25, &$F, 55, 15);
     $index(x, 0, 80, &$F, 55, 20);
-    field.data[($r49) - (0)].data[(x) - (0)] = TRUE;
+    field.data[(size_t)((int64_t)($r49) - (0))].data[(size_t)((int64_t)(x) - (0))] = TRUE;
     const int $r50 = (y + 2);
     $index($r50, 0, 25, &$F, 56, 15);
     const int $r51 = (x + 1);
     $index($r51, 0, 80, &$F, 56, 20);
-    field.data[($r50) - (0)].data[($r51) - (0)] = TRUE;
+    field.data[(size_t)((int64_t)($r50) - (0))].data[(size_t)((int64_t)($r51) - (0))] = TRUE;
 }
 void evolution()
 {
@@ -189,7 +189,7 @@ void evolution()
             int n = 0;
             $index(y, 0, 25, &$F, 68, 28);
             $index(x, 0, 80, &$F, 68, 31);
-            alive = field.data[(y) - (0)].data[(x) - (0)];
+            alive = field.data[(size_t)((int64_t)(y) - (0))].data[(size_t)((int64_t)(x) - (0))];
             const int $r54 = neighbours(x, y);
             n = $r54;
             const int $r55 = (alive == TRUE);
@@ -213,7 +213,7 @@ void evolution()
             }
             $index(y, 0, 25, &$F, 77, 18);
             $index(x, 0, 80, &$F, 77, 21);
-            next.data[(y) - (0)].data[(x) - (0)] = alive;
+            next.data[(size_t)((int64_t)(y) - (0))].data[(size_t)((int64_t)(x) - (0))] = alive;
             x += 1;
         }
         y += 1;
@@ -236,7 +236,7 @@ int main_program()
             if (!(x <= $r7)) break;
             $index(y, 0, 25, &$F, 89, 17);
             $index(x, 0, 80, &$F, 89, 20);
-            field.data[(y) - (0)].data[(x) - (0)] = FALSE;
+            field.data[(size_t)((int64_t)(y) - (0))].data[(size_t)((int64_t)(x) - (0))] = FALSE;
             x += 1;
         }
         y += 1;

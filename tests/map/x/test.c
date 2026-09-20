@@ -45,32 +45,34 @@ int main_program()
 {
     scanf("%d", &node_number);
     {
-        const int $r1 = (node_number < 1);
-        if ($r1)
+        const int $r25 = (node_number < 1);
+        if ($r25)
         {
             $output("A", $0);
             $exit();
         }
         else
         {
-            void *$r2 = make_array((node_number - 1 + 1), sizeof(struct
-            {
-                int data[49 - 1 + 1];
-            }), NULL);
             struct
             {
                 struct
                 {
                     int data[49 - 1 + 1];
                 } *data;
-            } adjacency = { .data = $r2 };
-            OWN(adjacency, manage_array, $r3);
-            void *$r4 = make_array((node_number - 1 + 1), sizeof(Node), $manage0);
+            } adjacency = {0};
+            OWN(adjacency, manage_array, $r26);
+            const int $r27 = 1;
+            adjacency.data = make_array($r27, node_number, sizeof(struct
+            {
+                int data[49 - 1 + 1];
+            }), NULL);
             struct
             {
                 Node *data;
-            } nodes = { .data = $r4 };
-            OWN(nodes, manage_array, $r5);
+            } nodes = {0};
+            OWN(nodes, manage_array, $r28);
+            const int $r29 = 1;
+            nodes.data = make_array($r29, node_number, sizeof(Node), $manage0);
             $output("Ai", $1, node_number);
             $output("");
             {
@@ -81,44 +83,44 @@ int main_program()
                     {
                         if (!(i <= node_number)) break;
                         int j = 0;
-                        $index(i, 1, node_number, &$F, 29, 19);
-                        scanf("%d", &nodes.data[(i) - (1)].id);
-                        $index(i, 1, node_number, &$F, 29, 32);
-                        scanf("%d", &nodes.data[(i) - (1)].neighbour_number);
-                        $index(i, 1, node_number, &$F, 29, 59);
+                        const size_t $r30 = $array_index(nodes.data, i, &$F, 29, 19);
+                        scanf("%d", &nodes.data[$r30].id);
+                        const size_t $r31 = $array_index(nodes.data, i, &$F, 29, 32);
+                        scanf("%d", &nodes.data[$r31].neighbour_number);
+                        const size_t $r32 = $array_index(nodes.data, i, &$F, 29, 59);
                         {
                             char buf[4096];
                             scanf("%4095s", buf);
-                            manage_string(&nodes.data[(i) - (1)].name, -1);
-                            nodes.data[(i) - (1)].name = make_string(buf, strlen(buf));
+                            manage_string(&nodes.data[$r32].name, -1);
+                            nodes.data[$r32].name = make_string(buf, strlen(buf));
                         }
                         j = 1;
                         while (1)
                         {
-                            $index(i, 1, node_number, &$F, 31, 27);
-                            if (!(j <= nodes.data[(i) - (1)].neighbour_number)) break;
-                            $index(i, 1, node_number, &$F, 32, 21);
+                            const size_t $r33 = $array_index(nodes.data, i, &$F, 31, 27);
+                            if (!(j <= nodes.data[$r33].neighbour_number)) break;
+                            const size_t $r34 = $array_index(nodes.data, i, &$F, 32, 21);
                             $index(j, 1, 10, &$F, 32, 35);
-                            scanf("%d", &nodes.data[(i) - (1)].neighbours.data[(j) - (1)]);
-                            $index(i, 1, node_number, &$F, 33, 29);
-                            $index(nodes.data[(i) - (1)].id, 1, node_number, &$F, 33, 23);
-                            $index(i, 1, node_number, &$F, 33, 42);
+                            scanf("%d", &nodes.data[$r34].neighbours.data[(size_t)((int64_t)(j) - (1))]);
+                            const size_t $r35 = $array_index(nodes.data, i, &$F, 33, 29);
+                            const size_t $r36 = $array_index(adjacency.data, nodes.data[$r35].id, &$F, 33, 23);
+                            const size_t $r37 = $array_index(nodes.data, i, &$F, 33, 42);
                             $index(j, 1, 10, &$F, 33, 56);
-                            $index(nodes.data[(i) - (1)].neighbours.data[(j) - (1)], 1, 49, &$F, 33, 36);
-                            adjacency.data[(nodes.data[(i) - (1)].id) - (1)].data[(nodes.data[(i) - (1)].neighbours.data[(j) - (1)]) - (1)] = TRUE;
+                            $index(nodes.data[$r37].neighbours.data[(size_t)((int64_t)(j) - (1))], 1, 49, &$F, 33, 36);
+                            adjacency.data[$r36].data[(size_t)((int64_t)(nodes.data[$r37].neighbours.data[(size_t)((int64_t)(j) - (1))]) - (1))] = TRUE;
                             j += 1;
                         }
                         {
-                            const STR $r6 = CHARACTER(13);
-                            OWN($r6, manage_string, $r7);
-                            $output("A", $r6);
+                            const STR $r38 = CHARACTER(13);
+                            OWN($r38, manage_string, $r39);
+                            $output("A", $r38);
                         }
                         i += 1;
                     }
                 }
                 scanf("%d", &i);
-                const int $r8 = (i != 0);
-                if ($r8)
+                const int $r40 = (i != 0);
+                if ($r40)
                 {
                     $output("A", $3);
                     $exit();
@@ -126,9 +128,9 @@ int main_program()
                 $output("A", $4);
                 $output("");
                 {
-                    const STR $r9 = CHARACTER(0);
-                    OWN($r9, manage_string, $r10);
-                    $output("AA", $5, $r9);
+                    const STR $r41 = CHARACTER(0);
+                    OWN($r41, manage_string, $r42);
+                    $output("AA", $5, $r41);
                 }
                 {
                     i = 1;
@@ -136,21 +138,21 @@ int main_program()
                     {
                         if (!(i <= node_number)) break;
                         int j = 0;
-                        const int $r11 = (i % 10);
-                        j = $r11;
+                        const int $r43 = (i % 10);
+                        j = $r43;
                         {
-                            const STR $r12 = CHARACTER(0);
-                            OWN($r12, manage_string, $r13);
-                            $output("iA", j, $r12);
+                            const STR $r44 = CHARACTER(0);
+                            OWN($r44, manage_string, $r45);
+                            $output("iA", j, $r44);
                         }
                         i += 1;
                     }
                 }
                 $output("");
                 {
-                    const STR $r14 = CHARACTER(0);
-                    OWN($r14, manage_string, $r15);
-                    $output("AA", $5, $r14);
+                    const STR $r46 = CHARACTER(0);
+                    OWN($r46, manage_string, $r47);
+                    $output("AA", $5, $r46);
                 }
                 i = 1;
                 while (1)
@@ -166,24 +168,24 @@ int main_program()
                     {
                         if (!(i <= node_number)) break;
                         int j = 0;
-                        const int $r16 = (i < 10);
-                        if ($r16)
+                        const int $r48 = (i < 10);
+                        if ($r48)
                         {
                             $output("A", $7);
                         }
                         {
-                            const STR $r17 = CHARACTER(0);
-                            OWN($r17, manage_string, $r18);
-                            $output("iAA", i, $8, $r17);
+                            const STR $r49 = CHARACTER(0);
+                            OWN($r49, manage_string, $r50);
+                            $output("iAA", i, $8, $r49);
                         }
                         j = 1;
                         while (1)
                         {
                             if (!(j <= node_number)) break;
-                            $index(i, 1, node_number, &$F, 61, 22);
+                            const size_t $r52 = $array_index(adjacency.data, i, &$F, 61, 22);
                             $index(j, 1, 49, &$F, 61, 25);
-                            const int $r19 = (adjacency.data[(i) - (1)].data[(j) - (1)] == TRUE);
-                            if ($r19)
+                            const int $r51 = (adjacency.data[$r52].data[(size_t)((int64_t)(j) - (1))] == TRUE);
+                            if ($r51)
                             {
                                 $output("A", $9);
                             }
@@ -194,47 +196,49 @@ int main_program()
                             j += 1;
                         }
                         {
-                            const STR $r20 = CHARACTER(10);
-                            OWN($r20, manage_string, $r21);
-                            $output("A", $r20);
+                            const STR $r53 = CHARACTER(10);
+                            OWN($r53, manage_string, $r54);
+                            $output("A", $r53);
                         }
                         i += 1;
                     }
                 }
             }
             {
-                void *$r22 = make_array((node_number - 1 + 1), sizeof(int), NULL);
                 struct
                 {
                     int *data;
-                } colors = { .data = $r22 };
-                OWN(colors, manage_array, $r23);
-                void *$r24 = make_array((node_number - 1 + 1), sizeof(int), NULL);
+                } colors = {0};
+                OWN(colors, manage_array, $r55);
+                const int $r56 = 1;
+                colors.data = make_array($r56, node_number, sizeof(int), NULL);
                 struct
                 {
                     int *data;
-                } available = { .data = $r24 };
-                OWN(available, manage_array, $r25);
+                } available = {0};
+                OWN(available, manage_array, $r57);
+                const int $r58 = 1;
+                available.data = make_array($r58, node_number, sizeof(int), NULL);
                 int max_color = 0;
                 int i = 0;
                 i = 1;
                 while (1)
                 {
                     if (!(i <= node_number)) break;
-                    $index(i, 1, node_number, &$F, 73, 45);
-                    const int $r26 = (-1);
-                    colors.data[(i) - (1)] = $r26;
+                    const size_t $r59 = $array_index(colors.data, i, &$F, 73, 45);
+                    const int $r60 = (-1);
+                    colors.data[$r59] = $r60;
                     i += 1;
                 }
-                $index(1, 1, node_number, &$F, 74, 16);
-                colors.data[(1) - (1)] = 1;
+                const size_t $r61 = $array_index(colors.data, 1, &$F, 74, 16);
+                colors.data[$r61] = 1;
                 max_color = 1;
                 i = 1;
                 while (1)
                 {
                     if (!(i <= node_number)) break;
-                    $index(i, 1, node_number, &$F, 77, 48);
-                    available.data[(i) - (1)] = TRUE;
+                    const size_t $r62 = $array_index(available.data, i, &$F, 77, 48);
+                    available.data[$r62] = TRUE;
                     i += 1;
                 }
                 i = 2;
@@ -247,19 +251,19 @@ int main_program()
                     while (1)
                     {
                         if (!(j <= node_number)) break;
-                        $index(i, 1, node_number, &$F, 84, 22);
+                        const size_t $r64 = $array_index(adjacency.data, i, &$F, 84, 22);
                         $index(j, 1, 49, &$F, 84, 25);
-                        const int $r27 = (adjacency.data[(i) - (1)].data[(j) - (1)] == TRUE);
-                        if ($r27)
+                        const int $r63 = (adjacency.data[$r64].data[(size_t)((int64_t)(j) - (1))] == TRUE);
+                        if ($r63)
                         {
-                            $index(j, 1, node_number, &$F, 85, 21);
-                            const int $r29 = (-1);
-                            const int $r28 = (colors.data[(j) - (1)] != $r29);
-                            if ($r28)
+                            const size_t $r66 = $array_index(colors.data, j, &$F, 85, 21);
+                            const int $r67 = (-1);
+                            const int $r65 = (colors.data[$r66] != $r67);
+                            if ($r65)
                             {
-                                $index(j, 1, node_number, &$F, 86, 34);
-                                $index(colors.data[(j) - (1)], 1, node_number, &$F, 86, 27);
-                                available.data[(colors.data[(j) - (1)]) - (1)] = FALSE;
+                                const size_t $r68 = $array_index(colors.data, j, &$F, 86, 34);
+                                const size_t $r69 = $array_index(available.data, colors.data[$r68], &$F, 86, 27);
+                                available.data[$r69] = FALSE;
                             }
                         }
                         j += 1;
@@ -268,16 +272,16 @@ int main_program()
                     j = 1;
                     while (1)
                     {
-                        const int $r30 = (!found);
-                        if (!($r30 && j <= node_number)) break;
-                        $index(j, 1, node_number, &$F, 93, 24);
-                        const int $r31 = (available.data[(j) - (1)] == TRUE);
-                        if ($r31)
+                        const int $r70 = (!found);
+                        if (!($r70 && j <= node_number)) break;
+                        const size_t $r72 = $array_index(available.data, j, &$F, 93, 24);
+                        const int $r71 = (available.data[$r72] == TRUE);
+                        if ($r71)
                         {
-                            $index(i, 1, node_number, &$F, 94, 24);
-                            colors.data[(i) - (1)] = j;
-                            const int $r32 = (j > max_color);
-                            if ($r32)
+                            const size_t $r73 = $array_index(colors.data, i, &$F, 94, 24);
+                            colors.data[$r73] = j;
+                            const int $r74 = (j > max_color);
+                            if ($r74)
                             {
                                 max_color = j;
                             }
@@ -289,8 +293,8 @@ int main_program()
                     while (1)
                     {
                         if (!(j <= node_number)) break;
-                        $index(j, 1, node_number, &$F, 100, 50);
-                        available.data[(j) - (1)] = TRUE;
+                        const size_t $r75 = $array_index(available.data, j, &$F, 100, 50);
+                        available.data[$r75] = TRUE;
                         j += 1;
                     }
                     i += 1;
@@ -307,28 +311,28 @@ int main_program()
                         {
                             if (!(color <= max_color)) break;
                             {
-                                const STR $r33 = CHARACTER(0);
-                                OWN($r33, manage_string, $r34);
-                                $output("AiAA", $11, color, $12, $r33);
+                                const STR $r76 = CHARACTER(0);
+                                OWN($r76, manage_string, $r77);
+                                $output("AiAA", $11, color, $12, $r76);
                             }
                             i = 1;
                             while (1)
                             {
                                 if (!(i <= node_number)) break;
-                                $index(i, 1, node_number, &$F, 110, 21);
-                                const int $r35 = (colors.data[(i) - (1)] == color);
-                                if ($r35)
+                                const size_t $r79 = $array_index(colors.data, i, &$F, 110, 21);
+                                const int $r78 = (colors.data[$r79] == color);
+                                if ($r78)
                                 {
-                                    $index(i, 1, node_number, &$F, 111, 26);
-                                    $index(i, 1, node_number, &$F, 111, 26);
-                                    $output("iA", nodes.data[(i) - (1)].id, $7);
+                                    const size_t $r80 = $array_index(nodes.data, i, &$F, 111, 26);
+                                    const size_t $r81 = $array_index(nodes.data, i, &$F, 111, 26);
+                                    $output("iA", nodes.data[$r81].id, $7);
                                 }
                                 i += 1;
                             }
                             {
-                                const STR $r36 = CHARACTER(10);
-                                OWN($r36, manage_string, $r37);
-                                $output("A", $r36);
+                                const STR $r82 = CHARACTER(10);
+                                OWN($r82, manage_string, $r83);
+                                $output("A", $r82);
                             }
                             color += 1;
                         }

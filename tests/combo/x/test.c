@@ -106,7 +106,7 @@ int main_program()
     $index(1, 1, 256, &$F, 48, 17);
     $index(1, 1, 8, &$F, 48, 14);
     $index(1, 1, 256, &$F, 48, 17);
-    $output("iA", s.m.data[(1) - (1)].data[(1) - (1)], s.a.s);
+    $output("iA", s.m.data[(size_t)((int64_t)(1) - (1))].data[(size_t)((int64_t)(1) - (1))], s.a.s);
     {
         const STR $r5 = $concat("AA", s.a.s, $5);
         OWN($r5, manage_string, $r6);
@@ -118,15 +118,15 @@ int main_program()
     s.m = m1;
     i = 0;
     $index(1, 1, 256, &$F, 55, 9);
-    r.data[(1) - (1)] = 1;
+    r.data[(size_t)((int64_t)(1) - (1))] = 1;
     $index(2, 1, 8, &$F, 56, 9);
     $index(3, 1, 256, &$F, 56, 12);
-    m.data[(2) - (1)].data[(3) - (1)] = 1;
+    m.data[(size_t)((int64_t)(2) - (1))].data[(size_t)((int64_t)(3) - (1))] = 1;
     $index(2, 1, 256, &$F, 57, 9);
-    r.data[(2) - (1)] = 0;
+    r.data[(size_t)((int64_t)(2) - (1))] = 0;
     $index(2, 1, 8, &$F, 57, 17);
     $index(1, 1, 256, &$F, 57, 20);
-    m.data[(2) - (1)].data[(1) - (1)] = 0;
+    m.data[(size_t)((int64_t)(2) - (1))].data[(size_t)((int64_t)(1) - (1))] = 0;
     m1 = m;
     i = 1;
     while (1)
@@ -140,7 +140,7 @@ int main_program()
             $index(j, 1, 256, &$F, 63, 16);
             const int $r9 = (i * 100);
             const int $r8 = ($r9 + j);
-            m.data[(i) - (1)].data[(j) - (1)] = $r8;
+            m.data[(size_t)((int64_t)(i) - (1))].data[(size_t)((int64_t)(j) - (1))] = $r8;
             j += 1;
         }
         i += 1;

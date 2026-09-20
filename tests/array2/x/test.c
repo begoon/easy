@@ -23,6 +23,6 @@ int main_program()
     $index(2, 0, 80, &$F, 10, 12);
     $index(2, 1, 25, &$F, 10, 22);
     $index(1, 0, 80, &$F, 10, 25);
-    b.data[(1) - (1)].data[(2) - (0)].x = b.data[(2) - (1)].data[(1) - (0)].x;
+    b.data[(size_t)((int64_t)(1) - (1))].data[(size_t)((int64_t)(2) - (0))].x = b.data[(size_t)((int64_t)(2) - (1))].data[(size_t)((int64_t)(1) - (0))].x;
     $output("A", $1);
 }

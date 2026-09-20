@@ -13,16 +13,17 @@ int main_program()
 {
     sz = 1024;
     {
-        void *$r1 = make_array((sz - 1 + 1), sizeof(int), NULL);
         struct
         {
             int *data;
-        } b = { .data = $r1 };
-        OWN(b, manage_array, $r2);
-        $index(1, 1, sz, &$F, 9, 11);
-        b.data[(1) - (1)] = 42;
-        $index(1, 1, sz, &$F, 10, 14);
-        $index(1, 1, sz, &$F, 10, 14);
-        $output("i", b.data[(1) - (1)]);
+        } b = {0};
+        OWN(b, manage_array, $r3);
+        const int $r4 = 1;
+        b.data = make_array($r4, sz, sizeof(int), NULL);
+        const size_t $r5 = $array_index(b.data, 1, &$F, 9, 11);
+        b.data[$r5] = 42;
+        const size_t $r6 = $array_index(b.data, 1, &$F, 10, 14);
+        const size_t $r7 = $array_index(b.data, 1, &$F, 10, 14);
+        $output("i", b.data[$r7]);
     }
 }

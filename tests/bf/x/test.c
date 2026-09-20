@@ -31,7 +31,7 @@ STR bf(STR program)
     OWN(ch, manage_string, $r7);
     int depth = 0;
     $index(0, 0, 299, &$F, 16, 14);
-    tape.data[(0) - (0)] = 0;
+    tape.data[(size_t)((int64_t)(0) - (0))] = 0;
     ptr = 0;
     __auto_type $r8 = $1;
     manage_string(&$r8, 1);
@@ -69,16 +69,16 @@ STR bf(STR program)
             {
                 $index(ptr, 0, 299, &$F, 26, 33);
                 $index(ptr, 0, 299, &$F, 26, 46);
-                const int $r19 = (tape.data[(ptr) - (0)] + 1);
-                tape.data[(ptr) - (0)] = $r19;
+                const int $r19 = (tape.data[(size_t)((int64_t)(ptr) - (0))] + 1);
+                tape.data[(size_t)((int64_t)(ptr) - (0))] = $r19;
             }
             const int $r20 = ch.sz == $5.sz && (ch.sz ? memcmp(ch.data, $5.data, ch.sz) : 0) == 0;
             if ($r20)
             {
                 $index(ptr, 0, 299, &$F, 27, 33);
                 $index(ptr, 0, 299, &$F, 27, 46);
-                const int $r21 = (tape.data[(ptr) - (0)] - 1);
-                tape.data[(ptr) - (0)] = $r21;
+                const int $r21 = (tape.data[(size_t)((int64_t)(ptr) - (0))] - 1);
+                tape.data[(size_t)((int64_t)(ptr) - (0))] = $r21;
             }
             {
                 const int $r22 = ch.sz == $6.sz && (ch.sz ? memcmp(ch.data, $6.data, ch.sz) : 0) == 0;
@@ -86,7 +86,7 @@ STR bf(STR program)
                 {
                     {
                         $index(ptr, 0, 299, &$F, 28, 57);
-                        const STR $r24 = CHARACTER(tape.data[(ptr) - (0)]);
+                        const STR $r24 = CHARACTER(tape.data[(size_t)((int64_t)(ptr) - (0))]);
                         OWN($r24, manage_string, $r25);
                         const STR $r23 = $concat("AA", out, $r24);
                         OWN($r23, manage_string, $r26);
@@ -103,7 +103,7 @@ STR bf(STR program)
                 {
                     {
                         $index(ptr, 0, 299, &$F, 30, 17);
-                        const int $r29 = (tape.data[(ptr) - (0)] == 0);
+                        const int $r29 = (tape.data[(size_t)((int64_t)(ptr) - (0))] == 0);
                         if ($r29)
                         {
                             {
@@ -147,7 +147,7 @@ STR bf(STR program)
                 {
                     {
                         $index(ptr, 0, 299, &$F, 40, 17);
-                        const int $r40 = (tape.data[(ptr) - (0)] != 0);
+                        const int $r40 = (tape.data[(size_t)((int64_t)(ptr) - (0))] != 0);
                         if ($r40)
                         {
                             {

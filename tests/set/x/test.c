@@ -26,12 +26,12 @@ int main_program()
     $index(1, 0, 1, &$F, 7, 14);
     $index(100, 0, 100, &$F, 7, 17);
     const int $r1 = (p.y + 321);
-    p.x.data[(0) - (0)].data[(1) - (0)].data[(100) - (0)] = $r1;
+    p.x.data[(size_t)((int64_t)(0) - (0))].data[(size_t)((int64_t)(1) - (0))].data[(size_t)((int64_t)(100) - (0))] = $r1;
     $index(0, 0, 1, &$F, 8, 14);
     $index(1, 0, 1, &$F, 8, 17);
     $index(100, 0, 100, &$F, 8, 20);
     $index(0, 0, 1, &$F, 8, 14);
     $index(1, 0, 1, &$F, 8, 17);
     $index(100, 0, 100, &$F, 8, 20);
-    $output("iAi", p.x.data[(0) - (0)].data[(1) - (0)].data[(100) - (0)], $1, p.y);
+    $output("iAi", p.x.data[(size_t)((int64_t)(0) - (0))].data[(size_t)((int64_t)(1) - (0))].data[(size_t)((int64_t)(100) - (0))], $1, p.y);
 }

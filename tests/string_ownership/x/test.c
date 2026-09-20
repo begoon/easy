@@ -48,43 +48,43 @@ STR $5 = { .data = "done", .sz = 4 };
 STR identity(STR value)
 {
     manage_string(&value, 1);
-    OWN(value, manage_string, $r77);
+    OWN(value, manage_string, $r82);
     manage_string(&value, 1);
     return value;
 }
 Boxes change(Boxes value)
 {
     $manage0(&value, 1);
-    OWN(value, $manage0, $r78);
+    OWN(value, $manage0, $r83);
     {
         $index(0, 0, 2, &$F, 15, 15);
         $index(0, 0, 2, &$F, 15, 32);
         $index(0, 0, 2, &$F, 15, 32);
-        const STR $r79 = $concat("AA", value.data[(0) - (0)].text, $1);
-        OWN($r79, manage_string, $r80);
-        __auto_type $r81 = $r79;
-        manage_string(&$r81, 1);
-        manage_string(&value.data[(0) - (0)].text, -1);
-        value.data[(0) - (0)].text = $r81;
+        const STR $r84 = $concat("AA", value.data[(size_t)((int64_t)(0) - (0))].text, $1);
+        OWN($r84, manage_string, $r85);
+        __auto_type $r86 = $r84;
+        manage_string(&$r86, 1);
+        manage_string(&value.data[(size_t)((int64_t)(0) - (0))].text, -1);
+        value.data[(size_t)((int64_t)(0) - (0))].text = $r86;
     }
     $manage0(&value, 1);
     return value;
 }
 Dynamic dynamic()
 {
-    const int $r83 = (1 + 1);
-    void *$r82 = make_array(($r83 - 0 + 1), sizeof(STR), manage_string);
-    Dynamic values = { .data = $r82 };
-    OWN(values, manage_array, $r84);
+    Dynamic values = {0};
+    OWN(values, manage_array, $r87);
+    const int $r88 = 0;
+    const int $r89 = (1 + 1);
+    values.data = make_array($r88, $r89, sizeof(STR), manage_string);
     {
-        const int $r85 = (1 + 1);
-        $index(0, 0, $r85, &$F, 21, 16);
-        const STR $r86 = CHARACTER(68);
-        OWN($r86, manage_string, $r87);
-        __auto_type $r88 = $r86;
-        manage_string(&$r88, 1);
-        manage_string(&values.data[(0) - (0)], -1);
-        values.data[(0) - (0)] = $r88;
+        const size_t $r90 = $array_index(values.data, 0, &$F, 21, 16);
+        const STR $r91 = CHARACTER(68);
+        OWN($r91, manage_string, $r92);
+        __auto_type $r93 = $r91;
+        manage_string(&$r93, 1);
+        manage_string(&values.data[$r90], -1);
+        values.data[$r90] = $r93;
     }
     manage_array(&values, 1);
     return values;
@@ -92,83 +92,83 @@ Dynamic dynamic()
 void modify(STR value)
 {
     manage_string(&value, 1);
-    OWN(value, manage_string, $r89);
+    OWN(value, manage_string, $r94);
     {
-        const STR $r90 = $concat("AA", value, $2);
-        OWN($r90, manage_string, $r91);
-        __auto_type $r92 = $r90;
-        manage_string(&$r92, 1);
+        const STR $r95 = $concat("AA", value, $2);
+        OWN($r95, manage_string, $r96);
+        __auto_type $r97 = $r95;
+        manage_string(&$r97, 1);
         manage_string(&value, -1);
-        value = $r92;
+        value = $r97;
     }
 }
 int main_program()
 {
-    OWN(s, manage_string, $r5);
-    OWN(t, manage_string, $r6);
-    OWN(a, $manage0, $r7);
-    OWN(b, $manage0, $r8);
+    OWN(s, manage_string, $r7);
+    OWN(t, manage_string, $r8);
+    OWN(a, $manage0, $r9);
+    OWN(b, $manage0, $r10);
     {
-        const STR $r9 = CHARACTER(65);
-        OWN($r9, manage_string, $r10);
-        __auto_type $r11 = $r9;
-        manage_string(&$r11, 1);
+        const STR $r11 = CHARACTER(65);
+        OWN($r11, manage_string, $r12);
+        __auto_type $r13 = $r11;
+        manage_string(&$r13, 1);
         manage_string(&s, -1);
-        s = $r11;
+        s = $r13;
     }
-    __auto_type $r12 = s;
-    manage_string(&$r12, 1);
+    __auto_type $r14 = s;
+    manage_string(&$r14, 1);
     manage_string(&t, -1);
-    t = $r12;
-    __auto_type $r13 = s;
-    manage_string(&$r13, 1);
+    t = $r14;
+    __auto_type $r15 = s;
+    manage_string(&$r15, 1);
     manage_string(&s, -1);
-    s = $r13;
+    s = $r15;
     modify(s);
     {
-        const STR $r15 = $concat("AA", s, $3);
-        OWN($r15, manage_string, $r16);
-        const STR $r14 = identity($r15);
-        OWN($r14, manage_string, $r17);
-        __auto_type $r18 = $r14;
-        manage_string(&$r18, 1);
+        const STR $r17 = $concat("AA", s, $3);
+        OWN($r17, manage_string, $r18);
+        const STR $r16 = identity($r17);
+        OWN($r16, manage_string, $r19);
+        __auto_type $r20 = $r16;
+        manage_string(&$r20, 1);
         manage_string(&s, -1);
-        s = $r18;
+        s = $r20;
     }
     {
-        const STR $r19 = $concat("AA", s, t);
-        OWN($r19, manage_string, $r20);
-        $output("A", $r19);
+        const STR $r21 = $concat("AA", s, t);
+        OWN($r21, manage_string, $r22);
+        $output("A", $r21);
     }
     $index(0, 0, 2, &$F, 35, 9);
-    __auto_type $r21 = s;
-    manage_string(&$r21, 1);
-    manage_string(&a.data[(0) - (0)].text, -1);
-    a.data[(0) - (0)].text = $r21;
-    __auto_type $r22 = a;
-    $manage0(&$r22, 1);
+    __auto_type $r23 = s;
+    manage_string(&$r23, 1);
+    manage_string(&a.data[(size_t)((int64_t)(0) - (0))].text, -1);
+    a.data[(size_t)((int64_t)(0) - (0))].text = $r23;
+    __auto_type $r24 = a;
+    $manage0(&$r24, 1);
     $manage0(&b, -1);
-    b = $r22;
+    b = $r24;
     {
-        const Boxes $r23 = change(a);
-        OWN($r23, $manage0, $r24);
-        __auto_type $r25 = $r23;
-        $manage0(&$r25, 1);
+        const Boxes $r25 = change(a);
+        OWN($r25, $manage0, $r26);
+        __auto_type $r27 = $r25;
+        $manage0(&$r27, 1);
         $manage0(&a, -1);
-        a = $r25;
+        a = $r27;
     }
-    __auto_type $r26 = a;
-    $manage0(&$r26, 1);
+    __auto_type $r28 = a;
+    $manage0(&$r28, 1);
     $manage0(&a, -1);
-    a = $r26;
+    a = $r28;
     {
         $index(0, 0, 2, &$F, 39, 12);
         $index(0, 0, 2, &$F, 39, 12);
         $index(0, 0, 2, &$F, 39, 25);
         $index(0, 0, 2, &$F, 39, 25);
-        const STR $r27 = $concat("AA", a.data[(0) - (0)].text, b.data[(0) - (0)].text);
-        OWN($r27, manage_string, $r28);
-        $output("A", $r27);
+        const STR $r29 = $concat("AA", a.data[(size_t)((int64_t)(0) - (0))].text, b.data[(size_t)((int64_t)(0) - (0))].text);
+        OWN($r29, manage_string, $r30);
+        $output("A", $r29);
     }
     {
         i = 1;
@@ -176,130 +176,128 @@ int main_program()
         {
             if (!(i <= 10000)) break;
             {
-                const STR $r31 = CHARACTER(65);
-                OWN($r31, manage_string, $r32);
-                const STR $r33 = CHARACTER(66);
+                const STR $r33 = CHARACTER(65);
                 OWN($r33, manage_string, $r34);
-                const STR $r30 = $concat("AA", $r31, $r33);
-                OWN($r30, manage_string, $r35);
-                const STR $r29 = identity($r30);
-                OWN($r29, manage_string, $r36);
-                __auto_type $r37 = $r29;
-                manage_string(&$r37, 1);
+                const STR $r35 = CHARACTER(66);
+                OWN($r35, manage_string, $r36);
+                const STR $r32 = $concat("AA", $r33, $r35);
+                OWN($r32, manage_string, $r37);
+                const STR $r31 = identity($r32);
+                OWN($r31, manage_string, $r38);
+                __auto_type $r39 = $r31;
+                manage_string(&$r39, 1);
                 manage_string(&s, -1);
-                s = $r37;
+                s = $r39;
             }
             {
-                const STR $r38 = SUBSTR(s, 0, 0);
-                OWN($r38, manage_string, $r39);
-                __auto_type $r40 = $r38;
-                manage_string(&$r40, 1);
+                const STR $r40 = SUBSTR(s, 0, 0);
+                OWN($r40, manage_string, $r41);
+                __auto_type $r42 = $r40;
+                manage_string(&$r42, 1);
                 manage_string(&t, -1);
-                t = $r40;
+                t = $r42;
             }
             $index(1, 0, 2, &$F, 44, 11);
-            __auto_type $r41 = s;
-            manage_string(&$r41, 1);
-            manage_string(&a.data[(1) - (0)].text, -1);
-            a.data[(1) - (0)].text = $r41;
-            __auto_type $r42 = a;
-            $manage0(&$r42, 1);
+            __auto_type $r43 = s;
+            manage_string(&$r43, 1);
+            manage_string(&a.data[(size_t)((int64_t)(1) - (0))].text, -1);
+            a.data[(size_t)((int64_t)(1) - (0))].text = $r43;
+            __auto_type $r44 = a;
+            $manage0(&$r44, 1);
             $manage0(&b, -1);
-            b = $r42;
+            b = $r44;
             i += 1;
         }
     }
     {
-        const int $r44 = (1 + 1);
-        void *$r43 = make_array(($r44 - 0 + 1), sizeof(STR), manage_string);
-        Dynamic values = { .data = $r43 };
+        Dynamic values = {0};
         OWN(values, manage_array, $r45);
+        const int $r46 = 0;
         const int $r47 = (1 + 1);
-        void *$r46 = make_array(($r47 - 0 + 1), sizeof(STR), manage_string);
-        Dynamic copy = { .data = $r46 };
+        values.data = make_array($r46, $r47, sizeof(STR), manage_string);
+        Dynamic copy = {0};
         OWN(copy, manage_array, $r48);
+        const int $r49 = 0;
+        const int $r50 = (1 + 1);
+        copy.data = make_array($r49, $r50, sizeof(STR), manage_string);
         {
-            const Dynamic $r49 = dynamic();
-            OWN($r49, manage_array, $r50);
-            __auto_type $r51 = $r49;
-            manage_array(&$r51, 1);
+            const Dynamic $r51 = dynamic();
+            OWN($r51, manage_array, $r52);
+            __auto_type $r53 = $r51;
+            manage_array(&$r53, 1);
             manage_array(&values, -1);
-            values = $r51;
+            values = $r53;
         }
-        __auto_type $r52 = values;
-        manage_array(&$r52, 1);
+        __auto_type $r54 = values;
+        manage_array(&$r54, 1);
         manage_array(&copy, -1);
-        copy = $r52;
-        __auto_type $r53 = values;
-        manage_array(&$r53, 1);
+        copy = $r54;
+        __auto_type $r55 = values;
+        manage_array(&$r55, 1);
         manage_array(&values, -1);
-        values = $r53;
+        values = $r55;
         {
-            const int $r54 = (1 + 1);
-            $index(0, 0, $r54, &$F, 53, 16);
-            const int $r56 = (1 + 1);
-            $index(0, 0, $r56, &$F, 53, 29);
-            const int $r57 = (1 + 1);
-            $index(0, 0, $r57, &$F, 53, 29);
-            const STR $r55 = $concat("AA", values.data[(0) - (0)], $1);
-            OWN($r55, manage_string, $r58);
-            __auto_type $r59 = $r55;
-            manage_string(&$r59, 1);
-            manage_string(&values.data[(0) - (0)], -1);
-            values.data[(0) - (0)] = $r59;
+            const size_t $r56 = $array_index(values.data, 0, &$F, 53, 16);
+            const size_t $r58 = $array_index(values.data, 0, &$F, 53, 29);
+            const size_t $r59 = $array_index(values.data, 0, &$F, 53, 29);
+            const STR $r57 = $concat("AA", values.data[$r59], $1);
+            OWN($r57, manage_string, $r60);
+            __auto_type $r61 = $r57;
+            manage_string(&$r61, 1);
+            manage_string(&values.data[$r56], -1);
+            values.data[$r56] = $r61;
         }
-        const int $r60 = (1 + 1);
-        $index(0, 0, $r60, &$F, 54, 17);
-        const int $r61 = (1 + 1);
-        $index(0, 0, $r61, &$F, 54, 17);
-        $output("A", copy.data[(0) - (0)]);
+        const size_t $r62 = $array_index(copy.data, 0, &$F, 54, 17);
+        const size_t $r63 = $array_index(copy.data, 0, &$F, 54, 17);
+        $output("A", copy.data[$r63]);
     }
     {
-        const STR $r64 = SUBSTR(t, 0, 0);
-        OWN($r64, manage_string, $r65);
-        const STR $r63 = $concat("AA", $r64, t);
-        OWN($r63, manage_string, $r66);
-        const int $r62 = LENGTH($r63);
-        $output("i", $r62);
+        const STR $r66 = SUBSTR(t, 0, 0);
+        OWN($r66, manage_string, $r67);
+        const STR $r65 = $concat("AA", $r66, t);
+        OWN($r65, manage_string, $r68);
+        const int $r64 = LENGTH($r65);
+        $output("i", $r64);
     }
-    const int $r67 = t.sz == $4.sz && (t.sz ? memcmp(t.data, $4.data, t.sz) : 0) == 0;
-    empty = $r67;
+    const int $r69 = t.sz == $4.sz && (t.sz ? memcmp(t.data, $4.data, t.sz) : 0) == 0;
+    empty = $r69;
     $output("b", empty);
     n = 2;
     {
-        void *$r68 = make_array((n - 0 + 1), sizeof(Box), $manage1);
         struct
         {
             Box *data;
-        } values = { .data = $r68 };
-        OWN(values, manage_array, $r69);
-        $index(0, 0, n, &$F, 64, 16);
-        __auto_type $r70 = s;
-        manage_string(&$r70, 1);
-        manage_string(&values.data[(0) - (0)].text, -1);
-        values.data[(0) - (0)].text = $r70;
+        } values = {0};
+        OWN(values, manage_array, $r70);
+        const int $r71 = 0;
+        values.data = make_array($r71, n, sizeof(Box), $manage1);
+        const size_t $r72 = $array_index(values.data, 0, &$F, 64, 16);
+        __auto_type $r73 = s;
+        manage_string(&$r73, 1);
+        manage_string(&values.data[$r72].text, -1);
+        values.data[$r72].text = $r73;
         n = 1;
-        $index(0, 0, n, &$F, 66, 19);
-        $index(0, 0, n, &$F, 66, 19);
-        $output("A", values.data[(0) - (0)].text);
+        const size_t $r74 = $array_index(values.data, 0, &$F, 66, 19);
+        const size_t $r75 = $array_index(values.data, 0, &$F, 66, 19);
+        $output("A", values.data[$r75].text);
     }
     i = 0;
     again:
     {
         STR local = {0};
-        OWN(local, manage_string, $r71);
+        OWN(local, manage_string, $r76);
         {
-            const STR $r72 = CHARACTER(67);
-            OWN($r72, manage_string, $r73);
-            __auto_type $r74 = $r72;
-            manage_string(&$r74, 1);
+            const STR $r77 = CHARACTER(67);
+            OWN($r77, manage_string, $r78);
+            __auto_type $r79 = $r77;
+            manage_string(&$r79, 1);
             manage_string(&local, -1);
-            local = $r74;
+            local = $r79;
         }
-        const int $r75 = (i + 1);
-        i = $r75;
-        const int $r76 = (i < 100);
-        if ($r76)
+        const int $r80 = (i + 1);
+        i = $r80;
+        const int $r81 = (i < 100);
+        if ($r81)
         {
             goto again;
         }

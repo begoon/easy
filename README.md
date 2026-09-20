@@ -86,7 +86,9 @@ Guards form a stack of active owners. On an explicit Easy `EXIT`, the runtime dr
 
 ### Strings inside dynamic arrays
 
-Dynamic arrays have a separate reference count for their shared backing allocation. Its header records the element count, element size, and an optional element release helper. When the final array owner releases the allocation, the runtime releases its managed elements before freeing the array itself. Recording the count at allocation time makes cleanup independent of later changes to variables used in the array bounds.
+Dynamic arrays have a separate reference count for their shared backing allocation. Its header records the original lower and upper bounds, element count, element size, and an optional element release helper. When the final array owner releases the allocation, the runtime releases its managed elements before freeing the array itself. Indexing and cleanup use this stored metadata, so later changes to variables used in the bounds do not change the array's index range or element offsets. Bound expressions are evaluated once per allocation, lower bound first.
+
+The compiler recursively allocates dynamic arrays inside arrays and structures. It registers ownership before initialization starts, so even an `EXIT` during a nested bound expression releases the partially initialized value. Allocation computes lengths using widened arithmetic, rejects inverted bounds, and checks the complete byte size for overflow before allocating.
 
 Dynamic-array copies still share their elements, as described in the runtime limitation above. Reference counting makes the shared storage survive copies and returns; it does not turn those copies into deep copies.
 
@@ -94,7 +96,7 @@ String allocations contain only bytes and cannot form reference cycles. The runt
 
 ### Checking reclamation
 
-Run `bun test-ownership.ts` for focused checks with AddressSanitizer and UndefinedBehaviorSanitizer at both `-O0` and `-O2`. These cover bounded live allocations during repeated overwrites, aggregate and parameter copies, returned arrays, self-assignment, jumps, input, and normal and explicit exits. The regular test suite defines `EASY_CHECK_OWNERSHIP`, which asserts that no managed string or array allocations remain at shutdown.
+Run `bun test-ownership.ts` for focused checks with AddressSanitizer and UndefinedBehaviorSanitizer at both `-O0` and `-O2`. These cover bounded live allocations during repeated overwrites, aggregate and parameter copies, returned arrays, self-assignment, jumps, input, and normal and explicit exits. Run `bun test-arrays.ts` for additional sanitizer checks of stored bounds, nested initialization, partial initialization followed by `EXIT`, and allocation-size arithmetic at integer limits. The regular test suite defines `EASY_CHECK_OWNERSHIP`, which asserts that no managed string or array allocations remain at shutdown.
 
 ## Compiler test pipeline
 

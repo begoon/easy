@@ -24,7 +24,7 @@ void step()
     {
         if (!(i <= N)) break;
         $index(i, 1, 32, &$F, 11, 33);
-        next.data[(i) - (1)] = 0;
+        next.data[(size_t)((int64_t)(i) - (1))] = 0;
         i += 1;
     }
     i = 1;
@@ -44,9 +44,9 @@ void step()
             j = N;
         }
         $index(j, 1, 32, &$F, 20, 23);
-        left = row.data[(j) - (1)];
+        left = row.data[(size_t)((int64_t)(j) - (1))];
         $index(i, 1, 32, &$F, 22, 20);
-        c = row.data[(i) - (1)];
+        c = row.data[(size_t)((int64_t)(i) - (1))];
         const int $r7 = (i + 1);
         j = $r7;
         const int $r8 = (j > N);
@@ -55,7 +55,7 @@ void step()
             j = 1;
         }
         $index(j, 1, 32, &$F, 26, 24);
-        right = row.data[(j) - (1)];
+        right = row.data[(size_t)((int64_t)(j) - (1))];
         const int $r10 = (left + c);
         const int $r9 = ($r10 + right);
         s = $r9;
@@ -66,12 +66,12 @@ void step()
         if ($r11)
         {
             $index(i, 1, 32, &$F, 31, 32);
-            next.data[(i) - (1)] = 1;
+            next.data[(size_t)((int64_t)(i) - (1))] = 1;
         }
         else if ($r12)
         {
             $index(i, 1, 32, &$F, 32, 40);
-            next.data[(i) - (1)] = 0;
+            next.data[(size_t)((int64_t)(i) - (1))] = 0;
         }
         else
         {
@@ -79,12 +79,12 @@ void step()
             if ($r15)
             {
                 $index(i, 1, 32, &$F, 33, 43);
-                next.data[(i) - (1)] = 1;
+                next.data[(size_t)((int64_t)(i) - (1))] = 1;
             }
             else
             {
                 $index(i, 1, 32, &$F, 33, 66);
-                next.data[(i) - (1)] = right;
+                next.data[(size_t)((int64_t)(i) - (1))] = right;
             }
         }
         i += 1;
@@ -99,7 +99,7 @@ void print()
     {
         if (!(i <= N)) break;
         $index(i, 1, 32, &$F, 43, 14);
-        const int $r16 = (row.data[(i) - (1)] == 1);
+        const int $r16 = (row.data[(size_t)((int64_t)(i) - (1))] == 1);
         if ($r16)
         {
             $output("A", $1);
@@ -118,7 +118,7 @@ int main_program()
     const int $r4 = (N / 2);
     const int $r3 = FIX($r4);
     $index($r3, 1, 32, &$F, 50, 11);
-    row.data[($r3) - (1)] = 1;
+    row.data[(size_t)((int64_t)($r3) - (1))] = 1;
     print();
     n = 1;
     while (1)

@@ -65,12 +65,12 @@ int main_program()
     $index(0, 0, 2, &$F, 22, 11);
     $index(2, 0, 3, &$F, 22, 14);
     $index(1, 0, 4, &$F, 22, 17);
-    c.t.data[(0) - (0)].data[(2) - (0)].data[(1) - (0)] = 789;
+    c.t.data[(size_t)((int64_t)(0) - (0))].data[(size_t)((int64_t)(2) - (0))].data[(size_t)((int64_t)(1) - (0))] = 789;
     $index(0, 0, 2, &$F, 23, 24);
     $index(2, 0, 3, &$F, 23, 27);
     $index(1, 0, 4, &$F, 23, 30);
     $index(0, 0, 2, &$F, 23, 24);
     $index(2, 0, 3, &$F, 23, 27);
     $index(1, 0, 4, &$F, 23, 30);
-    $output("iii", b, p.x.z, c.t.data[(0) - (0)].data[(2) - (0)].data[(1) - (0)]);
+    $output("iii", b, p.x.z, c.t.data[(size_t)((int64_t)(0) - (0))].data[(size_t)((int64_t)(2) - (0))].data[(size_t)((int64_t)(1) - (0))]);
 }

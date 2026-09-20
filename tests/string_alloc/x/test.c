@@ -82,8 +82,8 @@ int main_program()
                 OWN($r8, manage_string, $r9);
                 __auto_type $r10 = $r8;
                 manage_string(&$r10, 1);
-                manage_string(&huge.data[(i) - (0)], -1);
-                huge.data[(i) - (0)] = $r10;
+                manage_string(&huge.data[(size_t)((int64_t)(i) - (0))], -1);
+                huge.data[(size_t)((int64_t)(i) - (0))] = $r10;
             }
             i += 1;
         }

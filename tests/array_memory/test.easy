@@ -1,0 +1,65 @@
+PROGRAM ArrayMemory:
+  TYPE Row IS ARRAY [0:1+1] OF STRING;
+  TYPE Matrix IS ARRAY [0:1] OF Row;
+  DECLARE (lo, hi, n, i) INTEGER;
+  DECLARE same BOOLEAN;
+
+  FUNCTION returned() Matrix:
+    DECLARE result Matrix;
+    SET result[1][2] := CHARACTER(82);
+    RETURN result;
+  END FUNCTION returned;
+
+  SET lo := -1;
+  SET hi := 1;
+  BEGIN
+    DECLARE values ARRAY [lo:hi] OF INTEGER;
+    SET values[-1] := 11;
+    SET values[1] := 22;
+    SET lo := -100;
+    SET hi := 100;
+    OUTPUT values[-1];
+    OUTPUT values[1];
+    SET lo := 0;
+    SET hi := 0;
+    OUTPUT values[-1];
+    OUTPUT values[1];
+  END;
+
+  SET n := 2;
+  FOR i := 1 TO 100 DO
+    BEGIN
+      DECLARE fixed ARRAY [0:1] OF ARRAY [0:n] OF STRING;
+      DECLARE dynamic ARRAY [0:n] OF ARRAY [0:n] OF STRING;
+      DECLARE record STRUCTURE FIELD rows IS ARRAY [0:n] OF Row END STRUCTURE;
+      DECLARE (a, b) Matrix;
+      SET fixed[1][2] := CHARACTER(70);
+      SET dynamic[2][2] := CHARACTER(68);
+      SET record.rows[2][2] := CHARACTER(83);
+      SET a := returned();
+      SET b := a;
+      SET a := a;
+      SET a[1][2] := CHARACTER(88);
+      IF i = 100 THEN
+        OUTPUT fixed[1][2] || dynamic[2][2] || record.rows[2][2] || b[1][2];
+        SET same := dynamic[2][2] = "D";
+        OUTPUT same;
+      FI;
+    END;
+  END FOR;
+
+  BEGIN
+    DECLARE low ARRAY [-2147483647-1:-2147483647] OF INTEGER;
+    DECLARE high ARRAY [2147483646:2147483647] OF INTEGER;
+    SET low[-2147483647-1] := 31;
+    SET low[-2147483647] := 32;
+    SET high[2147483647] := 33;
+    FOR low[-2147483647-1] := 31 TO 31 DO
+      OUTPUT low[-2147483647-1];
+    END FOR;
+    SET low[-2147483647-1] := 31;
+    OUTPUT low[-2147483647-1];
+    OUTPUT low[-2147483647];
+    OUTPUT high[2147483647];
+  END;
+END PROGRAM ArrayMemory;

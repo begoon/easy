@@ -200,6 +200,40 @@ class Context {
         code.push(`OWN(${value}, ${manage}, ${this.R()});`);
     }
 
+    needsInitialization(type: Type): boolean {
+        if (type instanceof AliasType) return this.needsInitialization(type.reference_type);
+        if (type instanceof ArrayType) return type.dynamic || this.needsInitialization(type.type);
+        if (type instanceof StructType) return type.fields.some(field => this.needsInitialization(field.type));
+        return false;
+    }
+
+    initialize(type: Type, value: string, code: string[]) {
+        if (!this.needsInitialization(type)) return;
+        if (type instanceof AliasType) {
+            this.initialize(type.reference_type, value, code);
+        } else if (type instanceof StructType) {
+            for (const field of type.fields) this.initialize(field.type, `${value}.${field.name}`, code);
+        } else if (type instanceof ArrayType) {
+            if (type.dynamic) {
+                // Snapshot the lower bound before evaluating the upper bound;
+                // either expression may invoke an Easy function.
+                const lo = type.lo.v(code);
+                const savedLo = this.R();
+                code.push(`const int ${savedLo} = ${lo};`);
+                const hi = type.hi.v(code);
+                code.push(`${value}.data = make_array(${savedLo}, ${hi}, sizeof(${type.type.c()}), ${this.manager(type.type) ?? "NULL"});`);
+            }
+            if (this.needsInitialization(type.type)) {
+                const index = this.R();
+                const count = type.dynamic ? `array_storage(${value}.data)->count`
+                    : `sizeof(${value}.data) / sizeof(${value}.data[0])`;
+                const body: string[] = [];
+                this.initialize(type.type, `${value}.data[${index}]`, body);
+                code.push(`for (size_t ${index} = 0; ${index} < ${count}; ++${index})`, "{", indent(emit(body), 1), "}");
+            }
+        }
+    }
+
     enter_frame = () => {
         this.frames.push({ defer: [] });
     };
@@ -379,12 +413,7 @@ class ArrayType extends Type {
         return emit(["struct", "{", indent(`${this.type.c()} ${data};`, 1), "}"]);
     }
     sz = (code: string[] = []) => `${this.hi.v(code)} - ${this.lo.v(code)} + 1`;
-    zero(code: string[]): string {
-        if (!this.dynamic) return "{0}";
-        const r = this.hi.context().R();
-        code.push(`void *${r} = make_array((${this.sz(code)}), sizeof(${this.type.c()}), ${this.hi.context().manager(this.type) ?? "NULL"});`);
-        return `{ .data = ${r} }`;
-    }
+    zero = () => "{0}";
     typedef = (alias: string) => `typedef ${this.c()} ${alias}`;
 }
 
@@ -491,6 +520,9 @@ class DECLARE extends Node {
             // Register each allocation before evaluating the next initializer,
             // which may call an Easy function (including EXIT).
             this.context().own(this.type, name, code);
+            // The zeroed aggregate is guarded before recursive allocation, so
+            // EXIT in a bound expression can release partially built arrays.
+            this.context().initialize(this.type, name, code);
         }
     }
 }
@@ -846,7 +878,7 @@ class FOR extends Statement {
     c(): string {
         const code: string[] = [];
         const init = this.init.v(code);
-        code.push(`${this.variable.v([])} = ${init};`);
+        code.push(`${this.variable.v(code)} = ${init};`);
 
         const inner: string[] = [];
 
@@ -856,18 +888,20 @@ class FOR extends Statement {
         this.segment.context().enter_frame();
 
         if (this.condition) conditions.push(`${this.condition.v(inner)}`);
-        if (this.to) conditions.push(`${this.variable.v([])} <= ${this.to.v(inner)}`);
+        if (this.to) conditions.push(`${this.variable.v(inner)} <= ${this.to.v(inner)}`);
 
         const condition = conditions.join(" && ");
 
         const by = this.by ? this.by.v(inner) : "1";
-        const increment = `${this.variable.v([])} += ${by};`;
+        const incrementCode: string[] = [];
+        const increment = `${this.variable.v(incrementCode)} += ${by};`;
+        incrementCode.push(increment);
 
         code.push(
             indent(emit(inner), 1),
             indent(`if (!(${condition})) break;`, 1),
             indent(this.segment.c(), 1),
-            indent(increment, 1)
+            indent(emit(incrementCode), 1)
         );
 
         this.segment.context().leave_frame(code);
@@ -1131,18 +1165,11 @@ function string_compare(left: Expression, right: Expression, operation: string, 
     if (operation !== "==" && operation !== "!=") return null;
 
     function is_string_type(e: Expression): [boolean, string | null] {
-        if (e instanceof VariableReference) {
-            const variable = find_existing_variable(e);
-            const { type, reference } = expand_variable_reference(variable, e, []);
-            return [type instanceof StringType, reference];
-        }
-        if (e.type instanceof StringType) return [true, e.v(code)];
-        if (e instanceof FunctionCall) {
-            const func = e.context().functions[e.name];
-            if (!func) throw new GenerateError(`unknown function '${e.name}' at ${e.token}`);
-            if (func.type instanceof StringType) return [true, e.v(code)];
-        }
-        return [false, null];
+        let type = e.type;
+        while (type instanceof AliasType) type = type.reference_type;
+        // Only emit the reference when this is a string comparison. Numeric
+        // expressions are emitted by BinaryOperation's ordinary path.
+        return type instanceof StringType ? [true, e.v(code)] : [false, null];
     }
 
     const [left_string, left_reference] = is_string_type(left);
@@ -1395,13 +1422,19 @@ function expand_variable_reference(variable: Variable, variable_reference: Varia
 
             enlist_variable(new Variable(part.token, "$F", new StringType(), filename), "");
 
-            const lo = type.lo.v(code);
-            const hi = type.hi.v(code);
-            const index = part.value.v(code);
-
-            code.push(`$index(${index}, ${lo}, ${hi}, &$F, ${line}, ${character});`);
+            if (type.dynamic) {
+                const index = part.value.v(code);
+                const offset = part.token.context.R();
+                code.push(`const size_t ${offset} = $array_index(${reference}.data, ${index}, &$F, ${line}, ${character});`);
+                reference += `.data[${offset}]`;
+            } else {
+                const lo = type.lo.v(code);
+                const hi = type.hi.v(code);
+                const index = part.value.v(code);
+                code.push(`$index(${index}, ${lo}, ${hi}, &$F, ${line}, ${character});`);
+                reference += `.data[(size_t)((int64_t)(${index}) - (${lo}))]`;
+            }
             type = type.type;
-            reference += `.data[(${index}) - (${lo})]`;
         } else if (part instanceof VariableField) {
             if (type instanceof AliasType) type = type.reference_type;
 

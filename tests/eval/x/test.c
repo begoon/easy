@@ -125,14 +125,14 @@ int main_program()
     $index(1, 1, 2, &$F, 25, 9);
     $index(2, 1, 4, &$F, 25, 12);
     $index(1, 1, 2, &$F, 25, 17);
-    t.data[(1) - (1)].data[(2) - (1)].d.data[(1) - (1)] = 42;
+    t.data[(size_t)((int64_t)(1) - (1))].data[(size_t)((int64_t)(2) - (1))].d.data[(size_t)((int64_t)(1) - (1))] = 42;
     $index(1, 1, 2, &$F, 26, 12);
     $index(2, 1, 4, &$F, 26, 15);
     $index(1, 1, 2, &$F, 26, 20);
     $index(1, 1, 2, &$F, 26, 12);
     $index(2, 1, 4, &$F, 26, 15);
     $index(1, 1, 2, &$F, 26, 20);
-    $output("i", t.data[(1) - (1)].data[(2) - (1)].d.data[(1) - (1)]);
+    $output("i", t.data[(size_t)((int64_t)(1) - (1))].data[(size_t)((int64_t)(2) - (1))].d.data[(size_t)((int64_t)(1) - (1))]);
     {
         const STR $r9 = F1(456, $7);
         OWN($r9, manage_string, $r10);
@@ -150,13 +150,13 @@ int main_program()
     const int $r15 = (a / 2);
     const int $r14 = FIX($r15);
     $index($r14, 1, 100, &$F, 33, 9);
-    r.data[($r14) - (1)] = 1;
+    r.data[(size_t)((int64_t)($r14) - (1))] = 1;
     a = 0;
     const int $r16 = (a + 1);
     $index($r16, 1, 4, &$F, 36, 9);
     const int $r17 = (a + 2);
     $index($r17, 1, 2, &$F, 36, 14);
-    m.data[($r16) - (1)].data[($r17) - (1)] = 42;
+    m.data[(size_t)((int64_t)($r16) - (1))].data[(size_t)((int64_t)($r17) - (1))] = 42;
     const int $r18 = (a + 1);
     $index($r18, 1, 4, &$F, 37, 12);
     const int $r19 = (a + 2);
@@ -165,7 +165,7 @@ int main_program()
     $index($r20, 1, 4, &$F, 37, 12);
     const int $r21 = (a + 2);
     $index($r21, 1, 2, &$F, 37, 17);
-    $output("i", m.data[($r20) - (1)].data[($r21) - (1)]);
+    $output("i", m.data[(size_t)((int64_t)($r20) - (1))].data[(size_t)((int64_t)($r21) - (1))]);
     const int $r27 = (a + 1);
     const int $r29 = (42 * 3);
     const int $r28 = ($r29 % 3);

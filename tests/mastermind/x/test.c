@@ -72,7 +72,7 @@ Universe create_universe()
                     const int $r35 = ($r36 + l);
                     offset = $r35;
                     $index(offset, 0, 1295, &$F, 27, 24);
-                    universe.data[(offset) - (0)] = v;
+                    universe.data[(size_t)((int64_t)(offset) - (0))] = v;
                     l += 1;
                 }
                 k += 1;
@@ -332,7 +332,7 @@ int main_program()
             int rank = 0;
             int worst_evaluation = 0;
             $index(probe_index, 0, 1295, &$F, 141, 27);
-            probe = universe.data[(probe_index) - (0)];
+            probe = universe.data[(size_t)((int64_t)(probe_index) - (0))];
             probe_in_candidates = 0;
             const int $r3 = (-1);
             worst_evaluation = $r3;
@@ -342,7 +342,7 @@ int main_program()
                 if (!(candidate_index <= 1295)) break;
                 int candidate = 0;
                 $index(candidate_index, 0, 1295, &$F, 148, 35);
-                candidate = candidates.data[(candidate_index) - (0)];
+                candidate = candidates.data[(size_t)((int64_t)(candidate_index) - (0))];
                 const int $r4 = (probe == candidate);
                 if ($r4)
                 {
@@ -360,14 +360,14 @@ int main_program()
                     bucket_index = $r7;
                     $index(bucket_index, 0, 44, &$F, 159, 21);
                     $index(bucket_index, 0, 44, &$F, 159, 46);
-                    const int $r9 = (buckets.data[(bucket_index) - (0)] + 1);
-                    buckets.data[(bucket_index) - (0)] = $r9;
+                    const int $r9 = (buckets.data[(size_t)((int64_t)(bucket_index) - (0))] + 1);
+                    buckets.data[(size_t)((int64_t)(bucket_index) - (0))] = $r9;
                     $index(bucket_index, 0, 44, &$F, 161, 20);
-                    const int $r10 = (buckets.data[(bucket_index) - (0)] > worst_evaluation);
+                    const int $r10 = (buckets.data[(size_t)((int64_t)(bucket_index) - (0))] > worst_evaluation);
                     if ($r10)
                     {
                         $index(bucket_index, 0, 44, &$F, 161, 90);
-                        worst_evaluation = buckets.data[(bucket_index) - (0)];
+                        worst_evaluation = buckets.data[(size_t)((int64_t)(bucket_index) - (0))];
                     }
                 }
                 candidate_index += 1;
@@ -411,7 +411,7 @@ int main_program()
             int candidate = 0;
             Comparison comparison = {0};
             $index(candidate_index, 0, 1295, &$F, 195, 33);
-            candidate = candidates.data[(candidate_index) - (0)];
+            candidate = candidates.data[(size_t)((int64_t)(candidate_index) - (0))];
             const int $r20 = (candidate != 0);
             if ($r20)
             {
@@ -423,7 +423,7 @@ int main_program()
                 if ($r22)
                 {
                     $index(candidate_index, 0, 1295, &$F, 199, 24);
-                    candidates.data[(candidate_index) - (0)] = 0;
+                    candidates.data[(size_t)((int64_t)(candidate_index) - (0))] = 0;
                     const int $r25 = (eliminated_candidates + 1);
                     eliminated_candidates = $r25;
                 }
