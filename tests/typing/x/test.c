@@ -8,12 +8,13 @@ int i = 0;
 int j = 0;
 double r = 0.0;
 int b = 0;
-STR $0 = { .data = "abc", .sz = 3, .immutable = 1 };
-STR $1 = { .data = " - ", .sz = 3, .immutable = 1 };
-STR $2 = { .data = "xzy", .sz = 3, .immutable = 1 };
-STR $F = { .data = "tests/typing/test.easy", .sz = 22, .immutable = 1 };
+STR $0 = { .data = "abc", .sz = 3 };
+STR $1 = { .data = " - ", .sz = 3 };
+STR $2 = { .data = "xzy", .sz = 3 };
+STR $F = { .data = "tests/typing/test.easy", .sz = 22 };
 STR S()
 {
+    manage_string(&$0, 1);
     return $0;
 }
 int I()
@@ -30,39 +31,50 @@ int B()
 }
 int main_program()
 {
-    const STR $r1 = S();
-    const int $r2 = I();
-    const double $r3 = R();
-    const int $r4 = B();
-    $output("AAiArAb", $r1, $1, $r2, $1, $r3, $1, $r4);
-    const STR $r6 = S();
-    const STR $r5 = $concat("AA", $r6, $2);
-    s = $r5;
+    OWN(s, manage_string, $r1);
+    {
+        const STR $r2 = S();
+        OWN($r2, manage_string, $r3);
+        const int $r4 = I();
+        const double $r5 = R();
+        const int $r6 = B();
+        $output("AAiArAb", $r2, $1, $r4, $1, $r5, $1, $r6);
+    }
+    {
+        const STR $r8 = S();
+        OWN($r8, manage_string, $r9);
+        const STR $r7 = $concat("AA", $r8, $2);
+        OWN($r7, manage_string, $r10);
+        __auto_type $r11 = $r7;
+        manage_string(&$r11, 1);
+        manage_string(&s, -1);
+        s = $r11;
+    }
     $output("A", s);
-    const int $r7 = (i + j);
-    i = $r7;
-    const double $r12 = R();
-    const int $r11 = FIX($r12);
-    const int $r10 = ($r11 * 2);
-    const int $r9 = ($r10 / 7);
-    const int $r8 = (100 + $r9);
-    i = $r8;
-    const double $r14 = R();
-    const double $r15 = FLOAT(200);
-    const double $r13 = ($r14 + $r15);
-    r = $r13;
-    const int $r17 = FLOOR(r);
-    const int $r16 = ($r17 + i);
-    j = $r16;
-    const double $r19 = (r + 2.1);
-    const int $r18 = FIX($r19);
-    i = $r18;
-    const int $r22 = (i < j);
-    const int $r23 = B();
-    const int $r21 = ($r22 && $r23);
-    const int $r25 = (i >= j);
-    const int $r24 = (!$r25);
-    const int $r20 = ($r21 || $r24);
-    b = $r20;
+    const int $r12 = (i + j);
+    i = $r12;
+    const double $r17 = R();
+    const int $r16 = FIX($r17);
+    const int $r15 = ($r16 * 2);
+    const int $r14 = ($r15 / 7);
+    const int $r13 = (100 + $r14);
+    i = $r13;
+    const double $r19 = R();
+    const double $r20 = FLOAT(200);
+    const double $r18 = ($r19 + $r20);
+    r = $r18;
+    const int $r22 = FLOOR(r);
+    const int $r21 = ($r22 + i);
+    j = $r21;
+    const double $r24 = (r + 2.1);
+    const int $r23 = FIX($r24);
+    i = $r23;
+    const int $r27 = (i < j);
+    const int $r28 = B();
+    const int $r26 = ($r27 && $r28);
+    const int $r30 = (i >= j);
+    const int $r29 = (!$r30);
+    const int $r25 = ($r26 || $r29);
+    b = $r25;
     $output("iAiArAb", i, $1, j, $1, r, $1, b);
 }

@@ -4,7 +4,7 @@ typedef double REAL;
 typedef int BOOLEAN;
 typedef STR STRING;
 int f = 0;
-STR $F = { .data = "tests/func/test.easy", .sz = 20, .immutable = 1 };
+STR $F = { .data = "tests/func/test.easy", .sz = 20 };
 int a(int i)
 {
     const int $r2 = (i + 69);

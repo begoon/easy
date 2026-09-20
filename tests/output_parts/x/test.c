@@ -3,6 +3,25 @@ typedef int INTEGER;
 typedef double REAL;
 typedef int BOOLEAN;
 typedef STR STRING;
+static void $manage0(const void *value, int change)
+{
+    typedef struct
+    {
+        double r;
+        STR s;
+        struct
+        {
+            struct
+            {
+                struct
+                {
+                    int data[4 - 0 + 1];
+                } data[3 - 0 + 1];
+            } data[2 - 0 + 1];
+        } t;
+    } T;
+    manage_string((const char *)value + offsetof(T, s), change);
+}
 int b = 0;
 struct
 {
@@ -37,9 +56,10 @@ struct
         } data[2 - 0 + 1];
     } t;
 } c = {0};
-STR $F = { .data = "tests/output_parts/test.easy", .sz = 28, .immutable = 1 };
+STR $F = { .data = "tests/output_parts/test.easy", .sz = 28 };
 int main_program()
 {
+    OWN(c, $manage0, $r1);
     b = 123;
     p.x.z = 456;
     $index(0, 0, 2, &$F, 22, 11);

@@ -9,7 +9,7 @@ typedef struct
     int y;
 } Point;
 Point t = {0};
-STR $F = { .data = "tests/type_struct/test.easy", .sz = 27, .immutable = 1 };
+STR $F = { .data = "tests/type_struct/test.easy", .sz = 27 };
 int main_program()
 {
     $exit();

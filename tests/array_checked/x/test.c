@@ -48,7 +48,7 @@ struct
         } data[4 - 1 + 1];
     } data[2 - 1 + 1];
 } y = {0};
-STR $F = { .data = "tests/array_checked/test.easy", .sz = 29, .immutable = 1 };
+STR $F = { .data = "tests/array_checked/test.easy", .sz = 29 };
 int main_program()
 {
     $index(1, 1, 2, &$F, 8, 9);

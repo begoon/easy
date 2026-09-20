@@ -17,8 +17,8 @@ struct
     } x;
     int y;
 } p = {0};
-STR $F = { .data = "tests/set/test.easy", .sz = 19, .immutable = 1 };
-STR $1 = { .data = " ", .sz = 1, .immutable = 1 };
+STR $F = { .data = "tests/set/test.easy", .sz = 19 };
+STR $1 = { .data = " ", .sz = 1 };
 int main_program()
 {
     p.y = 123;

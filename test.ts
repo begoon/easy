@@ -217,7 +217,7 @@ async function runTest(test_folder: string) {
 
     const skip_run = exists(expected_c) && Boolean(process.env.SKIP_RUN);
 
-    const cc_flags = ["-I", ".", "-Wall", "-Wextra", "-Werror", "-std=c23", "-g", "-fsanitize=address"];
+    const cc_flags = ["-I", ".", "-Wall", "-Wextra", "-Werror", "-std=c23", "-g", "-fsanitize=address", "-DEASY_CHECK_OWNERSHIP"];
 
     const expected_output = x + ".output";
     if (exists(expected_output) && !skip_run) {

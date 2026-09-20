@@ -12,7 +12,7 @@ struct
     int data[1000 - 1000 + 1];
 } b = {0};
 int n = 0;
-STR $F = { .data = "tests/array_1000/test.easy", .sz = 26, .immutable = 1 };
+STR $F = { .data = "tests/array_1000/test.easy", .sz = 26 };
 int main_program()
 {
     $index(1000, 1000, 1001, &$F, 6, 9);
@@ -32,22 +32,24 @@ int main_program()
     $output("i", b.data[(1000) - (1000)]);
     n = 1000;
     {
-        void *$r1 AUTOFREE_ARRAY = malloc(sizeof(double) * (n - n + 1));
+        void *$r1 = make_array((n - n + 1), sizeof(double), NULL);
         struct
         {
             double *data;
         } c = { .data = $r1 };
-        void *$r2 AUTOFREE_ARRAY = malloc(sizeof(struct
+        OWN(c, manage_array, $r2);
+        void *$r3 = make_array((n - n + 1), sizeof(struct
         {
             double data[1 - 0 + 1];
-        }) * (n - n + 1));
+        }), NULL);
         struct
         {
             struct
             {
                 double data[1 - 0 + 1];
             } *data;
-        } d = { .data = $r2 };
+        } d = { .data = $r3 };
+        OWN(d, manage_array, $r4);
         $index(n, n, n, &$F, 20, 11);
         c.data[(n) - (n)] = 3.14;
         $index(n, n, n, &$F, 21, 14);

@@ -10,8 +10,8 @@ typedef struct
 } Point;
 int a = 0;
 Point p = {0};
-STR $0 = { .data = " ", .sz = 1, .immutable = 1 };
-STR $F = { .data = "tests/trivia2/test.easy", .sz = 23, .immutable = 1 };
+STR $0 = { .data = " ", .sz = 1 };
+STR $F = { .data = "tests/trivia2/test.easy", .sz = 23 };
 int main_program()
 {
     {

@@ -166,6 +166,39 @@ class Context {
     S = () => `$${this.s++}`;
 
     frames: Frame[] = [];
+    managers = new Map<Type, string>();
+    managerDefinitions: string[] = [];
+
+    manager(type: Type): string | null {
+        if (type instanceof AliasType) return this.manager(type.reference_type);
+        if (type instanceof StringType) return "manage_string";
+        if (type instanceof ArrayType && type.dynamic) return "manage_array";
+        if (this.managers.has(type)) return this.managers.get(type)!;
+        const name = `$manage${this.managers.size}`;
+        this.managers.set(type, name);
+        const body: string[] = [];
+        if (type instanceof StructType) {
+            for (const field of type.fields) {
+                const child = this.manager(field.type);
+                if (child) body.push(`${child}((const char *)value + offsetof(T, ${field.name}), change);`);
+            }
+        } else if (type instanceof ArrayType) {
+            const child = this.manager(type.type);
+            if (child) body.push(`for (size_t i = 0; i < sizeof(((T *)0)->data) / sizeof(((T *)0)->data[0]); ++i)`,
+                `    ${child}((const char *)value + offsetof(T, data) + i * sizeof(((T *)0)->data[0]), change);`);
+        }
+        if (!body.length) { this.managers.delete(type); return null; }
+        this.managerDefinitions.push(emit([`static void ${name}(const void *value, int change)`, "{",
+            indent(`typedef ${type.c()} T;`, 1), indent(emit(body), 1), "}"]));
+        return name;
+    }
+
+    own(type: Type, value: string, code: string[], retain = false) {
+        const manage = this.manager(type);
+        if (!manage) return;
+        if (retain) code.push(`${manage}(&${value}, 1);`);
+        code.push(`OWN(${value}, ${manage}, ${this.R()});`);
+    }
 
     enter_frame = () => {
         this.frames.push({ defer: [] });
@@ -345,11 +378,11 @@ class ArrayType extends Type {
         const data = this.dynamic ? `*data` : `data[${this.sz()}]`;
         return emit(["struct", "{", indent(`${this.type.c()} ${data};`, 1), "}"]);
     }
-    sz = () => `${this.hi.v([])} - ${this.lo.v([])} + 1`;
+    sz = (code: string[] = []) => `${this.hi.v(code)} - ${this.lo.v(code)} + 1`;
     zero(code: string[]): string {
         if (!this.dynamic) return "{0}";
         const r = this.hi.context().R();
-        code.push(`void *${r} AUTOFREE_ARRAY = malloc(sizeof(${this.type.c()}) * (${this.sz()}));`);
+        code.push(`void *${r} = make_array((${this.sz(code)}), sizeof(${this.type.c()}), ${this.hi.context().manager(this.type) ?? "NULL"});`);
         return `{ .data = ${r} }`;
     }
     typedef = (alias: string) => `typedef ${this.c()} ${alias}`;
@@ -393,7 +426,7 @@ class AliasType extends Type {
         this.reference_type = ref;
     }
     c = () => this.reference_name;
-    zero = () => this.reference_type.zero([]);
+    zero = (code: string[]) => this.reference_type.zero(code);
     typedef = (alias: string) => `typedef ${this.c()} ${alias}`;
 }
 
@@ -449,11 +482,16 @@ class DECLARE extends Node {
         this.names = names;
         this.type = type;
     }
-    v(code: string[]): string {
-        function zero(n: string, type: Type): string | undefined {
-            return `${type.c()} ${n} = ${type.zero(code)};`;
+    v(code: string[], main = false): void {
+        for (const name of this.names) {
+            const initial = this.type.zero(code);
+            const declaration = `${this.type.c()} ${name} = ${initial};`;
+            if (main) this.context().common.push(declaration);
+            else code.push(declaration);
+            // Register each allocation before evaluating the next initializer,
+            // which may call an Easy function (including EXIT).
+            this.context().own(this.type, name, code);
         }
-        return this.names.map((n) => zero(n, this.type)).join("\n");
     }
 }
 
@@ -480,13 +518,17 @@ class Segment extends Node {
         const v: string[] = [];
         if (this.variables) {
             for (const variable of this.variables) {
-                const c = variable.v(v);
-                if (main) this.context().common.push(c);
-                else v.push(c);
+                variable.v(v, main);
             }
         }
         if (this.statements) {
-            for (const statement of this.statements) v.push(statement.c());
+            for (const statement of this.statements) {
+                const code = statement.c();
+                // A statement scope bounds temporary lifetimes and makes jumps
+                // run C cleanup handlers before re-entering a labelled statement.
+                v.push(statement instanceof LABEL || statement instanceof BEGIN || !code.includes("OWN(")
+                    ? code : emit(["{", indent(code, 1), "}"]));
+            }
         }
         return emit(v);
     }
@@ -530,6 +572,9 @@ class PROCEDURE extends Node {
         const args = this.arguments.map((v) => v.c()).join(", ");
         const v = [`void ${this.name}(${args})`, "{"];
         this.segment.context().enter_frame();
+        const parameters: string[] = [];
+        for (const arg of this.arguments) this.context().own(arg.type, arg.name, parameters, true);
+        v.push(indent(emit(parameters), 1));
         v.push(indent(this.segment.c(), 1));
         this.segment.context().leave_frame(v);
         v.push("}");
@@ -566,6 +611,9 @@ class FUNCTION extends Node {
         const args = this.arguments.map((a) => a.c()).join(", ");
         const v = [`${type} ${this.name}(${args})`, "{"];
         this.segment.context().enter_frame();
+        const parameters: string[] = [];
+        for (const arg of this.arguments) this.context().own(arg.type, arg.name, parameters, true);
+        v.push(indent(emit(parameters), 1));
         v.push(indent(this.segment.c(), 1));
         this.segment.context().leave_frame(v);
         v.push("}");
@@ -602,7 +650,7 @@ class Variable {
     const(): string {
         if (!this.isConst()) throw new GenerateError(`variable '${this.name}' is not a constant at ${this.token}`);
         const z = (this.zero ?? "").replace(/"/g, '\\"');
-        return `${this.type.c()} ${this.name} = { .data = "${z}", .sz = ${z.length}, .immutable = 1 }`;
+        return `${this.type.c()} ${this.name} = { .data = "${z}", .sz = ${z.length} }`;
     }
     s(scope: string): string[] {
         return [this.name, scope, this.type.constructor.name, String(this.token)];
@@ -722,7 +770,15 @@ class SET extends Statement {
             }
 
             const value = this.expression.v(code);
-            code.push(`${reference} = ${value};`);
+            const manage = this.context().manager(type);
+            if (manage) {
+                // Snapshot and retain before releasing: source and destination
+                // may alias, including fields inside the same aggregate.
+                const copy = this.context().R();
+                code.push(`__auto_type ${copy} = ${value};`);
+                code.push(`${manage}(&${copy}, 1);`, `${manage}(&${reference}, -1);`);
+                code.push(`${reference} = ${copy};`);
+            } else code.push(`${reference} = ${value};`);
         }
         return emit(code);
     }
@@ -868,6 +924,7 @@ class INPUT extends Statement {
                 code.push(`{`);
                 code.push(indent(`char buf[4096];`, 1));
                 code.push(indent(`scanf("%4095s", buf);`, 1));
+                code.push(indent(`manage_string(&${reference}, -1);`, 1));
                 code.push(indent(`${reference} = make_string(buf, strlen(buf));`, 1));
                 code.push(`}`);
             } else if (type instanceof IntegerType) code.push(`scanf("%d", &${reference});`);
@@ -966,6 +1023,8 @@ class RETURN extends Statement {
         if (!this.value) return "return;";
         const code: string[] = [];
         const value = this.value.v(code);
+        const manage = this.context().manager(this.value.type);
+        if (manage) code.push(`${manage}(&${value}, 1);`);
         code.push(`return ${value};`);
         return emit(code);
     }
@@ -994,6 +1053,7 @@ class FunctionCall extends Expression {
         const args = this.arguments.map((a) => a.v(code)).join(", ");
         const type = this.type.c();
         code.push(`const ${type} ${r} = ${this.name}(${args});`);
+        this.context().own(this.type, r, code);
         return r;
     }
 }
@@ -1097,7 +1157,7 @@ function string_compare(left: Expression, right: Expression, operation: string, 
             `const int ${r} = ` +
                 `${left_sz} == ${right_sz} ` +
                 `&& ` +
-                `memcmp(${left_reference}.data, ${right_reference}.data, ${left_sz}) ${cmp} 0;`
+                `(${left_sz} ? memcmp(${left_reference}.data, ${right_reference}.data, ${left_sz}) : 0) ${cmp} 0;`
         );
         return r;
     }
@@ -2060,6 +2120,7 @@ class ConcatenationOperation extends Expression {
         const fmt: string[] = [];
         const args = this.parts.map((x) => expression_stringer(x, fmt, "||", code)).join(", ");
         code.push(`const STR ${r} = $concat("${fmt.join("")}", ${args});`);
+        this.context().own(this.type, r, code);
         return r;
     }
 }
@@ -2141,6 +2202,7 @@ export function compileToC(source: string, filename: string = "source.easy"): st
 
     for (const [name, definition] of Object.entries(context.types)) output.push(definition.typedef(name) + ";\n");
 
+    const helperIndex = output.length;
     if (context.common.length) output.push(emit(context.common) + "\n");
 
     for (const v of Object.values(context.variables)) if (v.isConst()) output.push(v.const() + ";\n");
@@ -2152,6 +2214,7 @@ export function compileToC(source: string, filename: string = "source.easy"): st
 
     for (const v of Object.values(context.procedures)) output.push(v.c() + "\n");
 
+    if (context.managerDefinitions.length) output.splice(helperIndex, 0, context.managerDefinitions.join("\n") + "\n");
     output.push(compiledText + "\n");
     return output.join("");
 }
@@ -2244,6 +2307,7 @@ export function run(argv: string[]) {
 
     for (const [name, definition] of Object.entries(context.types)) output.push(definition.typedef(name) + ";\n");
 
+    const helperIndex = output.length;
     if (context.common.length) output.push(emit(context.common) + "\n");
 
     for (const v of Object.values(context.variables)) if (v.isConst()) output.push(v.const() + ";\n");
@@ -2255,6 +2319,7 @@ export function run(argv: string[]) {
 
     for (const v of Object.values(context.procedures)) output.push(v.c() + "\n");
 
+    if (context.managerDefinitions.length) output.splice(helperIndex, 0, context.managerDefinitions.join("\n") + "\n");
     output.push(compiledText + "\n");
     fs.writeFileSync(outputFile, output.join(""), "utf-8");
 

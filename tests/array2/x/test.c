@@ -15,8 +15,8 @@ typedef struct
     } data[25 - 1 + 1];
 } B;
 B b = {0};
-STR $F = { .data = "tests/array2/test.easy", .sz = 22, .immutable = 1 };
-STR $1 = { .data = ".", .sz = 1, .immutable = 1 };
+STR $F = { .data = "tests/array2/test.easy", .sz = 22 };
+STR $1 = { .data = ".", .sz = 1 };
 int main_program()
 {
     $index(1, 1, 25, &$F, 10, 9);

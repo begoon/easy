@@ -5,8 +5,8 @@ typedef int BOOLEAN;
 typedef STR STRING;
 int a = 0;
 int b = 0;
-STR $0 = { .data = " - ", .sz = 3, .immutable = 1 };
-STR $F = { .data = "tests/for/test.easy", .sz = 19, .immutable = 1 };
+STR $0 = { .data = " - ", .sz = 3 };
+STR $F = { .data = "tests/for/test.easy", .sz = 19 };
 int main_program()
 {
     b = 69;

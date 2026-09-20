@@ -3,10 +3,10 @@ typedef int INTEGER;
 typedef double REAL;
 typedef int BOOLEAN;
 typedef STR STRING;
-STR $0 = { .data = "move ", .sz = 5, .immutable = 1 };
-STR $1 = { .data = " from ", .sz = 6, .immutable = 1 };
-STR $2 = { .data = " to ", .sz = 4, .immutable = 1 };
-STR $F = { .data = "tests/hanoi/test.easy", .sz = 21, .immutable = 1 };
+STR $0 = { .data = "move ", .sz = 5 };
+STR $1 = { .data = " from ", .sz = 6 };
+STR $2 = { .data = " to ", .sz = 4 };
+STR $F = { .data = "tests/hanoi/test.easy", .sz = 21 };
 void move(int n, int a, int b)
 {
     $output("AiAiAi", $0, n, $1, a, $2, b);

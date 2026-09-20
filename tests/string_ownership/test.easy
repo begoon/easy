@@ -1,0 +1,79 @@
+PROGRAM Ownership:
+  TYPE Box IS STRUCTURE FIELD text IS STRING END STRUCTURE;
+  TYPE Boxes IS ARRAY [0:2] OF Box;
+  TYPE Dynamic IS ARRAY [0:1+1] OF STRING;
+  DECLARE (s, t) STRING;
+  DECLARE (a, b) Boxes;
+  DECLARE (i, n) INTEGER;
+  DECLARE empty BOOLEAN;
+
+  FUNCTION identity(value STRING) STRING:
+    RETURN value;
+  END FUNCTION identity;
+
+  FUNCTION change(value Boxes) Boxes:
+    SET value[0].text := value[0].text || "!";
+    RETURN value;
+  END FUNCTION change;
+
+  FUNCTION dynamic() Dynamic:
+    DECLARE values Dynamic;
+    SET values[0] := CHARACTER(68);
+    RETURN values;
+  END FUNCTION dynamic;
+
+  PROCEDURE modify(value STRING):
+    SET value := value || "changed";
+  END PROCEDURE modify;
+
+  SET s := CHARACTER(65);
+  SET t := s;
+  SET s := s;
+  CALL modify(s);
+  SET s := identity(s || "B");
+  OUTPUT s || t;
+  SET a[0].text := s;
+  SET b := a;
+  SET a := change(a);
+  SET a := a;
+  OUTPUT a[0].text || b[0].text;
+
+  FOR i := 1 TO 10000 DO
+    SET s := identity(CHARACTER(65) || CHARACTER(66));
+    SET t := SUBSTR(s, 0, 0);
+    SET a[1].text := s;
+    SET b := a;
+  END FOR;
+
+  BEGIN
+    DECLARE (values, copy) Dynamic;
+    SET values := dynamic();
+    SET copy := values;
+    SET values := values;
+    SET values[0] := values[0] || "!";
+    OUTPUT copy[0];
+  END;
+
+  OUTPUT LENGTH(SUBSTR(t, 0, 0) || t);
+  SET empty := t = "";
+  OUTPUT empty;
+
+  SET n := 2;
+  BEGIN
+    DECLARE values ARRAY [0:n] OF Box;
+    SET values[0].text := s;
+    SET n := 1;
+    OUTPUT values[0].text;
+  END;
+
+  SET i := 0;
+  again: BEGIN
+    DECLARE local STRING;
+    SET local := CHARACTER(67);
+    SET i := i + 1;
+    IF i < 100 THEN REPEAT again; FI;
+    OUTPUT local;
+    REPENT done;
+  END done;
+  OUTPUT "done";
+END PROGRAM Ownership;

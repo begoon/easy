@@ -8,16 +8,17 @@ struct
     int data[99 - 0 + 1];
 } a = {0};
 int sz = 0;
-STR $F = { .data = "tests/array_dynamic/test.easy", .sz = 29, .immutable = 1 };
+STR $F = { .data = "tests/array_dynamic/test.easy", .sz = 29 };
 int main_program()
 {
     sz = 1024;
     {
-        void *$r1 AUTOFREE_ARRAY = malloc(sizeof(int) * (sz - 1 + 1));
+        void *$r1 = make_array((sz - 1 + 1), sizeof(int), NULL);
         struct
         {
             int *data;
         } b = { .data = $r1 };
+        OWN(b, manage_array, $r2);
         $index(1, 1, sz, &$F, 9, 11);
         b.data[(1) - (1)] = 42;
         $index(1, 1, sz, &$F, 10, 14);

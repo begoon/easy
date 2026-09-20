@@ -50,6 +50,52 @@ The compiler uses C `struct` to implement compound types, such as strings, array
 
 The compiler implements a handwritten recursive descent parser. However, there is a second experimental PEG parser (`peg.ts` with `easy.peg` grammar file), but this parser is not used to generate code. The PEG parser only runs in testing by `test.ts`. Maybe in the future, PEG will replace the basic recursive descent parser.
 
+## String memory management
+
+The runtime manages strings automatically using **reference counting**, with no external garbage collector such as Boehm GC. The compiler emits ownership operations alongside the ordinary C code. When the last owner releases a string, its storage is freed immediately; there is no heap scan or periodic collection pass.
+
+### String storage and sharing
+
+A string value is a small C `STR` structure containing its length (`sz`), a pointer to its bytes (`data`), and a pointer to its allocation (`owner`). For a dynamically created string, the allocation holds a reference count and the bytes together in one block. `make_string()` creates that block with a count of one. String literals and empty strings have no owned allocation, so retaining or releasing them does nothing.
+
+String bytes are immutable. Copying a string shares its allocation and increments the reference count, preserving Easy's value semantics without copying the bytes. Concatenation, `CHARACTER`, and nonempty `SUBSTR` results create new allocations; a substring does not keep the original string's allocation alive.
+
+For example:
+
+```easy
+DECLARE (a, b) STRING;
+SET a := CHARACTER(65);
+SET b := a;
+SET a := CHARACTER(66);
+```
+
+After the second assignment, `a` and `b` share the storage for `"A"`. Reassigning `a` releases its reference to that storage, but `b` still holds it. The storage for `"A"` is freed when `b` is overwritten or leaves scope. For assignment, the generated code retains the source before releasing the destination, making self-assignment such as `SET a := a` safe.
+
+### Ownership in generated C
+
+The compiler accounts for references wherever a string can be stored or copied:
+
+- Variables own their current values. Overwriting a variable releases its previous value.
+- Expression results have ownership guards. The compiler introduces C scopes around statements with managed temporaries so repeated execution can reclaim those temporaries.
+- By-value parameters retain their own references on entry. Returning a managed value retains a reference for the caller before the callee's locals are released.
+- Structures and fixed-size arrays have generated helpers that recursively retain or release their managed fields and elements.
+
+The runtime's `OWN` macro registers a guard containing the value's address and its release helper. Clang/GCC's `cleanup` attribute invokes that helper when the guard leaves scope, including on `RETURN` and jumps out of a scope. Top-level program variables also have guards registered in the generated entry function.
+
+Guards form a stack of active owners. On an explicit Easy `EXIT`, the runtime drains this stack before terminating, releasing values in active callers as well as the current scope. Normal program completion releases the entry function's guards and then exits. This stack tracks live ownership locations; it does not retain every string ever allocated.
+
+### Strings inside dynamic arrays
+
+Dynamic arrays have a separate reference count for their shared backing allocation. Its header records the element count, element size, and an optional element release helper. When the final array owner releases the allocation, the runtime releases its managed elements before freeing the array itself. Recording the count at allocation time makes cleanup independent of later changes to variables used in the array bounds.
+
+Dynamic-array copies still share their elements, as described in the runtime limitation above. Reference counting makes the shared storage survive copies and returns; it does not turn those copies into deep copies.
+
+String allocations contain only bytes and cannot form reference cycles. The runtime does not include a cycle collector or thread-safe reference counts; it is designed for Easy's current single-threaded execution model.
+
+### Checking reclamation
+
+Run `bun test-ownership.ts` for focused checks with AddressSanitizer and UndefinedBehaviorSanitizer at both `-O0` and `-O2`. These cover bounded live allocations during repeated overwrites, aggregate and parameter copies, returned arrays, self-assignment, jumps, input, and normal and explicit exits. The regular test suite defines `EASY_CHECK_OWNERSHIP`, which asserts that no managed string or array allocations remain at shutdown.
+
 ## Compiler test pipeline
 
 The compiler project has a test pipeline, `test.ts`, running a set of tests from the `tests` folder. Some of the tests implement well-known programs, such as the Brainfuck interpreter, Conway's Game of Life, Rule 110 automaton, Quine (a program that prints its own source code), Mastermind (utilising Knuth's Minimax algorithm), FizzBuzz, Eratosthenes Sieve (from the book).

@@ -33,44 +33,88 @@ typedef struct
     Row row;
     Record2 record;
 } ComboType;
+static void $manage1(const void *value, int change)
+{
+    typedef struct
+    {
+        int a;
+        STR s;
+    } T;
+    manage_string((const char *)value + offsetof(T, s), change);
+}
+static void $manage0(const void *value, int change)
+{
+    typedef struct
+    {
+        Record a;
+        Matrix m;
+    } T;
+    $manage1((const char *)value + offsetof(T, a), change);
+}
 int i = 0;
 int j = 0;
 Row r = {0};
 Matrix m = {0};
 Matrix m1 = {0};
 Record2 s = {0};
-STR $0 = { .data = "**", .sz = 2, .immutable = 1 };
-STR $1 = { .data = "123", .sz = 3, .immutable = 1 };
-STR $2 = { .data = "456", .sz = 3, .immutable = 1 };
-STR $3 = { .data = "abc", .sz = 3, .immutable = 1 };
-STR $F = { .data = "tests/combo/test.easy", .sz = 21, .immutable = 1 };
-STR $5 = { .data = "XYZ", .sz = 3, .immutable = 1 };
+STR $0 = { .data = "**", .sz = 2 };
+STR $1 = { .data = "123", .sz = 3 };
+STR $2 = { .data = "456", .sz = 3 };
+STR $3 = { .data = "abc", .sz = 3 };
+STR $F = { .data = "tests/combo/test.easy", .sz = 21 };
+STR $5 = { .data = "XYZ", .sz = 3 };
 STR F1(int x, STR s)
 {
-    const int $r6 = LENGTH(s);
-    const STR $r5 = $concat("Aii", s, $r6, x);
-    return $r5;
+    manage_string(&s, 1);
+    OWN(s, manage_string, $r10);
+    {
+        const int $r12 = LENGTH(s);
+        const STR $r11 = $concat("Aii", s, $r12, x);
+        OWN($r11, manage_string, $r13);
+        manage_string(&$r11, 1);
+        return $r11;
+    }
 }
 void P1(int xx, STR s, STR xx2)
 {
+    manage_string(&s, 1);
+    OWN(s, manage_string, $r14);
+    manage_string(&xx2, 1);
+    OWN(xx2, manage_string, $r15);
     int x = 0;
     x = 1;
-    const int $r8 = LENGTH(s);
-    const STR $r7 = $concat("iAiiAA", x, s, $r8, xx, xx2, $0);
-    $output("A", $r7);
+    {
+        const int $r17 = LENGTH(s);
+        const STR $r16 = $concat("iAiiAA", x, s, $r17, xx, xx2, $0);
+        OWN($r16, manage_string, $r18);
+        $output("A", $r16);
+    }
 }
 int main_program()
 {
-    const STR $r1 = F1(456, $2);
-    P1(123, $1, $r1);
-    s.a.s = $3;
+    OWN(s, $manage0, $r1);
+    {
+        const STR $r2 = F1(456, $2);
+        OWN($r2, manage_string, $r3);
+        P1(123, $1, $r2);
+    }
+    __auto_type $r4 = $3;
+    manage_string(&$r4, 1);
+    manage_string(&s.a.s, -1);
+    s.a.s = $r4;
     $index(1, 1, 8, &$F, 48, 14);
     $index(1, 1, 256, &$F, 48, 17);
     $index(1, 1, 8, &$F, 48, 14);
     $index(1, 1, 256, &$F, 48, 17);
     $output("iA", s.m.data[(1) - (1)].data[(1) - (1)], s.a.s);
-    const STR $r2 = $concat("AA", s.a.s, $5);
-    s.a.s = $r2;
+    {
+        const STR $r5 = $concat("AA", s.a.s, $5);
+        OWN($r5, manage_string, $r6);
+        __auto_type $r7 = $r5;
+        manage_string(&$r7, 1);
+        manage_string(&s.a.s, -1);
+        s.a.s = $r7;
+    }
     s.m = m1;
     i = 0;
     $index(1, 1, 256, &$F, 55, 9);
@@ -94,9 +138,9 @@ int main_program()
             if (!(j <= 256)) break;
             $index(i, 1, 8, &$F, 63, 13);
             $index(j, 1, 256, &$F, 63, 16);
-            const int $r4 = (i * 100);
-            const int $r3 = ($r4 + j);
-            m.data[(i) - (1)].data[(j) - (1)] = $r3;
+            const int $r9 = (i * 100);
+            const int $r8 = ($r9 + j);
+            m.data[(i) - (1)].data[(j) - (1)] = $r8;
             j += 1;
         }
         i += 1;

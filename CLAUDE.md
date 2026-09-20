@@ -17,7 +17,7 @@ CLI is invoked as `easyc` (or `npx @begoon/easyc`).
 - `peg.ts` + `easy.peg` — experimental PEG parser, run as a cross-check by
   `test.ts` but not used for codegen.
 - `runtime.c` — ~300 lines of C runtime (`STR`, `ARRAY`, `$concat`, `$output`,
-  `$index`, `string_list`/`AUTOFREE_ARRAY` cleanup).
+  `$index`, reference-counted strings/arrays and ownership guards).
 - `test.ts` — parallel golden-file test harness over `tests/*/`.
 - `tests/<name>/test.easy` — source; `tests/<name>/x/*.*` — goldens
   (`test.c`, `test.output`, optional `test.tokens`, `test.json`, `test.s`,
@@ -74,8 +74,10 @@ CLI is invoked as `easyc` (or `npx @begoon/easyc`).
   deep-copied on assignment, argument pass, and return. **Dynamic arrays
   (size unknown at compile time) are the one exception**: shallow-copied,
   called out in the README.
-- Strings are tracked in a global `string_list` and freed at `$exit`. Fine
-  for short programs; don't expect long-running Easy programs to be tight.
+- Strings use immutable reference-counted storage. Generated ownership guards
+  release locals and temporaries on scope exit; `$exit` drains active guards.
+  Dynamic arrays share reference-counted backing storage. `bun test-ownership.ts`
+  checks reclamation and bounded memory with ASan/UBSan at O0/O2.
 - Test goldens live in `tests/<name>/x/`; `.gitignore` keeps the sibling
   `tests/<name>/*.c|*.s|*.tokens|...` build artifacts out of git but
   whitelists the `x/` directory.

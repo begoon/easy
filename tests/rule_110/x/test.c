@@ -11,10 +11,10 @@ Row row = {0};
 int N = 0;
 int n = 0;
 int i = 0;
-STR $F = { .data = "tests/rule_110/test.easy", .sz = 24, .immutable = 1 };
-STR $1 = { .data = "X", .sz = 1, .immutable = 1 };
-STR $2 = { .data = ".", .sz = 1, .immutable = 1 };
-STR $3 = { .data = "  ", .sz = 2, .immutable = 1 };
+STR $F = { .data = "tests/rule_110/test.easy", .sz = 24 };
+STR $1 = { .data = "X", .sz = 1 };
+STR $2 = { .data = ".", .sz = 1 };
+STR $3 = { .data = "  ", .sz = 2 };
 void step()
 {
     int i = 0;

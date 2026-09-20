@@ -7,15 +7,52 @@
 #include <stdarg.h>
 #include <alloca.h>
 #include <time.h>
+#include <stddef.h>
+#include <stdint.h>
+#include <assert.h>
 
 void exit(int status);
-void *malloc(size_t size);
+void *calloc(size_t count, size_t size);
 void free(void *ptr);
 
 #define TRUE 1
 #define FALSE 0
 
-#define AUTOFREE_ARRAY __attribute__((cleanup(free_array)))
+typedef void (*Manage)(const void *, int);
+
+typedef struct Guard {
+    struct Guard *previous;
+    const void *value;
+    Manage manage;
+} Guard;
+
+static Guard *guards;
+static size_t live_strings;
+static size_t live_arrays;
+
+static inline void guard_init(Guard *guard, const void *value, Manage manage)
+{
+    *guard = (Guard){guards, value, manage};
+    guards = guard;
+}
+
+static inline void guard_cleanup(Guard *guard)
+{
+    assert(guards == guard);
+    guards = guard->previous;
+    guard->manage(guard->value, -1);
+}
+
+#define OWN(value, manage, name) \
+    Guard name __attribute__((cleanup(guard_cleanup))); \
+    guard_init(&name, &(value), manage)
+
+static void *allocate(size_t size)
+{
+    void *p = calloc(1, size);
+    if (!p) { fprintf(stderr, "out of memory\n"); exit(1); }
+    return p;
+}
 
 static inline void $sleep(double seconds)
 {
@@ -29,12 +66,29 @@ static inline void $sleep(double seconds)
     nanosleep(&ts, NULL);
 }
 
+typedef struct {
+    size_t refs;
+    char bytes[];
+} StringStorage;
+
 typedef struct
 {
     int sz;
-    int immutable;
-    char *data;
+    const char *data;
+    StringStorage *owner;
 } STR;
+
+static inline void manage_string(const void *value, int change)
+{
+    STR s;
+    memcpy(&s, value, sizeof(s));
+    if (!s.owner) return;
+    if (change > 0) ++s.owner->refs;
+    else if (--s.owner->refs == 0) {
+        --live_strings;
+        free(s.owner);
+    }
+}
 
 typedef struct
 {
@@ -43,85 +97,53 @@ typedef struct
     int character;
 } L;
 
-typedef struct string_list
-{
-    struct string_list *next;
-    STR *str;
-} string_list;
-
-static string_list *strings = NULL;
-
-void print_string(STR s, const char *prefix)
-{
-    char *buf = alloca(s.sz + 1);
-    memcpy(buf, s.data, s.sz);
-    buf[s.sz] = '\0';
-    printf("%s: '%s'\n", prefix, buf);
-}
-
 STR make_string(const char *data, int sz)
 {
-    void *ptr = malloc(sz);
-    if (!ptr)
-    {
-        fprintf(stderr, "make_string|data: out of memory\n");
-        exit(1);
-    }
-    STR *str = malloc(sizeof(STR));
-    if (!str)
-    {
-        fprintf(stderr, "make_string|str: out of memory\n");
-        exit(1);
-    }
-    *str = (STR){.sz = sz, .data = ptr, .immutable = 0};
-    memcpy(str->data, data, sz);
-
-    string_list *reference = malloc(sizeof(string_list));
-    if (!reference)
-    {
-        fprintf(stderr, "make_string|list: out of memory\n");
-        exit(1);
-    }
-    reference->str = str;
-    reference->next = strings;
-    strings = reference;
-    return *str;
+    if (sz == 0) return (STR){0};
+    assert(sz > 0);
+    StringStorage *owner = allocate(sizeof(*owner) + (size_t)sz);
+    owner->refs = 1;
+    memcpy(owner->bytes, data, (size_t)sz);
+    ++live_strings;
+    return (STR){.sz = sz, .data = owner->bytes, .owner = owner};
 }
 
-void free_strings()
+// Dynamic arrays retain their shared backing allocation. The header records
+// the element count independently of the variables used in the Easy bounds.
+typedef struct {
+    size_t refs, count, element_size;
+    Manage element;
+    max_align_t alignment;
+    unsigned char data[];
+} ArrayStorage;
+
+static inline void *make_array(size_t count, size_t element_size, Manage element)
 {
-    string_list *list = strings;
-    while (list)
-    {
-        string_list *next = list->next;
-        if (list->str->data && !list->str->immutable)
-        {
-            memset(list->str->data, 0, list->str->sz);
-            free(list->str->data);
-            list->str->data = NULL;
-
-            memset(list->str, 0, sizeof(STR));
-            free(list->str);
-            list->str = NULL;
-        }
-        free(list);
-        list = next;
+    if (count > (SIZE_MAX - sizeof(ArrayStorage)) / element_size) {
+        fprintf(stderr, "array allocation too large\n"); exit(1);
     }
-    strings = NULL;
+    ArrayStorage *owner = allocate(sizeof(*owner) + count * element_size);
+    owner->refs = 1;
+    owner->count = count;
+    owner->element_size = element_size;
+    owner->element = element;
+    ++live_arrays;
+    return owner->data;
 }
 
-typedef struct
+static inline void manage_array(const void *value, int change)
 {
     void *data;
-} ARRAY;
-
-void free_array(void *ptr)
-{
-    ARRAY *array = (ARRAY *)ptr;
-    if (array->data)
-    {
-        free(array->data);
-        array->data = NULL;
+    memcpy(&data, value, sizeof(data));
+    if (!data) return;
+    ArrayStorage *owner = (ArrayStorage *)((char *)data - offsetof(ArrayStorage, data));
+    if (change > 0) ++owner->refs;
+    else if (--owner->refs == 0) {
+        if (owner->element)
+            for (size_t i = 0; i < owner->count; ++i)
+                owner->element(owner->data + i * owner->element_size, -1);
+        --live_arrays;
+        free(owner);
     }
 }
 
@@ -169,6 +191,7 @@ STR SUBSTR(STR from, int start, int length)
         fprintf(stderr, "substr (%s): start + length > size (%d + %d = %d > %d)\n", buf, start, length, start + length, from.sz);
         exit(1);
     }
+    if (length == 0) return (STR){0};
     STR v = make_string(from.data + start, length);
     return v;
 }
@@ -202,13 +225,13 @@ STR $concat(const char *fmt, ...)
         {
             const STR *arg = va_arg(args, STR *);
             n = (int)sizeof(buf) - sz < arg->sz ? (int)sizeof(buf) - sz : arg->sz;
-            memcpy(buf + sz, arg->data, n);
+            if (n) memcpy(buf + sz, arg->data, n);
         }
         else if (*fmt == 'A')
         {
             const STR arg = va_arg(args, STR);
             n = (int)sizeof(buf) - sz < arg.sz ? (int)sizeof(buf) - sz : arg.sz;
-            memcpy(buf + sz, arg.data, n);
+            if (n) memcpy(buf + sz, arg.data, n);
         }
         sz += n;
     }
@@ -252,7 +275,7 @@ void $output(const char *fmt, ...)
             if (!zero)
             {
                 char *const buf = alloca(n + 1);
-                memcpy(buf, arg->data, n);
+                if (n) memcpy(buf, arg->data, n);
                 buf[n] = '\0';
                 n = printf("%s", buf);
             }
@@ -267,7 +290,7 @@ void $output(const char *fmt, ...)
             if (!zero)
             {
                 char *const buf = alloca(n + 1);
-                memcpy(buf, arg.data, n);
+                if (n) memcpy(buf, arg.data, n);
                 buf[n] = '\0';
                 n = printf("%s", buf);
             }
@@ -297,7 +320,11 @@ int main_program();
 
 void $exit()
 {
-    free_strings();
+    while (guards) guard_cleanup(guards);
+#ifdef EASY_CHECK_OWNERSHIP
+    assert(live_strings == 0);
+    assert(live_arrays == 0);
+#endif
     exit(0);
 }
 
