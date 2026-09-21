@@ -1,6 +1,6 @@
 {
   "name": "@begoon/easyc",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "description": "Compiler for the Easy language (Wetherell's 'Etudes for Programmers', 1978), emitting C",
   "keywords": [
     "easy",
