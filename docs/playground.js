@@ -2687,7 +2687,7 @@ function compileToC(source, filename = "source.easy") {
 if (false) {}
 
 // docs/build-info.ts
-var BUILD_TIME = "2026-11-27 07:32:30";
+var BUILD_TIME = "2026-11-27 08:04:12";
 
 // runtime.c
 var runtime_default = `#if defined(__linux__)
@@ -3320,7 +3320,7 @@ select.addEventListener("change", async () => {
   saveTabs();
   renderTabs();
   onChange();
-  source.focus();
+  focusSourceTop();
 });
 function uniqueFilename(base) {
   if (!tabs.some((t, i) => i !== active && t.filename === base))
@@ -3421,6 +3421,12 @@ function syncSourceScroll() {
   sourceHighlight.scrollLeft = source.scrollLeft;
 }
 source.addEventListener("scroll", syncSourceScroll);
+function focusSourceTop() {
+  source.setSelectionRange(0, 0);
+  source.focus({ preventScroll: true });
+  source.scrollTop = 0;
+  syncSourceScroll();
+}
 function runPipeline() {
   renderSourceHighlight();
   const src = source.value;
@@ -3709,7 +3715,7 @@ function switchTab(i) {
   renderTabs();
   deselectExample();
   runPipeline();
-  source.focus();
+  focusSourceTop();
 }
 function newTab() {
   tabs[active].source = source.value;
@@ -3724,7 +3730,7 @@ function newTab() {
   renderTabs();
   deselectExample();
   runPipeline();
-  source.focus();
+  focusSourceTop();
 }
 async function closeTab(i) {
   const current = i === active ? source.value : tabs[i].source;
@@ -3862,7 +3868,7 @@ resetBtn.addEventListener("click", async () => {
   saveTabs();
   renderTabs();
   onChange();
-  source.focus();
+  focusSourceTop();
 });
 fileInput.addEventListener("change", async () => {
   const f = fileInput.files?.[0];
@@ -3881,7 +3887,7 @@ fileInput.addEventListener("change", async () => {
   saveTabs();
   renderTabs();
   onChange();
-  source.focus();
+  focusSourceTop();
 });
 var buildTimeEl = document.getElementById("build-time");
 if (buildTimeEl && BUILD_TIME)

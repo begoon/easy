@@ -155,7 +155,7 @@ select.addEventListener("change", async () => {
     saveTabs();
     renderTabs();
     onChange();
-    source.focus();
+    focusSourceTop();
 });
 
 function uniqueFilename(base: string): string {
@@ -266,6 +266,15 @@ function syncSourceScroll() {
 }
 
 source.addEventListener("scroll", syncSourceScroll);
+
+// After loading new text: a plain focus() would scroll to the caret, which
+// assigning .value leaves at the end, so park the caret at the top first.
+function focusSourceTop() {
+    source.setSelectionRange(0, 0);
+    source.focus({ preventScroll: true });
+    source.scrollTop = 0;
+    syncSourceScroll();
+}
 
 function runPipeline() {
     renderSourceHighlight();
@@ -531,7 +540,7 @@ function switchTab(i: number) {
     renderTabs();
     deselectExample();
     runPipeline();
-    source.focus();
+    focusSourceTop();
 }
 
 function newTab() {
@@ -547,7 +556,7 @@ function newTab() {
     renderTabs();
     deselectExample();
     runPipeline();
-    source.focus();
+    focusSourceTop();
 }
 
 async function closeTab(i: number) {
@@ -692,7 +701,7 @@ resetBtn.addEventListener("click", async () => {
     saveTabs();
     renderTabs();
     onChange();
-    source.focus();
+    focusSourceTop();
 });
 
 fileInput.addEventListener("change", async () => {
@@ -711,7 +720,7 @@ fileInput.addEventListener("change", async () => {
     saveTabs();
     renderTabs();
     onChange();
-    source.focus();
+    focusSourceTop();
 });
 
 const buildTimeEl = document.getElementById("build-time");
