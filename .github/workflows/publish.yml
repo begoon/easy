@@ -39,4 +39,7 @@ jobs:
                   fi
             # prepublishOnly runs the compile-only tests and builds dist/easyc.js.
             # --access public: scoped packages default to private.
-            - run: npm publish --access public
+            # --loglevel verbose: npm reports why a trusted-publishing (OIDC)
+            # exchange failed only at this level, then falls back to the
+            # placeholder token and fails with a misleading 404.
+            - run: npm publish --access public --loglevel verbose
