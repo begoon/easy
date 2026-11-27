@@ -4,9 +4,7 @@ import * as path from "node:path";
 import * as process from "node:process";
 import * as url from "node:url";
 
-import child_process from "node:child_process";
-
-const { execFileSync } = child_process;
+import * as child_process from "node:child_process";
 
 function indent(str: string, n: number = 1): string {
     return str
@@ -2367,7 +2365,7 @@ export function run(argv: string[]) {
 }
 
 function execute(cmd: string[]) {
-    execFileSync(cmd.join(" "), { stdio: "inherit", shell: true });
+    child_process.execFileSync(cmd.join(" "), { stdio: "inherit", shell: true });
 }
 
 // Locate the runtime.c shipped with the compiler.
