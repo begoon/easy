@@ -53,9 +53,14 @@ video: build-playground
     cd video && bun capture.ts
     cd video && uv run --python 3.12 python build.py
 
-# Build, bump patch version, and publish to npm.
-# --access=public is required for scoped packages (@begoon/easyc) since
-# npm defaults scoped names to private.
-publish: quick build
+# The tag triggers .github/workflows/publish.yml, which publishes to npm
+# through trusted publishing: no npm login or token needed here.
+# Bump the patch version, commit, tag vX.Y.Z and push from a clean main.
+release: quick
+    test "$(git branch --show-current)" = main || (echo "release from main" >&2; exit 1)
+    git diff --quiet && git diff --cached --quiet || (echo "commit or stash changes first" >&2; exit 1)
+    git pull --ff-only
     npm version patch --no-git-tag-version
-    npm publish --access=public
+    git commit -qam "chore: bump npm release to $(node -p 'require("./package.json").version')"
+    git tag "v$(node -p 'require("./package.json").version')"
+    git push origin main "v$(node -p 'require("./package.json").version')"

@@ -44,9 +44,13 @@ CLI is invoked as `easyc` (or `npx @begoon/easyc`).
   `docs/compile-worker.js` and `docs/run-worker.js` (all committed;
   Pages serves `docs/` as-is).
 - `bun run build` — bundle `easyc.ts` to `dist/easyc.js` for the npm CLI.
-- `just publish` — compile-only tests, build, `npm version patch`
-  (no git tag), `npm publish --access=public`. The `--access=public`
-  flag is required because scoped packages default to private on npm.
+- `just release` — from a clean `main`: compile-only tests, `npm version
+  patch`, commit `chore: bump npm release to X.Y.Z`, tag `vX.Y.Z`, push.
+  The tag runs `.github/workflows/publish.yml`, which publishes through npm
+  trusted publishing (GitHub OIDC, no token; provenance attached). The
+  npmjs.com trusted publisher names `begoon/easy` + `publish.yml`, so
+  renaming the workflow breaks publishing. `--access public` stays because
+  scoped packages default to private.
 
 ## Playground architecture
 
