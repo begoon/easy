@@ -350,9 +350,9 @@ var hostEndingChars = ["/", "?", "#"];
 var hostnameMaxLen = 255;
 var hostnamePartPattern = /^[+a-z0-9A-Z_-]{0,63}$/;
 var hostnamePartStart = /^([+a-z0-9A-Z_-]{0,63})(.*)$/;
-var unsafeProtocol = { javascript: true, "javascript:": true };
-var hostlessProtocol = { javascript: true, "javascript:": true };
-var slashedProtocol = { http: true, https: true, ftp: true, gopher: true, file: true, "http:": true, "https:": true, "ftp:": true, "gopher:": true, "file:": true };
+var unsafeProtocol = { __proto__: null, javascript: true, "javascript:": true };
+var hostlessProtocol = { __proto__: null, javascript: true, "javascript:": true };
+var slashedProtocol = { __proto__: null, http: true, https: true, ftp: true, gopher: true, file: true, "http:": true, "https:": true, "ftp:": true, "gopher:": true, "file:": true };
 var querystring = { parse(str) {
   var decode = decodeURIComponent;
   return (str + "").replace(/\+/g, " ").split("&").filter(Boolean).reduce(function(obj, item, index) {
@@ -400,10 +400,10 @@ Url.prototype.parse = function(url, parseQueryString, slashesDenoteHost) {
   }
   if (slashesDenoteHost || proto || rest.match(/^\/\/[^@\/]+@[^@\/]+/)) {
     var slashes = rest.substr(0, 2) === "//";
-    if (slashes && !(proto && hostlessProtocol[proto]))
+    if (slashes && !(proto && hostlessProtocol[lowerProto]))
       rest = rest.substr(2), this.slashes = true;
   }
-  if (!hostlessProtocol[proto] && (slashes || proto && !slashedProtocol[proto])) {
+  if (!hostlessProtocol[lowerProto] && (slashes || lowerProto && !slashedProtocol[lowerProto])) {
     var hostEnd = -1;
     for (var i = 0;i < hostEndingChars.length; i++) {
       var hec = rest.indexOf(hostEndingChars[i]);
@@ -523,93 +523,93 @@ Url.prototype.format = function() {
     return encodeURIComponent(match);
   }), search = search.replace("#", "%23"), protocol + host + pathname + search + hash;
 };
-Url.prototype.resolve = function(relative2) {
-  return this.resolveObject(urlParse(relative2, false, true)).format();
+Url.prototype.resolve = function(relative) {
+  return this.resolveObject(urlParse(relative, false, true)).format();
 };
-Url.prototype.resolveObject = function(relative2) {
-  if (util_isString(relative2)) {
+Url.prototype.resolveObject = function(relative) {
+  if (util_isString(relative)) {
     var rel = new Url;
-    rel.parse(relative2, false, true), relative2 = rel;
+    rel.parse(relative, false, true), relative = rel;
   }
   var result = new Url, tkeys = Object.keys(this);
   for (var tk = 0;tk < tkeys.length; tk++) {
     var tkey = tkeys[tk];
     result[tkey] = this[tkey];
   }
-  if (result.hash = relative2.hash, relative2.href === "")
+  if (result.hash = relative.hash, relative.href === "")
     return result.href = result.format(), result;
-  if (relative2.slashes && !relative2.protocol) {
-    var rkeys = Object.keys(relative2);
+  if (relative.slashes && !relative.protocol) {
+    var rkeys = Object.keys(relative);
     for (var rk = 0;rk < rkeys.length; rk++) {
       var rkey = rkeys[rk];
       if (rkey !== "protocol")
-        result[rkey] = relative2[rkey];
+        result[rkey] = relative[rkey];
     }
     if (slashedProtocol[result.protocol] && result.hostname && !result.pathname)
       result.path = result.pathname = "/";
     return result.href = result.format(), result;
   }
-  if (relative2.protocol && relative2.protocol !== result.protocol) {
-    if (!slashedProtocol[relative2.protocol]) {
-      var keys = Object.keys(relative2);
+  if (relative.protocol && relative.protocol !== result.protocol) {
+    if (!slashedProtocol[relative.protocol]) {
+      var keys = Object.keys(relative);
       for (var v = 0;v < keys.length; v++) {
         var k = keys[v];
-        result[k] = relative2[k];
+        result[k] = relative[k];
       }
       return result.href = result.format(), result;
     }
-    if (result.protocol = relative2.protocol, !relative2.host && !hostlessProtocol[relative2.protocol]) {
-      var relPath = (relative2.pathname || "").split("/");
-      while (relPath.length && !(relative2.host = relPath.shift()))
+    if (result.protocol = relative.protocol, !relative.host && !hostlessProtocol[relative.protocol]) {
+      var relPath = (relative.pathname || "").split("/");
+      while (relPath.length && !(relative.host = relPath.shift()))
         ;
-      if (!relative2.host)
-        relative2.host = "";
-      if (!relative2.hostname)
-        relative2.hostname = "";
+      if (!relative.host)
+        relative.host = "";
+      if (!relative.hostname)
+        relative.hostname = "";
       if (relPath[0] !== "")
         relPath.unshift("");
       if (relPath.length < 2)
         relPath.unshift("");
       result.pathname = relPath.join("/");
     } else
-      result.pathname = relative2.pathname;
-    if (result.search = relative2.search, result.query = relative2.query, result.host = relative2.host || "", result.auth = relative2.auth, result.hostname = relative2.hostname || relative2.host, result.port = relative2.port, result.pathname || result.search) {
+      result.pathname = relative.pathname;
+    if (result.search = relative.search, result.query = relative.query, result.host = relative.host || "", result.auth = relative.auth, result.hostname = relative.hostname || relative.host, result.port = relative.port, result.pathname || result.search) {
       var p = result.pathname || "", s = result.search || "";
       result.path = p + s;
     }
-    return result.slashes = result.slashes || relative2.slashes, result.href = result.format(), result;
+    return result.slashes = result.slashes || relative.slashes, result.href = result.format(), result;
   }
-  var isSourceAbs = result.pathname && result.pathname.charAt(0) === "/", isRelAbs = relative2.host || relative2.pathname && relative2.pathname.charAt(0) === "/", mustEndAbs = isRelAbs || isSourceAbs || result.host && relative2.pathname, removeAllDots = mustEndAbs, srcPath = result.pathname && result.pathname.split("/") || [], relPath = relative2.pathname && relative2.pathname.split("/") || [], psychotic = result.protocol && !slashedProtocol[result.protocol];
+  var isSourceAbs = result.pathname && result.pathname.charAt(0) === "/", isRelAbs = relative.host || relative.pathname && relative.pathname.charAt(0) === "/", mustEndAbs = isRelAbs || isSourceAbs || result.host && relative.pathname, removeAllDots = mustEndAbs, srcPath = result.pathname && result.pathname.split("/") || [], relPath = relative.pathname && relative.pathname.split("/") || [], psychotic = result.protocol && !slashedProtocol[result.protocol];
   if (psychotic) {
     if (result.hostname = "", result.port = null, result.host)
       if (srcPath[0] === "")
         srcPath[0] = result.host;
       else
         srcPath.unshift(result.host);
-    if (result.host = "", relative2.protocol) {
-      if (relative2.hostname = null, relative2.port = null, relative2.host)
+    if (result.host = "", relative.protocol) {
+      if (relative.hostname = null, relative.port = null, relative.host)
         if (relPath[0] === "")
-          relPath[0] = relative2.host;
+          relPath[0] = relative.host;
         else
-          relPath.unshift(relative2.host);
-      relative2.host = null;
+          relPath.unshift(relative.host);
+      relative.host = null;
     }
     mustEndAbs = mustEndAbs && (relPath[0] === "" || srcPath[0] === "");
   }
   if (isRelAbs)
-    result.host = relative2.host || relative2.host === "" ? relative2.host : result.host, result.hostname = relative2.hostname || relative2.hostname === "" ? relative2.hostname : result.hostname, result.search = relative2.search, result.query = relative2.query, srcPath = relPath;
+    result.host = relative.host || relative.host === "" ? relative.host : result.host, result.hostname = relative.hostname || relative.hostname === "" ? relative.hostname : result.hostname, result.search = relative.search, result.query = relative.query, srcPath = relPath;
   else if (relPath.length) {
     if (!srcPath)
       srcPath = [];
-    srcPath.pop(), srcPath = srcPath.concat(relPath), result.search = relative2.search, result.query = relative2.query;
-  } else if (!util_isNullOrUndefined(relative2.search)) {
+    srcPath.pop(), srcPath = srcPath.concat(relPath), result.search = relative.search, result.query = relative.query;
+  } else if (!util_isNullOrUndefined(relative.search)) {
     if (psychotic) {
       result.hostname = result.host = srcPath.shift();
       var authInHost = result.host && result.host.indexOf("@") > 0 ? result.host.split("@") : false;
       if (authInHost)
         result.auth = authInHost.shift(), result.host = result.hostname = authInHost.shift();
     }
-    if (result.search = relative2.search, result.query = relative2.query, !util_isNull(result.pathname) || !util_isNull(result.search))
+    if (result.search = relative.search, result.query = relative.query, !util_isNull(result.pathname) || !util_isNull(result.search))
       result.path = (result.pathname ? result.pathname : "") + (result.search ? result.search : "");
     return result.href = result.format(), result;
   }
@@ -620,7 +620,7 @@ Url.prototype.resolveObject = function(relative2) {
       result.path = null;
     return result.href = result.format(), result;
   }
-  var last = srcPath.slice(-1)[0], hasTrailingSlash = (result.host || relative2.host || srcPath.length > 1) && (last === "." || last === "..") || last === "", up = 0;
+  var last = srcPath.slice(-1)[0], hasTrailingSlash = (result.host || relative.host || srcPath.length > 1) && (last === "." || last === "..") || last === "", up = 0;
   for (var i = srcPath.length;i >= 0; i--)
     if (last = srcPath[i], last === ".")
       srcPath.splice(i, 1);
@@ -635,14 +635,14 @@ Url.prototype.resolveObject = function(relative2) {
     srcPath.unshift("");
   if (hasTrailingSlash && srcPath.join("/").substr(-1) !== "/")
     srcPath.push("");
-  var isAbsolute2 = srcPath[0] === "" || srcPath[0] && srcPath[0].charAt(0) === "/";
+  var isAbsolute = srcPath[0] === "" || srcPath[0] && srcPath[0].charAt(0) === "/";
   if (psychotic) {
-    result.hostname = result.host = isAbsolute2 ? "" : srcPath.length ? srcPath.shift() : "";
+    result.hostname = result.host = isAbsolute ? "" : srcPath.length ? srcPath.shift() : "";
     var authInHost = result.host && result.host.indexOf("@") > 0 ? result.host.split("@") : false;
     if (authInHost)
       result.auth = authInHost.shift(), result.host = result.hostname = authInHost.shift();
   }
-  if (mustEndAbs = mustEndAbs || result.host && srcPath.length, mustEndAbs && !isAbsolute2)
+  if (mustEndAbs = mustEndAbs || result.host && srcPath.length, mustEndAbs && !isAbsolute)
     srcPath.unshift("");
   if (!srcPath.length)
     result.pathname = null, result.path = null;
@@ -650,7 +650,7 @@ Url.prototype.resolveObject = function(relative2) {
     result.pathname = srcPath.join("/");
   if (!util_isNull(result.pathname) || !util_isNull(result.search))
     result.path = (result.pathname ? result.pathname : "") + (result.search ? result.search : "");
-  return result.auth = relative2.auth || result.auth, result.slashes = result.slashes || relative2.slashes, result.href = result.format(), result;
+  return result.auth = relative.auth || result.auth, result.slashes = result.slashes || relative.slashes, result.href = result.format(), result;
 };
 Url.prototype.parseHost = function() {
   var host = this.host, port = portPattern.exec(host);
@@ -664,7 +664,7 @@ Url.prototype.parseHost = function() {
 };
 
 // easyc.ts
-var { default: child_process} = (() => ({}));
+var child_process = (() => ({}));
 function indent(str, n = 1) {
   return str.split(/\r?\n/).map((line) => "    ".repeat(n) + line).join(`
 `);
@@ -771,6 +771,86 @@ class Context {
   s;
   S = () => `$${this.s++}`;
   frames = [];
+  managers = new Map;
+  managerDefinitions = [];
+  manager(type) {
+    if (type instanceof AliasType)
+      return this.manager(type.reference_type);
+    if (type instanceof StringType)
+      return "manage_string";
+    if (type instanceof ArrayType && type.dynamic)
+      return "manage_array";
+    if (this.managers.has(type))
+      return this.managers.get(type);
+    const name = `$manage${this.managers.size}`;
+    this.managers.set(type, name);
+    const body = [];
+    if (type instanceof StructType) {
+      for (const field of type.fields) {
+        const child = this.manager(field.type);
+        if (child)
+          body.push(`${child}((const char *)value + offsetof(T, ${field.name}), change);`);
+      }
+    } else if (type instanceof ArrayType) {
+      const child = this.manager(type.type);
+      if (child)
+        body.push(`for (size_t i = 0; i < sizeof(((T *)0)->data) / sizeof(((T *)0)->data[0]); ++i)`, `    ${child}((const char *)value + offsetof(T, data) + i * sizeof(((T *)0)->data[0]), change);`);
+    }
+    if (!body.length) {
+      this.managers.delete(type);
+      return null;
+    }
+    this.managerDefinitions.push(emit([
+      `static void ${name}(const void *value, int change)`,
+      "{",
+      indent(`typedef ${type.c()} T;`, 1),
+      indent(emit(body), 1),
+      "}"
+    ]));
+    return name;
+  }
+  own(type, value, code, retain = false) {
+    const manage = this.manager(type);
+    if (!manage)
+      return;
+    if (retain)
+      code.push(`${manage}(&${value}, 1);`);
+    code.push(`OWN(${value}, ${manage}, ${this.R()});`);
+  }
+  needsInitialization(type) {
+    if (type instanceof AliasType)
+      return this.needsInitialization(type.reference_type);
+    if (type instanceof ArrayType)
+      return type.dynamic || this.needsInitialization(type.type);
+    if (type instanceof StructType)
+      return type.fields.some((field) => this.needsInitialization(field.type));
+    return false;
+  }
+  initialize(type, value, code) {
+    if (!this.needsInitialization(type))
+      return;
+    if (type instanceof AliasType) {
+      this.initialize(type.reference_type, value, code);
+    } else if (type instanceof StructType) {
+      for (const field of type.fields)
+        this.initialize(field.type, `${value}.${field.name}`, code);
+    } else if (type instanceof ArrayType) {
+      if (type.dynamic) {
+        const lo = type.lo.v(code);
+        const savedLo = this.R();
+        code.push(`const int ${savedLo} = ${lo};`);
+        const hi = type.hi.v(code);
+        code.push(`${value}.data = make_array(${savedLo}, ${hi}, sizeof(${type.type.c()}), ${this.manager(type.type) ?? "NULL"});`);
+      }
+      if (this.needsInitialization(type.type)) {
+        const index = this.R();
+        const count = type.dynamic ? `array_storage(${value}.data)->count` : `sizeof(${value}.data) / sizeof(${value}.data[0])`;
+        const body = [];
+        this.initialize(type.type, `${value}.data[${index}]`, body);
+        code.push(`for (size_t ${index} = 0; ${index} < ${count}; ++${index})`, "{", indent(emit(body), 1), "}");
+      }
+    }
+  }
   enter_frame = () => {
     this.frames.push({ defer: [] });
   };
@@ -835,25 +915,25 @@ function printer(root) {
       seen.add(obj);
       if (obj instanceof Token) {
         const token = obj;
-        const data3 = `<${token.value}|${token.type} ${token.context.text.filename}:${token.line}:${token.character}>`;
+        const data = `<${token.value}|${token.type} ${token.context.text.filename}:${token.line}:${token.character}>`;
         seen.delete(obj);
-        return data3;
+        return data;
       }
       if (Array.isArray(obj)) {
         const sequence = obj.map((x) => walker(x));
         seen.delete(obj);
         return sequence;
       }
-      const data2 = { node: obj.constructor?.name ?? "[node]" };
+      const data = { node: obj.constructor?.name ?? "[node]" };
       for (const [name, value] of Object.entries(obj)) {
         if (name.startsWith("_"))
           continue;
         if (typeof value === "function")
           continue;
-        data2[name] = walker(value);
+        data[name] = walker(value);
       }
       seen.delete(obj);
-      return data2;
+      return data;
     }
     return String(obj);
   }
@@ -933,14 +1013,8 @@ class ArrayType extends Type {
     const data = this.dynamic ? `*data` : `data[${this.sz()}]`;
     return emit(["struct", "{", indent(`${this.type.c()} ${data};`, 1), "}"]);
   }
-  sz = () => `${this.hi.v([])} - ${this.lo.v([])} + 1`;
-  zero(code) {
-    if (!this.dynamic)
-      return "{0}";
-    const r = this.hi.context().R();
-    code.push(`void *${r} AUTOFREE_ARRAY = malloc(sizeof(${this.type.c()}) * (${this.sz()}));`);
-    return `{ .data = ${r} }`;
-  }
+  sz = (code = []) => `${this.hi.v(code)} - ${this.lo.v(code)} + 1`;
+  zero = () => "{0}";
   typedef = (alias) => `typedef ${this.c()} ${alias}`;
 }
 
@@ -982,7 +1056,7 @@ class AliasType extends Type {
     this.reference_type = ref;
   }
   c = () => this.reference_name;
-  zero = () => this.reference_type.zero([]);
+  zero = (code) => this.reference_type.zero(code);
   typedef = (alias) => `typedef ${this.c()} ${alias}`;
 }
 
@@ -1031,12 +1105,17 @@ class DECLARE extends Node {
     this.names = names;
     this.type = type;
   }
-  v(code) {
-    function zero(n, type) {
-      return `${type.c()} ${n} = ${type.zero(code)};`;
+  v(code, main = false) {
+    for (const name of this.names) {
+      const initial = this.type.zero(code);
+      const declaration = `${this.type.c()} ${name} = ${initial};`;
+      if (main)
+        this.context().common.push(declaration);
+      else
+        code.push(declaration);
+      this.context().own(this.type, name, code);
+      this.context().initialize(this.type, name, code);
     }
-    return this.names.map((n) => zero(n, this.type)).join(`
-`);
   }
 }
 
@@ -1056,16 +1135,14 @@ class Segment extends Node {
     const v = [];
     if (this.variables) {
       for (const variable of this.variables) {
-        const c = variable.v(v);
-        if (main)
-          this.context().common.push(c);
-        else
-          v.push(c);
+        variable.v(v, main);
       }
     }
     if (this.statements) {
-      for (const statement of this.statements)
-        v.push(statement.c());
+      for (const statement of this.statements) {
+        const code = statement.c();
+        v.push(statement instanceof LABEL || statement instanceof BEGIN || !code.includes("OWN(") ? code : emit(["{", indent(code, 1), "}"]));
+      }
     }
     return emit(v);
   }
@@ -1102,9 +1179,13 @@ class PROCEDURE extends Node {
         throw new GenerateError(`type mismatch in PROCEDURE call: ` + `${this.arguments[i].type.constructor.name} !== ${procedure.arguments[i].type.constructor.name} ` + `at ${this.token}`);
       }
     }
-    const args = this.arguments.map((v2) => v2.c()).join(", ");
+    const args = this.arguments.map((v) => v.c()).join(", ");
     const v = [`void ${this.name}(${args})`, "{"];
     this.segment.context().enter_frame();
+    const parameters = [];
+    for (const arg of this.arguments)
+      this.context().own(arg.type, arg.name, parameters, true);
+    v.push(indent(emit(parameters), 1));
     v.push(indent(this.segment.c(), 1));
     this.segment.context().leave_frame(v);
     v.push("}");
@@ -1137,6 +1218,10 @@ class FUNCTION extends Node {
     const args = this.arguments.map((a) => a.c()).join(", ");
     const v = [`${type} ${this.name}(${args})`, "{"];
     this.segment.context().enter_frame();
+    const parameters = [];
+    for (const arg of this.arguments)
+      this.context().own(arg.type, arg.name, parameters, true);
+    v.push(indent(emit(parameters), 1));
     v.push(indent(this.segment.c(), 1));
     this.segment.context().leave_frame(v);
     v.push("}");
@@ -1174,7 +1259,7 @@ class Variable {
     if (!this.isConst())
       throw new GenerateError(`variable '${this.name}' is not a constant at ${this.token}`);
     const z = (this.zero ?? "").replace(/"/g, "\\\"");
-    return `${this.type.c()} ${this.name} = { .data = "${z}", .sz = ${z.length}, .immutable = 1 }`;
+    return `${this.type.c()} ${this.name} = { .data = "${z}", .sz = ${z.length} }`;
   }
   s(scope) {
     return [this.name, scope, this.type.constructor.name, String(this.token)];
@@ -1291,7 +1376,14 @@ class SET extends Statement {
         throw new GenerateError(`type mismatch in SET: ${type.constructor.name} !== ${this.expression.type.constructor.name} at ${this.token}`);
       }
       const value = this.expression.v(code);
-      code.push(`${reference} = ${value};`);
+      const manage = this.context().manager(type);
+      if (manage) {
+        const copy = this.context().R();
+        code.push(`__auto_type ${copy} = ${value};`);
+        code.push(`${manage}(&${copy}, 1);`, `${manage}(&${reference}, -1);`);
+        code.push(`${reference} = ${copy};`);
+      } else
+        code.push(`${reference} = ${value};`);
     }
     return emit(code);
   }
@@ -1347,7 +1439,7 @@ class FOR extends Statement {
   c() {
     const code = [];
     const init = this.init.v(code);
-    code.push(`${this.variable.v([])} = ${init};`);
+    code.push(`${this.variable.v(code)} = ${init};`);
     const inner = [];
     const conditions = [];
     code.push("while (1)", "{");
@@ -1355,11 +1447,13 @@ class FOR extends Statement {
     if (this.condition)
       conditions.push(`${this.condition.v(inner)}`);
     if (this.to)
-      conditions.push(`${this.variable.v([])} <= ${this.to.v(inner)}`);
+      conditions.push(`${this.variable.v(inner)} <= ${this.to.v(inner)}`);
     const condition = conditions.join(" && ");
     const by = this.by ? this.by.v(inner) : "1";
-    const increment = `${this.variable.v([])} += ${by};`;
-    code.push(indent(emit(inner), 1), indent(`if (!(${condition})) break;`, 1), indent(this.segment.c(), 1), indent(increment, 1));
+    const incrementCode = [];
+    const increment = `${this.variable.v(incrementCode)} += ${by};`;
+    incrementCode.push(increment);
+    code.push(indent(emit(inner), 1), indent(`if (!(${condition})) break;`, 1), indent(this.segment.c(), 1), indent(emit(incrementCode), 1));
     this.segment.context().leave_frame(code);
     code.push("}");
     return emit(code);
@@ -1410,6 +1504,7 @@ class INPUT extends Statement {
         code.push(`{`);
         code.push(indent(`char buf[4096];`, 1));
         code.push(indent(`scanf("%4095s", buf);`, 1));
+        code.push(indent(`manage_string(&${reference}, -1);`, 1));
         code.push(indent(`${reference} = make_string(buf, strlen(buf));`, 1));
         code.push(`}`);
       } else if (type instanceof IntegerType)
@@ -1511,6 +1606,9 @@ class RETURN extends Statement {
       return "return;";
     const code = [];
     const value = this.value.v(code);
+    const manage = this.context().manager(this.value.type);
+    if (manage)
+      code.push(`${manage}(&${value}, 1);`);
     code.push(`return ${value};`);
     return emit(code);
   }
@@ -1538,6 +1636,7 @@ class FunctionCall extends Expression {
     const args = this.arguments.map((a) => a.v(code)).join(", ");
     const type = this.type.c();
     code.push(`const ${type} ${r} = ${this.name}(${args});`);
+    this.context().own(this.type, r, code);
     return r;
   }
 }
@@ -1592,21 +1691,10 @@ function string_compare(left, right, operation, code) {
   if (operation !== "==" && operation !== "!=")
     return null;
   function is_string_type(e) {
-    if (e instanceof VariableReference) {
-      const variable = find_existing_variable(e);
-      const { type, reference } = expand_variable_reference(variable, e, []);
-      return [type instanceof StringType, reference];
-    }
-    if (e.type instanceof StringType)
-      return [true, e.v(code)];
-    if (e instanceof FunctionCall) {
-      const func = e.context().functions[e.name];
-      if (!func)
-        throw new GenerateError(`unknown function '${e.name}' at ${e.token}`);
-      if (func.type instanceof StringType)
-        return [true, e.v(code)];
-    }
-    return [false, null];
+    let type = e.type;
+    while (type instanceof AliasType)
+      type = type.reference_type;
+    return type instanceof StringType ? [true, e.v(code)] : [false, null];
   }
   const [left_string, left_reference] = is_string_type(left);
   const [right_string, right_reference] = is_string_type(right);
@@ -1615,7 +1703,7 @@ function string_compare(left, right, operation, code) {
     const r = left.context().R();
     const left_sz = `${left_reference}.sz`;
     const right_sz = `${right_reference}.sz`;
-    code.push(`const int ${r} = ` + `${left_sz} == ${right_sz} ` + `&& ` + `memcmp(${left_reference}.data, ${right_reference}.data, ${left_sz}) ${cmp} 0;`);
+    code.push(`const int ${r} = ` + `${left_sz} == ${right_sz} ` + `&& ` + `(${left_sz} ? memcmp(${left_reference}.data, ${right_reference}.data, ${left_sz}) : 0) ${cmp} 0;`);
     return r;
   }
   return null;
@@ -1832,12 +1920,19 @@ function expand_variable_reference(variable, variable_reference, code) {
       const { filename } = part.token.context.text;
       const { line, character } = part.token;
       enlist_variable(new Variable(part.token, "$F", new StringType, filename), "");
-      const lo = type.lo.v(code);
-      const hi = type.hi.v(code);
-      const index = part.value.v(code);
-      code.push(`$index(${index}, ${lo}, ${hi}, &$F, ${line}, ${character});`);
+      if (type.dynamic) {
+        const index = part.value.v(code);
+        const offset = part.token.context.R();
+        code.push(`const size_t ${offset} = $array_index(${reference}.data, ${index}, &$F, ${line}, ${character});`);
+        reference += `.data[${offset}]`;
+      } else {
+        const lo = type.lo.v(code);
+        const hi = type.hi.v(code);
+        const index = part.value.v(code);
+        code.push(`$index(${index}, ${lo}, ${hi}, &$F, ${line}, ${character});`);
+        reference += `.data[(size_t)((int64_t)(${index}) - (${lo}))]`;
+      }
       type = type.type;
-      reference += `.data[(${index}) - (${lo})]`;
     } else if (part instanceof VariableField) {
       if (type instanceof AliasType)
         type = type.reference_type;
@@ -2295,9 +2390,9 @@ class Parser {
       this.i = position;
       if (!tokens_ahead.includes(":="))
         break;
-      const variable2 = this.variable_reference();
+      const variable = this.variable_reference();
       this.eat(":=");
-      targets.push(variable2);
+      targets.push(variable);
     }
     const expression = this.expression();
     this.eat(";");
@@ -2309,14 +2404,14 @@ class Parser {
     const parts = [];
     while (true) {
       if (this.accept(".")) {
-        const token2 = this.eat("IDENT");
-        parts.push(new VariableField(token2, token2.value));
+        const token = this.eat("IDENT");
+        parts.push(new VariableField(token, token.value));
         continue;
       }
       if (this.accept("[")) {
-        const token2 = this.current();
+        const token = this.current();
         const expression = this.expression();
-        parts.push(new VariableSubscript(token2, expression));
+        parts.push(new VariableSubscript(token, expression));
         this.eat("]");
         continue;
       }
@@ -2357,11 +2452,11 @@ class Parser {
     const token = this.current();
     let left = this.expression_NOT();
     while (true) {
-      const token2 = this.accept("&");
-      if (!token2)
+      const token = this.accept("&");
+      if (!token)
         break;
       const right = this.expression_NOT();
-      left = new BinaryOperation(token2, this.scope(), new BooleanType, left.type, right.type, token2.value, left, right);
+      left = new BinaryOperation(token, this.scope(), new BooleanType, left.type, right.type, token.value, left, right);
     }
     return left;
   }
@@ -2375,11 +2470,11 @@ class Parser {
     const token = this.current();
     let left = this.expression_CONCATENATION();
     while (true) {
-      const token2 = this.accept(["<", ">", "=", "<=", ">=", "<>"]);
-      if (!token2)
+      const token = this.accept(["<", ">", "=", "<=", ">=", "<>"]);
+      if (!token)
         break;
       const right = this.expression_CONCATENATION();
-      left = new BinaryOperation(token2, this.scope(), new BooleanType, left.type, right.type, token2.value, left, right);
+      left = new BinaryOperation(token, this.scope(), new BooleanType, left.type, right.type, token.value, left, right);
     }
     return left;
   }
@@ -2409,11 +2504,11 @@ class Parser {
     const token = this.current();
     let left = this.expression_FUNCTION_CALL();
     while (true) {
-      const token2 = this.accept(["*", "/", "MOD"]);
-      if (!token2)
+      const token = this.accept(["*", "/", "MOD"]);
+      if (!token)
         break;
       const right = this.expression_FUNCTION_CALL();
-      left = new BinaryOperation(token2, this.scope(), left.type, left.type, right.type, token2.value, left, right);
+      left = new BinaryOperation(token, this.scope(), left.type, left.type, right.type, token.value, left, right);
     }
     return left;
   }
@@ -2435,24 +2530,24 @@ class Parser {
   factor() {
     const token = this.current();
     if (token.type === "INTEGER") {
-      const token2 = this.eat("INTEGER");
-      return new IntegerLiteral(token2, this.scope(), parseInt(token2.value, 10));
+      const token = this.eat("INTEGER");
+      return new IntegerLiteral(token, this.scope(), parseInt(token.value, 10));
     }
     if (token.type === "REAL") {
-      const token2 = this.eat("REAL");
-      return new RealLiteral(token2, this.scope(), token2.value);
+      const token = this.eat("REAL");
+      return new RealLiteral(token, this.scope(), token.value);
     }
     if (token.type === "STRING") {
-      const token2 = this.eat("STRING");
+      const token = this.eat("STRING");
       const context = this.context;
-      const existing = Object.values(context.variables).find((v) => v.isConst() && v.zero === token2.value);
+      const existing = Object.values(context.variables).find((v) => v.isConst() && v.zero === token.value);
       if (existing)
-        return new VariableReference(token2, "", existing.name, [], existing.type);
+        return new VariableReference(token, "", existing.name, [], existing.type);
       const const_i = Object.values(context.variables).filter((v) => v.isConst()).length;
       const name = `$${const_i}`;
-      const variable = new Variable(token2, name, new StringType, token2.value);
+      const variable = new Variable(token, name, new StringType, token.value);
       enlist_variable(variable, "");
-      return new VariableReference(token2, "", name, [], variable.type);
+      return new VariableReference(token, "", name, [], variable.type);
     }
     if (token.value === "+" || token.value === "-") {
       const unaryToken = this.eat(token.value);
@@ -2487,6 +2582,7 @@ class ConcatenationOperation extends Expression {
     const fmt = [];
     const args = this.parts.map((x) => expression_stringer(x, fmt, "||", code)).join(", ");
     code.push(`const STR ${r} = $concat("${fmt.join("")}", ${args});`);
+    this.context().own(this.type, r, code);
     return r;
   }
 }
@@ -2563,6 +2659,7 @@ function compileToC(source, filename = "source.easy") {
   for (const [name, definition] of Object.entries(context.types))
     output.push(definition.typedef(name) + `;
 `);
+  const helperIndex = output.length;
   if (context.common.length)
     output.push(emit(context.common) + `
 `);
@@ -2579,6 +2676,10 @@ function compileToC(source, filename = "source.easy") {
   for (const v of Object.values(context.procedures))
     output.push(v.c() + `
 `);
+  if (context.managerDefinitions.length)
+    output.splice(helperIndex, 0, context.managerDefinitions.join(`
+`) + `
+`);
   output.push(compiledText + `
 `);
   return output.join("");
@@ -2586,7 +2687,7 @@ function compileToC(source, filename = "source.easy") {
 if (false) {}
 
 // docs/build-info.ts
-var BUILD_TIME = "2026-04-24 12:15:17";
+var BUILD_TIME = "2026-11-27 07:32:30";
 
 // runtime.c
 var runtime_default = `#if defined(__linux__)
@@ -2598,15 +2699,52 @@ var runtime_default = `#if defined(__linux__)
 #include <stdarg.h>
 #include <alloca.h>
 #include <time.h>
+#include <stddef.h>
+#include <stdint.h>
+#include <assert.h>
 
 void exit(int status);
-void *malloc(size_t size);
+void *calloc(size_t count, size_t size);
 void free(void *ptr);
 
 #define TRUE 1
 #define FALSE 0
 
-#define AUTOFREE_ARRAY __attribute__((cleanup(free_array)))
+typedef void (*Manage)(const void *, int);
+
+typedef struct Guard {
+    struct Guard *previous;
+    const void *value;
+    Manage manage;
+} Guard;
+
+static Guard *guards;
+static size_t live_strings;
+static size_t live_arrays;
+
+static inline void guard_init(Guard *guard, const void *value, Manage manage)
+{
+    *guard = (Guard){guards, value, manage};
+    guards = guard;
+}
+
+static inline void guard_cleanup(Guard *guard)
+{
+    assert(guards == guard);
+    guards = guard->previous;
+    guard->manage(guard->value, -1);
+}
+
+#define OWN(value, manage, name) \\
+    Guard name __attribute__((cleanup(guard_cleanup))); \\
+    guard_init(&name, &(value), manage)
+
+static void *allocate(size_t size)
+{
+    void *p = calloc(1, size);
+    if (!p) { fprintf(stderr, "out of memory\\n"); exit(1); }
+    return p;
+}
 
 static inline void $sleep(double seconds)
 {
@@ -2620,12 +2758,29 @@ static inline void $sleep(double seconds)
     nanosleep(&ts, NULL);
 }
 
+typedef struct {
+    size_t refs;
+    char bytes[];
+} StringStorage;
+
 typedef struct
 {
     int sz;
-    int immutable;
-    char *data;
+    const char *data;
+    StringStorage *owner;
 } STR;
+
+static inline void manage_string(const void *value, int change)
+{
+    STR s;
+    memcpy(&s, value, sizeof(s));
+    if (!s.owner) return;
+    if (change > 0) ++s.owner->refs;
+    else if (--s.owner->refs == 0) {
+        --live_strings;
+        free(s.owner);
+    }
+}
 
 typedef struct
 {
@@ -2634,85 +2789,75 @@ typedef struct
     int character;
 } L;
 
-typedef struct string_list
-{
-    struct string_list *next;
-    STR *str;
-} string_list;
-
-static string_list *strings = NULL;
-
-void print_string(STR s, const char *prefix)
-{
-    char *buf = alloca(s.sz + 1);
-    memcpy(buf, s.data, s.sz);
-    buf[s.sz] = '\\0';
-    printf("%s: '%s'\\n", prefix, buf);
-}
-
 STR make_string(const char *data, int sz)
 {
-    void *ptr = malloc(sz);
-    if (!ptr)
-    {
-        fprintf(stderr, "make_string|data: out of memory\\n");
-        exit(1);
-    }
-    STR *str = malloc(sizeof(STR));
-    if (!str)
-    {
-        fprintf(stderr, "make_string|str: out of memory\\n");
-        exit(1);
-    }
-    *str = (STR){.sz = sz, .data = ptr, .immutable = 0};
-    memcpy(str->data, data, sz);
-
-    string_list *reference = malloc(sizeof(string_list));
-    if (!reference)
-    {
-        fprintf(stderr, "make_string|list: out of memory\\n");
-        exit(1);
-    }
-    reference->str = str;
-    reference->next = strings;
-    strings = reference;
-    return *str;
+    if (sz == 0) return (STR){0};
+    assert(sz > 0);
+    StringStorage *owner = allocate(sizeof(*owner) + (size_t)sz);
+    owner->refs = 1;
+    memcpy(owner->bytes, data, (size_t)sz);
+    ++live_strings;
+    return (STR){.sz = sz, .data = owner->bytes, .owner = owner};
 }
 
-void free_strings()
+// Dynamic arrays retain their shared backing allocation. The header records
+// the element count independently of the variables used in the Easy bounds.
+typedef struct {
+    size_t refs, count, element_size;
+    int lo, hi;
+    Manage element;
+    max_align_t alignment;
+    unsigned char data[];
+} ArrayStorage;
+
+// Calculate in a widened type before converting to size_t. In particular,
+// [0:INT_MAX] has INT_MAX + 1 elements, which does not fit in an int.
+static inline size_t array_allocation_size(int lo, int hi, size_t element_size, size_t *count)
 {
-    string_list *list = strings;
-    while (list)
-    {
-        string_list *next = list->next;
-        if (list->str->data && !list->str->immutable)
-        {
-            memset(list->str->data, 0, list->str->sz);
-            free(list->str->data);
-            list->str->data = NULL;
-
-            memset(list->str, 0, sizeof(STR));
-            free(list->str);
-            list->str = NULL;
-        }
-        free(list);
-        list = next;
+    if (hi < lo) {
+        fprintf(stderr, "invalid array bounds: %d..%d\\n", lo, hi); exit(1);
     }
-    strings = NULL;
+    uint64_t length = (uint64_t)((int64_t)hi - (int64_t)lo) + 1;
+    if (!element_size || length > (SIZE_MAX - sizeof(ArrayStorage)) / element_size) {
+        fprintf(stderr, "array allocation too large\\n"); exit(1);
+    }
+    *count = (size_t)length;
+    return sizeof(ArrayStorage) + *count * element_size;
 }
 
-typedef struct
+static inline ArrayStorage *array_storage(const void *data)
+{
+    return (ArrayStorage *)((char *)data - offsetof(ArrayStorage, data));
+}
+
+static inline void *make_array(int lo, int hi, size_t element_size, Manage element)
+{
+    size_t count;
+    size_t bytes = array_allocation_size(lo, hi, element_size, &count);
+    ArrayStorage *owner = allocate(bytes);
+    owner->refs = 1;
+    owner->count = count;
+    owner->lo = lo;
+    owner->hi = hi;
+    owner->element_size = element_size;
+    owner->element = element;
+    ++live_arrays;
+    return owner->data;
+}
+
+static inline void manage_array(const void *value, int change)
 {
     void *data;
-} ARRAY;
-
-void free_array(void *ptr)
-{
-    ARRAY *array = (ARRAY *)ptr;
-    if (array->data)
-    {
-        free(array->data);
-        array->data = NULL;
+    memcpy(&data, value, sizeof(data));
+    if (!data) return;
+    ArrayStorage *owner = array_storage(data);
+    if (change > 0) ++owner->refs;
+    else if (--owner->refs == 0) {
+        if (owner->element)
+            for (size_t i = 0; i < owner->count; ++i)
+                owner->element(owner->data + i * owner->element_size, -1);
+        --live_arrays;
+        free(owner);
     }
 }
 
@@ -2760,6 +2905,7 @@ STR SUBSTR(STR from, int start, int length)
         fprintf(stderr, "substr (%s): start + length > size (%d + %d = %d > %d)\\n", buf, start, length, start + length, from.sz);
         exit(1);
     }
+    if (length == 0) return (STR){0};
     STR v = make_string(from.data + start, length);
     return v;
 }
@@ -2793,13 +2939,13 @@ STR $concat(const char *fmt, ...)
         {
             const STR *arg = va_arg(args, STR *);
             n = (int)sizeof(buf) - sz < arg->sz ? (int)sizeof(buf) - sz : arg->sz;
-            memcpy(buf + sz, arg->data, n);
+            if (n) memcpy(buf + sz, arg->data, n);
         }
         else if (*fmt == 'A')
         {
             const STR arg = va_arg(args, STR);
             n = (int)sizeof(buf) - sz < arg.sz ? (int)sizeof(buf) - sz : arg.sz;
-            memcpy(buf + sz, arg.data, n);
+            if (n) memcpy(buf + sz, arg.data, n);
         }
         sz += n;
     }
@@ -2843,7 +2989,7 @@ void $output(const char *fmt, ...)
             if (!zero)
             {
                 char *const buf = alloca(n + 1);
-                memcpy(buf, arg->data, n);
+                if (n) memcpy(buf, arg->data, n);
                 buf[n] = '\\0';
                 n = printf("%s", buf);
             }
@@ -2858,7 +3004,7 @@ void $output(const char *fmt, ...)
             if (!zero)
             {
                 char *const buf = alloca(n + 1);
-                memcpy(buf, arg.data, n);
+                if (n) memcpy(buf, arg.data, n);
                 buf[n] = '\\0';
                 n = printf("%s", buf);
             }
@@ -2884,11 +3030,26 @@ void $index(int index, int lo, int hi, const STR *filename, int line, int charac
     }
 }
 
+static inline size_t $array_index(const void *data, int index, const STR *filename, int line, int character)
+{
+    if (!data) {
+        fprintf(stderr, "uninitialized array (%s:%d:%d)\\n", filename->data, line, character);
+        exit(1);
+    }
+    const ArrayStorage *owner = array_storage(data);
+    $index(index, owner->lo, owner->hi, filename, line, character);
+    return (size_t)((int64_t)index - (int64_t)owner->lo);
+}
+
 int main_program();
 
 void $exit()
 {
-    free_strings();
+    while (guards) guard_cleanup(guards);
+#ifdef EASY_CHECK_OWNERSHIP
+    assert(live_strings == 0);
+    assert(live_arrays == 0);
+#endif
     exit(0);
 }
 
@@ -2905,13 +3066,167 @@ int main()
 #pragma clang diagnostic ignored "-Wconstant-logical-operand"
 `;
 
+// docs/run.ts
+class CompileFailure extends Error {
+}
+var compiler;
+var cached;
+function abortError(signal) {
+  return signal.reason ?? new DOMException("aborted", "AbortError");
+}
+function compileToWasm(c, onStatus, signal) {
+  if (cached?.c === c)
+    return Promise.resolve(cached.wasm);
+  signal.throwIfAborted();
+  const worker = compiler ??= new Worker("compile-worker.js", { type: "module" });
+  return new Promise((resolve, reject) => {
+    function finish(reset) {
+      signal.removeEventListener("abort", abort);
+      worker.onmessage = null;
+      worker.onerror = null;
+      if (reset) {
+        worker.terminate();
+        compiler = undefined;
+      }
+    }
+    function abort() {
+      finish(true);
+      reject(abortError(signal));
+    }
+    signal.addEventListener("abort", abort, { once: true });
+    worker.onerror = (e) => {
+      finish(true);
+      reject(new Error(`C compiler worker failed: ${e.message || "could not start"}`));
+    };
+    worker.onmessage = ({ data }) => {
+      if (data.type === "status")
+        return onStatus(data.text);
+      finish(false);
+      if (data.type === "error")
+        return reject(new CompileFailure(data.text));
+      cached = { c, wasm: data.wasm };
+      resolve(data.wasm);
+    };
+    worker.postMessage({ c });
+  });
+}
+function runWasm(wasm, stdin, onOutput, signal) {
+  signal.throwIfAborted();
+  const worker = new Worker("run-worker.js", { type: "module" });
+  return new Promise((resolve, reject) => {
+    function finish() {
+      signal.removeEventListener("abort", abort);
+      worker.terminate();
+    }
+    function abort() {
+      finish();
+      reject(abortError(signal));
+    }
+    signal.addEventListener("abort", abort, { once: true });
+    worker.onerror = (e) => {
+      finish();
+      reject(new Error(`run worker failed: ${e.message || "could not start"}`));
+    };
+    worker.onmessage = ({ data }) => {
+      if (data.type === "output") {
+        for (const [stream, text] of data.chunks)
+          onOutput(stream, text);
+        return;
+      }
+      finish();
+      if (data.type === "exit")
+        resolve(data.status);
+      else
+        reject(new Error(data.text));
+    };
+    worker.postMessage({ wasm, stdin });
+  });
+}
+
+// docs/highlight-easy.ts
+var TYPES = new Set(["INTEGER", "REAL", "BOOLEAN", "STRING"]);
+var CONSTANTS = new Set(["TRUE", "FALSE"]);
+var BUILTINS = new Set(["LENGTH", "CHARACTER", "SUBSTR", "FIX", "FLOAT"]);
+function escHtml(s) {
+  return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
+var span = (cls, text) => `<span class="${cls}">${escHtml(text)}</span>`;
+function blockCommentEnd(text, i) {
+  let depth = 0;
+  while (i < text.length) {
+    if (text.startsWith("/*", i)) {
+      depth++;
+      i += 2;
+    } else if (text.startsWith("*/", i)) {
+      i += 2;
+      if (--depth === 0)
+        return i;
+    } else
+      i++;
+  }
+  return text.length;
+}
+function stringEnd(text, i) {
+  i++;
+  while (i < text.length) {
+    if (text[i] === '"') {
+      if (text[i + 1] === '"')
+        i += 2;
+      else
+        return i + 1;
+    } else
+      i++;
+  }
+  return text.length;
+}
+var NUMBER = /\d+(?:[.eE][\d+\-eE]*)?/y;
+var WORD = /[A-Za-z_][A-Za-z0-9_]*/y;
+function matchAt(re, text, i) {
+  re.lastIndex = i;
+  return re.exec(text)[0];
+}
+function highlightEasy(text) {
+  let out = "";
+  let plain = 0;
+  let i = 0;
+  const emit = (end, cls) => {
+    out += escHtml(text.slice(plain, i)) + span(cls, text.slice(i, end));
+    i = plain = end;
+  };
+  while (i < text.length) {
+    const c = text[i];
+    if (c === "/" && text[i + 1] === "*")
+      emit(blockCommentEnd(text, i), "hl-c");
+    else if (c === "/" && text[i + 1] === "/") {
+      const nl = text.indexOf(`
+`, i);
+      emit(nl === -1 ? text.length : nl, "hl-c");
+    } else if (c === '"')
+      emit(stringEnd(text, i), "hl-s");
+    else if (/\d/.test(c)) {
+      emit(i + matchAt(NUMBER, text, i).length, "hl-n");
+    } else if (/[A-Za-z_]/.test(c)) {
+      const word = matchAt(WORD, text, i);
+      const cls = TYPES.has(word) ? "hl-t" : CONSTANTS.has(word) ? "hl-n" : KEYWORDS.has(word) ? "hl-k" : BUILTINS.has(word) ? "hl-p" : "";
+      if (cls)
+        emit(i + word.length, cls);
+      else
+        i += word.length;
+    } else
+      i++;
+  }
+  out += escHtml(text.slice(plain));
+  return out;
+}
+
 // docs/playground.ts
 var fetchExample = (f) => fetch(`examples/${f}`).then((r) => r.text());
 var EXAMPLES = (window.easyExamples ?? []).map((e) => {
   const ex = {
     name: e.name,
     filename: e.filename,
-    source: fetchExample(e.filename)
+    source: fetchExample(e.filename),
+    input: e.input ? fetchExample(e.input).catch(() => "") : Promise.resolve("")
   };
   ex.source.then((s) => {
     ex.resolvedSource = s;
@@ -2968,14 +3283,19 @@ var sourceModalContent = document.getElementById("source-modal-content");
 var sourceModalClose = document.getElementById("source-modal-close");
 var filenameInput = document.getElementById("filename");
 var tabsEl = document.getElementById("tabs");
+var sourceHighlight = document.getElementById("source-highlight");
+var runButton = document.getElementById("run");
+var stdinInput = document.getElementById("stdin");
+var runOutput = document.getElementById("run-output");
+var runTitle = document.getElementById("run-title");
 function easyName() {
   return filenameInput.value.trim() || DEFAULT_FILENAME;
 }
 function stem(name) {
   return name.replace(/\.[^.]*$/, "") || name;
 }
-function outputName(format2) {
-  return `${stem(easyName())}.${format2}`;
+function outputName(format) {
+  return `${stem(easyName())}.${format}`;
 }
 for (const ex of EXAMPLES) {
   const opt = document.createElement("option");
@@ -2987,12 +3307,13 @@ select.addEventListener("change", async () => {
   const ex = EXAMPLES.find((e) => e.name === select.value);
   if (!ex)
     return;
-  const exSource = await ex.source;
+  const [exSource, exInput] = await Promise.all([ex.source, ex.input]);
   tabs[active].source = source.value;
   const uniqueName = uniqueFilename(ex.filename);
-  tabs.push({ filename: uniqueName, source: exSource });
+  tabs.push({ filename: uniqueName, source: exSource, input: exInput });
   active = tabs.length - 1;
   source.value = exSource;
+  showTabRun();
   filenameInput.value = uniqueName;
   lastGoodName = uniqueName;
   source.scrollTop = 0;
@@ -3023,8 +3344,8 @@ function askConfirm(message) {
   confirmMessage.textContent = message;
   confirmModal.hidden = false;
   confirmOk.focus();
-  return new Promise((resolve2) => {
-    confirmResolver = resolve2;
+  return new Promise((resolve) => {
+    confirmResolver = resolve;
   });
 }
 function closeConfirm(result) {
@@ -3049,6 +3370,10 @@ window.addEventListener("keydown", (e) => {
   }
   if (e.key === "Escape" && !sourceModal.hidden)
     closeSourceModal();
+  if (e.key === "Enter" && (e.ctrlKey || e.metaKey) && confirmModal.hidden) {
+    e.preventDefault();
+    runButton.click();
+  }
 });
 function closeSourceModal() {
   sourceModal.hidden = true;
@@ -3086,7 +3411,18 @@ function formatCompileError(e) {
   }
   return e.message ?? String(e);
 }
+function renderSourceHighlight() {
+  sourceHighlight.innerHTML = highlightEasy(source.value) + `
+`;
+  syncSourceScroll();
+}
+function syncSourceScroll() {
+  sourceHighlight.scrollTop = source.scrollTop;
+  sourceHighlight.scrollLeft = source.scrollLeft;
+}
+source.addEventListener("scroll", syncSourceScroll);
 function runPipeline() {
+  renderSourceHighlight();
   const src = source.value;
   const file = easyName();
   let cText;
@@ -3098,6 +3434,7 @@ function runPipeline() {
     cTitle.textContent = "output.c";
     setError(formatCompileError(e));
     updateDownloadEnabled();
+    updateRunEnabled();
     return;
   }
   clearError();
@@ -3106,6 +3443,7 @@ function runPipeline() {
   const lines = cText.split(/\r?\n/).length;
   cTitle.textContent = `${stem(file)}.c — ${cText.length} B, ${lines} lines`;
   updateDownloadEnabled();
+  updateRunEnabled();
 }
 var C_KEYWORDS = new Set([
   "int",
@@ -3162,7 +3500,7 @@ var C_TYPES = new Set([
   "time_t"
 ]);
 var C_TOKEN = /(\/\/[^\n]*)|(\/\*[\s\S]*?\*\/)|("(?:\\.|[^"\\])*")|('(?:\\.|[^'\\])*')|(^[ \t]*#[^\n]*)|(\b0x[0-9a-fA-F]+\b|\b\d+(?:\.\d+)?\b)|([A-Za-z_$][A-Za-z0-9_$]*)/gm;
-function escHtml(s) {
+function escHtml2(s) {
   return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }
 function highlightC(text) {
@@ -3172,33 +3510,143 @@ function highlightC(text) {
   let m;
   while (m = C_TOKEN.exec(text)) {
     if (m.index > last)
-      out += escHtml(text.slice(last, m.index));
+      out += escHtml2(text.slice(last, m.index));
     const full = m[0];
     if (m[1] || m[2])
-      out += `<span class="hl-c">${escHtml(full)}</span>`;
+      out += `<span class="hl-c">${escHtml2(full)}</span>`;
     else if (m[3] || m[4])
-      out += `<span class="hl-s">${escHtml(full)}</span>`;
+      out += `<span class="hl-s">${escHtml2(full)}</span>`;
     else if (m[5]) {
       if (/^\s*#\s*include\s+"runtime\.c"/.test(full)) {
-        out += `<span class="hl-p hl-include" data-runtime-link="1" title="click to view runtime.c">${escHtml(full)}</span>`;
+        out += `<span class="hl-p hl-include" data-runtime-link="1" title="click to view runtime.c">${escHtml2(full)}</span>`;
       } else {
-        out += `<span class="hl-p">${escHtml(full)}</span>`;
+        out += `<span class="hl-p">${escHtml2(full)}</span>`;
       }
     } else if (m[6])
-      out += `<span class="hl-n">${escHtml(full)}</span>`;
+      out += `<span class="hl-n">${escHtml2(full)}</span>`;
     else if (m[7]) {
       if (C_KEYWORDS.has(full))
-        out += `<span class="hl-k">${escHtml(full)}</span>`;
+        out += `<span class="hl-k">${escHtml2(full)}</span>`;
       else if (C_TYPES.has(full))
-        out += `<span class="hl-t">${escHtml(full)}</span>`;
+        out += `<span class="hl-t">${escHtml2(full)}</span>`;
       else
-        out += escHtml(full);
+        out += escHtml2(full);
     }
     last = m.index + full.length;
   }
-  out += escHtml(text.slice(last));
+  out += escHtml2(text.slice(last));
   return out;
 }
+var RUN_HINT = "press run (Ctrl/⌘+Enter) to compile and execute in the browser";
+var running = null;
+function setRunTitle(text, state = "") {
+  runTitle.textContent = text;
+  runTitle.className = "pane-title" + (state ? ` ${state}` : "");
+}
+function updateRunEnabled() {
+  runButton.disabled = !running && lastC === null;
+}
+function setRunning(on) {
+  runButton.textContent = on ? "stop" : "run";
+  runButton.classList.toggle("running", on);
+  updateRunEnabled();
+}
+var pendingOutput = [];
+var outputFrame = 0;
+function appendOutput(kind, text) {
+  pendingOutput.push([kind, text]);
+  outputFrame ||= requestAnimationFrame(flushOutput);
+}
+function flushOutput() {
+  outputFrame = 0;
+  const follow = runOutput.scrollHeight - runOutput.scrollTop - runOutput.clientHeight < 24;
+  const fragment = document.createDocumentFragment();
+  for (const [kind, text] of pendingOutput) {
+    if (kind === "stdout") {
+      fragment.append(text);
+    } else {
+      const span = document.createElement("span");
+      span.className = kind;
+      span.textContent = text;
+      fragment.append(span);
+    }
+  }
+  pendingOutput = [];
+  runOutput.append(fragment);
+  if (follow)
+    runOutput.scrollTop = runOutput.scrollHeight;
+}
+function clearOutput() {
+  pendingOutput = [];
+  if (outputFrame)
+    cancelAnimationFrame(outputFrame);
+  outputFrame = 0;
+  runOutput.textContent = "";
+}
+function noteOnNewLine(text) {
+  flushOutput();
+  const pre = runOutput.textContent ?? "";
+  appendOutput("note", (pre && !pre.endsWith(`
+`) ? `
+` : "") + text);
+}
+function showTabRun() {
+  const previous = running;
+  running = null;
+  previous?.abort();
+  setRunning(false);
+  stdinInput.value = tabs[active]?.input ?? "";
+  clearOutput();
+  setRunTitle("output");
+  appendOutput("note", RUN_HINT);
+}
+stdinInput.addEventListener("input", () => {
+  tabs[active].input = stdinInput.value;
+  saveTabs();
+});
+async function run() {
+  if (running) {
+    running.abort();
+    return;
+  }
+  if (lastC === null)
+    return;
+  const controller = new AbortController;
+  const { signal } = controller;
+  running = controller;
+  setRunning(true);
+  clearOutput();
+  const c = lastC;
+  const stdin = stdinInput.value;
+  try {
+    const wasm = await compileToWasm(c, (text) => setRunTitle(`output — ${text}`, "running"), signal);
+    setRunTitle("output — running…", "running");
+    const start = performance.now();
+    const status = await runWasm(wasm, stdin, appendOutput, signal);
+    const seconds = ((performance.now() - start) / 1000).toFixed(2);
+    setRunTitle(`output — exit ${status} · ${seconds} s`, status === 0 ? "" : "failed");
+  } catch (e) {
+    if (signal.aborted) {
+      if (running === controller) {
+        setRunTitle("output — stopped", "failed");
+        noteOnNewLine("stopped");
+      }
+    } else if (e instanceof CompileFailure) {
+      setRunTitle("output — C compilation failed", "failed");
+      appendOutput("stderr", e.message);
+    } else {
+      setRunTitle("output — failed", "failed");
+      noteOnNewLine("");
+      appendOutput("stderr", e.message ?? String(e));
+    }
+  } finally {
+    if (running === controller) {
+      running = null;
+      setRunning(false);
+    }
+  }
+}
+runButton.addEventListener("click", () => void run());
 function saveTabs() {
   try {
     localStorage.setItem(TABS_KEY, JSON.stringify(tabs));
@@ -3253,6 +3701,7 @@ function switchTab(i) {
   tabs[active].source = source.value;
   active = i;
   source.value = tabs[active].source;
+  showTabRun();
   filenameInput.value = tabs[active].filename;
   lastGoodName = tabs[active].filename;
   source.scrollTop = 0;
@@ -3264,9 +3713,10 @@ function switchTab(i) {
 }
 function newTab() {
   tabs[active].source = source.value;
-  tabs.push({ filename: nextUntitled(), source: "" });
+  tabs.push({ filename: nextUntitled(), source: "", input: "" });
   active = tabs.length - 1;
   source.value = "";
+  showTabRun();
   filenameInput.value = tabs[active].filename;
   lastGoodName = tabs[active].filename;
   source.scrollTop = 0;
@@ -3288,7 +3738,7 @@ async function closeTab(i) {
       return;
   }
   if (tabs.length === 1) {
-    tabs[0] = { filename: DEFAULT_FILENAME, source: "" };
+    tabs[0] = { filename: DEFAULT_FILENAME, source: "", input: "" };
     active = 0;
     source.value = "";
     filenameInput.value = tabs[0].filename;
@@ -3303,6 +3753,7 @@ async function closeTab(i) {
     filenameInput.value = tabs[active].filename;
     lastGoodName = tabs[active].filename;
   }
+  showTabRun();
   saveTabs();
   renderTabs();
   deselectExample();
@@ -3399,10 +3850,11 @@ resetBtn.addEventListener("click", async () => {
   const def = EXAMPLES.find((e) => e.name === DEFAULT_EXAMPLE) ?? EXAMPLES[0];
   if (!def)
     return;
-  const defSource = await def.source;
+  const [defSource, defInput] = await Promise.all([def.source, def.input]);
   const uniqueName = uniqueFilename(def.filename);
-  tabs[active] = { filename: uniqueName, source: defSource };
+  tabs[active] = { filename: uniqueName, source: defSource, input: defInput };
   source.value = defSource;
+  showTabRun();
   filenameInput.value = uniqueName;
   lastGoodName = uniqueName;
   select.value = def.name;
@@ -3418,9 +3870,10 @@ fileInput.addEventListener("change", async () => {
     return;
   const text = await f.text();
   const uniqueName = uniqueFilename(f.name);
-  tabs.push({ filename: uniqueName, source: text });
+  tabs.push({ filename: uniqueName, source: text, input: "" });
   active = tabs.length - 1;
   source.value = text;
+  showTabRun();
   filenameInput.value = uniqueName;
   lastGoodName = uniqueName;
   source.scrollTop = 0;
@@ -3447,7 +3900,8 @@ async function loadTabsFromStorage() {
       if (Array.isArray(parsed) && parsed.length > 0) {
         tabs = parsed.map((t) => ({
           filename: String(t.filename ?? DEFAULT_FILENAME),
-          source: String(t.source ?? "")
+          source: String(t.source ?? ""),
+          input: String(t.input ?? "")
         }));
         const a = Number(localStorage.getItem(ACTIVE_KEY) ?? 0) | 0;
         active = a < 0 || a >= tabs.length ? 0 : a;
@@ -3457,14 +3911,16 @@ async function loadTabsFromStorage() {
   } catch {}
   const def = EXAMPLES.find((e) => e.name === DEFAULT_EXAMPLE) ?? EXAMPLES[0];
   const src = await def?.source ?? "";
+  const input = await def?.input ?? "";
   const name = def?.filename ?? DEFAULT_FILENAME;
-  tabs = [{ filename: name, source: src }];
+  tabs = [{ filename: name, source: src, input }];
   active = 0;
   saveTabs();
 }
 (async () => {
   await loadTabsFromStorage();
   source.value = tabs[active].source;
+  showTabRun();
   filenameInput.value = tabs[active].filename;
   lastGoodName = tabs[active].filename;
   renderTabs();

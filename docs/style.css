@@ -163,6 +163,23 @@ header h1 .sub {
 .toolbar button.danger:hover:not(:disabled) { background: var(--danger-hover); }
 .toolbar button:disabled { opacity: 0.4; cursor: not-allowed; }
 
+.toolbar button.primary {
+  background: var(--primary-bg);
+  border-color: var(--primary-border);
+  color: var(--primary-fg);
+  min-width: 6ch;
+}
+
+.toolbar button.primary:hover:not(:disabled) { background: var(--primary-hover); }
+
+.toolbar button.primary.running {
+  background: var(--btn-bg);
+  border-color: var(--danger-border);
+  color: var(--danger-fg);
+}
+
+.toolbar button.primary.running:hover { background: var(--danger-hover); }
+
 .icon-btn {
   padding: 4px 6px;
   display: inline-flex;
@@ -276,7 +293,18 @@ main {
   overflow: hidden;
 }
 
-.pane-source { border-right: 1px solid var(--border); }
+.pane-source,
+.pane-input { border-right: 1px solid var(--border); }
+
+.panes-run {
+  flex: 0 0 32%;
+  border-top: 1px solid var(--border);
+}
+
+.pane-hint { opacity: 0.7; }
+
+.pane-title.running { color: var(--label); }
+.pane-title.failed { color: var(--err-fg); }
 
 .pane-title {
   flex: 0 0 auto;
@@ -289,7 +317,10 @@ main {
 }
 
 #source,
-#c-output {
+#source-highlight,
+#c-output,
+#stdin,
+#run-output {
   flex: 1;
   min-height: 0;
   padding: 8px 12px;
@@ -305,15 +336,48 @@ main {
   color: var(--fg);
 }
 
+/* The source editor is a transparent textarea over a <pre> that draws
+   the colours; both must share font, padding and wrapping exactly. */
+.editor {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+}
+
+.editor #source,
+.editor #source-highlight {
+  position: absolute;
+  inset: 0;
+}
+
+#source-highlight {
+  overflow: hidden;
+  pointer-events: none;
+}
+
 #source {
+  color: transparent;
+}
+
+#source::selection { color: transparent; }
+
+/* Italics could shift glyphs against the caret; keep the overlay upright. */
+#source-highlight .hl-c { font-style: normal; }
+
+#source,
+#stdin {
   resize: none;
   outline: none;
   caret-color: var(--fg);
 }
 
-#c-output {
+#c-output,
+#run-output {
   user-select: text;
 }
+
+#run-output .stderr { color: var(--err-fg); }
+#run-output .note { color: var(--muted); font-style: italic; }
 
 .hl-k { color: var(--hl-kw); }
 .hl-t { color: var(--hl-type); }

@@ -121,6 +121,30 @@ Currently, the compiler test pipeline runs either locally by `just test-compiler
 
 NOTE: Running tests in the Linux container helps because the Clang memory sanitiser is more capable in Linux, rather than on macOS.
 
+`just test-wasm` runs the same golden tests through the web playground's toolchain instead: in-WebAssembly Clang and the browser's WASI shim (needs `bun install` first). It catches differences between native and WebAssembly builds.
+
+## Web playground
+
+The playground at [demin.ws/easy](http://demin.ws/easy/) compiles and runs Easy programs entirely in the browser. The page is the static `docs/` folder, served by GitHub Pages.
+
+```mermaid
+flowchart LR
+    A["Easy source"] --> B["easyc.ts (compileToC)"]
+    B --> C["C + runtime.c"]
+    C --> D["YoWASP Clang/LLD (compile worker)"]
+    D --> E["program.wasm"]
+    E --> F["WASI run worker"]
+    F --> G["output pane"]
+```
+
+1. The editor colours Easy source as you type (`docs/highlight-easy.ts`, using the compiler's own keyword list). The C pane updates on every keystroke.
+2. **run** (or Ctrl/⌘+Enter) sends the generated C to a worker. On the first run the worker downloads the [YoWASP](https://yowasp.org/) build of Clang/LLD, about 100 MB, from jsDelivr (`docs/toolchain.ts` pins the version and the flags). After that the browser cache serves it. Compiling takes about 0.1–0.5 s.
+3. A fresh worker runs `program.wasm` with a minimal WASI shim. It gets standard input from the **input** pane and streams stdout and stderr to the **output** pane. There is no filesystem or network access. **stop** terminates the worker.
+
+Limits: programs can grow to the 4 GiB WebAssembly maximum (browsers, especially iOS Safari, may refuse earlier), get an 8 MiB stack like a native build, and are stopped after 4 MiB of output. There is no time limit, so use **stop**. Input is prefilled, not interactive. Large static arrays compile slowly: WebAssembly object files store zero-initialised globals as literal zeros, so a 160 MB array (`tests/string_alloc`) takes in-browser Clang about two minutes.
+
+`just playground` rebuilds the bundles (`docs/playground.js`, `docs/compile-worker.js`, `docs/run-worker.js`) and serves `docs/` on http://localhost:8000.
+
 ## Examples
 
 Get a feel for the compiler, and run `just life` to play the Convey's Game of Life in the console.

@@ -15,6 +15,10 @@ update:
 test-compiler:
     bun run test.ts
 
+# Golden tests through the playground's in-WebAssembly clang + WASI shim.
+test-wasm *NAMES:
+    bun test-wasm.ts {{ NAMES }}
+
 run NAME:
     bun easyc.ts tests/{{ NAME }}/test.easy \
     && cc -std=c23 tests/{{ NAME }}/test.c -o tests/{{ NAME }}/test.exe -I . -g -fsanitize=address \

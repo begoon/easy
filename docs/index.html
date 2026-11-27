@@ -13,6 +13,7 @@
         <div class="build-time" id="build-time"></div>
       </div>
       <div class="toolbar">
+        <button type="button" id="run" class="primary" title="compile and run in the browser (Ctrl/⌘+Enter)">run</button>
         <label for="example">Example</label>
         <select id="example">
           <option value="">— load example —</option>
@@ -68,18 +69,39 @@
       <div class="panes">
         <section class="pane pane-source">
           <div class="pane-title">source.easy</div>
+          <div class="editor">
+            <pre id="source-highlight" aria-hidden="true"></pre>
+            <textarea
+              id="source"
+              spellcheck="false"
+              autocomplete="off"
+              autocapitalize="off"
+              autocorrect="off"
+              wrap="off"
+            ></textarea>
+          </div>
+        </section>
+        <section class="pane pane-c">
+          <div class="pane-title" id="c-title">output.c</div>
+          <pre id="c-output"></pre>
+        </section>
+      </div>
+      <div class="panes panes-run">
+        <section class="pane pane-input">
+          <div class="pane-title">input <span class="pane-hint">— standard input for INPUT, read until it runs out</span></div>
           <textarea
-            id="source"
+            id="stdin"
             spellcheck="false"
             autocomplete="off"
             autocapitalize="off"
             autocorrect="off"
             wrap="off"
+            placeholder="values for INPUT statements, e.g. 42 3.14 abc"
           ></textarea>
         </section>
-        <section class="pane pane-c">
-          <div class="pane-title" id="c-title">output.c</div>
-          <pre id="c-output"></pre>
+        <section class="pane pane-output">
+          <div class="pane-title" id="run-title">output</div>
+          <pre id="run-output"></pre>
         </section>
       </div>
       <div id="error" class="error"></div>

@@ -2250,7 +2250,7 @@ export function compileToC(source: string, filename: string = "source.easy"): st
     return output.join("");
 }
 
-export { ParseError, LexerError, CompilerError, GenerateError };
+export { ParseError, LexerError, CompilerError, GenerateError, KEYWORDS };
 
 export function run(argv: string[]) {
     if (argv.length < 3) {

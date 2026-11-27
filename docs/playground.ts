@@ -1,21 +1,26 @@
 import { compileToC, ParseError, LexerError, CompilerError, GenerateError } from "../easyc.ts";
 import { BUILD_TIME } from "./build-info.ts";
 import runtimeC from "../runtime.c" with { type: "text" };
+import { CompileFailure, compileToWasm, runWasm } from "./run.ts";
+import { highlightEasy } from "./highlight-easy.ts";
 
 // The "Example" dropdown is populated from a runtime-loaded manifest.
 // docs/examples.js defines `window.easyExamples` as
-// `[{ name, filename }, ...]` and is loaded by a classic `<script>` tag
-// before this module runs. Each entry's `source` is a Promise kicked off
-// immediately so tab-switching feels instant.
+// `[{ name, filename, input? }, ...]` and is loaded by a classic `<script>`
+// tag before this module runs. Each entry's `source` is a Promise kicked
+// off immediately so tab-switching feels instant. `input`, when present,
+// names a file in examples/ whose text prefills the "input" pane.
 interface Example {
     name: string;
     filename: string;
     source: Promise<string>;
+    input: Promise<string>;
     resolvedSource?: string;
 }
 interface ExampleManifestEntry {
     name: string;
     filename: string;
+    input?: string;
 }
 declare global {
     interface Window {
@@ -31,6 +36,7 @@ const EXAMPLES: Example[] = (window.easyExamples ?? []).map((e) => {
         name: e.name,
         filename: e.filename,
         source: fetchExample(e.filename),
+        input: e.input ? fetchExample(e.input).catch(() => "") : Promise.resolve(""),
     };
     ex.source.then(
         (s) => {
@@ -42,7 +48,7 @@ const EXAMPLES: Example[] = (window.easyExamples ?? []).map((e) => {
     return ex;
 });
 
-function tabMatchesExample(t: Tab): boolean {
+function tabMatchesExample(t: Pick<Tab, "filename" | "source">): boolean {
     const ex = EXAMPLES.find((e) => e.filename === t.filename);
     return !!ex && ex.resolvedSource === t.source;
 }
@@ -61,6 +67,8 @@ const DEFAULT_FORMAT: OutputFormat = "easy";
 interface Tab {
     filename: string;
     source: string;
+    // Standard input for the program, saved per tab.
+    input: string;
 }
 
 let tabs: Tab[] = [];
@@ -106,6 +114,11 @@ const sourceModalContent = document.getElementById("source-modal-content") as HT
 const sourceModalClose = document.getElementById("source-modal-close") as HTMLButtonElement;
 const filenameInput = document.getElementById("filename") as HTMLInputElement;
 const tabsEl = document.getElementById("tabs") as HTMLDivElement;
+const sourceHighlight = document.getElementById("source-highlight") as HTMLPreElement;
+const runButton = document.getElementById("run") as HTMLButtonElement;
+const stdinInput = document.getElementById("stdin") as HTMLTextAreaElement;
+const runOutput = document.getElementById("run-output") as HTMLPreElement;
+const runTitle = document.getElementById("run-title") as HTMLDivElement;
 
 function easyName(): string {
     return filenameInput.value.trim() || DEFAULT_FILENAME;
@@ -129,12 +142,13 @@ for (const ex of EXAMPLES) {
 select.addEventListener("change", async () => {
     const ex = EXAMPLES.find((e) => e.name === select.value);
     if (!ex) return;
-    const exSource = await ex.source;
+    const [exSource, exInput] = await Promise.all([ex.source, ex.input]);
     tabs[active]!.source = source.value;
     const uniqueName = uniqueFilename(ex.filename);
-    tabs.push({ filename: uniqueName, source: exSource });
+    tabs.push({ filename: uniqueName, source: exSource, input: exInput });
     active = tabs.length - 1;
     source.value = exSource;
+    showTabRun();
     filenameInput.value = uniqueName;
     lastGoodName = uniqueName;
     source.scrollTop = 0;
@@ -192,6 +206,10 @@ window.addEventListener("keydown", (e) => {
         closeConfirm(true);
     }
     if (e.key === "Escape" && !sourceModal.hidden) closeSourceModal();
+    if (e.key === "Enter" && (e.ctrlKey || e.metaKey) && confirmModal.hidden) {
+        e.preventDefault();
+        runButton.click();
+    }
 });
 
 function closeSourceModal() {
@@ -235,7 +253,22 @@ function formatCompileError(e: unknown): string {
     return (e as Error).message ?? String(e);
 }
 
+// A trailing newline in a <pre> adds no line box, so pad it to keep the
+// overlay as tall as the textarea's content.
+function renderSourceHighlight() {
+    sourceHighlight.innerHTML = highlightEasy(source.value) + "\n";
+    syncSourceScroll();
+}
+
+function syncSourceScroll() {
+    sourceHighlight.scrollTop = source.scrollTop;
+    sourceHighlight.scrollLeft = source.scrollLeft;
+}
+
+source.addEventListener("scroll", syncSourceScroll);
+
 function runPipeline() {
+    renderSourceHighlight();
     const src = source.value;
     const file = easyName();
 
@@ -248,6 +281,7 @@ function runPipeline() {
         cTitle.textContent = "output.c";
         setError(formatCompileError(e));
         updateDownloadEnabled();
+        updateRunEnabled();
         return;
     }
 
@@ -257,6 +291,7 @@ function runPipeline() {
     const lines = cText.split(/\r?\n/).length;
     cTitle.textContent = `${stem(file)}.c — ${cText.length} B, ${lines} lines`;
     updateDownloadEnabled();
+    updateRunEnabled();
 }
 
 const C_KEYWORDS = new Set([
@@ -307,6 +342,130 @@ function highlightC(text: string): string {
     out += escHtml(text.slice(last));
     return out;
 }
+
+// ---- run: C -> .wasm (in-browser clang) -> execute (WASI worker) ----
+
+const RUN_HINT = "press run (Ctrl/⌘+Enter) to compile and execute in the browser";
+let running: AbortController | null = null;
+
+function setRunTitle(text: string, state: "" | "running" | "failed" = "") {
+    runTitle.textContent = text;
+    runTitle.className = "pane-title" + (state ? ` ${state}` : "");
+}
+
+function updateRunEnabled() {
+    runButton.disabled = !running && lastC === null;
+}
+
+function setRunning(on: boolean) {
+    runButton.textContent = on ? "stop" : "run";
+    runButton.classList.toggle("running", on);
+    updateRunEnabled();
+}
+
+// Output arrives in bursts from the worker; render once per frame and
+// keep following the bottom unless the user has scrolled up.
+let pendingOutput: [string, string][] = [];
+let outputFrame = 0;
+
+function appendOutput(kind: "stdout" | "stderr" | "note", text: string) {
+    pendingOutput.push([kind, text]);
+    outputFrame ||= requestAnimationFrame(flushOutput);
+}
+
+function flushOutput() {
+    outputFrame = 0;
+    const follow = runOutput.scrollHeight - runOutput.scrollTop - runOutput.clientHeight < 24;
+    const fragment = document.createDocumentFragment();
+    for (const [kind, text] of pendingOutput) {
+        if (kind === "stdout") {
+            fragment.append(text);
+        } else {
+            const span = document.createElement("span");
+            span.className = kind;
+            span.textContent = text;
+            fragment.append(span);
+        }
+    }
+    pendingOutput = [];
+    runOutput.append(fragment);
+    if (follow) runOutput.scrollTop = runOutput.scrollHeight;
+}
+
+function clearOutput() {
+    pendingOutput = [];
+    if (outputFrame) cancelAnimationFrame(outputFrame);
+    outputFrame = 0;
+    runOutput.textContent = "";
+}
+
+function noteOnNewLine(text: string) {
+    flushOutput();
+    const pre = runOutput.textContent ?? "";
+    appendOutput("note", (pre && !pre.endsWith("\n") ? "\n" : "") + text);
+}
+
+// Called whenever the editor shows a different tab: stop any run and
+// show that tab's input with an empty output pane.
+function showTabRun() {
+    const previous = running;
+    running = null;
+    previous?.abort();
+    setRunning(false);
+    stdinInput.value = tabs[active]?.input ?? "";
+    clearOutput();
+    setRunTitle("output");
+    appendOutput("note", RUN_HINT);
+}
+
+stdinInput.addEventListener("input", () => {
+    tabs[active]!.input = stdinInput.value;
+    saveTabs();
+});
+
+async function run() {
+    if (running) {
+        running.abort();
+        return;
+    }
+    if (lastC === null) return;
+    const controller = new AbortController();
+    const { signal } = controller;
+    running = controller;
+    setRunning(true);
+    clearOutput();
+    const c = lastC;
+    const stdin = stdinInput.value;
+    try {
+        const wasm = await compileToWasm(c, (text) => setRunTitle(`output — ${text}`, "running"), signal);
+        setRunTitle("output — running…", "running");
+        const start = performance.now();
+        const status = await runWasm(wasm, stdin, appendOutput, signal);
+        const seconds = ((performance.now() - start) / 1000).toFixed(2);
+        setRunTitle(`output — exit ${status} · ${seconds} s`, status === 0 ? "" : "failed");
+    } catch (e) {
+        if (signal.aborted) {
+            if (running === controller) {
+                setRunTitle("output — stopped", "failed");
+                noteOnNewLine("stopped");
+            }
+        } else if (e instanceof CompileFailure) {
+            setRunTitle("output — C compilation failed", "failed");
+            appendOutput("stderr", e.message);
+        } else {
+            setRunTitle("output — failed", "failed");
+            noteOnNewLine("");
+            appendOutput("stderr", (e as Error).message ?? String(e));
+        }
+    } finally {
+        if (running === controller) {
+            running = null;
+            setRunning(false);
+        }
+    }
+}
+
+runButton.addEventListener("click", () => void run());
 
 function saveTabs() {
     try {
@@ -364,6 +523,7 @@ function switchTab(i: number) {
     tabs[active]!.source = source.value;
     active = i;
     source.value = tabs[active]!.source;
+    showTabRun();
     filenameInput.value = tabs[active]!.filename;
     lastGoodName = tabs[active]!.filename;
     source.scrollTop = 0;
@@ -376,9 +536,10 @@ function switchTab(i: number) {
 
 function newTab() {
     tabs[active]!.source = source.value;
-    tabs.push({ filename: nextUntitled(), source: "" });
+    tabs.push({ filename: nextUntitled(), source: "", input: "" });
     active = tabs.length - 1;
     source.value = "";
+    showTabRun();
     filenameInput.value = tabs[active]!.filename;
     lastGoodName = tabs[active]!.filename;
     source.scrollTop = 0;
@@ -400,7 +561,7 @@ async function closeTab(i: number) {
         if (!ok) return;
     }
     if (tabs.length === 1) {
-        tabs[0] = { filename: DEFAULT_FILENAME, source: "" };
+        tabs[0] = { filename: DEFAULT_FILENAME, source: "", input: "" };
         active = 0;
         source.value = "";
         filenameInput.value = tabs[0]!.filename;
@@ -413,6 +574,7 @@ async function closeTab(i: number) {
         filenameInput.value = tabs[active]!.filename;
         lastGoodName = tabs[active]!.filename;
     }
+    showTabRun();
     saveTabs();
     renderTabs();
     deselectExample();
@@ -518,10 +680,11 @@ resetBtn.addEventListener("click", async () => {
     if (!ok) return;
     const def = EXAMPLES.find((e) => e.name === DEFAULT_EXAMPLE) ?? EXAMPLES[0];
     if (!def) return;
-    const defSource = await def.source;
+    const [defSource, defInput] = await Promise.all([def.source, def.input]);
     const uniqueName = uniqueFilename(def.filename);
-    tabs[active] = { filename: uniqueName, source: defSource };
+    tabs[active] = { filename: uniqueName, source: defSource, input: defInput };
     source.value = defSource;
+    showTabRun();
     filenameInput.value = uniqueName;
     lastGoodName = uniqueName;
     select.value = def.name;
@@ -537,9 +700,10 @@ fileInput.addEventListener("change", async () => {
     if (!f) return;
     const text = await f.text();
     const uniqueName = uniqueFilename(f.name);
-    tabs.push({ filename: uniqueName, source: text });
+    tabs.push({ filename: uniqueName, source: text, input: "" });
     active = tabs.length - 1;
     source.value = text;
+    showTabRun();
     filenameInput.value = uniqueName;
     lastGoodName = uniqueName;
     source.scrollTop = 0;
@@ -570,6 +734,7 @@ async function loadTabsFromStorage(): Promise<void> {
                 tabs = parsed.map((t) => ({
                     filename: String(t.filename ?? DEFAULT_FILENAME),
                     source: String(t.source ?? ""),
+                    input: String(t.input ?? ""),
                 }));
                 const a = Number(localStorage.getItem(ACTIVE_KEY) ?? 0) | 0;
                 active = a < 0 || a >= tabs.length ? 0 : a;
@@ -579,8 +744,9 @@ async function loadTabsFromStorage(): Promise<void> {
     } catch {}
     const def = EXAMPLES.find((e) => e.name === DEFAULT_EXAMPLE) ?? EXAMPLES[0];
     const src = (await def?.source) ?? "";
+    const input = (await def?.input) ?? "";
     const name = def?.filename ?? DEFAULT_FILENAME;
-    tabs = [{ filename: name, source: src }];
+    tabs = [{ filename: name, source: src, input }];
     active = 0;
     saveTabs();
 }
@@ -588,6 +754,7 @@ async function loadTabsFromStorage(): Promise<void> {
 (async () => {
     await loadTabsFromStorage();
     source.value = tabs[active]!.source;
+    showTabRun();
     filenameInput.value = tabs[active]!.filename;
     lastGoodName = tabs[active]!.filename;
     renderTabs();
