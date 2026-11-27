@@ -1,10 +1,14 @@
 name: publish
 
-# Publishes @begoon/easyc to npm when a v* tag is pushed (see `just release`).
-# Uses npm trusted publishing: GitHub's OIDC token authenticates the publish,
+# Uploads @begoon/easyc to npm when a v* tag is pushed (see `just release`).
+# Uses npm trusted publishing: GitHub's OIDC token authenticates the upload,
 # so there is no npm token in the repository or on any machine. npm attaches
 # provenance automatically. The trusted publisher on npmjs.com must name
 # this file, publish.yml, exactly.
+#
+# The trusted publisher allows staged publishing only: npm answers 202 and
+# holds the version until the owner approves it on npmjs.com with 2FA. A
+# green run means "staged", not "live".
 
 on:
     push:

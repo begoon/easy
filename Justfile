@@ -53,8 +53,9 @@ video: build-playground
     cd video && bun capture.ts
     cd video && uv run --python 3.12 python build.py
 
-# The tag triggers .github/workflows/publish.yml, which publishes to npm
-# through trusted publishing: no npm login or token needed here.
+# The tag triggers .github/workflows/publish.yml, which stages the release
+# on npm through trusted publishing (no npm login or token needed here);
+# it goes live once approved on npmjs.com with 2FA.
 # Bump the patch version, commit, tag vX.Y.Z and push from a clean main.
 release: quick
     test "$(git branch --show-current)" = main || (echo "release from main" >&2; exit 1)
