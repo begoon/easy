@@ -46,11 +46,18 @@ CLI is invoked as `easyc` (or `npx @begoon/easyc`).
 - `bun run build` — bundle `easyc.ts` to `dist/easyc.js` for the npm CLI.
 - `just release` — from a clean `main`: compile-only tests, `npm version
   patch`, commit `chore: bump npm release to X.Y.Z`, tag `vX.Y.Z`, push.
-  The tag runs `.github/workflows/publish.yml`, which publishes through npm
+  The tag runs `.github/workflows/publish.yml`, which uploads through npm
   trusted publishing (GitHub OIDC, no token; provenance attached). The
   npmjs.com trusted publisher names `begoon/easy` + `publish.yml`, so
   renaming the workflow breaks publishing. `--access public` stays because
   scoped packages default to private.
+- Releases are **staged**: the trusted publisher allows only `npm stage
+  publish`, so the upload returns HTTP 202 and the version is not live
+  until the owner approves it on npmjs.com with 2FA (OIDC cannot approve).
+  A green workflow therefore does not mean published; check
+  `npm view @begoon/easyc version --prefer-online` after approval. To
+  publish directly instead, recreate the trusted publisher with "npm
+  publish" ticked under Allowed actions (connections cannot be edited).
 
 ## Playground architecture
 
