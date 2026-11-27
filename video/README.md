@@ -6,8 +6,9 @@ loaded from the example menu and run. Rebuild it with:
 
     just video
 
-The video is not committed (`.gitignore`); upload the result wherever it is
-needed.
+The video is not committed (`.gitignore`). It is on YouTube as an unlisted
+video: https://youtu.be/pCCgxgRruZQ (a rebuild does not update that copy; it
+has to be uploaded again).
 
 ## What the recipe does
 

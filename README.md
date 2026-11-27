@@ -125,7 +125,7 @@ NOTE: Running tests in the Linux container helps because the Clang memory saniti
 
 ## Web playground
 
-The playground at [demin.ws/easy](http://demin.ws/easy/) compiles and runs Easy programs entirely in the browser. The page is the static `docs/` folder, served by GitHub Pages.
+The playground at [demin.ws/easy](https://demin.ws/easy/) compiles and runs Easy programs entirely in the browser. The page is the static `docs/` folder, served by GitHub Pages. A 75-second narrated demo is on YouTube (unlisted): https://youtu.be/pCCgxgRruZQ
 
 ```mermaid
 flowchart LR
