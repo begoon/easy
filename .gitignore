@@ -17,3 +17,9 @@ node_modules
 .claude/settings.local.json
 
 dist/
+
+# demo video: model cache, intermediates and the result are rebuilt by `just video`
+video/.cache/
+video/work/
+video/node_modules/
+video/*.mp4
