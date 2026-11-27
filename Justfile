@@ -42,6 +42,17 @@ playground: build-playground
 build:
     bun run build
 
+# Rebuild video/easy-playground.mp4: narration, a live recording of the
+# playground, then the mix (see video/README.md). Not committed.
+video: build-playground
+    cd video && bun install --frozen-lockfile --silent
+    mkdir -p video/.cache
+    test -f video/.cache/kokoro-v1.0.onnx || curl -fsSL -o video/.cache/kokoro-v1.0.onnx https://github.com/thewh1teagle/kokoro-onnx/releases/download/model-files-v1.0/kokoro-v1.0.onnx
+    test -f video/.cache/voices-v1.0.bin || curl -fsSL -o video/.cache/voices-v1.0.bin https://github.com/thewh1teagle/kokoro-onnx/releases/download/model-files-v1.0/voices-v1.0.bin
+    cd video && uv run --python 3.12 --with kokoro-onnx --with soundfile python narrate.py
+    cd video && bun capture.ts
+    cd video && uv run --python 3.12 python build.py
+
 # Build, bump patch version, and publish to npm.
 # --access=public is required for scoped packages (@begoon/easyc) since
 # npm defaults scoped names to private.

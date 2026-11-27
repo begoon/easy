@@ -1,0 +1,115 @@
+/* Injected into the playground by capture.ts. Nothing here ships with the site. */
+
+#demo-layer {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1000;
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+/* Spotlight: a rounded outline whose huge shadow dims everything else. */
+.demo-spot {
+  position: absolute;
+  border: 3px solid #ffb020;
+  border-radius: 10px;
+  box-shadow: 0 0 0 200vmax rgba(10, 14, 20, 0.55), 0 0 24px rgba(255, 176, 32, 0.6);
+  opacity: 0;
+  transition: left 0.6s ease, top 0.6s ease, width 0.6s ease, height 0.6s ease, opacity 0.4s ease;
+}
+
+.demo-spot.on { opacity: 1; }
+
+.demo-label {
+  position: absolute;
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: #ffb020;
+  color: #1b1300;
+  font-size: 17px;
+  font-weight: 600;
+  white-space: nowrap;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
+  opacity: 0;
+  transition: left 0.6s ease, top 0.6s ease, opacity 0.4s ease;
+}
+
+.demo-label.on { opacity: 1; }
+
+.demo-card {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  background: rgba(10, 14, 20, 0.82);
+  color: #fff;
+  text-align: center;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+
+.demo-card.on { opacity: 1; }
+
+.demo-card h1 {
+  margin: 0;
+  font-size: 54px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+}
+
+.demo-card p {
+  margin: 0;
+  font-size: 24px;
+  color: #ffcf6e;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+.demo-cursor {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 26px;
+  height: 26px;
+  transform: translate(640px, 420px);
+  opacity: 0;
+  transition: transform 0.7s cubic-bezier(0.3, 0.7, 0.3, 1), opacity 0.3s ease;
+  filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.45));
+}
+
+.demo-ripple {
+  position: absolute;
+  width: 34px;
+  height: 34px;
+  margin: -17px 0 0 -17px;
+  border-radius: 50%;
+  border: 3px solid #ffb020;
+  animation: demo-ripple 0.5s ease-out forwards;
+}
+
+@keyframes demo-ripple {
+  from { transform: scale(0.3); opacity: 1; }
+  to { transform: scale(1.6); opacity: 0; }
+}
+
+/* Stands in for the native <select> popup, which headless Chrome does not draw. */
+.demo-menu {
+  position: absolute;
+  min-width: 190px;
+  padding: 4px 0;
+  background: #fff;
+  color: #1f1f1f;
+  border: 1px solid #c6c6c6;
+  border-radius: 6px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+  font-size: 14px;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.demo-menu.on { opacity: 1; }
+
+.demo-menu div { padding: 4px 12px; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+.demo-menu div.hit { background: #0366d6; color: #fff; }

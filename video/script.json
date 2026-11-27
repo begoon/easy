@@ -1,0 +1,67 @@
+{
+  "voice": "bm_george",
+  "speed": 0.95,
+  "lang": "en-gb",
+  "beats": [
+    {
+      "scene": "roundup",
+      "say": "This is the Easy playground, for a small teaching language from the seventies.",
+      "do": [["card", "Easy playground", "Easy → C → WebAssembly, in your browser"]]
+    },
+    {
+      "scene": "roundup",
+      "say": "On the left is your Easy program, coloured as you type.",
+      "do": [["uncard"], ["box", [".pane-source"], "Easy source, coloured as you type"]]
+    },
+    {
+      "scene": "roundup",
+      "say": "On the right, the same program translated to C, updated with every keystroke.",
+      "do": [["box", [".pane-c"], "Generated C, updated on every keystroke"]]
+    },
+    {
+      "scene": "roundup",
+      "say": "Below are the program's input, and its output.",
+      "do": [["box", [".pane-input", ".pane-output"], "Standard input  ·  program output"]]
+    },
+    {
+      "scene": "roundup",
+      "say": "And this is the run button.",
+      "do": [["box", ["#run"], "Run  (Ctrl/⌘+Enter)"], ["cursor", "#run"]]
+    },
+    {
+      "scene": "roundup",
+      "say": "Everything runs in your browser, and nothing is uploaded. Easy compiles to C, then Clang, built for WebAssembly, compiles that C to WebAssembly, which runs right here.",
+      "do": [["clear"], ["card", "Nothing leaves your browser", "Easy  →  C  →  Clang (in WebAssembly)  →  WebAssembly  →  run"]]
+    },
+    {
+      "scene": "sieve",
+      "say": "First, the Sieve of Eratosthenes. Its input is already filled in.",
+      "do": [["uncard"], ["pick", "sieve"], ["box", [".pane-input"], "Input for INPUT statements"]]
+    },
+    {
+      "scene": "sieve",
+      "say": "The first run downloads the C compiler, about a hundred megabytes, once. The browser keeps it.",
+      "do": [["clear"], ["run"], ["box", ["#run-title"], "@"], ["finish"], ["hold", 0.8], ["clear"], ["hold", 0.6]]
+    },
+    {
+      "scene": "bf",
+      "say": "Next, a Brainfuck interpreter written in Easy. The compiler is cached now, so it's instant.",
+      "do": [["pick", "bf"], ["run"], ["finish"], ["hold", 0.9]]
+    },
+    {
+      "scene": "fizzbuzz",
+      "say": "FizzBuzz, of course.",
+      "do": [["pick", "fizzbuzz"], ["run"], ["finish"], ["hold", 0.9]]
+    },
+    {
+      "scene": "rule_110",
+      "say": "And Rule one-ten, a Turing complete cellular automaton.",
+      "do": [["pick", "rule_110"], ["run"], ["finish"], ["hold", 1.5]]
+    },
+    {
+      "scene": "outro",
+      "say": "Try it yourself, at demin dot W S, slash easy.",
+      "do": [["card", "demin.ws/easy", "github.com/begoon/easy"], ["hold", 1.5]]
+    }
+  ]
+}

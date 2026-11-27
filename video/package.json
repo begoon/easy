@@ -1,0 +1,8 @@
+{
+  "name": "easy-playground-video",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "puppeteer-core": "25.19.0"
+  }
+}
