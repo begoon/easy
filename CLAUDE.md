@@ -37,8 +37,12 @@ CLI is invoked as `easyc` (or `npx @begoon/easyc`).
 - `just test-docker` — Linux/MSAN container run.
 - `just playground` — build the bundle and serve `docs/` on
   `http://localhost:8000`.
-- `bun run build:playground` — rebuild `docs/playground.js` only (also
-  copies `runtime.c` into `docs/` so the source-browser modal can fetch it).
+- `just test-wasm [NAME...]` — golden tests through the playground's
+  in-Wasm clang + WASI shim (`bun install` first; `string_alloc` only
+  when named, its 160 MB static array takes ~2 min to compile).
+- `bun run build:playground` — rebuild `docs/playground.js`,
+  `docs/compile-worker.js` and `docs/run-worker.js` (all committed;
+  Pages serves `docs/` as-is).
 - `bun run build` — bundle `easyc.ts` to `dist/easyc.js` for the npm CLI.
 - `just publish` — compile-only tests, build, `npm version patch`
   (no git tag), `npm publish --access=public`. The `--access=public`
@@ -62,6 +66,20 @@ CLI is invoked as `easyc` (or `npx @begoon/easyc`).
   / comment / preproc) are defined globally so the source-browser modal
   reuses them. Output is HTML-escaped before wrapping — never change that
   without rechecking how `#include <…>` and string contents render.
+- **Run**: `docs/run.ts` drives two module workers. `compile-worker.ts`
+  imports YoWASP Clang from jsDelivr (version + flags pinned in
+  `docs/toolchain.ts`; keep in sync with the `@yowasp/clang`
+  devDependency — `test-wasm.ts` checks) and compiles C + inlined
+  `runtime.c` to WASI wasm. It prefetches resources itself because
+  `commands.clang()` drops `fetchProgress` on its internal `clang -###`
+  call. `run-worker.ts` executes via `docs/wasi-run.ts` (shared with
+  `test-wasm.ts`); stop = `worker.terminate()`. Per-tab stdin lives in
+  the tab state; examples with a `test.input` list `input:` in
+  `docs/examples.js` and ship `docs/examples/<name>.input`.
+- **Easy highlighting**: `docs/highlight-easy.ts` draws into a `<pre>`
+  behind the transparent `#source` textarea; both must share font,
+  padding and `white-space`. Keywords come from `easyc.ts`'s exported
+  `KEYWORDS`.
 - **Runtime source modal**: the first-line `#include "runtime.c"` in the
   C pane is rendered as a clickable `.hl-include` span with
   `data-runtime-link`. Click delegation on `#c-output` opens `#source-modal`

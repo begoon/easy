@@ -11,4 +11,6 @@ jobs:
             - uses: oven-sh/setup-bun@v2
             - uses: extractions/setup-just@v3
             - run: just ci
+            - run: bun install --frozen-lockfile
+            - run: just test-wasm
             - run: just test-docker

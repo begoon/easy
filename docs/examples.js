@@ -4,7 +4,7 @@
 // The actual source text for each entry lives in ./examples/<filename>
 // and is fetched on demand.
 window.easyExamples = [
-    { name: "sieve", filename: "sieve.easy" },
+    { name: "sieve", filename: "sieve.easy", input: "sieve.input" },
     { name: "array_1000", filename: "array_1000.easy" },
     { name: "array_checked", filename: "array_checked.easy" },
     { name: "array_dynamic", filename: "array_dynamic.easy" },
@@ -27,11 +27,11 @@ window.easyExamples = [
     { name: "func", filename: "func.easy" },
     { name: "hanoi", filename: "hanoi.easy" },
     { name: "hw", filename: "hw.easy" },
-    { name: "input", filename: "input.easy" },
+    { name: "input", filename: "input.easy", input: "input.input" },
     { name: "label", filename: "label.easy" },
     { name: "life", filename: "life.easy" },
-    { name: "map", filename: "map.easy" },
-    { name: "mastermind", filename: "mastermind.easy" },
+    { name: "map", filename: "map.easy", input: "map.input" },
+    { name: "mastermind", filename: "mastermind.easy", input: "mastermind.input" },
     { name: "operations", filename: "operations.easy" },
     { name: "output", filename: "output.easy" },
     { name: "output_parts", filename: "output_parts.easy" },
